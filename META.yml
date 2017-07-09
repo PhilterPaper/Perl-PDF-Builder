@@ -1,0 +1,33 @@
+---
+abstract: 'Facilitates the creation and modification of PDF files'
+author:
+  - 'Phil Perry <phil4597@catskilltech.com>'
+build_requires: {}
+configure_requires:
+  ExtUtils::MakeMaker: '0'
+dynamic_config: 1
+generated_by: 'Dist::Zilla version 6.007, CPAN::Meta::Converter version 2.150005'
+license: lgpl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: '1.4'
+name: PDF-Builder
+requires:
+  Compress::Zlib: '1.0'
+  Font::TTF: '0'
+  perl: v5.8.5,
+  utf8: '0',
+  File::Temp: '0',
+  File::Basename: '0',
+  File::Find: '0',
+  Scalar::Util: '0',
+  IO::File: '0',
+  Unicode::UCD: '0',
+  warnings: '0',
+  Math::Trig: '0',
+  List::Util: '0',
+  POSIX: '0'
+resources:
+  repository: git://github.com/PhilterPaper/pdfbuilder.git
+version: '3.004'
+x_serialization_backend: 'YAML::Tiny version 1.69'

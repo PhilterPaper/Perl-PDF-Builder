@@ -1,0 +1,8 @@
+# ignore any PDFs except t test resources
+*.pdf
+!/t/resources/*.pdf
+# ignore WinMerge and ViM backups
+*.bak
+*~
+# ignore ViM editor swap files
+*.swp
