@@ -51,7 +51,7 @@
          "web" : "https://github.com/PhilterPaper/pdfbuilder"
       }
    },
-   "version" : "2.031",
+   "version" : "3.004",
    "x_serialization_backend" : "Cpanel::JSON::XS version 3.0217"
 }
 

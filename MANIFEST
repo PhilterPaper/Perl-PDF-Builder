@@ -123,8 +123,8 @@ lib/PDF/Builder/Resource/XObject/Form/BarCode/code128.pm
 lib/PDF/Builder/Resource/XObject/Form/BarCode/code3of9.pm
 lib/PDF/Builder/Resource/XObject/Form/BarCode/ean13.pm
 lib/PDF/Builder/Resource/XObject/Form/BarCode/int2of5.pm
-lib/PDF/Builder/Resource/XObject/Form/BarCode2D/
-lib/PDF/Builder/Resource/XObject/Form/QRCode/
+lib/PDF/Builder/Resource/XObject/Form/BarCode2D/placeholder
+lib/PDF/Builder/Resource/XObject/Form/QRCode/placeholder
 lib/PDF/Builder/Resource/XObject/Form/BarCode.pm
 lib/PDF/Builder/Resource/XObject/Form/Hybrid.pm
 lib/PDF/Builder/Resource/XObject/Image/TIFF/File.pm
