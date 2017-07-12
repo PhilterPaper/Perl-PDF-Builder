@@ -91,8 +91,8 @@ in the file so far.
 
 =item outlist (P)
 
-This is a list of Objind which are to be output when the next C<appendfile() or 
-C<outfile()> occurs.
+This is a list of Objind which are to be output when the next C<appendfile()> 
+or C<outfile()> occurs.
 
 =item firstfree (P)
 

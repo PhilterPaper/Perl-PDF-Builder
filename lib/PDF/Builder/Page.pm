@@ -30,6 +30,8 @@ PDF::Builder::Page - Methods to interact with individual pages
 
 Returns a page object (called from $pdf->page()).
 
+=back
+
 =cut
 
 sub new {
@@ -331,6 +333,7 @@ This may most easily be done by using $I<type>->restore() and ->save() just
 after creating $I<type>:
 
 =over
+
 =item $text1 = $page->text(); 
 =item   $text1->save();
 =item $grfx1 = $page->gfx();
@@ -341,6 +344,7 @@ after creating $I<type>:
 =item   $text2->save();
 =item $grfx2 = $page->gfx();
 =item   $grfx1->restore();
+
 =back
 
 =cut
