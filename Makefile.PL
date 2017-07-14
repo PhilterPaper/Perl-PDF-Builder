@@ -33,7 +33,7 @@ my %WriteMakefileArgs = (
     "List::Util" => 0,
     "POSIX" => 0
   },
-  "VERSION" => "3.004",
+  VERSION_FROM => "lib/PDF/Builder.pm",
   "test" => {
     "TESTS" => "t/*.t"
   }
