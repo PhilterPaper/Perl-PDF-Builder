@@ -68,6 +68,10 @@
 #
 use strict;
 use warnings;
+
+# VERSION
+my $LAST_UPDATE = '3.002'; # manually update whenever code is changed
+
 use PDF::Builder;
 use PDF::Builder::Util;
 use Getopt::Long;
