@@ -29,5 +29,5 @@ requires:
   POSIX: '0'
 resources:
   repository: git://github.com/PhilterPaper/pdfbuilder.git
-version: '3.004'
+version: '3.005'
 x_serialization_backend: 'YAML::Tiny version 1.69'
