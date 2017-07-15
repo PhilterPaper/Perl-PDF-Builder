@@ -6,3 +6,8 @@
 *~
 # ignore ViM editor swap files
 *.swp
+# ignore leftover POD-to-HTML stuff
+pod2htmd.tmp
+# local build process
+/PDFbuild.pl
+/version
