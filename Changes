@@ -1,4 +1,12 @@
-3.005     2017-07-14
+See also Changes-ver_2 for changes released for PDF::API2, and incorporated
+into PDF::Builder.
+
+
+3.006     2017-07-16 unreleased
+
+   lib/PDF/Builder/Page.pm POD glitch reported by Kwalitee fixed.
+
+3.005     2017-07-16
 
    Some minor POD cleanups (missing > brackets) and fix VERSION in .pm files.
    Otherwise no code changes. Some build cleanup.

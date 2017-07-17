@@ -33,7 +33,7 @@ my %WriteMakefileArgs = (
     "List::Util" => 0,
     "POSIX" => 0
   },
-  "VERSION" => "3.005",
+  "VERSION" => "3.006",
 # "VERSION_FROM" => "lib/PDF/Builder.pm",  can't get to work
   "test" => {
     "TESTS" => "t/*.t"
