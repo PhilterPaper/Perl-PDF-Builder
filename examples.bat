@@ -15,8 +15,6 @@ perl examples\024_bdffonts ..\PDFAPI2-work\codec\codec.bdf
 echo === 025 will fail with error messages about a bad UTF-8 character
 perl examples\025_unifonts
 perl examples\026_unifont2
-echo === 027 will fail with no output
-perl examples\027_winfont
 perl examples\030_colorspecs
 perl examples\031_color_hsv
 perl examples\032_separation

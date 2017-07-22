@@ -158,9 +158,6 @@ to see when the resulting PDFs are displayed.
   026_unifont2.pdf
    9 pages of labeled UTF character grids (16x16)
 
-027_winfont 
- (fails with no output -- unable to find Windows fonts in registry)
-
 030_colorspecs
   030_colorspaces.pdf
  RGB colorspace (16 pages)   16x16 colored dots 0..Fx0..F with x constant per pg

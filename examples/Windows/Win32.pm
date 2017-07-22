@@ -4,9 +4,9 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.002'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.006'; # manually update whenever code is changed
 
-use Win32::TieRegistry;
+use Win32::TieRegistry qw( :KEY_ );  # creates $Registry, et al.
 
 =head1 NAME
 
@@ -19,13 +19,17 @@ our $wf = {};
 $Registry->Delimiter('/');
 
 # e.g., "C:\Windows\Fonts". $Registry->{} is a hash reference to Fonts element
-my $fontdir = $Registry->{'HKEY_CURRENT_USER/Software/Microsoft/Windows/CurrentVersion/Explorer/Shell Folders'}->{'Fonts'};
+my $fontdir = $Registry->{'HKEY_CURRENT_USER/Software/Microsoft/Windows/CurrentVersion/Explorer/Shell Folders/Fonts'};
 
 # $Registry->{} should be a hash reference containing elements which are the
-# names of .ttf etc. files found in $fontdir
-my $subKey = $Registry->{'HKEY_LOCAL_MACHINE/SOFTWARE/Microsoft/Windows NT/CurrentVersion/Fonts'};
+# names of .ttf etc. files found in $fontdir. 
+# E.g., $Registry->{'Arial (TrueType)'} = 'arial.ttf'
+my $subKey = $Registry->Open('LMachine', {Access=>KEY_READ(), Delimiter=>'/'}) or die "error opening LMachine: $^E\n";
+$subKey = $subKey->Open('SOFTWARE/Microsoft/Windows NT/CurrentVersion/Fonts/') or die "error accessing Fonts entry: $^E\n";
 
 foreach my $k (sort keys %{$subKey}) {
+    # $k should be something like 'Arial (TrueType)'
+    # $subKey->{$k} would then be 'arial.ttf'
     next unless $subKey->{$k} =~ /\.[ot]tf$/i;
     my $kk = lc($k);
     $kk =~ s|^/||;
@@ -45,9 +49,11 @@ foreach my $k (sort keys %{$subKey}) {
     }
 }
 
-$subKey = $Registry->{'HKEY_LOCAL_MACHINE/SOFTWARE/Microsoft/Windows NT/CurrentVersion/Type 1 Installer/Type 1 Fonts/'};
+# this one seems to be optional (often missing)
+$subKey = $Registry->Open('LMachine', {Access=>KEY_READ(), Delimiter=>'/'}) or die "error opening LMachine for T1 fonts: $^E\n";
+$subKey = $subKey->Open('SOFTWARE/Microsoft/Windows NT/CurrentVersion/Type 1 Installer/Type 1 Fonts/') or die "error accessing T1 Fonts entry: $^E\n";
 
-foreach my $k (sort keys %$subKey) {
+foreach my $k (sort keys %{$subKey}) {
     my $kk = lc($k);
     $kk =~ s|^/||;
     $kk =~ s/[^a-z0-9]+//g;
@@ -66,6 +72,8 @@ foreach my $k (sort keys %$subKey) {
     }
 }
 
+# return hash of fonts, key=lc name w/o fileext, value=full name 
+# e.g., {'arial'} = 'Arial (TrueType)'
 sub enumwinfonts {
     my $self = shift;
 
@@ -75,10 +83,13 @@ sub enumwinfonts {
 sub winfont {
     my $self = shift;
     my $key = lc(shift());
+    my %opts = @_;
     $key =~ s/[^a-z0-9]+//g;
 
+    # $wf is hash reference
     return unless defined $wf and defined $wf->{$key};
 
+    # ttfile is complete path and name of a file
     if (defined $wf->{$key}->{'ttfile'}) {
         return $self->ttfont($wf->{$key}->{'ttfile'}, @_);
     } else {

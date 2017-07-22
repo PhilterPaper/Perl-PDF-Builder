@@ -67,9 +67,10 @@ unless ( eval { ExtUtils::MakeMaker->VERSION(6.63_03) } ) {
 delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
   unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
 
-if ( $^O eq 'MSWin32' ) {
-	$WriteMakefileArgs{PREREQ_PM}{'Win32::TieRegistry'} = '0';
-}
+# restore if make use of Win32.pm again
+#if ( $^O eq 'MSWin32' ) {
+#	$WriteMakefileArgs{PREREQ_PM}{'Win32::TieRegistry'} = '0';
+#}
 if ( $^O eq 'MacOS' ) {
 	$WriteMakefileArgs{PREREQ_PM}{'MacPerl'} = '0';
 }

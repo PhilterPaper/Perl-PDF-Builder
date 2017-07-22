@@ -2,9 +2,18 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 
 
-3.006     2017-07-16 unreleased
+3.006     2017-07-22 unreleased
 
    lib/PDF/Builder/Page.pm POD glitch reported by Kwalitee fixed.
+
+   lib/PDF/Builder.pm update history to mention Text::PDF origin
+
+   lib/PDF/Builder/Win32.pm, examples/027_winfont moved to examples/Windows.
+     examples/README, examples/examples.output, examples.bat, Makefile.PL, 
+     MANIFEST updated. The Windows-specific code in Win32.pm has not worked 
+     since at least Windows 7, and the demo doesn't do anything particularly 
+     useful. Rather than erasing the code, it is still available if you 
+     actually use it, and can look at it for examples of Registry access.
 
 3.005     2017-07-16
 

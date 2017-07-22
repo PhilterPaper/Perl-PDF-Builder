@@ -10,14 +10,13 @@ use PDF::Builder::Win32;
 use Unicode::UCD 'charinfo';
 use Encode qw[:all];
 use Getopt::Long;
-use Data::Dumper;
+#use Data::Dumper;
 use utf8;
 
 #my $compress = 'none'; # uncompressed streams
 my $compress = 'flate'; # compressed streams
 
 my %wxf = PDF::Builder::Win32->enumwinfonts();
-# Dumper(%wxf);  appears to return nothing
 
 foreach my $k (sort keys %wxf) {
     print "font '$wxf{$k}' has key '$k'\n";
@@ -32,7 +31,8 @@ foreach my $k (sort keys %wxf) {
     my $sy = 45;
     my $fx = 20;
 
-    my $xf = $api->winfont($k, -encode=>'latin1');
+#   my $xf = $api->winfont($k, -encode=>'latin1');
+    my $xf = PDF::Builder::Win32->winfont($k, -encode=>'latin1');
 
     my $page = $api->page();
     $page->mediabox(595,842);
@@ -40,14 +40,13 @@ foreach my $k (sort keys %wxf) {
     my $gfx = $page->gfx();
     my $text = $page->text();
 
-#   $gfx->textlabel(50,800, $helv,20, $wxf{$k}, -hscale=>90);
-    $gfx->textlabel(50,800, $helv,20, $wxf{$k});
+    $text->textlabel(50,800, $helv,20, $wxf{$k});
     
     # row number yp
-    foreach my $yp (0..15) {
+    foreach my $yp (0 .. 15) {
 	my $y = 15 - $yp; # row location top to bottom
 	# column number x left to right
-        foreach my $x (0..15) {
+        foreach my $x (0 .. 15) {
             my $c = $yp*16 + $x;
             $text->textlabel(50+($sx*$x),50+($sy*$y), $xf,$fx, pack('C',$c));
             $text->textlabel(50+($sx*$x),50+($sy*$y)-6, $helv,6, nameByUni($c), -color=>'#a00000', -hscale=>80, -rotate=>-15);
