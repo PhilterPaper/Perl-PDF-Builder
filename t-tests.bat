@@ -1,6 +1,8 @@
+echo off
 REM this should be simple enough to convert to a bash script
-echo === use  |more  filter to page through test results
-echo ===   or |grep -v "^ok" |more   to catch failing results 
+echo "=== use  |more  filter to page through test results"
+echo "===   or |grep -v '^ok' |more   to catch failing results"
+echo on
 perl t\00-all-usable.t
 perl t\01-basic.t
 perl t\02-xrefstm.t
