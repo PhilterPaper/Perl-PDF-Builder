@@ -4,7 +4,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.004'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.006'; # manually update whenever code is changed
 
 use Carp;
 use Encode qw(:all);
@@ -117,7 +117,8 @@ I<Please see the> LICENSE I<file in the distribution root for full details.>
 
 =head1 HISTORY
 
-PDF::API2 was originally written by Alfred Reibenschuh, derived from PDF::API. 
+PDF::API2 was originally written by Alfred Reibenschuh, derived from Martin
+Hosken's Text::PDF via the Text::PDF::API wrapper. 
 In 2009, Otto Hirr started the PDF::API3 fork, but it never went anywhere.
 In 2011, maintenance was taken over by Steve Simms. In 2017, PDF::Builder 
 was forked by Phil M. Perry, who desired a more aggressive schedule of new
