@@ -59,20 +59,20 @@ foreach $fn (qw(
 
     my $fn1 = $pdf->corefont($fn, -encode => 'latin1');
 
-    my @fonts = ($fn1, $fn1->automap());
+    my @planes = ($fn1, $fn1->automap());
     my @variants = ({-slant=>0.750}, {-oblique=>12}, {-bold=>4}, {-caps=>1});
     my @varLabels = ('slant 0.750', 'oblique 12', 'bold 4', 'caps 1');
     my $varNum = 0;
 
     print STDERR "  ".(scalar @variants)." variants of font, each ".
-                      (scalar @fonts)." page(s)\n";
+                      (scalar @planes)." page(s)\n";
 
     foreach $varNum ( 0..$#variants ) {
 	# 4 or so variants requested per font
 	$k = $variants[$varNum];
 
-        foreach my $fnt (@fonts) {  
-	    # individual pages of each font, character list varies by font
+        foreach my $fnt (@planes) {  
+	    # individual planes of each font, character list varies by font
 
             my $font = $pdf->synfont($fnt, %{$k});
 

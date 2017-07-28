@@ -187,7 +187,7 @@ foreach $fn (@ARGV) {
 		}
 
                 my $name = $font->glyphByCId($xo);
-                if ($name eq '') {
+                if (!defined $name || $name eq '') {
                     $tx->fillcolor('red');
                     $name="NONE";
                 } else {

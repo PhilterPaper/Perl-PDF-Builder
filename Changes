@@ -26,6 +26,20 @@ into PDF::Builder.
      under discussion is how to indicate when a file was last updated -- is
      there a better way than $LAST_UPDATE?
 
+   examples/020_corefonts and examples/021_synfonts [ref #68, CTS 9] updated 
+     "@fonts" list to "@planes" to clarify that these fonts are 256 character 
+     planes of part of a font's glyph list. Also updated 
+     lib/PDF/Builder/Resource/Font.pm to document the automap() method, and 
+     lib/PDF/Builder.pm to mention that UTF-8 cannot be used in corefonts and 
+     psfonts (at least, non-CID fonts). PS (Type 1) fonts may use automap(), 
+     although such fonts are usually (non-CID) limited to 256 glyphs. In that 
+     case, automap() will return nothing for the extended planes.
+
+   lib/PDF/Builder/Content/Hyphenate_basic.pm in basic hyphenation, split word 
+     with SHY (soft hyphen) instead of -, so a screen reader or other text 
+     scraper or resizable display knows it can omit the hyphen when gluing a 
+     word back together. A SHY is supposed to display as a normal hyphen -.
+
 3.005     2017-07-16
 
    Some minor POD cleanups (missing > brackets) and fix VERSION in .pm files.

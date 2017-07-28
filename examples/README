@@ -62,10 +62,13 @@ tested against 3.004 July 2017
 
  020_corefonts   latin1 encoding only (actually looks more like Windows-1252). 
                  4 variants most faces
-                 one page per font name, not exactly sure what second page is
-                     (fnt->automap()), apparently some non-Latin-1 extensions
+                 one page per font plane (256 characters each), as most fonts
+                     have more than 256 glyphs from a variety of encodings
+                     (uses automap).
                  command line list of core fonts to display, or entire list
-                 by default
+                     by default
+                 note that "utf8" (and any other multibyte characters) does not
+                     appear to work with core fonts!
 
  020_textrise    show a line of text with rise of +5 (superscript) and -5
                  (subscript). Also +/- 10 and 20 units.
@@ -82,7 +85,8 @@ tested against 3.004 July 2017
                  sample text is produced for each file. Note that unlike most
                  of the other example programs, the resulting PDF(s) are in
                  the directory you run the program from, not the examples/ 
-                 directory where 022_truefonts lives!
+                 directory where 022_truefonts lives! OpenType (.otf) fonts
+                 also appear to work well here.
 
  022_truefonts_diacrits_utf8   similar to 022_truefonts in its inputs and
                  outputs. times.ttf and tahoma.ttf (and presumably others)

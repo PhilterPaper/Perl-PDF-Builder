@@ -1793,12 +1793,28 @@ sub _findFont {
 
 Returns a new Adobe core font object.
 
+Core fonts are limited to single byte encodings. You cannot use UTF-8 or other
+multibyte encodings with core fonts.
+See L<PDF::Builder::Resource::Font> C<automap> method for information on
+accessing more than 256 glyphs in a font, using planes.
+
+Note that core fonts use fixed lists of expected glyphs, along with metrics
+such as their widths. This may not exactly match up with whatever local font
+file is used by the PDF reader. It's usually pretty close, but many cases have
+been found where the list of glyphs is different between the core fonts and
+various local font files, so be aware of this.
+
+To allow UTF-8 text and extended glyph counts, you should 
+consider replacing your use of core fonts with TrueType (.ttf) and OpenType
+(.otf) fonts. There are tools, such as I<FontForge>, which can do a fairly good
+(though, not perfect) job of converting a Type1 font library to OTF.
+
 B<Examples:>
 
-    $font = $pdf->corefont('Times-Roman');
-    $font = $pdf->corefont('Times-Bold');
-    $font = $pdf->corefont('Helvetica');
-    $font = $pdf->corefont('ZapfDingbats');
+    $font1 = $pdf->corefont('Times-Roman', -encode => 'latin2');
+    $font2 = $pdf->corefont('Times-Bold');
+    $font3 = $pdf->corefont('Helvetica');
+    $font4 = $pdf->corefont('ZapfDingbats');
 
 Valid %options are:
 
@@ -1806,7 +1822,10 @@ Valid %options are:
 
 =item -encode
 
-Changes the encoding of the font from its default.
+Changes the encoding of the font from its default. Notice that the encoding
+(I<not> the entire font's glyph list) is shown in a PDF object (record), listing
+256 glyphs associated with this encoding (I<and> that are available in this 
+font). 
 
 =item -dokern
 
@@ -1833,12 +1852,25 @@ sub corefont {
 
 =item $font = $pdf->psfont($ps_file)
 
-Returns a new Adobe Type1 font object.
+Returns a new Adobe Type1 ("PostScript") font object.
+
+PS fonts are limited to single byte encodings. You cannot use UTF-8 or other
+multibyte encodings with PS fonts.
+See L<PDF::Builder::Resource::Font> C<automap> method for information on
+accessing more than 256 glyphs in a font, using planes. B<Note:> most, if not
+all, Type1 fonts appear to be limited to 256 glyphs anyway, but you might find 
+one that has more than 256 glyphs and is not CID.
+
+C<psfont> accepts both ASCII-encoded Type1 (.pfa and .afm) and binary Type1
+(.pfb and .pfm). To allow UTF-8 text and extended glyph counts, you should 
+consider replacing your use of Type1 fonts with TrueType (.ttf) and OpenType
+(.otf) fonts. There are tools, such as I<FontForge>, which can do a fairly good
+(though, not perfect) job of converting your font library to OTF.
 
 B<Examples:>
 
-    $font = $pdf->psfont('Times-Book.pfa', -afmfile => 'Times-Book.afm');
-    $font = $pdf->psfont('/fonts/Synest-FB.pfb', -pfmfile => '/fonts/Synest-FB.pfm');
+    $font1 = $pdf->psfont('Times-Book.pfa', -afmfile => 'Times-Book.afm');
+    $font2 = $pdf->psfont('/fonts/Synest-FB.pfb', -pfmfile => '/fonts/Synest-FB.pfm');
 
 Valid %options are:
 
@@ -1846,7 +1878,10 @@ Valid %options are:
 
 =item -encode
 
-Changes the encoding of the font from its default.
+Changes the encoding of the font from its default. Notice that the encoding
+(I<not> the entire font's glyph list) is shown in a PDF object (record), listing
+256 glyphs associated with this encoding (I<and> that are available in this 
+font). 
 
 =item -afmfile
 
@@ -1888,10 +1923,17 @@ sub psfont {
 
 Returns a new TrueType or OpenType font object.
 
+B<Warning:> BaseEncoding is I<not> set by default for TrueType fonts, so text 
+in the PDF isn't searchable (by the PDF reader) unless a ToUnicode CMap is 
+included. Include the ToUnicode CMap by default, but allow it to be disabled 
+(for performance and file size reasons) by setting -unicodemap to 0. Note that 
+non-searchable text, besides being annoying to users, may prevent screen 
+readers and other aids to disabled users from working correctly!
+
 B<Examples:>
 
-    $font = $pdf->ttfont('Times.ttf');
-    $font = $pdf->ttfont('Georgia.otf');
+    $font1 = $pdf->ttfont('Times.ttf');
+    $font2 = $pdf->ttfont('Georgia.otf');
 
 Valid %options are:
 
@@ -1977,7 +2019,15 @@ sub cjkfont {
 
 =item $font = $pdf->synfont($basefont)
 
-Returns a new synthetic font object.
+Returns a new synthetic font object. These are modifications to a core font,
+where the font may be replaced by a Type1 or Type3 PostScript font.
+
+B<Warning:> BaseEncoding is I<not> set by default for these fonts, so text 
+in the PDF isn't searchable (by the PDF reader) unless a ToUnicode CMap is 
+included. Include the ToUnicode CMap by default, but allow it to be disabled 
+(for performance and file size reasons) by setting -unicodemap to 0. Note that 
+non-searchable text, besides being annoying to users, may prevent screen 
+readers and other aids to disabled users from working correctly!
 
 B<Examples:>
 
