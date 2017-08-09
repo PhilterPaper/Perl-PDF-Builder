@@ -2,7 +2,7 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 
 
-3.006     2017-08-08 unreleased
+3.006     2017-08-09 unreleased
 
    lib/PDF/Builder/Page.pm POD glitch reported by Kwalitee fixed.
 
@@ -48,6 +48,9 @@ into PDF::Builder.
 
    lib/PDF/Builder.pm (per Johan Vromans) add $VERSION to Builder.pm so that
      a developer can run PDF::Builder directly from git.
+
+   Please read the DEPRECATED file (new) for a list of deprecated names and
+     interfaces which will disappear at some time in the future!
 
 3.005     2017-07-16
 
