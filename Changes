@@ -2,7 +2,7 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 
 
-3.006     2017-07-22 unreleased
+3.006     2017-08-08 unreleased
 
    lib/PDF/Builder/Page.pm POD glitch reported by Kwalitee fixed.
 
@@ -39,6 +39,15 @@ into PDF::Builder.
      with SHY (soft hyphen) instead of -, so a screen reader or other text 
      scraper or resizable display knows it can omit the hyphen when gluing a 
      word back together. A SHY is supposed to display as a normal hyphen -.
+
+   lib/PDF/Builder/Resource/XObject/Image/TIFF.pm [ref RT 15730, Rejected] the
+     BlackIs1 DecodeParm hash member was misspelled as Blackls1 (el instead of 
+     EYE). BlackIs1 has been added, and Blackls1 is now DEPRECATED. It will be 
+     removed some time after July 2018, so please update your code if you use 
+     it.
+
+   lib/PDF/Builder.pm (per Johan Vromans) add $VERSION to Builder.pm so that
+     a developer can run PDF::Builder directly from git.
 
 3.005     2017-07-16
 

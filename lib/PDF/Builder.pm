@@ -3,7 +3,9 @@ package PDF::Builder;
 use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
-# VERSION
+# ##### Don't forget to update $VERSION with each CPAN release!
+# $VERSION defined here so developers can run PDF::Builder from git
+our $VERSION = '3.005'; # VERSION
 my $LAST_UPDATE = '3.006'; # manually update whenever code is changed
 
 use Carp;
