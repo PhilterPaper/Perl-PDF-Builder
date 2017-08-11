@@ -72,6 +72,27 @@ PDF::Builder - Facilitates the creation and modification of PDF files
 
 =head1 A NOTE ON STRINGS (CHARACTER TEXT)
 
+Perl, and hence PDF::Builder, use strings that support the full range of
+Unicode characters. When importing strings into a Perl program, for example
+by reading text from a file, you must always decode the text from
+external encoding (ASCII, UTF-8, Latin-1, ...) into the Perl (internal)
+encoding. See pragma C<utf8> and module C<Encode> for details about decoding
+text. 
+
+Then, there is the matter of encoding I<output> to match up with available font
+character sets. Many fonts (for Latin-alphabet languages) for PDF use appear to 
+use WinAnsiEncoding as their default, which is more-or-less Windows CP-1252 (a
+superset of ISO-8859-1 Latin-1). Be aware of such encodings when planning how
+you're going to output text to a PDF. See C<corefont> and C<psfont> in 
+L<FONT-METHODS> for additional information.
+
+External text data in various encodings B<< -> >>
+Perl internal string representation (Latin-1 or UTF-8) B<< -> >>
+Output text data encoded for compatibility with various font files (corefont 
+and psfont single byte encodings, TTF/OTF single or multibyte encodings)
+
+=head2 Some Internal Details
+
 Perl (and PDF::Builder) internally use strings which are either ISO-8859-1 or 
 UTF-8 encoded (there is an internal flag marking the string as UTF-8 or not). 
 If you work I<strictly> in ASCII, with no Latin-1, CP-1252, or
@@ -196,7 +217,7 @@ sub new {
         $self->{' filed'} = $options{'-file'};
         $self->{'pdf'}->create_file($options{'-file'});
     }
-    $self->{'infoMeta'}=[qw(Author CreationDate ModDate Creator Producer Title Subject Keywords)];
+    $self->{'infoMeta'} = [qw(Author CreationDate ModDate Creator Producer Title Subject Keywords)];
 
     my $version = eval { $PDF::Builder::VERSION } || '(Unreleased Version)';
     $self->info('Producer' => "PDF::Builder $version [$^O]");
@@ -1796,9 +1817,12 @@ sub _findFont {
 Returns a new Adobe core font object.
 
 Core fonts are limited to single byte encodings. You cannot use UTF-8 or other
-multibyte encodings with core fonts.
+multibyte encodings with core fonts. The default encoding for the core fonts is
+WinAnsiEncoding (roughly the CP-1252 superset of ISO-8859-1). See the 
+C<-encode> option below to change this encoding.
 See L<PDF::Builder::Resource::Font> C<automap> method for information on
-accessing more than 256 glyphs in a font, using planes.
+accessing more than 256 glyphs in a font, using planes, I<although there is no
+guarantee that future changes to font files will permit consistent results>.
 
 Note that core fonts use fixed lists of expected glyphs, along with metrics
 such as their widths. This may not exactly match up with whatever local font
@@ -1858,8 +1882,13 @@ Returns a new Adobe Type1 ("PostScript") font object.
 
 PS fonts are limited to single byte encodings. You cannot use UTF-8 or other
 multibyte encodings with PS fonts.
+The default encoding for the T1 fonts is
+WinAnsiEncoding (roughly the CP-1252 superset of ISO-8859-1). See the 
+C<-encode> option below to change this encoding.
 See L<PDF::Builder::Resource::Font> C<automap> method for information on
-accessing more than 256 glyphs in a font, using planes. B<Note:> most, if not
+accessing more than 256 glyphs in a font, using planes, I<although there is no
+guarantee that future changes to font files will permit consistent results>.
+B<Note:> most, if not
 all, Type1 fonts appear to be limited to 256 glyphs anyway, but you might find 
 one that has more than 256 glyphs and is not CID.
 

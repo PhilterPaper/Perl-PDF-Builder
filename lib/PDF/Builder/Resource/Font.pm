@@ -143,8 +143,8 @@ sub encodeByData {
 This applies to core fonts (C<< $pdf->corefont() >>) and PostScript fonts 
 (C<< $pdf->psfont() >>). These cannot use UTF-8 (or other multibyte character) 
 encoded text; only single byte characters. This limits a font to a maximum of
-256 glyphs (the "standard" single-byte encoding being used). The other glyphs 
-are inaccessible.
+256 glyphs (the "standard" single-byte encoding being used). Any other glyphs 
+supplied with the font are inaccessible.
 
 C<automap> splits a font containing more than 256 glyphs into "planes" of single
 byte fonts of up to 256 glyphs, so that all glyphs may be accessed in separate 
@@ -152,15 +152,20 @@ byte fonts of up to 256 glyphs, so that all glyphs may be accessed in separate
 code page (of the selected encoding). If there are any glyphs beyond xFF on the 
 standard encoding page, they will be returned in one or more additional fonts
 of 223 glyphs each. I<Why 223?> The first 32 are reserved as control characters
-(although they have no glyphs), and number x20 is a space. This gives 256 in 
-total. These "fonts" are temporary (dynamic), though as usable as any other 
-font. The I<ordering> of these 223 glyphs does not appear to follow any 
-particular scheme, so be sure to reference something like 
+(although they have no glyphs), and number x20 is a space. This, plus 223, 
+gives 256 in total (the last plane may have less than 223 glyphs). These "fonts"
+are temporary (dynamic), though as usable as any other font. 
+
+The I<ordering> of these 223 glyphs in each following plane does I<not> appear 
+to follow any particular official scheme, so be sure to reference something like
 C<examples/020_corefonts> to see what is available, and what code point a glyph 
 is at (e.g., an 'A' in the text stream will print something different if you're 
-not on plane 0). For a given font, they should be I<consistent>. For instance, 
-in Times-Roman core font, an \x21 or ! in plane[1] should always give an 
-A+macron.
+not on plane 0). For a given font B<file>, they should be I<consistent>. For 
+instance, in Times-Roman core font, an \x21 or ! in plane[1] should always give 
+an A+macron. Further note that new editions of font files released in the future
+may have changes to the glyph list and the ordering (affecting which plane a
+glyph appears on), so use automap() with caution. It appears that glyphs are 
+sorted by Unicode number, but if a new glyph is inserted, it could bump another glyph to the next plane.
 
 An example:
 
