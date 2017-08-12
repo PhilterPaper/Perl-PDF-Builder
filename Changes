@@ -52,6 +52,12 @@ into PDF::Builder.
    Please read the DEPRECATED file (new) for a list of deprecated names and
      interfaces which will disappear at some time in the future!
 
+   The build process has been modified to ensure that all text (non-binary) 
+     files are now "Unix style" (LF for end-of-line). Before, some text files
+     were "DOS style" (CRLF for end-of-line), which caused problems for tools
+     used by some Linux-based developers. DOS-only files, such as .bat files,
+     have been left in DOS style.
+
 3.005     2017-07-16
 
    Some minor POD cleanups (missing > brackets) and fix VERSION in .pm files.

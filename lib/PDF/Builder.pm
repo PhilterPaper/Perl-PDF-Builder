@@ -3,8 +3,8 @@ package PDF::Builder;
 use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
-# ##### Don't forget to update $VERSION with each CPAN release!
-# $VERSION defined here so developers can run PDF::Builder from git
+# $VERSION defined here so developers can run PDF::Builder from git.
+# it should be automatically updated as part of the CPAN build.
 our $VERSION = '3.005'; # VERSION
 my $LAST_UPDATE = '3.006'; # manually update whenever code is changed
 
@@ -84,7 +84,7 @@ character sets. Many fonts (for Latin-alphabet languages) for PDF use appear to
 use WinAnsiEncoding as their default, which is more-or-less Windows CP-1252 (a
 superset of ISO-8859-1 Latin-1). Be aware of such encodings when planning how
 you're going to output text to a PDF. See C<corefont> and C<psfont> in 
-L<FONT-METHODS> for additional information.
+L<FONT METHODS> for additional information.
 
 External text data in various encodings B<< -> >>
 Perl internal string representation (Latin-1 or UTF-8) B<< -> >>
@@ -221,6 +221,7 @@ sub new {
 
     my $version = eval { $PDF::Builder::VERSION } || '(Unreleased Version)';
     $self->info('Producer' => "PDF::Builder $version [$^O]");
+   #$self->info('Producer' => "PDF::Builder $version [see https://github.com/PhilterPaper/Perl-PDF-Builder/blob/master/SUPPORT]");
 
     return $self;
 } # end of new()
@@ -1892,8 +1893,11 @@ B<Note:> most, if not
 all, Type1 fonts appear to be limited to 256 glyphs anyway, but you might find 
 one that has more than 256 glyphs and is not CID.
 
-C<psfont> accepts both ASCII-encoded Type1 (.pfa and .afm) and binary Type1
-(.pfb and .pfm). To allow UTF-8 text and extended glyph counts, you should 
+C<psfont> accepts both ASCII (.pfa) and binary (.pfb) Type1 glyph files.
+Font metrics can be supplied in either ASCII (.afm) or binary (.pfm) format,
+as can be seen in the examples given below.
+
+To allow UTF-8 text and extended glyph counts in one font, you should 
 consider replacing your use of Type1 fonts with TrueType (.ttf) and OpenType
 (.otf) fonts. There are tools, such as I<FontForge>, which can do a fairly good
 (though, not perfect) job of converting your font library to OTF.
