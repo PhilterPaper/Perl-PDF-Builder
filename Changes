@@ -2,7 +2,7 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 
 
-3.006     2017-08-09 unreleased
+3.006     2017-08-14 unreleased
 
    lib/PDF/Builder/Page.pm POD glitch reported by Kwalitee fixed.
 
@@ -66,6 +66,9 @@ into PDF::Builder.
      support area for this product. Of course, you can always override the 
      Producer (and Creator) tags with whatever strings you want (see the info() 
      call).
+
+   t-tests.bat (per Johan Vromans and Jeffrey Ratcliffe) add some comments on
+     ways to run t tests in various situations.
 
 3.005     2017-07-16
 
