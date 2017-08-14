@@ -40,11 +40,13 @@ into PDF::Builder.
      scraper or resizable display knows it can omit the hyphen when gluing a 
      word back together. A SHY is supposed to display as a normal hyphen -.
 
-   lib/PDF/Builder/Resource/XObject/Image/TIFF.pm [ref RT 15730, Rejected] the
-     BlackIs1 DecodeParm hash member was misspelled as Blackls1 (el instead of 
-     EYE). BlackIs1 has been added, and Blackls1 is now DEPRECATED. It will be 
-     removed some time after July 2018, so please update your code if you use 
-     it.
+   lib/PDF/Builder/Resource/XObject/Image/TIFF.pm (reported by Ivan Middleton)
+     [ref RT 15730, Rejected] the BlackIs1 DecodeParm hash member was misspelled
+     as Blackls1 (el instead of EYE). BlackIs1 has been added, and Blackls1 is 
+     now DEPRECATED. It will be removed some time after July 2018, so please 
+     update your code if you use it. The original bug report also stated that 
+     the value of this member /may/ be the reverse of what it should be, so 
+     further corrections to the code /may/ be necessary in the future.
 
    lib/PDF/Builder.pm (per Johan Vromans) add $VERSION to Builder.pm so that
      a developer can run PDF::Builder directly from git.
@@ -57,6 +59,13 @@ into PDF::Builder.
      were "DOS style" (CRLF for end-of-line), which caused problems for tools
      used by some Linux-based developers. DOS-only files, such as .bat files,
      have been left in DOS style.
+
+   lib/PDF/Builder.pm the default /Producer PDF tag had the producer's operating
+     system in the string, which led to different PDF file lengths depending on 
+     which OS a PDF was produced on. This has been changed to a URL for the 
+     support area for this product. Of course, you can always override the 
+     Producer (and Creator) tags with whatever strings you want (see the info() 
+     call).
 
 3.005     2017-07-16
 

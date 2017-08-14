@@ -220,8 +220,8 @@ sub new {
     $self->{'infoMeta'} = [qw(Author CreationDate ModDate Creator Producer Title Subject Keywords)];
 
     my $version = eval { $PDF::Builder::VERSION } || '(Unreleased Version)';
-    $self->info('Producer' => "PDF::Builder $version [$^O]");
-   #$self->info('Producer' => "PDF::Builder $version [see https://github.com/PhilterPaper/Perl-PDF-Builder/blob/master/SUPPORT]");
+   #$self->info('Producer' => "PDF::Builder $version [$^O]");
+    $self->info('Producer' => "PDF::Builder $version [see https://github.com/PhilterPaper/Perl-PDF-Builder/blob/master/SUPPORT]");
 
     return $self;
 } # end of new()
