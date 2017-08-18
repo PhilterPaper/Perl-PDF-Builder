@@ -37,6 +37,7 @@ my %WriteMakefileArgs =
  PREREQ_PM => {
     "Compress::Zlib" => 1.0,
     "Font::TTF" => 1.04,
+    #"Graphics::TIFF" => 0,    use if possible, but don't make mandatory
     # found in CORE, so no need to explicitly list
     #"utf8" => 0,
     #"File::Temp" => 0,
