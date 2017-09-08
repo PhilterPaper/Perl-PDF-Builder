@@ -181,9 +181,9 @@ foreach $fn (@ARGV) {
                 $tx->text("G+$xo"); 
                 $tx->translate($x+25*$sX,$y+10*$sY);
 		if (defined $font->uniByCId($xo)) {
-                    $tx->text(sprintf('U+0x%04X', $font->uniByCId($xo)));
+                    $tx->text(sprintf('U+%04X', $font->uniByCId($xo)));
 	        } else {
-                    $tx->text('U+0x????');
+                    $tx->text('U+????');
 		}
 
                 my $name = $font->glyphByCId($xo);

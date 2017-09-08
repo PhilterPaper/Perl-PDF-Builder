@@ -106,7 +106,7 @@ foreach my $k (sort keys %wxf) {
                     $text->translate($x+25*$scale,$y+860*$scale);
                     $text->text("G+$xo"); 
                     $text->translate($x+25*$scale,$y+10*$scale);
-                    $text->text(sprintf('U+0x%04X', $xf->uniByCId($xo)));
+                    $text->text(sprintf('U+%04X', $xf->uniByCId($xo)));
     
                     my $name = $xf->glyphByCId($xo);
                     if ($name eq '') {

@@ -90,9 +90,9 @@ foreach $fn (@fontnames) {
                 $text->translate($x+25*$scale,$y+10*$scale);
 		my $fontValue = $font->uniByCId($xo);
 		if (defined $fontValue) {
-                  $text->text(sprintf('U+0x%04X',$fontValue));
+                  $text->text(sprintf('U+%04X',$fontValue));
 		} else {
-                  $text->text('U+0x????');
+                  $text->text('U+????');
 		}
                 $text->translate($x+975*$scale,$y+10*$scale);
                 $text->text_right('wx='.$font->wxByCId($xo));
