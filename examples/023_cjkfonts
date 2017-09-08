@@ -26,6 +26,7 @@ my @fontnames = qw[ Ming Ming-Bold Ming-Italic Ming-BoldItalic
     KozGo KozGo-Bold KozGo-Italic KozGo-BoldItalic ];
 
 foreach $fn (@fontnames) {
+   #if ($fn eq 'Ming-Bold') { last; } # for testing
 
     $pdf = PDF::Builder->new(-compress => $compress, -file => "$0.$fn.pdf");
 

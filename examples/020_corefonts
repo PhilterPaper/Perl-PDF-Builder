@@ -172,17 +172,17 @@ foreach $fn (@fns) {
                     $gfx->stroke();
 
 		    # character data
-                    $txt2->translate($gLLx+($sx*$x)-2,$gLLy+($sy*$y)-6);
+                    $txt2->translate($gLLx+($sx*$x)+$wx,$gLLy+($sy*$y)-6);
                     $txt2->text_right($ci);
-                    $txt2->translate($gLLx+($sx*$x)-2,$gLLy+($sy*$y)-11);
+                    $txt2->translate($gLLx+($sx*$x)+$wx,$gLLy+($sy*$y)-11);
                     if (defined $plane->uniByEnc($ci)) {
-                        $txt2->text_right(sprintf('U=0x%04X',$plane->uniByEnc($ci)));
+                        $txt2->text_right(sprintf('U+%04X',$plane->uniByEnc($ci)));
                     } else {
-                        $txt2->text_right('U=0x????');
+                        $txt2->text_right('U+????');
 		    }
-                    $txt2->translate($gLLx+($sx*$x)-2,$gLLy+($sy*$y)-16);
+                    $txt2->translate($gLLx+($sx*$x)+$wx,$gLLy+($sy*$y)-16);
                     $txt2->text_right($plane->glyphByEnc($ci));
-                    $txt2->translate($gLLx+($sx*$x)-2,$gLLy+($sy*$y)-21);
+                    $txt2->translate($gLLx+($sx*$x)+$wx,$gLLy+($sy*$y)-21);
                     $txt2->text_right(sprintf('wx=%i',$plane->wxByEnc($ci)));
                 } # loop through columns (x)
             } # loop through rows (yp/y)
