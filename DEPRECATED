@@ -3,8 +3,11 @@ misspellings that have been corrected at some point in the past (in PDF::API2),
 although some are interfaces that have been removed. Rather than keeping the 
 old names around forever, they will be sunset and removed in due time. Please 
 periodically check this list and make sure you have plans to change or remove 
-these deprecated usages before they disappear from PDF::Builder. In order of 
-scheduled removal date:
+these deprecated usages before they disappear from PDF::Builder. Initially,
+the deprecated items may only be commented out (so they can be restored by a
+user in an emergency), but eventually they WILL be removed.
+
+In order of scheduled removal date:
 
 Blackls1     DecodeParms hash element in Resource/XObject/Image/TIFF.pm
    Misspelling of "BlackIs1" (EYE instead of el) PDF flag. It was reported in 
