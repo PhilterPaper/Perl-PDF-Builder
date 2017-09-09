@@ -126,10 +126,7 @@ This software is Copyright (c) 2017 by Phil M. Perry.
 
 This is free software, licensed under:
 
-  The GNU Lesser General Public License, Version 2.1, February 1999
-
-The GNU Lesser General Public License (LGPL)
-Version 2.1, February 1999
+The GNU Lesser General Public License (LGPL) Version 2.1, February 1999
 
   (The master copy of this license lives on the GNU website.)
 
@@ -137,6 +134,15 @@ Copyright (C) 1991, 1999 Free Software Foundation, Inc. 59
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 I<Please see the> LICENSE I<file in the distribution root for full details.>
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU Lesser General Public License, as published by the Free
+Software Foundation, either version 2.1 of the License, or (at your option) any
+later version.
+
+This library is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 
 =head1 HISTORY
 
@@ -2636,7 +2642,8 @@ This module does not work with perl's -l command-line switch.
 
 =head1 AUTHOR
 
-PDF::API2 was originally written by Alfred Reibenschuh.
+PDF::API2 was originally written by Alfred Reibenschuh. See the HISTORY section
+for more information.
 
 It was maintained by Steve Simms.
 
