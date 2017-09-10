@@ -26,6 +26,7 @@ examples/012_pages
 examples/020_corefonts
 examples/020_textrise
 examples/020_textunderline
+examples/021_psfonts
 examples/021_synfonts
 examples/022_truefonts
 examples/022_truefonts_diacrits_utf8
@@ -178,6 +179,7 @@ t/annotate.t
 t/author-critic.t
 t/author-pod-syntax.t
 t/barcode.t
+t/circular-references.t
 t/cmap.t
 t/content.t
 t/cs-webcolor.t

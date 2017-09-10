@@ -2,7 +2,7 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 
 
-3.006     2017-08-14 unreleased
+3.006     2017-09-06 unreleased
 
    lib/PDF/Builder/Page.pm POD glitch reported by Kwalitee fixed.
 
@@ -24,7 +24,8 @@ into PDF::Builder.
      unresolved is the best way (and whether) to put $VERSION in all .pl and
      .pm files, or just Builder.pm, and the associated build process. Also
      under discussion is how to indicate when a file was last updated -- is
-     there a better way than $LAST_UPDATE?
+     there a better way than $LAST_UPDATE? It is provided as a local variable
+     in case anyone wants to access it in their code.
 
    examples/020_corefonts and examples/021_synfonts [ref #68, CTS 9] updated 
      "@fonts" list to "@planes" to clarify that these fonts are 256 character 
@@ -34,6 +35,9 @@ into PDF::Builder.
      psfonts (at least, non-CID fonts). PS (Type 1) fonts may use automap(), 
      although such fonts are usually (non-CID) limited to 256 glyphs. In that 
      case, automap() will return nothing for the extended planes.
+
+   lib/PDF/Builder.pm update comments (POD) on character encoding. This is 
+     still a Work In Progress.
 
    lib/PDF/Builder/Content/Hyphenate_basic.pm in basic hyphenation, split word 
      with SHY (soft hyphen) instead of -, so a screen reader or other text 
@@ -69,6 +73,16 @@ into PDF::Builder.
 
    t-tests.bat (per Johan Vromans and Jeffrey Ratcliffe) add some comments on
      ways to run t tests in various situations.
+
+   examples/012_pages insert pages i-iii in front of other pages, to show how
+     (for instance) a Table of Contents could be inserted after writing the 
+     rest of the document.
+
+   examples/ font display utilities change Unicode formatting to U+nnnn and
+     align character description text under character box.
+
+   examples/021_psfonts added to display Type1 fonts (.pfa, .pfb glyph files
+     and .afm, .pfm metrics files).
 
 3.005     2017-07-16
 

@@ -57,8 +57,8 @@ tested against 3.004 July 2017
                  page is new Hello World! (2). Internal string adds third page
                  Hello World! (3). STRING PDF adds fourth page Hello World! (4).
 
- 012_pages       output pages numbered 1, 9, 2 - 8 (generate pages 1 - 8,
-                 insert page 9 before 2)
+ 012_pages       output pages numbered i - iii, 1, 9, 2 - 8 (generate pages 
+                 1 - 8, insert page 9 before 2, insert Front Matter i-iii)
 
  020_corefonts   latin1 encoding only (actually looks more like Windows-1252). 
                  4 variants most faces
@@ -76,6 +76,10 @@ tested against 3.004 July 2017
  020_textunderline  show off textlabel() call with angles, colors, and a
                  variety of underlining.
 
+ 021_psfonts     Given one or more Type1 (PS) fonts and their metrics files
+                 on the command line, a PDF showing the characters and CID
+                 details is produced for each font file.
+
  021_synfonts    .75 slant, 12 oblique, 4 bold, and small caps variants (where
                  available) of the given core fonts, as available, for 29 core 
                  fonts.
@@ -90,11 +94,11 @@ tested against 3.004 July 2017
 
  022_truefonts_diacrits_utf8   similar to 022_truefonts in its inputs and
                  outputs. times.ttf and tahoma.ttf (and presumably others)
-                 contain the U+0x0361 combining diacritic.
+                 contain the U+0361 combining diacritic.
 
  023_cjkfonts    (MyungJo fonts only) the last several hundred characters (2 
                  pages, rotated ASCII) get an undefined value returned by 
-                 $font->uniByCId($xo), and so end up being formatted U+0x???? 
+                 $font->uniByCId($xo), and so end up being formatted U+???? 
                  to avoid a fatal error. Presumably, rotated text should not
                  have a Unicode number.
                  The Lorem Ipsum text on the last page of some fonts (KozGo, 
