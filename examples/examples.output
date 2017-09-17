@@ -126,12 +126,17 @@ to see when the resulting PDFs are displayed.
 022_truefonts  times.ttf (sample input)
  times
   022_truefonts.times.pdf
-   24 pages x 16x16 grid + one page sample text
+   1 page 16x16 grid of selected encoding (SINGLE BYTE, default latin1, omitted
+     if UTF-8 is chosen as the encoding)
+   23 pages of 15x10 grid of CIDs in order (nothing to do with encoding)
+   1 page sample text in ASCII
 
 022_truefonts_diacrits_utf8  tahoma.ttf (sample input)
  tahoma
   022_truefonts_diacrits_utf8.tahoma.pdf  
-   1 page x 16x16 grid + 1 page with sample diacritic spanning 3 letters
+   1 page 16x16 grid in selected encoding (SINGLE BYTE, default latin1, omitted
+     if UTF-8 is chosen as the encoding)
+   1 page with sample diacritic spanning 3 letters (UTF-8 input)
 
 023_cjkfonts   (requires installation of CJK font package by Adobe Reader)
  Ming  Ming-Bold Ming-Italic Ming-BoldItalic

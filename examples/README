@@ -85,16 +85,25 @@ tested against 3.004 July 2017
                  fonts.
 
  022_truefonts   Given one or more TrueType (.ttf) font FILES on the command
-                 line, a PDF showing the characters, CID details, and some
+                 line, a PDF showing the characters (256 per indicated SINGLE
+                 BYTE encoding, default is 'latin1'), the CID details for all
+                 the characters in the font, and some ASCII
                  sample text is produced for each file. Note that unlike most
                  of the other example programs, the resulting PDF(s) are in
                  the directory you run the program from, not the examples/ 
                  directory where 022_truefonts lives! OpenType (.otf) fonts
-                 also appear to work well here.
+                 also appear to work well here. The first (encoding) page works
+                 only with single byte encodings (not UTF-8). The CID list is
+                 independent of the encoding, and the sample text is ASCII.
 
  022_truefonts_diacrits_utf8   similar to 022_truefonts in its inputs and
-                 outputs. times.ttf and tahoma.ttf (and presumably others)
-                 contain the U+0361 combining diacritic.
+                 outputs (no CId character dump). times.ttf and tahoma.ttf 
+                 (and presumably others) contain the U+0361 combining diacritic
+                 used on the second page.
+                 'utf8' encoding doesn't work for the first page (dump of 256
+                 characters in given encoding), only single byte encodings.
+                 UTF-8 input is used for the second page string, and the 
+                 encoding is ignored.
 
  023_cjkfonts    (MyungJo fonts only) the last several hundred characters (2 
                  pages, rotated ASCII) get an undefined value returned by 
