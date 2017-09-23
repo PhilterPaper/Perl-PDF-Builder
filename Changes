@@ -2,7 +2,7 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 
 
-3.006     2017-09-06 unreleased
+3.006     2017-09-23
 
    lib/PDF/Builder/Page.pm POD glitch reported by Kwalitee fixed.
 
@@ -36,8 +36,8 @@ into PDF::Builder.
      although such fonts are usually (non-CID) limited to 256 glyphs. In that 
      case, automap() will return nothing for the extended planes.
 
-   lib/PDF/Builder.pm update comments (POD) on character encoding. This is 
-     still a Work In Progress.
+   lib/PDF/Builder.pm and lib/PDF/Builder/Resource/Font.pm update comments 
+     (POD) on character encoding (per Johan Vromans).
 
    lib/PDF/Builder/Content/Hyphenate_basic.pm in basic hyphenation, split word 
      with SHY (soft hyphen) instead of -, so a screen reader or other text 
@@ -59,10 +59,10 @@ into PDF::Builder.
      interfaces which will disappear at some time in the future!
 
    The build process has been modified to ensure that all text (non-binary) 
-     files are now "Unix style" (LF for end-of-line). Before, some text files
-     were "DOS style" (CRLF for end-of-line), which caused problems for tools
-     used by some Linux-based developers. DOS-only files, such as .bat files,
-     have been left in DOS style.
+     files are now "Unix style" (LF for end-of-line) per Jeffrey Ratcliffe. 
+     Before, some text files were "DOS style" (CRLF for end-of-line), which 
+     caused problems for tools used by some Linux-based developers. DOS-only 
+     files, such as .bat files, have been left in DOS style.
 
    lib/PDF/Builder.pm the default /Producer PDF tag had the producer's operating
      system in the string, which led to different PDF file lengths depending on 

@@ -5,7 +5,7 @@ no warnings qw[ deprecated recursion uninitialized ];
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
-our $VERSION = '3.005'; # VERSION
+our $VERSION = '3.006'; # VERSION
 my $LAST_UPDATE = '3.006'; # manually update whenever code is changed
 
 use Carp;
@@ -74,47 +74,79 @@ PDF::Builder - Facilitates the creation and modification of PDF files
 
 Perl, and hence PDF::Builder, use strings that support the full range of
 Unicode characters. When importing strings into a Perl program, for example
-by reading text from a file, you must always decode the text from
-external encoding (ASCII, UTF-8, Latin-1, ...) into the Perl (internal)
-encoding. See pragma C<utf8> and module C<Encode> for details about decoding
-text. 
+by reading text from a file, you must be aware of what their character encoding
+is. Single-byte encodings (default is 'latin1'), represented as bytes of value
+0x00 through 0xFF (0..255), will produce different results if you do something 
+that depends on the encoding, such as sorting, searching, or comparing any
+two non-ASCII characters. This also applies to any characters (text) hard 
+coded into the Perl program.
 
-Then, there is the matter of encoding I<output> to match up with available font
-character sets. Many fonts (for Latin-alphabet languages) for PDF use appear to 
-use WinAnsiEncoding as their default, which is more-or-less Windows CP-1252 (a
-superset of ISO-8859-1 Latin-1). Be aware of such encodings when planning how
-you're going to output text to a PDF. See C<corefont> and C<psfont> in 
-L<FONT METHODS> for additional information.
+You can always decode the text from external encoding (ASCII, UTF-8, Latin-3, 
+etc.) into the Perl (internal) UTF-8 multibyte encoding. This uses one to four 
+bytes to represent each character. See pragma C<utf8> and module C<Encode> for 
+details about decoding text. Note that only TrueType fonts (C<ttfont>) can 
+make direct use of UTF-8-encoded text. Other font types (core, T1, etc.) can
+only use single-byte encoded text. If your text is ASCII, Latin-1, or CP-1252,
+you I<can> just leave the Perl strings as the default single-byte encoding.
 
-External text data in various encodings B<< -> >>
-Perl internal string representation (Latin-1 or UTF-8) B<< -> >>
-Output text data encoded for compatibility with various font files (corefont 
-and psfont single byte encodings, TTF/OTF single or multibyte encodings)
+Then, there is the matter of encoding the I<output> to match up with available 
+font character sets. You're not actually I<translating> the text on output, but
+are telling the output system (and Reader) what encoding the output byte stream
+represents, and what character glyphs they should generate. 
+
+If you confine your text to plain ASCII (0x00 .. 0x7F byte values) or even
+Latin-1 or CP-1252 (0x00 .. 0xFF byte values), you can
+use default (non-UTF-8) Perl strings and use the default output encoding
+(WinAnsiEncoding), which is more-or-less Windows CP-1252 (a superset 
+in turn, of ISO-8859-1 Latin-1). If your text uses any other characters, you
+will need to be aware of what encoding your text strings are (in the Perl string
+and for declaring output glyph generation).
+See C<corefont>, C<psfont>, and C<ttfont> in L<FONT METHODS> for additional 
+information.
 
 =head2 Some Internal Details
 
-Perl (and PDF::Builder) internally use strings which are either ISO-8859-1 or 
-UTF-8 encoded (there is an internal flag marking the string as UTF-8 or not). 
-If you work I<strictly> in ASCII, with no Latin-1, CP-1252, or
-other non-ASCII characters in your text, you should be OK in not doing anything
-special about your string encoding. However, any string containing non-ASCII
-characters (0x80 or higher) should for safety be converted to the Perl UTF-8
+Some of the following may be a bit scary or confusing to beginners, so don't 
+be afraid to skip over it until you're ready for it...
+
+Perl (and PDF::Builder) internally use strings which are either single-byte 
+(ISO-8859-1/Latin-1) or multibyte UTF-8 encoded (there is an internal flag 
+marking the string as UTF-8 or not). 
+If you work I<strictly> in ASCII or Latin-1 or CP-1252 (each a superset of the
+previous), you should be OK in not doing anything special about your string 
+encoding. You can just use the default Perl single byte strings (internally
+marked as I<not> UTF-8) and the default output encoding (WinAnsiEncoding).
+
+If you intend to use input from a variety of sources, you should consider 
+decoding (converting) your text to UTF-8, which will provide an internally
+consistent representation (and your Perl code itself should be saved in UTF-8, 
+in case you want to use any hard coded non-ASCII characters). In any string,
+non-ASCII characters (0x80 or higher) would be converted to the Perl UTF-8
 internal representation, via C<$string = Encode::decode(MY_ENCODING, $input);>.
 C<MY_ENCODING> would be a string like 'latin1', 'cp-1252', 'utf8', etc. Similar 
 capabilities are available for declaring a I<file> to be in a certain encoding.
 
-If you are using Latin-1 (ISO-8859-1) text, or CP-1252 B<without> Microsoft's
-"Smart Quotes" and extended accented letters, you can probably get away with
-leaving the string in the default ISO-8859-1 encoding. However, you should 
-still get into the habit of converting to UTF-8 (including if the text is
-already UTF-8 -- Perl won't know that). Needless to say, anything using a 
-non-Latin alphabet will need to be properly converted before Perl (and 
-PDF::Builder) can use it. Any developer writing a Perl application to accept 
-user input (including from files), and feed it to PDF::Builder, should be aware 
-of what encoding the end user is using for their input. Don't assume that any 
-file is a given encoding! Ask the user what it is, an be prepared for mistakes 
--- CP-1252 is so widespread that many people think it is identical to Latin-1 
-(it isn't).
+Be aware that if you use UTF-8 encoding for your text, that only TrueType font
+output (C<ttfont>) can handle it directly. Corefont and Type1 output will 
+require that the text will have to be converted back into a single-byte encoding
+(using C<Encode::encode>), which may need to be declared with C<-encode> (for 
+C<corefont> or C<psfont>). If you have any characters I<not> found in the 
+selected single-byte I<encoding> (but I<are> found in the font itself), you 
+will need to use C<automap> to break up the font glyphs into 256 character 
+planes, map such characters to 0x00 .. 0xFF in the appropriate plane, and 
+switch between font planes as necessary.
+
+Core and Type1 fonts (output) use the byte values in the string (single-byte 
+encoding only!) and provide a byte-to-glyph mapping record for each plane. 
+TrueType outputs a group of four hexadecimal digits representing the "CId" 
+(character ID) of each character. The CId does not correspond to either the 
+single-byte or UTF-8 internal representations of the characters.
+
+The bottom line is that you need to know what the internal representation of
+your text is, so that the output routines can tell the PDF reader about it 
+(via the PDF file). The text will not be translated upon output, but the PDF 
+reader needs to know what the encoding in use is, so it knows what glyph to 
+associate with each byte (or byte sequence).
 
 By the way, it is recommended that you be using I<at least> Perl 5.10 if you
 are going to be using any non-ASCII characters. Perl 5.8 may be a little
@@ -1866,7 +1898,14 @@ Enables kerning if data is available.
 
 =back
 
-See Also: L<PDF::Builder::Resource::Font::CoreFont>.
+B<Note:> even though these are called "core" fonts, they are I<not> shipped
+with PDF::Builder, but are expected to be found on the machine with the PDF
+reader. Most core fonts are installed with a PDF reader, and thus are not
+coordinated with PDF::Builder. PDF::Builder I<does> ship with core font 
+I<metrics> files (width, glyph names, etc.), but these cannot be guaranteed to 
+be in sync with what the PDF reader has installed!
+
+See also L<PDF::Builder::Resource::Font::CoreFont>.
 
 =cut
 
@@ -1876,7 +1915,7 @@ sub corefont {
     require PDF::Builder::Resource::Font::CoreFont;
     my $obj = PDF::Builder::Resource::Font::CoreFont->new($self->{'pdf'}, $name, %opts);
     $self->{'pdf'}->out_obj($self->{'pages'});
-    $obj->tounicodemap() if $opts{'-unicodemap'} == 1;
+    $obj->tounicodemap() if $opts{'-unicodemap'} == 1; # UTF-8 not usable
 
     return $obj;
 }
@@ -1887,21 +1926,22 @@ sub corefont {
 
 Returns a new Adobe Type1 ("PostScript") font object.
 
-PS fonts are limited to single byte encodings. You cannot use UTF-8 or other
-multibyte encodings with PS fonts.
+PS (T1) fonts are limited to single byte encodings. You cannot use UTF-8 or 
+other multibyte encodings with T1 fonts.
 The default encoding for the T1 fonts is
 WinAnsiEncoding (roughly the CP-1252 superset of ISO-8859-1). See the 
 C<-encode> option below to change this encoding.
 See L<PDF::Builder::Resource::Font> C<automap> method for information on
 accessing more than 256 glyphs in a font, using planes, I<although there is no
 guarantee that future changes to font files will permit consistent results>.
-B<Note:> most, if not
-all, Type1 fonts appear to be limited to 256 glyphs anyway, but you might find 
-one that has more than 256 glyphs and is not CID.
+B<Note:> many Type1 fonts are limited to 256 glyphs, but some are available
+with more than 256 glyphs. Still, a maximum of 256 at a time are usable.
 
 C<psfont> accepts both ASCII (.pfa) and binary (.pfb) Type1 glyph files.
 Font metrics can be supplied in either ASCII (.afm) or binary (.pfm) format,
-as can be seen in the examples given below.
+as can be seen in the examples given below. It is possible to use .pfa with .pfm
+and .pfb with .afm if that's what's available. The ASCII and binary files have
+the same content, just in different formats.
 
 To allow UTF-8 text and extended glyph counts in one font, you should 
 consider replacing your use of Type1 fonts with TrueType (.ttf) and OpenType
@@ -1926,18 +1966,26 @@ font).
 
 =item -afmfile
 
-Specifies the location of the font metrics file.
+Specifies the location of the I<ASCII> font metrics file (.afm). It may be used
+with either an ASCII (.pfa) or binary (.pfb) glyph file.
 
 =item -pfmfile
 
-Specifies the location of the printer font metrics file.  This option
-overrides the -encode option.
+Specifies the location of the I<binary> font metrics file (.pfm). It may be used
+with either an ASCII (.pfa) or binary (.pfb) glyph file.
 
 =item -dokern
 
 Enables kerning if data is available.
 
 =back
+
+B<Note:> these T1 (Type1) fonts are I<not> shipped with PDF::Builder, but are 
+expected to be found on the machine with the PDF reader. Most PDF readers do 
+not install T1 fonts, and it is up to the user of the PDF reader to install
+the needed fonts.
+
+See also L<PDF::Builder::Resource::Font::Postscript>.
 
 =cut
 
@@ -1953,7 +2001,7 @@ sub psfont {
     my $obj = PDF::Builder::Resource::Font::Postscript->new($self->{'pdf'}, $psf, %opts);
 
     $self->{'pdf'}->out_obj($self->{'pages'});
-    $obj->tounicodemap() if $opts{'-unicodemap'} == 1;
+    $obj->tounicodemap() if $opts{'-unicodemap'} == 1; # UTF-8 not usable
 
     return $obj;
 }
@@ -1962,13 +2010,14 @@ sub psfont {
 
 =item $font = $pdf->ttfont($ttf_file)
 
-Returns a new TrueType or OpenType font object.
+Returns a new TrueType (or OpenType) font object.
 
-B<Warning:> BaseEncoding is I<not> set by default for TrueType fonts, so text 
-in the PDF isn't searchable (by the PDF reader) unless a ToUnicode CMap is 
-included. Include the ToUnicode CMap by default, but allow it to be disabled 
-(for performance and file size reasons) by setting -unicodemap to 0. Note that 
-non-searchable text, besides being annoying to users, may prevent screen 
+B<Warning:> BaseEncoding is I<not> set by default for TrueType fonts, so B<text 
+in the PDF isn't searchable> (by the PDF reader) unless a ToUnicode CMap is 
+included. A ToUnicode CMap I<is> included by default (-unicodemap set to 1) by
+PDF::Builder, but allows it to be disabled (for performance and file size 
+reasons) by setting -unicodemap to 0. This will produce non-searchable text, 
+which, besides being annoying to users, may prevent screen 
 readers and other aids to disabled users from working correctly!
 
 B<Examples:>
@@ -1982,11 +2031,22 @@ Valid %options are:
 
 =item -encode
 
-Changes the encoding of the font from its default.
+Changes the encoding of the font from its default (WinAnsiEncoding).
+
+Note that for a single byte encoding (e.g., 'latin1'), you are limited to 256
+characters defined for that encoding. 'automap' does not work with TrueType.
+If you want more characters than that, use 'utf8' encoding with a UTF-8
+encoded text string.
 
 =item -isocmap
 
 Use the ISO Unicode Map instead of the default MS Unicode Map.
+
+=item -unicodemap
+
+If 1 (default), output ToUnicode CMap to permit text searches and screen
+readers. Set to 0 to save space by I<not> including the ToUnicode CMap, but
+text searching and screen reading will not be possible.
 
 =item -dokern
 
@@ -2040,7 +2100,7 @@ Changes the encoding of the font from its default.
 
 =back
 
-See Also: L<PDF::Builder::Resource::CIDFont::CJKFont>
+See also L<PDF::Builder::Resource::CIDFont::CJKFont>
 
 =cut
 
@@ -2065,9 +2125,10 @@ where the font may be replaced by a Type1 or Type3 PostScript font.
 
 B<Warning:> BaseEncoding is I<not> set by default for these fonts, so text 
 in the PDF isn't searchable (by the PDF reader) unless a ToUnicode CMap is 
-included. Include the ToUnicode CMap by default, but allow it to be disabled 
-(for performance and file size reasons) by setting -unicodemap to 0. Note that 
-non-searchable text, besides being annoying to users, may prevent screen 
+included. A ToUnicode CMap I<is> included by default (-unicodemap set to 1) by
+PDF::Builder, but allows it to be disabled (for performance and file size 
+reasons) by setting -unicodemap to 0. This will produce non-searchable text, 
+which, besides being annoying to users, may prevent screen 
 readers and other aids to disabled users from working correctly!
 
 B<Examples:>
@@ -2099,7 +2160,7 @@ Additional character spacing in ems (0-1000)
 
 =back
 
-See Also: L<PDF::Builder::Resource::Font::SynFont>
+See also L<PDF::Builder::Resource::Font::SynFont>
 
 =cut
 
@@ -2125,9 +2186,10 @@ sub synfont {
 
 =item $font = $pdf->bdfont($bdf_file)
 
-Returns a new BDF font object, based on the specified Adobe BDF file.
+Returns a new BDF (bitmapped distribution format) font object, based on the 
+specified Adobe BDF file.
 
-See Also: L<PDF::Builder::Resource::Font::BdFont>
+See also L<PDF::Builder::Resource::Font::BdFont>
 
 =cut
 
@@ -2151,7 +2213,7 @@ Returns a new uni-font object, based on the specified fonts and options.
 
 B<BEWARE:> This is not a true PDF-object, but a virtual/abstract font definition!
 
-See Also: L<PDF::Builder::Resource::UniFont>.
+See also L<PDF::Builder::Resource::UniFont>.
 
 Valid %options are:
 
