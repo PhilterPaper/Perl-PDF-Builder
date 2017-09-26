@@ -5,7 +5,7 @@ no warnings qw[ deprecated recursion uninitialized ];
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
-our $VERSION = '3.006'; # VERSION
+our $VERSION = '3.007'; # VERSION
 my $LAST_UPDATE = '3.006'; # manually update whenever code is changed
 
 use Carp;

@@ -14,7 +14,7 @@ my %WriteMakefileArgs =
  NAME		=> "PDF::Builder",
  DISTNAME       => "PDF-Builder",
 # VERSION	 => $version,
- VERSION        => "3.006",
+ VERSION        => "3.007",
 # ABSTRACT_FROM	 => $master,
  ABSTRACT       => "Facilitates the creation and modification of PDF files",
 
@@ -32,6 +32,7 @@ my %WriteMakefileArgs =
 
  TEST_REQUIRES	=> {
     "Test::Exception" => 0,
+    "Test::Memory::Cycle" => 1.0,
  },
 
  PREREQ_PM => {

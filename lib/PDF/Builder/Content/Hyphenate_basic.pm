@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.004'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.006'; # manually update whenever code is changed
 
 # basic language word-splitting routines for PDF::Builder.
 # This is currently all that is supported. Not language-specific.

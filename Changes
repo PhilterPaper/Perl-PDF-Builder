@@ -2,6 +2,10 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 
 
+3.007     2017-09-26
+
+   Makefile.PL add missing prerequisite Test::Memory::Cycle.
+
 3.006     2017-09-23
 
    lib/PDF/Builder/Page.pm POD glitch reported by Kwalitee fixed.
