@@ -27,4 +27,5 @@ perl examples\060_transparency
 perl examples\BarCode.pl
 perl examples\Content.pl
 perl examples\ContentText.pl
+perl examples\ShowFont.pl Helvetica
 echo === do not erase files if you are going to run "contrib.bat"

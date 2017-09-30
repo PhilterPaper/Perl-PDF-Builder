@@ -268,3 +268,5 @@ ContentText.pl
           crazy long URL-style text, default left justify, splits at
             camelCase, punctuation, letter runs, slashes
             same, but outdented to force splits at different points
+
+ShowFont.pl   run without command line arguments to get help

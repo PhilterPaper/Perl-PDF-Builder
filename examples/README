@@ -156,6 +156,9 @@ BarCode.pl       demonstrate the bar code library, 1 page.
   and there may be other problems, so my advice is NOT to use the barcodes in
   production code until they have been tested and verified.
 
+ShowFont.pl      list glyphs in a font. output varies by font, encoding(s),
+                 and font type.
+
 Windows/
   027_winfont  demo Windows registry access
   Win32.pm     glue routine (lib/PDF/Builder/Win32.pm) only used in 027_winfont.
