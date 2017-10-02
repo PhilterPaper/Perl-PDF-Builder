@@ -1,10 +1,15 @@
 See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 
-3.008     2017-09-30  unreleased
+3.008     2017-10-01  unreleased
 
    examples/ShowFont.pl added to list out many font file glyphs.
      examples.bat, examples/README, examples/examples.output updated.
+
+   lib/PDF/Builder.pm [ref RT 121912/#67 and also RT 41971/#5] fix outlines 
+     method (thanks to "futuramedium"). Update test case into an example, and
+     add to examples.bat, MANIFEST, examples/README, examples/examples.output,
+     and (new) examples/055_outlines and examples/resources/samples_55.pdf.
 
 3.007     2017-09-26
 

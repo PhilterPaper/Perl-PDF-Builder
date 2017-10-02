@@ -141,6 +141,9 @@ tested against 3.004 July 2017
                  time the display format is changed, the page number resets to
                  1 (I, i, A, a).
 
+ 055_outlines    take PDF like 012_page's, and add three outlines (bookmarks)
+                 to physical pages 1, 4, and 11 (labeled i, 1, 7).
+
  060_transparency  show writing opaque and translucent text by two methods.
 
 =========== other example material:

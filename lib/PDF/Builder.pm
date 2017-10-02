@@ -2646,6 +2646,11 @@ sub outlines {
     $self->{'pdf'}->{'Root'}->{'Outlines'} ||= PDF::Builder::Outlines->new($self);
 
     my $obj = $self->{'pdf'}->{'Root'}->{'Outlines'};
+    bless $obj, 'PDF::Builder::Outlines';
+    $obj->{' apipdf'} = $self->{'pdf'};
+    $obj->{' api'}    = $self;
+    weaken $obj->{' apipdf'};
+    weaken $obj->{' api'};
 
     $self->{'pdf'}->new_obj($obj) unless $obj->is_obj($self->{'pdf'});
     $self->{'pdf'}->out_obj($obj);

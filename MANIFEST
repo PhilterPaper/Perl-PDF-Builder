@@ -21,6 +21,7 @@ contrib/pdf-deoptimize.pl
 contrib/pdf-optimize.pl
 contrib/text2pdf.pl
 examples/resources/aptfrontview.jpg
+examples/resources/sample_55.pdf
 examples/011_open_update
 examples/012_pages
 examples/020_corefonts
@@ -39,6 +40,7 @@ examples/031_color_hsv
 examples/032_separation
 examples/040_annotation
 examples/050_pagelabels
+examples/055_outlines
 examples/060_transparency
 examples/BarCode.pl
 examples/Content.pl

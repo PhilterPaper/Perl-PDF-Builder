@@ -193,6 +193,11 @@ to see when the resulting PDFs are displayed.
   050_pagelabels.pdf
    26 pages with a variety of thumbnail labels in Reader
 
+055_samples
+  055_samples+.pdf
+   12 pages (like 012_pages output) with three bookmarks (outlines) to logical
+   pages 1 ("i"), 4 ("1"), and 11 ("7").
+
 060_transparency
   060_transparency.pdf
    2 pages, each one method of transparency/opacity,

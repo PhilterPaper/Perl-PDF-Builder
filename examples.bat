@@ -23,6 +23,7 @@ perl examples\031_color_hsv
 perl examples\032_separation
 perl examples\040_annotation
 perl examples\050_pagelabels
+perl examples\055_outlines
 perl examples\060_transparency
 perl examples\BarCode.pl
 perl examples\Content.pl
