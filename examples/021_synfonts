@@ -16,8 +16,17 @@ my $fx = 20;
 
 my ($fn, $x, $y, $yp, $k);
 
-# outer loop, one file each for Times-Roman, Times-Italic, etc.
-foreach $fn (qw(
+my $encoding = 'latin1';  # normally latin1
+
+my @font_list;
+# @font_list = qw( Times-Roman );  # uncomment for testing a single corefont
+# core fonts work well, but TrueType and Type1 seem to have some problems here.
+# also, need short name for .pdf file, and .afm or .pfm file for Type1.
+# @font_list = qw( C:\\Windows\\Fonts\\calibri.ttf ); 
+# @font_list = qw( C:\\Users\\Phil\\Desktop\\URWPalladioL-Roma.pfb );
+
+if (scalar @font_list == 0) {
+@font_list = qw(
     Times-Roman
     Times-Italic
     Times-Bold
@@ -46,9 +55,11 @@ foreach $fn (qw(
     verdanabold
     verdanabolditalic
     wingdings
-    webdings
-)) {
-   #if ($fn eq 'Times-Italic') { last; } # for testing
+    webdings);
+}
+
+# outer loop, one file each for Times-Roman, Times-Italic, etc.
+foreach $fn (@font_list) {
 
     my $pdf = PDF::Builder->new(-compress => $compress);
     initNameTable();
@@ -58,9 +69,14 @@ foreach $fn (qw(
     print STDERR "\n$fn\n";
 
 
-    my $fn1 = $pdf->corefont($fn, -encode => 'latin1');
+    my $fn1 = $pdf->corefont($fn, -encode => $encoding);
+    # TrueType and Type1 aren't quite ready, yet (encoding seems to be off)
+   #my $fn1 = $pdf->ttfont($fn, -encode => $encoding);
+   #my $fn1 = $pdf->psfont($fn, -afmfile => '\\Users\\Phil\\Desktop\\URWPalladioL-Roma.afm', -encode => $encoding);
 
     my @planes = ($fn1, $fn1->automap());
+    # TrueType can't use automap. Need to get to glyphs beyond basic encoding
+   #my @planes = ($fn1);   
     my @variants = ({-slant=>0.750}, {-oblique=>12}, {-bold=>4}, {-caps=>1});
     my @varLabels = ('slant 0.750', 'oblique 12', 'bold 4', 'caps 1');
     my $varNum = 0;
@@ -104,6 +120,8 @@ foreach $fn (qw(
                 $txt2->translate(50,780);
 		$txt2->font($f1, 15);
 		$txt2->text("variant = $varLabels[$varNum]");
+                $txt2->translate(300,780);
+		$txt2->text("encoding = $encoding");
 
                 $txt2->font($f1, 5);
                 $txt2->hscale(80);
@@ -159,6 +177,9 @@ foreach $fn (qw(
     } # end middle loop of @variants list
     
     $pdf->saveas("$0.$fn.pdf");
+    # TrueType and Type1 need to have a short fontname defined
+   #$pdf->saveas("$0.calibri.pdf");
+   #$pdf->saveas("$0.Palladio.pdf");
     $pdf->end();
     print STDERR "\n";
    #last;

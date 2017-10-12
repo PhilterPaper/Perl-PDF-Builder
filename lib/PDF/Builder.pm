@@ -6,7 +6,7 @@ no warnings qw[ deprecated recursion uninitialized ];
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
 our $VERSION = '3.007'; # VERSION
-my $LAST_UPDATE = '3.006'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.008'; # manually update whenever code is changed
 
 use Carp;
 use Encode qw(:all);
@@ -1853,7 +1853,8 @@ sub _findFont {
 
 =item $font = $pdf->corefont($fontname)
 
-Returns a new Adobe core font object.
+Returns a new Adobe core font object. Note that C<$fontname> is just the
+font name itself, without any path or file extension.
 
 Core fonts are limited to single byte encodings. You cannot use UTF-8 or other
 multibyte encodings with core fonts. The default encoding for the core fonts is
@@ -1924,7 +1925,8 @@ sub corefont {
 
 =item $font = $pdf->psfont($ps_file)
 
-Returns a new Adobe Type1 ("PostScript") font object.
+Returns a new Adobe Type1 ("PostScript") font object. Note that C<$ps_file> is 
+a full path and file name, unlike with core fonts.
 
 PS (T1) fonts are limited to single byte encodings. You cannot use UTF-8 or 
 other multibyte encodings with T1 fonts.
@@ -1985,6 +1987,11 @@ expected to be found on the machine with the PDF reader. Most PDF readers do
 not install T1 fonts, and it is up to the user of the PDF reader to install
 the needed fonts.
 
+Either an .afm I<or> a .pfm font metrics file is specified, but not both. 
+Either may be used with .pfa (ASCII) or .pfb (binary) glyph file. Supposedly, 
+there are glyph files that don't need a metrics file, but these seem to be
+quite rare.
+
 See also L<PDF::Builder::Resource::Font::Postscript>.
 
 =cut
@@ -2010,7 +2017,8 @@ sub psfont {
 
 =item $font = $pdf->ttfont($ttf_file)
 
-Returns a new TrueType (or OpenType) font object.
+Returns a new TrueType (or OpenType) font object. Note that C<$ttf_file> is a
+full path and file name, unlike with core fonts.
 
 B<Warning:> BaseEncoding is I<not> set by default for TrueType fonts, so B<text 
 in the PDF isn't searchable> (by the PDF reader) unless a ToUnicode CMap is 
@@ -2083,7 +2091,21 @@ sub ttfont {
 
 =item $font = $pdf->cjkfont($cjkname)
 
-Returns a new CJK font object.
+Returns a new CJK font object. Note that C<$cjkname> may include hyphens and
+other punctuation for better readability (e.g., Song-Italic instead of 
+songitalic). This will be stripped out of the name, and capital letters in the 
+name will be folded to lower case.
+
+See the file PDF::Builder::Resource::CIDFont::CJKfont for the C<$alias> list
+of known names and what they map to. For instance, 'traditional' [Chinese, ROC]
+and 'ming' both map to 'adobemingstdlightacro'. 'simplified' [Chinese, PRC] 
+and 'song' both map to 'adobesongstdlightacro'. 'korean' [Hangul] and 'myungjo'
+both map to 'adobemyungjostdmediumacro'. 'japanese' and 'kozmin' [Kanji, etc.] 
+both map to 'kozminproregularacro'. 'kozgo' [Kanji, etc.] maps to 
+'kozgopromediumacro'.
+All five families have bold, italic, and bold-italic variants available.
+If you have other CJK files available (for both writer and readers), you might
+experiment with adding new aliases and new fonts.
 
 B<Examples:>
 
@@ -2120,8 +2142,13 @@ sub cjkfont {
 
 =item $font = $pdf->synfont($basefont)
 
-Returns a new synthetic font object. These are modifications to a core font,
-where the font may be replaced by a Type1 or Type3 PostScript font.
+Returns a new synthetic font object. These are modifications to a core font.
+Type1 and Type3 PostScript fonts, as well as TrueType and OpenType fonts, may
+work correctly in some situations (at least, with ASCII text), but some 
+problems have been noted, and this is still under investigation.
+
+At this point, it appears that only single byte encodings are permitted. UTF-8
+and other multibyte encodings are currently not correctly handled.
 
 B<Warning:> BaseEncoding is I<not> set by default for these fonts, so text 
 in the PDF isn't searchable (by the PDF reader) unless a ToUnicode CMap is 
@@ -2158,7 +2185,17 @@ Emboldening factor (0.1+, bold = 1, heavy = 2, ...)
 
 Additional character spacing in ems (0-1000)
 
+=item -caps
+
+0 for normal text, 1 for small caps. Note that not all lower case letters
+appear to have small caps equivalents defined for them. These include, but are
+not limited to, 'n U+0149, fi ligature U+FB01, fl ligature U+FB02, German eszet
+(sharp s) U+00DF, and doubtless others. In such cases, you may want to consider
+replacing these ligatures with separate characters: '+n, f+i, f+l, s+s, etc.
+
 =back
+
+Options may be combined.
 
 See also L<PDF::Builder::Resource::Font::SynFont>
 

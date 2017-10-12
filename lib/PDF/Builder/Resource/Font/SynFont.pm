@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.003'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.008'; # manually update whenever code is changed
 
 use Math::Trig;    # CAUTION: deg2rad(0) = deg2rad(360) = 0!
 use Unicode::UCD 'charinfo';
@@ -86,11 +86,13 @@ sub new
     my $space = $opts{'-space'} || '0';
     my $bold = ($opts{'-bold'} || 0)*10; # convert to em
 
-    $self->{' slant'} = $slant;
-    $self->{' oblique'} = $oblique;
-    $self->{' bold'} = $bold;
-    $self->{' boldmove'} = 0.001;
-    $self->{' space'} = $space;
+    # 5 elements apparently not used anywhere
+   #$self->{' slant'} = $slant;
+   #$self->{' oblique'} = $oblique;
+   #$self->{' bold'} = $bold;
+   #$self->{' boldmove'} = 0.001;
+   #$self->{' space'} = $space;
+    $font->encodeByName($opts{'-encode'}) if $opts{'-encode'};
 
     $class = ref $class if ref $class;
     $self = $class->SUPER::new($pdf,
@@ -143,9 +145,9 @@ sub new
     $self->{'Resources'} = PDFDict();
     $self->{'Resources'}->{'ProcSet'} = PDFArray(map { PDFName($_) } qw[ PDF Text ImageB ImageC ImageI ]);
     my $xo = PDFDict();
-    $self->{'Resources'}->{'Font'}=$xo;
+    $self->{'Resources'}->{'Font'} = $xo;
     $self->{'Resources'}->{'Font'}->{'FSN'} = $font;
-    foreach my $w ($first..$last) {
+    foreach my $w ($first .. $last) {
         $self->data()->{'char'}->[$w] = $font->glyphByEnc($w);
         $self->data()->{'uni'}->[$w] = uniByName($self->data()->{'char'}->[$w]);
         $self->data()->{'u2e'}->{$self->data()->{'uni'}->[$w]} = $w;
@@ -155,7 +157,7 @@ sub new
         $self->{'Encoding'} = PDFDict();
         $self->{'Encoding'}->{'Type'} = PDFName('Encoding');
         $self->{'Encoding'}->{'Differences'} = PDFArray();
-        foreach my $w ($first..$last) {
+        foreach my $w ($first .. $last) {
             if (defined $self->data()->{'char'}->[$w] && 
 		$self->data()->{'char'}->[$w] ne '.notdef') {
                 $self->{'Encoding'}->{'Differences'}->add_elements(PDFNum($w),PDFName($self->data()->{'char'}->[$w]));
@@ -166,20 +168,24 @@ sub new
     }
 
     my @widths = ();
-    foreach my $w ($first..$last) {
+    foreach my $w ($first .. $last) {
         if ($self->data()->{'char'}->[$w] eq '.notdef') {
             push @widths, $self->missingwidth();
             next;
         }
         my $char = PDFDict();
-        my $wth = int($font->width(chr($w)) * 1000 * $slant + 2 * $space);
+
+       #my $wth = int($font->width(chr($w)) * 1000 * $slant + 2 * $space);
+        my $uni = $self->data()->{'uni'}->[$w];
+	my $wth = int($font->width(chr($uni)) * 1000 * $slant + 2*$space);
+
         $procs->{$font->glyphByEnc($w)} = $char;
-        #$char->{'Filter'} = PDFArray(PDFName('FlateDecode'));
+       #$char->{'Filter'} = PDFArray(PDFName('FlateDecode'));
         $char->{' stream'} = $wth." 0 ".join(' ',map { int($_) } $self->fontbbox())." d1\n";
         $char->{' stream'} .= "BT\n";
         $char->{' stream'} .= join(' ', 1, 0, tan(deg2rad($oblique)), 1, 0, 0)." Tm\n" if $oblique;
         $char->{' stream'} .= "2 Tr ".($bold)." w\n" if $bold;
-        # my $ci = charinfo($self->data()->{'uni'}->[$w]);
+       #my $ci = charinfo($self->data()->{'uni'}->[$w]);
         my $ci = {};
   	if ($self->data()->{'uni'}->[$w] ne '') {
     	    $ci = charinfo($self->data()->{'uni'}->[$w]);
@@ -188,14 +194,22 @@ sub new
             $char->{' stream'} .= "/FSN 800 Tf\n";
             $char->{' stream'} .= ($slant * 110)." Tz\n";
             $char->{' stream'} .= " [ -$space ] TJ\n" if $space;
-            my $ch = $self->encByUni(hex($ci->{'upper'}));
-            $wth = int($font->width(chr($ch)) * 800 * $slant * 1.1 + 2* $space);
-            $char->{' stream'} .= $font->text(chr($ch));
+           #my $ch = $self->encByUni(hex($ci->{'upper'}));
+           #$wth = int($font->width(chr($ch)) * 800 * $slant * 1.1 + 2* $space);
+           #$char->{' stream'} .= $font->text(chr($ch));
+	    # uc chr($uni) supposed to be always equivalent to 
+	    # chr hex($ci->{'upper'}), according to "futuramedium"
+	    # HOWEVER, uc doesn't seem to know what to do with non-ASCII chars
+           #$wth = int($font->width(uc chr($uni)) * 800 * $slant * 1.1 + 2* $space);
+           #$char->{' stream'} .= $font->text(uc chr($uni));
+            $wth = int($font->width(chr(hex($ci->{'upper'}))) * 800 * $slant * 1.1 + 2* $space);
+            $char->{' stream'} .= $font->text(chr(hex($ci->{'upper'})));
         } else {
             $char->{' stream'} .= "/FSN 1000 Tf\n";
-            $char->{' stream'} .= ($slant * 100)." Tz\n" if $slant!=1;
+            $char->{' stream'} .= ($slant * 100)." Tz\n" if $slant != 1;
             $char->{' stream'} .= " [ -$space ] TJ\n" if $space;
-            $char->{' stream'} .= $font->text(chr($w));
+           #$char->{' stream'} .= $font->text(chr($w));
+            $char->{' stream'} .= $font->text(chr($uni));
         }
         $char->{' stream'} .= " Tj\nET\n";
         push @widths, $wth;
@@ -215,7 +229,7 @@ sub new
     $self->data()->{'n2e'} = {};
     $self->data()->{'n2u'} = {};
 
-    foreach my $n (reverse 0..255) {
+    foreach my $n (reverse 0 .. 255) {
         $self->data()->{'n2c'}->{$self->data()->{'char'}->[$n] || '.notdef'} = 
 	  $n unless defined $self->data()->{'n2c'}->{$self->data()->{'char'}->[$n] || '.notdef'};
         $self->data()->{'n2e'}->{$self->data()->{'e2n'}->[$n] || '.notdef'} =

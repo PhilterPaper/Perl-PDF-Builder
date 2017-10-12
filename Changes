@@ -1,7 +1,7 @@
 See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 
-3.008     2017-10-01  unreleased
+3.008     2017-10-11  unreleased
 
    examples/ShowFont.pl added to list out many font file glyphs.
      examples.bat, examples/README, examples/examples.output updated.
@@ -10,6 +10,15 @@ into PDF::Builder.
      method (thanks to "futuramedium"). Update test case into an example, and
      add to examples.bat, MANIFEST, examples/README, examples/examples.output,
      and (new) examples/055_outlines and examples/resources/samples_55.pdf.
+
+   lib/PDF/Builder.pm, lib/PDF/Builder/Resource/BaseFont.pm, 
+     lib/PDF/Builder/Resource/Font/SynFont.pm, examples/021_synfonts
+     [ref RT 120048] fixes for synthetic fonts (via "futuramedium"). Still a
+     work in progress, and ticket is still open.
+
+   lib/PDF/Builder.pm [ref RT 122393] further work on diagnosing reported
+     problem. Documented supported CJK names and aliases in Builder's POD for
+     synfont() method.
 
 3.007     2017-09-26
 
