@@ -85,6 +85,7 @@ sub new
     my $oblique = $opts{'-oblique'} || 0;
     my $space = $opts{'-space'} || '0';
     my $bold = ($opts{'-bold'} || 0)*10; # convert to em
+   #   -caps
 
     # 5 elements apparently not used anywhere
    #$self->{' slant'} = $slant;
@@ -92,16 +93,17 @@ sub new
    #$self->{' bold'} = $bold;
    #$self->{' boldmove'} = 0.001;
    #$self->{' space'} = $space;
-    $font->encodeByName($opts{'-encode'}) if $opts{'-encode'};
+    # only available in TT fonts. besides, multibyte encodings not supported
+   #$font->encodeByName($opts{'-encode'}) if $opts{'-encode'};
 
     $class = ref $class if ref $class;
     $self = $class->SUPER::new($pdf,
         pdfkey()
-        .'+'.($font->name())
+        .('+' . $font->name())
         .($opts{'-caps'} ? '+Caps' : '')
         .($opts{'-vname'} ? '+'.$opts{'-vname'} : '')
     );
-    $pdf->new_obj($self) unless($self->is_obj($pdf));
+    $pdf->new_obj($self) unless $self->is_obj($pdf);
     $self->{' font'} = $font;
     $self->{' data'} = {
         'type' => 'Type3',
