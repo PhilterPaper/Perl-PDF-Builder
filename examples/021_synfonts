@@ -7,7 +7,7 @@ use lib '../lib';
 use PDF::Builder;
 use PDF::Builder::Util;
 
-my $type = 3;  # 0 = full list of core fonts
+my $type = 0;  # 0 = full list of core fonts
                # 1 = single core font (for testing)
 	       # 2 = TTF font(s)
 	       # 3 = Type1 (PS) font(s)
