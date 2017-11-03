@@ -14,7 +14,9 @@ into PDF::Builder.
    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/BaseFont.pm, 
      lib/PDF/Builder/Resource/Font/SynFont.pm, examples/021_synfonts
      [ref RT 120048/#47] fixes for synthetic fonts (via "futuramedium"). Some 
-     items carried over to new issues #79 and #81, and this one closed.
+     items carried over to new issues #79 and #81, and this one closed. 
+     021_synfonts make cleaner selection of what to run (which font types,
+     which fonts within a type, which variants).
 
    lib/PDF/Builder.pm [ref RT 122393/#72] further work on diagnosing reported
      problem. If this was actually a PDF::API2/Builder problem at one time, and 
