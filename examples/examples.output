@@ -189,6 +189,11 @@ to see when the resulting PDFs are displayed.
    1 page two annotations, one open (R/W), one closed (R/O)
    you will be prompted by Reader to save changes (if wrote to open)
 
+041_annot_fileattach
+  041_annot_fileattach.pdf 
+   1 page six annotations, two small attached (embedded files) with a 
+   variety of icons.
+
 050_pagelabels
   050_pagelabels.pdf
    26 pages with a variety of thumbnail labels in Reader

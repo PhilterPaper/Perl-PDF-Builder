@@ -1,7 +1,7 @@
 See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 
-3.008     2017-11-03  unreleased
+3.008     2017-11-16  unreleased
 
    examples/ShowFont.pl added to list out many font file glyphs.
      examples.bat, examples/README, examples/examples.output updated.
@@ -22,6 +22,17 @@ into PDF::Builder.
      problem. If this was actually a PDF::API2/Builder problem at one time, and 
      not simply a corrupted local font issue, it has apparently been cleared 
      up. Documented supported CJK names and aliases in Builder's POD.
+
+   lib/PDF/Builder/Annotation.pm, examples/040_annotation, 
+     examples/041_annot_fileattach (new), examples/resources/pod2htmd.temp 
+     (new), examples/resources/sample.txt (new), MANIFEST, DEPRECATED, 
+     examples.bat, examples/README, examples/examples.output, t/annotate.t 
+     [ref RT 117942/#41] (thanks to Johan Vromans). 
+     Extensions to annotation methods plus new file attachment annotation code 
+     contributed by Johan. There are still some minor glitches in the behavior, 
+     including the "border" specification not working, so I'm leaving the issue 
+     open for now. The annotation pdfile() method has been deprecated and
+     replaced by pdffile().
 
 3.007     2017-09-26
 

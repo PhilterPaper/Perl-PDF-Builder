@@ -22,6 +22,8 @@ contrib/pdf-optimize.pl
 contrib/text2pdf.pl
 examples/resources/aptfrontview.jpg
 examples/resources/sample_55.pdf
+examples/resources/sample.txt
+examples/resources/pod2htmd.temp
 examples/011_open_update
 examples/012_pages
 examples/020_corefonts
@@ -39,6 +41,7 @@ examples/030_colorspecs
 examples/031_color_hsv
 examples/032_separation
 examples/040_annotation
+examples/041_annot_fileattach
 examples/050_pagelabels
 examples/055_outlines
 examples/060_transparency

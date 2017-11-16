@@ -22,6 +22,7 @@ perl examples\030_colorspecs
 perl examples\031_color_hsv
 perl examples\032_separation
 perl examples\040_annotation
+perl examples\041_annot_fileattach
 perl examples\050_pagelabels
 perl examples\055_outlines
 perl examples\060_transparency
