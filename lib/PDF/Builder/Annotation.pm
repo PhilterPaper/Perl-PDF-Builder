@@ -158,9 +158,9 @@ sub file {
     return $self;
 }
 
-=item $ant->pdffile($pdffile, $pagenum, %opts)
+=item $ant->pdf_file($pdffile, $pagenum, %opts)
 
-=item $ant->pdffile($pdffile, $pagenum)
+=item $ant->pdf_file($pdffile, $pagenum)
 
 Defines the annotation as a PDF-file with filepath C<$pdffile>, on page 
 C<$pagenum>, and options %opts (-rect, -border, I<fit> options).
@@ -173,10 +173,10 @@ removed at some time in the future.
 # to be removed no earlier than November 16, 2019
 sub pdfile {
     my ($self, $url, $pnum, %opts) = @_;
-    return $self->pdffile($url, $pnum, %opts);
+    return $self->pdf_file($url, $pnum, %opts);
 }
 
-sub pdffile {
+sub pdf_file {
     my ($self, $url, $pnum, %opts) = @_;
 
     $self->{'Subtype'} = PDFName('Link');
@@ -560,7 +560,7 @@ sub open {
 
 =item $ant->dest($page, I<fit_setting>)
 
-For certain annotation types (C<link> or C<pdffile>), the I<fit_setting> 
+For certain annotation types (C<link> or C<pdf_file>), the I<fit_setting> 
 specifies how the content of the page C<$page> is to be fit to the window,
 while preserving its aspect ratio. 
 These options are:

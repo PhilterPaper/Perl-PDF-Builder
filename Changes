@@ -32,7 +32,7 @@ into PDF::Builder.
      contributed by Johan. There are still some minor glitches in the behavior, 
      including the "border" specification not working, so I'm leaving the issue 
      open for now. The annotation pdfile() method has been deprecated and
-     replaced by pdffile().
+     replaced by pdf_file().
 
 3.007     2017-09-26
 

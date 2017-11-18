@@ -88,8 +88,8 @@ importpage    method in Builder.pm
    August, 2019.
 
 pdfile    method in Annotation.pm
-   This functionality was renamed to pdffile(). Simply rename any call to
-   "pdfile" to "pdffile". pdfile is scheduled to be removed on or after
+   This functionality was renamed to pdf_file(). Simply rename any call to
+   "pdfile" to "pdf_file". pdfile is scheduled to be removed on or after
    November, 2019.
 
 
