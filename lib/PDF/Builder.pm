@@ -5,7 +5,7 @@ no warnings qw[ deprecated recursion uninitialized ];
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
-our $VERSION = '3.007'; # VERSION
+# VERSION
 my $LAST_UPDATE = '3.008'; # manually update whenever code is changed
 
 use Carp;
@@ -31,6 +31,8 @@ use Scalar::Util qw(weaken);
 
 our @FontDirs = ( (map { "$_/PDF/Builder/fonts" } @INC),
                   qw[ /usr/share/fonts /usr/local/share/fonts c:/windows/fonts c:/winnt/fonts ] );
+our @MSG_COUNT = (0,  # Graphics::TIFF not installed
+	         );
 
 =head1 NAME
 
@@ -1853,8 +1855,7 @@ sub _findFont {
 
 =item $font = $pdf->corefont($fontname)
 
-Returns a new Adobe core font object. Note that C<$fontname> is just the
-font name itself, without any path or file extension.
+Returns a new Adobe core font object.
 
 Core fonts are limited to single byte encodings. You cannot use UTF-8 or other
 multibyte encodings with core fonts. The default encoding for the core fonts is
@@ -1925,8 +1926,7 @@ sub corefont {
 
 =item $font = $pdf->psfont($ps_file)
 
-Returns a new Adobe Type1 ("PostScript") font object. Note that C<$ps_file> is 
-a full path and file name, unlike with core fonts.
+Returns a new Adobe Type1 ("PostScript") font object.
 
 PS (T1) fonts are limited to single byte encodings. You cannot use UTF-8 or 
 other multibyte encodings with T1 fonts.
@@ -1987,11 +1987,6 @@ expected to be found on the machine with the PDF reader. Most PDF readers do
 not install T1 fonts, and it is up to the user of the PDF reader to install
 the needed fonts.
 
-Either an .afm I<or> a .pfm font metrics file is specified, but not both. 
-Either may be used with .pfa (ASCII) or .pfb (binary) glyph file. Supposedly, 
-there are glyph files that don't need a metrics file, but these seem to be
-quite rare.
-
 See also L<PDF::Builder::Resource::Font::Postscript>.
 
 =cut
@@ -2017,8 +2012,7 @@ sub psfont {
 
 =item $font = $pdf->ttfont($ttf_file)
 
-Returns a new TrueType (or OpenType) font object. Note that C<$ttf_file> is a
-full path and file name, unlike with core fonts.
+Returns a new TrueType (or OpenType) font object.
 
 B<Warning:> BaseEncoding is I<not> set by default for TrueType fonts, so B<text 
 in the PDF isn't searchable> (by the PDF reader) unless a ToUnicode CMap is 
@@ -2091,21 +2085,7 @@ sub ttfont {
 
 =item $font = $pdf->cjkfont($cjkname)
 
-Returns a new CJK font object. Note that C<$cjkname> may include hyphens and
-other punctuation for better readability (e.g., Song-Italic instead of 
-songitalic). This will be stripped out of the name, and capital letters in the 
-name will be folded to lower case.
-
-See the file PDF::Builder::Resource::CIDFont::CJKfont for the C<$alias> list
-of known names and what they map to. For instance, 'traditional' [Chinese, ROC]
-and 'ming' both map to 'adobemingstdlightacro'. 'simplified' [Chinese, PRC] 
-and 'song' both map to 'adobesongstdlightacro'. 'korean' [Hangul] and 'myungjo'
-both map to 'adobemyungjostdmediumacro'. 'japanese' and 'kozmin' [Kanji, etc.] 
-both map to 'kozminproregularacro'. 'kozgo' [Kanji, etc.] maps to 
-'kozgopromediumacro'.
-All five families have bold, italic, and bold-italic variants available.
-If you have other CJK files available (for both writer and readers), you might
-experiment with adding new aliases and new fonts.
+Returns a new CJK font object.
 
 B<Examples:>
 
@@ -2142,13 +2122,8 @@ sub cjkfont {
 
 =item $font = $pdf->synfont($basefont)
 
-Returns a new synthetic font object. These are modifications to a core font.
-Type1 and Type3 PostScript fonts, as well as TrueType and OpenType fonts, may
-work correctly in some situations (at least, with ASCII text), but some 
-problems have been noted, and this is still under investigation.
-
-At this point, it appears that only single byte encodings are permitted. UTF-8
-and other multibyte encodings are currently not correctly handled.
+Returns a new synthetic font object. These are modifications to a core font,
+where the font may be replaced by a Type1 or Type3 PostScript font.
 
 B<Warning:> BaseEncoding is I<not> set by default for these fonts, so text 
 in the PDF isn't searchable (by the PDF reader) unless a ToUnicode CMap is 
@@ -2194,8 +2169,6 @@ not limited to, 'n U+0149, fi ligature U+FB01, fl ligature U+FB02, German eszet
 replacing these ligatures with separate characters: '+n, f+i, f+l, s+s, etc.
 
 =back
-
-Options may be combined.
 
 See also L<PDF::Builder::Resource::Font::SynFont>
 
@@ -2298,20 +2271,97 @@ sub image_jpeg {
     return $obj;
 }
 
+=item $tiff = $pdf->image_tiff($file, %opts)
+
 =item $tiff = $pdf->image_tiff($file)
 
-Imports and returns a new TIFF image object.  C<$file> may be either a filename or a filehandle.
+Imports and returns a new TIFF image object. C<$file> may be either a filename or a filehandle.
+
+Note that the Graphics::TIFF support library does B<not> currently permit a 
+filehandle for C<$file>.
+
+PDF::Builder will use the Graphics::TIFF support library for TIFF functions, if
+it is available, unless explicitly told not to. Your code can test whether
+Graphics::TIFF is available by examining C<< $tiff->{'usesGT'}->val() >>.
+
+=over
+
+=item -1 
+
+Graphics::TIFF I<is> installed, but your code has specified C<-nouseGT>, to 
+I<not> use it. The old, pure Perl, code (buggy!) will be used instead, as if 
+Graphics::TIFF was not installed.
+
+=item 0
+
+Graphics::TIFF is I<not> installed. Not all systems are able to successfully
+install this package, as it requires libtiff.a.
+
+=item 1
+
+Graphics::TIFF is installed and is being used.
+
+=back
+
+Options:
+
+=over
+
+=item -nouseGT => 1
+
+Do B<not> use the Graphics::TIFF library, even if it's available. Normally
+you I<would> want to use this library, but there may be cases where you don't,
+such as when you want to use a file I<handle> instead of a file I<name>.
+
+=item -silent => 1
+
+Do not give the message that Graphics::TIFF is not B<installed>. This message
+will be given only once, but you may want to suppress it, such as during 
+t-tests.
+
+=back
 
 =cut
-
-# =item $tiff = $pdf->image_tiff($file, %options)   no current options
 
 sub image_tiff {
     my ($self, $file, %opts) = @_;
 
-    require PDF::Builder::Resource::XObject::Image::TIFF;
-    my $obj = PDF::Builder::Resource::XObject::Image::TIFF->new($self->{'pdf'}, $file);
-    $self->{'pdf'}->out_obj($self->{'pages'});
+    my ($rc, $obj);
+    $rc = eval {
+        require Graphics::TIFF;
+	1;
+    };
+    if (!defined $rc) { $rc = 0; }  # else is 1
+    if ($rc) {
+	# Graphics::TIFF available
+	if (defined $opts{'-nouseGT'} && $opts{'-nouseGT'} == 1) {
+	   $rc = -1;  # don't use it
+	}
+    }
+    if ($rc == 1) {
+	# Graphics::TIFF available and to be used
+        require PDF::Builder::Resource::XObject::Image::TIFF_GT;
+        $obj = PDF::Builder::Resource::XObject::Image::TIFF_GT->new($self->{'pdf'}, $file);
+        $self->{'pdf'}->out_obj($self->{'pages'});
+    } else {
+	# Graphics::TIFF not available, or is but is not to be used
+        require PDF::Builder::Resource::XObject::Image::TIFF;
+        $obj = PDF::Builder::Resource::XObject::Image::TIFF->new($self->{'pdf'}, $file);
+        $self->{'pdf'}->out_obj($self->{'pages'});
+
+	if ($rc == 0) {
+	    # TBD give warning message once, unless silenced (-silent) or
+	    # deliberately not using Graphics::TIFF (rc == -1)
+	    if ((!defined $opts{'-silent'} || $opts{'-silent'} == 0) &&
+	        $MSG_COUNT[0]++ == 0) {
+	        print STDERR "Your system does not have Graphics::TIFF installed, so some\nTIFF functions may not run correctly.\n";
+	    }
+	}
+    }
+    $obj->{'usesGT'} = PDFNum($rc);  # -1 available but unused
+                                     #  0 not available
+			             #  1 available and used
+				     # $tiff->{'usesGT'}->val() to get number
 
     return $obj;
 }

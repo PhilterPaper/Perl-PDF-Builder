@@ -135,12 +135,14 @@ lib/PDF/Builder/Resource/XObject/Form/QRCode/placeholder
 lib/PDF/Builder/Resource/XObject/Form/BarCode.pm
 lib/PDF/Builder/Resource/XObject/Form/Hybrid.pm
 lib/PDF/Builder/Resource/XObject/Image/TIFF/File.pm
+lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm
 lib/PDF/Builder/Resource/XObject/Image/GD.pm
 lib/PDF/Builder/Resource/XObject/Image/GIF.pm
 lib/PDF/Builder/Resource/XObject/Image/JPEG.pm
 lib/PDF/Builder/Resource/XObject/Image/PNG.pm
 lib/PDF/Builder/Resource/XObject/Image/PNM.pm
 lib/PDF/Builder/Resource/XObject/Image/TIFF.pm
+lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm
 lib/PDF/Builder/Resource/XObject/Form.pm
 lib/PDF/Builder/Resource/XObject/Image.pm
 lib/PDF/Builder/Resource/BaseFont.pm
