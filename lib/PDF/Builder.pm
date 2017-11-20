@@ -2282,7 +2282,7 @@ filehandle for C<$file>.
 
 PDF::Builder will use the Graphics::TIFF support library for TIFF functions, if
 it is available, unless explicitly told not to. Your code can test whether
-Graphics::TIFF is available by examining C<< $tiff->{'usesGT'}->val() >>.
+Graphics::TIFF is available by examining C<< $tiff->usesLib() >>.
 
 =over
 
@@ -2311,7 +2311,7 @@ Options:
 
 Do B<not> use the Graphics::TIFF library, even if it's available. Normally
 you I<would> want to use this library, but there may be cases where you don't,
-such as when you want to use a file I<handle> instead of a file I<name>.
+such as when you want to use a file I<handle> instead of a I<name>.
 
 =item -silent => 1
 
@@ -2349,19 +2349,19 @@ sub image_tiff {
         $obj = PDF::Builder::Resource::XObject::Image::TIFF->new($self->{'pdf'}, $file);
         $self->{'pdf'}->out_obj($self->{'pages'});
 
-	if ($rc == 0) {
+	if ($rc == 0 && $MSG_COUNT[0]++ == 0) {
 	    # TBD give warning message once, unless silenced (-silent) or
 	    # deliberately not using Graphics::TIFF (rc == -1)
-	    if ((!defined $opts{'-silent'} || $opts{'-silent'} == 0) &&
-	        $MSG_COUNT[0]++ == 0) {
+	    if (!defined $opts{'-silent'} || $opts{'-silent'} == 0) {
 	        print STDERR "Your system does not have Graphics::TIFF installed, so some\nTIFF functions may not run correctly.\n";
+		# even if -silent only once, COUNT still incremented
 	    }
 	}
     }
     $obj->{'usesGT'} = PDFNum($rc);  # -1 available but unused
                                      #  0 not available
 			             #  1 available and used
-				     # $tiff->{'usesGT'}->val() to get number
+				     # $tiff->usesLib() to get number
 
     return $obj;
 }

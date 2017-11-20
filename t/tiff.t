@@ -9,8 +9,9 @@ use PDF::Builder;
 
 my $pdf = PDF::Builder->new('-compress' => 'none');
 
+# -silent shuts off one-time warning for rest of run
 my $tiff = $pdf->image_tiff('t/resources/1x1.tif', -silent => 1);
-if ($tiff->{'usesGT'}->val() == 1) {
+if ($tiff->usesLib() == 1) {
     isa_ok($tiff, 'PDF::Builder::Resource::XObject::Image::TIFF_GT',
         q{$pdf->image_tiff(filename)});
 } else {
@@ -30,7 +31,7 @@ like($pdf->stringify(), qr/q 216 0 0 288 72 144 cm \S+ Do Q/,
 
 $pdf = PDF::Builder->new();
 open my $fh, '<', 't/resources/1x1.tif';
-$tiff = $pdf->image_tiff($fh, -nouseGT => 1, -silent => 1);
+$tiff = $pdf->image_tiff($fh, -nouseGT => 1);
 isa_ok($tiff, 'PDF::Builder::Resource::XObject::Image::TIFF',
     q{$pdf->image_tiff(filehandle)});
 
@@ -43,8 +44,8 @@ close $fh;
 
 $pdf = PDF::Builder->new('-compress' => 'none');
 
-my $lzw_tiff = $pdf->image_tiff('t/resources/1x1-lzw.tif', -silent => 1);
-if ($lzw_tiff->{'usesGT'}->val() == 1) {
+my $lzw_tiff = $pdf->image_tiff('t/resources/1x1-lzw.tif');
+if ($lzw_tiff->usesLib() == 1) {
     isa_ok($lzw_tiff, 'PDF::Builder::Resource::XObject::Image::TIFF_GT',
         q{$pdf->image_tiff(), LZW compression});
 } else {
@@ -61,7 +62,7 @@ like($pdf->stringify(), qr/q 216 0 0 432 72 360 cm \S+ Do Q/,
 # Missing file  1 test
 
 $pdf = PDF::Builder->new();
-eval { $pdf->image_tiff('t/resources/this.file.does.not.exist', -silent => 1) };
+eval { $pdf->image_tiff('t/resources/this.file.does.not.exist') };
 ok($@, q{Fail fast if the requested file doesn't exist});
 
 ##############################################################
@@ -101,7 +102,7 @@ $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page();
 $page->mediabox($width, $height);
 $gfx = $page->gfx();
-my $img = $pdf->image_tiff($tiff, -silent => 1);
+my $img = $pdf->image_tiff($tiff);
 $gfx->image($img, 0, 0, $width, $height);
 $pdf->save();
 $pdf->end();
@@ -123,7 +124,7 @@ $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page;
 $page->mediabox( $width, $height );
 $gfx = $page->gfx();
-my $img = $pdf->image_tiff($tiff, -silent => 1);
+my $img = $pdf->image_tiff($tiff);
 $gfx->image( $img, 0, 0, $width, $height );
 $pdf->save();
 $pdf->end();

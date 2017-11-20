@@ -33,6 +33,10 @@ PDF::Builder::Resource::XObject::Image::TIFF_GT - TIFF image support
 
 Returns a TIFF-image object.
 
+If the Graphics::TIFF package is installed, and its use is not suppressed via
+the C<-nouseGT> flag (see Builder documentation for C<image_tiff>), the TIFF_GT
+library will be used. Otherwise, the TIFF library will be used instead.
+
 =cut
 
 sub new {
@@ -58,6 +62,21 @@ sub new {
     $tif->close();
 
     return $self;
+}
+
+=item  $mode = $tif->usesLib()
+
+Returns 1 if Graphics::TIFF installed and used, 0 if not installed, or -1 if
+installed but not used (-nouseGT option given to C<image_tiff>).
+
+=back
+
+=cut
+
+sub usesLib {
+    my ($self) = shift;
+    # should be 1 for Graphics::TIFF is installed and used
+    return $self->{'usesGT'}->val();
 }
 
 sub handle_generic {

@@ -36,15 +36,14 @@ into PDF::Builder.
 
    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm (new),
      lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm (new), MANIFEST,
-     KNOWN_INCOMP, t/tiff.t [ref RT 118047/#42] (thanks to Jeffrey Ratcliffe).
+     KNOWN_INCOMP, t/tiff.t, lib/PDF/Builder/Resource/XObject/Image/TIFF.pm,
+     lib/PDF/Builder/Lite.pm [ref RT 118047/#42] (thanks to Jeffrey Ratcliffe).
      Use Jeffrey's Graphics::TIFF wrapper around libtiff.a to simplify and
      correct many bugs in TIFF support. As libtiff.a is not available on all
      systems, add this as an extension (_GT modules) and have Builder.pm
      select which one to use. This can be overridden (force old version) with
-     the -nouseGT option (see t/tiff.t). I'll leave the issue open until JR 
-     gives his blessing on the changes, as it's a bit different than his
-     proposed changes for 118047. It is not known yet whether this will also
-     fix issue 84665/#2, which also involves the TIFF library.
+     the -nouseGT option (see t/tiff.t). It is not known yet whether this will 
+     also fix issue 84665/#2, which also involves the TIFF library.
 
 3.007     2017-09-26
 
