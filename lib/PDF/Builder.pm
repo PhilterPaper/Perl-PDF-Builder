@@ -1133,14 +1133,14 @@ sub saveas {
 }
 
 sub save {
-    my ($self, $file) = @_;
+    my ($self) = @_;
 
     if ($self->{'reopened'}) {
-        die "invalid method invocation: use 'saveas' instead.";
+        die "Invalid method invocation: use 'saveas' instead of 'save'.";
     } elsif ($self->{' filed'}) {
         $self->{'pdf'}->close_file();
     } else {
-        die "invalid method invocation: use 'saveas' instead.";
+        die "Invalid method invocation: use 'saveas' instead of 'save'.";
     }
 
     $self->end();

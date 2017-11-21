@@ -81,8 +81,12 @@ sub readTags {
     if      ($self->{'filter'} == COMPRESSION_NONE) {
         delete $self->{'filter'};
     } elsif ($self->{'filter'} == COMPRESSION_CCITTFAX3 || $self->{'filter'} == COMPRESSION_CCITT_T4) {
+        $self->{'ccitt'} = $self->{'filter'};
         $self->{'filter'} = 'CCITTFaxDecode';
-        $self->{'ccitt'} = $self->{filter};
+   } elsif ($self->{'filter'} == COMPRESSION_CCITTFAX4 || $self->{'filter'} == COMPRESSION_CCITT_T6) {
+# G4 same code as G3? combine the two?
+        $self->{'ccitt'} = $self->{'filter'};
+        $self->{'filter'} = 'CCITTFaxDecode';
     } elsif ($self->{'filter'} == COMPRESSION_LZW) {
         $self->{'filter'} = 'LZWDecode';
     } elsif ($self->{'filter'} == COMPRESSION_OJPEG || $self->{'filter'} == COMPRESSION_JPEG) {
