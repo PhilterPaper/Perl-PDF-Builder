@@ -113,22 +113,22 @@ sub handle_ccitt {
     my ($i, $stripcount);
 
     $self->{' nofilt'} = 1;
-    $self->{'Filter'} = PDFName('CCITTFaxDecode');
-    $self->{'DecodeParms'} = PDFDict();
-    # DecodeParms.K -1 if G4 or there are G3 options with bit 0 set, 0 otherwise
-    $self->{'DecodeParms'}->{'K'} = (($tif->{'ccitt'} == 4 || (defined $tif->{'g3Options'} && $tif->{'g3Options'} & 0x1))? PDFNum(-1): PDFNum(0));
-    $self->{'DecodeParms'}->{'Columns'} = PDFNum($tif->{'imageWidth'});
-    $self->{'DecodeParms'}->{'Rows'} = PDFNum($tif->{'imageHeight'});
+    $self->{'Filter'} = PDFArray(PDFName('CCITTFaxDecode'));
+    my $decode = PDFDict();
+    $self->{'DecodeParms'} = PDFArray($decode);
+    # DecodeParms.K 0 if G3 or there are G3 options with bit 0 set, -1 for G4
+    $decode->{'K'} = (($tif->{'ccitt'} == 4 || (defined $tif->{'g3Options'} && $tif->{'g3Options'} & 0x1))? PDFNum(-1): PDFNum(0));
+    $decode->{'Columns'} = PDFNum($tif->{'imageWidth'});
+    $decode->{'Rows'} = PDFNum($tif->{'imageHeight'});
     # deprecated Blackls1 (incorrectly named). will be removed 8/2018 or later
     # it creates harmless extra entry /Blackls1 true
-    $self->{'DecodeParms'}->{'Blackls1'} = 
-    $self->{'DecodeParms'}->{'BlackIs1'} = PDFBool($tif->{'whiteIsZero'} == 1? 1: 0);
+    $decode->{'Blackls1'} = 
+    $decode->{'BlackIs1'} = PDFBool($tif->{'whiteIsZero'} == 1? 1: 0);
     if (defined($tif->{'g3Options'}) && ($tif->{'g3Options'} & 0x4)) {
-        $self->{'DecodeParms'}->{'EndOfLine'} = PDFBool(1);
-        $self->{'DecodeParms'}->{'EncodedByteAlign'} = PDFBool(1);
+        $decode->{'EndOfLine'} = PDFBool(1);
+        $decode->{'EncodedByteAlign'} = PDFBool(1);
     }
-    # $self->{'DecodeParms'} = PDFArray($self->{'DecodeParms'});
-    $self->{'DecodeParms'}->{'DamagedRowsBeforeError'} = PDFNum(100);
+    $decode->{'DamagedRowsBeforeError'} = PDFNum(100);
 
     if (ref($tif->{'imageOffset'})) {
         die "Chunked CCITT G3/G4 TIFF not supported.";

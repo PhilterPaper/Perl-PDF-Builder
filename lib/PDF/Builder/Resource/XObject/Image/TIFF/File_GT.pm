@@ -27,39 +27,6 @@ sub new {
     return $self;
 }
 
-sub readTag {
-    my $self = shift;
-
-    my $fh = $self->{'fh'};
-    my $buf;
-    $fh->read($buf, 12);
-    my $tag = unpack($self->{'short'}, substr($buf, 0, 2));
-    my $type = unpack($self->{'short'}, substr($buf, 2, 2));
-    my $count = unpack($self->{'long'}, substr($buf, 4, 4));
-    my $len = 0;
-
-    $len = ($type == 1? $count  : # byte
-            $type == 2? $count  : # char2
-            $type == 3? $count*2: # int16
-            $type == 4? $count*4: # int32
-            $type == 5? $count*8: # rational: 2 * int32
-            $count);
-
-    my $off = substr($buf, 8, 4);
-
-    if ($len > 4) {
-        $off = unpack($self->{'long'}, $off);
-    } else {
-        $off = ($type == 1? unpack($self->{'byte'},  $off):
-                $type == 2? unpack($self->{'long'},  $off):
-                $type == 3? unpack($self->{'short'}, $off):
-                $type == 4? unpack($self->{'long'},  $off):
-                unpack($self->{'short'}, $off) );
-    }
-
-    return ($tag, $type, $count, $len, $off);
-}
-
 sub close { ## no critic
     my $self = shift;
 
@@ -84,7 +51,7 @@ sub readTags {
         $self->{'ccitt'} = $self->{'filter'};
         $self->{'filter'} = 'CCITTFaxDecode';
    } elsif ($self->{'filter'} == COMPRESSION_CCITTFAX4 || $self->{'filter'} == COMPRESSION_CCITT_T6) {
-# G4 same code as G3? combine the two?
+        # G4 same code as G3
         $self->{'ccitt'} = $self->{'filter'};
         $self->{'filter'} = 'CCITTFaxDecode';
     } elsif ($self->{'filter'} == COMPRESSION_LZW) {

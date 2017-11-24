@@ -1,7 +1,7 @@
 See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 
-3.008     2017-11-16  unreleased
+3.008     2017-11-23  unreleased
 
    examples/ShowFont.pl added to list out many font file glyphs.
      examples.bat, examples/README, examples/examples.output updated.
@@ -42,8 +42,12 @@ into PDF::Builder.
      correct many bugs in TIFF support. As libtiff.a is not available on all
      systems, add this as an extension (_GT modules) and have Builder.pm
      select which one to use. This can be overridden (force old version) with
-     the -nouseGT option (see t/tiff.t). It is not known yet whether this will 
-     also fix issue 84665/#2, which also involves the TIFF library.
+     the -nouseGT option (see t/tiff.t).
+
+   lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm,
+     lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm,
+     lib/PDF/Builder/Basic/PDF/File.pm [ref RT 84665/#2] minor updates and 
+     fixes while working on TIFF G3/G4 compression bug.
 
 3.007     2017-09-26
 
