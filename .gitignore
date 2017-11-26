@@ -1,6 +1,7 @@
 # ignore any PDFs except t test resources
 *.pdf
 !/t/resources/*.pdf
+!/examples/resources/*.pdf
 # ignore WinMerge and ViM backups
 *.bak
 *~
