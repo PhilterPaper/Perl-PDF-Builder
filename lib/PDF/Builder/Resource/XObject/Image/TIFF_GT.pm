@@ -113,7 +113,6 @@ sub handle_ccitt {
     my ($self, $pdf, $tif) = @_;
     my ($i, $stripcount);
 
-### TBD #### consider fillOrder 1 (Msb2Lsb) and 2 (Lsb2Msb)
     $self->{' nofilt'} = 1;
     $self->{'Filter'} = PDFArray(PDFName('CCITTFaxDecode'));
     my $decode = PDFDict();
@@ -125,7 +124,8 @@ sub handle_ccitt {
     # deprecated Blackls1 (incorrectly named). will be removed 8/2018 or later
     # it creates harmless extra entry /Blackls1 true
     $decode->{'Blackls1'} = 
-    $decode->{'BlackIs1'} = PDFBool($tif->{'whiteIsZero'} == 1? 1: 0);
+    # not sure why whiteIsZero needs to be flipped around???
+    $decode->{'BlackIs1'} = PDFBool($tif->{'whiteIsZero'} == 0? 1: 0);
     $decode->{'DamagedRowsBeforeError'} = PDFNum(100);
 
     # g3Options       bit 0 = 0 for 1-Dimensional, = 1 for 2-Dimensional MR
@@ -147,6 +147,29 @@ sub handle_ccitt {
 	for $i (0 .. $stripcount - 1) {
             $self->{' stream'} .= $tif->{'object'}->ReadRawStrip($i, -1);
 	}
+        # if bit fill order in data is opposite of PDF spec (Lsb2Msb), need to 
+	# swap each byte end-for-end: x01->x80, x02->x40, x03->xC0, etc.
+	#
+	# a 256-entry lookup table could probably do just as well and build
+	# up the replacement string rather than constantly substr'ing.
+	if ($tif->{'fillOrder'} == 2) { # Lsb first, PDF is Msb
+	    my ($j, $oldByte, $newByte);
+	    for $j ( 0 .. length($self->{' stream'}) ) {
+	        # swapping j-th byte of stream
+		$oldByte = ord(substr($self->{' stream'}, $j, 1));
+		if ($oldByte eq 0 || $oldByte eq 255) { next; }
+		$newByte = 0;
+		if ($oldByte & 0x01) { $newByte |= 0x80; }
+		if ($oldByte & 0x02) { $newByte |= 0x40; }
+		if ($oldByte & 0x04) { $newByte |= 0x20; }
+		if ($oldByte & 0x08) { $newByte |= 0x10; }
+		if ($oldByte & 0x10) { $newByte |= 0x08; }
+		if ($oldByte & 0x20) { $newByte |= 0x04; }
+		if ($oldByte & 0x40) { $newByte |= 0x02; }
+		if ($oldByte & 0x80) { $newByte |= 0x01; }
+                substr($self->{' stream'}, $j, 1) = chr($newByte);
+	    }
+        }
     }
 
     return $self;

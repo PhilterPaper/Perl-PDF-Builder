@@ -119,9 +119,11 @@ sub readTags {
     if      ($self->{'colorSpace'} == PHOTOMETRIC_MINISWHITE) { # 0=WhiteIsZero
         $self->{'colorSpace'} = 'DeviceGray';
         $self->{'whiteIsZero'} = 1;
+        $self->{'blackIsZero'} = 0;
     } elsif ($self->{'colorSpace'} == PHOTOMETRIC_MINISBLACK) { # 1=BlackIsZero
         $self->{'colorSpace'} = 'DeviceGray';
         $self->{'blackIsZero'} = 1;
+        $self->{'whiteIsZero'} = 0;
     } elsif ($self->{'colorSpace'} == PHOTOMETRIC_RGB) { # 2=RGB in that order
         $self->{'colorSpace'} = 'DeviceRGB';
     } elsif ($self->{'colorSpace'} == PHOTOMETRIC_PALETTE) { # 3=palette index
