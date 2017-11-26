@@ -5,7 +5,7 @@ no warnings qw[ deprecated recursion uninitialized ];
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
-# VERSION
+$our $VERSION = '3.008'; # VERSION
 my $LAST_UPDATE = '3.008'; # manually update whenever code is changed
 
 use Carp;
@@ -1135,7 +1135,7 @@ sub saveas {
 sub save {
     my ($self) = @_;
 
-    if ($self->{'reopened'}) {
+    if      ($self->{'reopened'}) {
         die "Invalid method invocation: use 'saveas' instead of 'save'.";
     } elsif ($self->{' filed'}) {
         $self->{'pdf'}->close_file();

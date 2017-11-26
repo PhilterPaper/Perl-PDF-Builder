@@ -34,6 +34,7 @@ PDF::Builder::Resource::XObject::Image::TIFF_GT - TIFF image support
 Returns a TIFF-image object. C<$pdf> is the PDF object being added to, C<$file>
 is the input TIFF file, and the optional C<$name> of the new parent image object
 defaults to IxAAA.
+
 If the Graphics::TIFF package is installed, and its use is not suppressed via
 the C<-nouseGT> flag (see Builder documentation for C<image_tiff>), the TIFF_GT
 library will be used. Otherwise, the TIFF library will be used instead.
@@ -112,6 +113,7 @@ sub handle_ccitt {
     my ($self, $pdf, $tif) = @_;
     my ($i, $stripcount);
 
+### TBD #### consider fillOrder 1 (Msb2Lsb) and 2 (Lsb2Msb)
     $self->{' nofilt'} = 1;
     $self->{'Filter'} = PDFArray(PDFName('CCITTFaxDecode'));
     my $decode = PDFDict();
@@ -124,11 +126,19 @@ sub handle_ccitt {
     # it creates harmless extra entry /Blackls1 true
     $decode->{'Blackls1'} = 
     $decode->{'BlackIs1'} = PDFBool($tif->{'whiteIsZero'} == 1? 1: 0);
+    $decode->{'DamagedRowsBeforeError'} = PDFNum(100);
+
+    # g3Options       bit 0 = 0 for 1-Dimensional, = 1 for 2-Dimensional MR
+    #  aka T4Options  bit 1 = 0 (compressed data only)
+    #                 bit 2 = 0 non-byte-aligned EOLs, = 1 byte-aligned EOLs
+    # g4Options       bit 0 = 0 MMR 2-D compression
+    #  aka T6Options  bit 1 = 0 (compressed data only)
+    #  aka Group4Options
     if (defined($tif->{'g3Options'}) && ($tif->{'g3Options'} & 0x4)) {
         $decode->{'EndOfLine'} = PDFBool(1);
         $decode->{'EncodedByteAlign'} = PDFBool(1);
     }
-    $decode->{'DamagedRowsBeforeError'} = PDFNum(100);
+    # TBD currently nothing to look at for g4Options
 
     if (ref($tif->{'imageOffset'})) {
         die "Chunked CCITT G3/G4 TIFF not supported.";

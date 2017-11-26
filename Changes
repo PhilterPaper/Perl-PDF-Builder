@@ -30,9 +30,9 @@ into PDF::Builder.
      [ref RT 117942/#41] (thanks to Johan Vromans). 
      Extensions to annotation methods plus new file attachment annotation code 
      contributed by Johan. There are still some minor glitches in the behavior, 
-     including the "border" specification not working, so I'm leaving the issue 
-     open for now. The annotation pdfile() method has been deprecated and
-     replaced by pdf_file().
+     including the "border" specification not working, and inconsistent icon
+     size, so I'm leaving the issue open for now. Also, the annotation pdfile() 
+     method has been deprecated and replaced by pdf_file().
 
    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm (new),
      lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm (new), MANIFEST,
@@ -41,13 +41,15 @@ into PDF::Builder.
      Use Jeffrey's Graphics::TIFF wrapper around libtiff.a to simplify and
      correct many bugs in TIFF support. As libtiff.a is not available on all
      systems, add this as an extension (_GT modules) and have Builder.pm
-     select which one to use. This can be overridden (force old version) with
-     the -nouseGT option (see t/tiff.t).
+     select which one to use (preferably the new Graphics::TIFF-using version,
+     with fallback to the old pure Perl version, which has not been fixed). 
+     This can be overridden (force old version) with the -nouseGT option (see 
+     t/tiff.t).
 
    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm,
      lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm,
      lib/PDF/Builder/Basic/PDF/File.pm [ref RT 84665/#2] minor updates and 
-     fixes while working on TIFF G3/G4 compression bug.
+     fixes while working on TIFF G3/G4 compression bug (not yet resolved).
 
 3.007     2017-09-26
 
