@@ -11,7 +11,7 @@ use Graphics::TIFF ':all';  # already confirmed to be installed
 
 =head1 NAME
 
-PDF::Builder::Resource::XObject::Image::TIFF::File - support routines for TIFF image library (Graphics::TIFF enabled)
+PDF::Builder::Resource::XObject::Image::TIFF::File_GT - support routines for TIFF image library (Graphics::TIFF enabled)
 
 =cut
 
