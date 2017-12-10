@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.008'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 use Encode qw(:all);
 
@@ -337,6 +337,10 @@ just the file name.
 =back
 
 =cut
+
+# TBD it is possible to specify different files for DOS, Mac, Unix
+#     (see PDF 1.7 7.11.4.2). This might solve problem of different line
+#     ends, at the cost of 3 copies of each file.
 
 sub file_attachment {
     my ($self, $file, %opts) = @_;
