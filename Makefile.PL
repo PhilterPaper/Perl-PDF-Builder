@@ -38,8 +38,9 @@ my %WriteMakefileArgs =
  PREREQ_PM => {
     "Compress::Zlib" => 1.0,
     "Font::TTF" => 1.04,
-    #"Graphics::TIFF" => 0,    use if possible, but don't make mandatory
-    # found in CORE, so no need to explicitly list
+    # === "optional prerequisites", used if present, but not mandatory
+    #"Graphics::TIFF" => 0,
+    # === found in CORE, so no need to explicitly list
     #"utf8" => 0,
     #"File::Temp" => 0,
     #"File::Basename" => 0,
@@ -53,11 +54,23 @@ my %WriteMakefileArgs =
     #"POSIX" => 0
   },
 
-# META_MERGE => {
-#    resources => {
-#	homepage => "https://www.catskilltech.com",
-#    },
-# },
+  META_MERGE        => {
+
+    "meta-spec" => { version => 2 },
+
+    resources => {
+
+      homepage => "http://www.catskilltech.com",
+
+      repository => {
+          type => 'git',
+          url => 'git://github.com/PhilterPaper/Perl-PDF-Builder.git',
+          web => 'https://github.com/PhilterPaper/Perl-PDF-Builder',
+      },
+
+    },
+
+  },
 
 );
 
