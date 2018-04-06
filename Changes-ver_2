@@ -1,6 +1,8 @@
 Change log for PDF::API2 version 2.xxx (predecessor to PDF::Builder)
 
-2.034     2017-08-18 (unreleased)
+2.034     2018-04-02 (unreleased)
+
+    - Add support for cross-reference streams using 64-bit field widths.
 
     - Add additional author and license information to lib/PDF/API2.pm
 
