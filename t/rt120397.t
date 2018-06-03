@@ -1,3 +1,6 @@
+use warnings;
+use strict;
+
 use Test::More;
 
 use PDF::Builder::Basic::PDF::File;

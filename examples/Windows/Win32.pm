@@ -1,10 +1,10 @@
-package PDF::Builder::Win32;
+package PDF::Builder::Win32;  ## no critic
 
 use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.006'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 use Win32::TieRegistry qw( :KEY_ );  # creates $Registry, et al.
 

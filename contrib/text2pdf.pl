@@ -5,6 +5,9 @@
 # $Date: 2013/08/14 20:26:56 $
 # $RCSfile: text2pdf.pl,v $
 #
+# Revision: by Phil M Perry  June 2018
+#   make Perl::Critic happy over handling of bareword filehandles and loop
+#     iterator declarations
 # Revision: by Phil M Perry  March 2017
 #   cleanup: remove deprecated and commented-out old stuff
 #   diagnostic/debug print statements under "debug" control --debug
@@ -123,14 +126,12 @@ my $PGwidth;		# Physical sheet height in points.
 my ($left, $right, $top, $bottom);  # margins in points
 my ($LineStart, $LineBottom);
 my ($gfx, $txt, $gfx_border, $gfx_image);
-our ($pageNum,$filename);  # $file is unknown outside of foreach loop!
+our ($pageNum,$filename); 
 
 # other variables
 my @FILES;            	# list of input files, in case of glob
 my @INFILES;		# command line list of files and globs
-my $file;             	# Current file being converted
 my $destpath;           # destination path
-my $infile;		# Source file name
 my $outfile;          	# output path & file
 my $arg;              	# command line argument being processed
 my $help;               # Flag for displaying help
@@ -217,7 +218,7 @@ if ( defined($CLtabs) ) { @tabs = tabDef($CLtabs); }
 # Check for filename vs. filespec(glob) * or ?
 # build up final @FILES from @INFILES
 @FILES = ();
-foreach $infile (@INFILES) {
+foreach my $infile (@INFILES) {
 	if ( $infile =~ m/\*|\?/ ) {
 		# it's a glob that may expand to 1 or more files
 		my @globList = ();
@@ -320,7 +321,7 @@ if ($CLFontType eq "C" || $CLFontType eq "TT") {
 if ( $spacing > 720 ) { $spacing = 720;	}         # why would anyone want this much spacing?
 if ( $spacing < 1   ) { $spacing = 1; 	}         # That's awfully crammed together...
 
-foreach $file ( @FILES ) {
+foreach my $file ( @FILES ) {
   	print "Processing $file...\n";   # always output
 	$pageNum = 0; $filename = $file;
   	my ($name,$dir,$suf) = fileparse($file,qr/\.[^.]*/);
@@ -342,8 +343,8 @@ foreach $file ( @FILES ) {
 
 	print "Page Length data LineBottom $LineBottom - spacing $spacing - bottom $bottom \n" if $debug;
 	my $minSpace;
-	open (FILEIN,"$file") or die "$file - $!\n";
-	while(<FILEIN>) {
+	open ($FILEIN, '>', "$file") or die "$file - $!\n";
+	while(<$FILEIN>) {
 		# chomp is insufficient when dealing with EOL from different systems
     		# this little regex will make things a bit easier
     		s/(\r)|(\n)//g;
@@ -569,8 +570,8 @@ foreach $file ( @FILES ) {
 			}
 		}
 
-  	} # while(<FILEIN>)
-  	close(FILEIN);
+  	} # while(<$FILEIN>)
+  	close($FILEIN);
 	FinishObjects();
   	$pdf->save();
 	$pdf->end();

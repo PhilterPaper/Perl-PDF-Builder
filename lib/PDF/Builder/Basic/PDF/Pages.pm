@@ -18,7 +18,7 @@ no warnings qw[ deprecated recursion uninitialized ];
 use base 'PDF::Builder::Basic::PDF::Dict';
 
 # VERSION
-my $LAST_UPDATE = '3.004'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Array;
 use PDF::Builder::Basic::PDF::Dict;
@@ -68,14 +68,14 @@ sub new {
     weaken $_ for @{$self->{' outto'}};
     weaken $self->{'Parent'} if defined $parent;
 
-    $self;
+    return $self;
 }
 
 sub init {
     my ($self, $pdf) = @_;
     $self->{' outto'} = [$pdf];
     weaken $self->{' outto'}->[0] if defined $pdf;
-    $self;
+    return $self;
 }
 
 =head2 $p->out_obj($isnew)
@@ -103,7 +103,7 @@ sub out_obj {
             $_->out_obj($_->{'Root'});
         }
     }
-    $self;
+    return $self;
 }
 
 =head2 $p->find_page($pnum)
@@ -328,7 +328,7 @@ sub add_font {
     if (ref $rdict ne 'HASH' && $rdict->is_obj($pdf)) {
         $pdf->out_obj($rdict);
     }
-    $self;
+    return $self;
 } # end of add_font()
 
 =head2 $p->bbox($xmin,$ymin, $xmax,$ymax, [$param])
@@ -360,7 +360,7 @@ sub bbox {
         $inh->add_elements(PDFNum($e));
     }
     $self->{$str} = $inh;
-    $self;
+    return $self;
 }
 
 =head2 $p->proc_set(@entries)
@@ -394,7 +394,7 @@ sub proc_set {
     foreach my $e (@entries) { 
 	$self->{'Resources'}{'ProcSet'}->add_elements(PDFName($e)); 
     }
-    $self;
+    return $self;
 } # end of proc_set()
 
 sub empty {
@@ -407,7 +407,7 @@ sub empty {
         $self->{'Parent'} = $parent;
         weaken $self->{'Parent'};
     }
-    $self;
+    return $self;
 }
 
 sub dont_copy {

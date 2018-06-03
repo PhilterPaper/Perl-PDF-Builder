@@ -1,4 +1,6 @@
-#!perl
+use strict;
+use warnings;
+
 
 BEGIN {
   unless ($ENV{AUTHOR_TESTING}) {
@@ -7,9 +9,6 @@ BEGIN {
   }
 }
 
-
-use strict;
-use warnings;
 
 use Test::More;
 use English qw(-no_match_vars);

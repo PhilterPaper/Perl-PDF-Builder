@@ -47,7 +47,7 @@ my $to = 0x3FF;  # default end value for UTF-8 (-r)
 my $extra = "ShowFont";
 my $T1metrics = '';  # no default
 
-my ($f, $i,$j, $encode, $font, $page, $text);
+my ($f, $i,$j, $font, $page, $text);
 my $pdf = PDF::Builder->new(-compress => 'none');
 my $title_font = $pdf->corefont('Helvetica');
 my $grid_font = $pdf->corefont('Helvetica-Bold');
@@ -184,14 +184,14 @@ if ($T1metrics ne '') { print "T1 metrics file: $T1metrics\n"; }
 # loop through encodings. for all but UTF-8, range is 00-FF on one page.
 # for UTF-8, $from to $to, with max 256 entries per page (xxx00 through xxxFF)
 
-foreach $encode (@encode_list) {
+foreach my $encode (@encode_list) {
     # xxx0 through xxxF across 
     my @x_list = ( 95, 125, 155, 185, 215, 245, 275, 305, 
 	          335, 365, 395, 425, 455, 485, 515, 545);
     # xx0x through xxFx down
     my @y_list = (590, 565, 540, 515, 490, 465, 440, 415,
 	          390, 365, 340, 315, 290, 265, 240, 215);
-    my ($x,$y, $multibyte, $cur_font, @planes, $plane);
+    my ($multibyte, $cur_font, @planes, $plane);
     my ($page_start, $page_end, $num_pages, $cur_page);
 
     if ($encode =~ m/^utf/i || $encode =~ m/^ucs/i) {
@@ -241,8 +241,8 @@ foreach $encode (@encode_list) {
     # for planes 1+, check if any characters in it
     if ($plane > 0) {
       my $flag = 0; # no character found yet
-      foreach $y (0..15) {
-	foreach $x (0..15) {
+      foreach my $y (0..15) {
+	foreach my $x (0..15) {
 	  my $ci = $y*16 + $x; # 0..255 value
 	  if ($ci==32 || $ci==33) { next; } # always something there
 	  if (defined $planes[$plane]->uniByEnc($ci) && 

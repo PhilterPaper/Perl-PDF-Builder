@@ -1,4 +1,5 @@
-#!perl
+use warnings;
+use strict;
 
 BEGIN {
   unless ($ENV{AUTHOR_TESTING}) {

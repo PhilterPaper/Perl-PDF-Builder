@@ -5,8 +5,8 @@ no warnings qw[ deprecated recursion uninitialized ];
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
-our $VERSION = '3.009'; # VERSION
-my $LAST_UPDATE = '3.009'; # manually update whenever code is changed
+our $VERSION = '3.010'; # VERSION
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 use Carp;
 use Encode qw(:all);
@@ -1009,10 +1009,14 @@ sub pageLabel {
         $nums->add_elements(PDFNum($index));
 
         my $d = PDFDict();
-        $d->{'S'} = PDFName($opts->{'-style'} eq 'Roman' ? 'R' :
-                            $opts->{'-style'} eq 'roman' ? 'r' :
-                            $opts->{'-style'} eq 'Alpha' ? 'A' :
-                            $opts->{'-style'} eq 'alpha' ? 'a' : 'D');
+	if (defined $opts->{'-style'}) {
+            $d->{'S'} = PDFName($opts->{'-style'} eq 'Roman' ? 'R' :
+                                $opts->{'-style'} eq 'roman' ? 'r' :
+                                $opts->{'-style'} eq 'Alpha' ? 'A' :
+                                $opts->{'-style'} eq 'alpha' ? 'a' : 'D');
+	} else {
+	    $d->{'S'} = PDFName('D');
+	}
 
         if (defined $opts->{'-prefix'}) {
             $d->{'P'} = PDFStr($opts->{'-prefix'});
@@ -1172,7 +1176,7 @@ B<Example:>
 sub stringify {
     my $self = shift;
 
-    my $str;
+    my $str = '';
     if ((defined $self->{'reopened'}) and ($self->{'reopened'} == 1)) {
         $self->{'pdf'}->append_file();
         $str = ${$self->{'content_ref'}};
@@ -1917,7 +1921,7 @@ sub corefont {
     require PDF::Builder::Resource::Font::CoreFont;
     my $obj = PDF::Builder::Resource::Font::CoreFont->new($self->{'pdf'}, $name, %opts);
     $self->{'pdf'}->out_obj($self->{'pages'});
-    $obj->tounicodemap() if $opts{'-unicodemap'} == 1; # UTF-8 not usable
+    $obj->tounicodemap() if $opts{'-unicodemap'}; # UTF-8 not usable
 
     return $obj;
 }
@@ -2003,7 +2007,7 @@ sub psfont {
     my $obj = PDF::Builder::Resource::Font::Postscript->new($self->{'pdf'}, $psf, %opts);
 
     $self->{'pdf'}->out_obj($self->{'pages'});
-    $obj->tounicodemap() if $opts{'-unicodemap'} == 1; # UTF-8 not usable
+    $obj->tounicodemap() if $opts{'-unicodemap'}; # UTF-8 not usable
 
     return $obj;
 }
@@ -2113,7 +2117,7 @@ sub cjkfont {
     my $obj = PDF::Builder::Resource::CIDFont::CJKFont->new($self->{'pdf'}, $name, %opts);
 
     $self->{'pdf'}->out_obj($self->{'pages'});
-    $obj->tounicodemap() if $opts{'-unicodemap'} == 1;
+    $obj->tounicodemap() if $opts{'-unicodemap'};
 
     return $obj;
 }

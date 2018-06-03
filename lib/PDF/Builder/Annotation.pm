@@ -251,7 +251,8 @@ sub text {
     $self->{'T'} = PDFStr($opts{'-text'}) if exists $opts{'-text'};
 
     # Icon Name will be ignored if there is an AP.
-    my $icon = $opts{'-icon'} if exists $opts{'-icon'};
+    my $icon;  # perlcritic doesn't want 2 lines combined
+    $icon = $opts{'-icon'} if exists $opts{'-icon'};
     $self->{'Name'} = PDFName($icon) if $icon && !ref($icon); # icon name
     # Set the icon appearance
     $self->icon_appearance($icon, %opts) if $icon;
@@ -751,7 +752,8 @@ sub icon_appearance {
 
     return unless $self->{'Subtype'}->val() eq 'FileAttachment';
 
-    my @r = @{$opts{'-rect'}} if defined $opts{'-rect'};
+    my @r;  # perlcritic doesn't want 2 lines combined
+    @r = @{$opts{'-rect'}} if defined $opts{'-rect'};
     # number of parameters should be 4, checked above (rect method)
 
     # Handle custom icon type 'None' and icon reference.

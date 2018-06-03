@@ -28,7 +28,7 @@ my $LoremIpsum = qq|Sed ut perspici\x{0361}atis.|;  # times.ttf includes
 # "use utf8" says to interpret string as UTF-8
 my $encoding = 'latin1';
 
-my ($fn, $pdf, $f1, $f2, $gfx, $text, $x, $y, $yp, $page);
+my ($pdf, $f1, $f2, $gfx, $text, $y, $page);
 
 GetOptions(
     "encode|e=s" => \$encoding,
@@ -37,7 +37,7 @@ GetOptions(
 # loop through command line list of font file names
 die "Need at least one TTF file name on command line!\n" if !scalar(@ARGV);
 
-foreach $fn (@ARGV) {
+foreach my $fn (@ARGV) {
     if (!-r $fn) {
 	print "$fn cannot be read. Skipping...\n\n";
 	next;
@@ -82,11 +82,11 @@ foreach $fn (@ARGV) {
         my $u = $font->underlineposition*$fx/1000;
 
 	# loop through rows (yp growing from bottom)
-        foreach $yp (0..15) {
+        foreach my $yp (0..15) {
 	    $y = 15 - $yp; # grow y from top to bottom instead
             print STDERR ".";
 	    # loop through columns left to right
-            foreach $x (0..15) {
+            foreach my $x (0..15) {
                 $txt->translate(50+($sx*$x),50+($sy*$y));
 		my $ci = $yp*16 + $x;
 		my $c  = chr($ci);

@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.004'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 use Encode qw(:all);
 use Font::TTF::Font;
@@ -212,7 +212,7 @@ sub read_kern_table {
     my $fh = $font->{' INFILE'};
     my $data = undef;
 
-    return undef unless $font->{'kern'};
+    return (undef) unless $font->{'kern'};  # need () so critic happy
 
     my $buf = undef;
 

@@ -85,7 +85,7 @@ sub mediabox {
     } else {
         $self->{'api'}->mediabox($x1,$y1);
     }
-    $self;
+    return $self;
 }
 
 =item $pdf->saveas($file)

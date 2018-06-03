@@ -84,7 +84,7 @@ if (processCMD(@ARGV)) {
 #  shiftjis  UCS-2BE  UCS-2LE  UTF-16  UTF-16BE  UTF-16LE  UTF-32  UTF-32BE  
 #  UTF-32LE  UTF-7  utf-8-strict  utf8   and probably others
 
-my ($i, $base, $x, $y, $pdf, $fn, $fnM, $ec, $f1, $yp);
+my ($i, $base, $y, $pdf, $fn, $fnM, $f1);
 
 # should have same number of entries each in @gns, @mns, @ecs
 # loop through list of font names (glyph file names)
@@ -102,7 +102,7 @@ for ($i=0; $i<scalar @gns; $i++) {
     $base =~ s#\.pf[ab]$##i;
 
     # at least one page for each encoding 
-    foreach $ec (split / /, $ecs[$i]) {
+    foreach my $ec (split / /, $ecs[$i]) {
 	
         $pdf = PDF::Builder->new(-compress => $compress);
         $f1 = $pdf->corefont('Helvetica');  # for various labels
@@ -131,8 +131,8 @@ for ($i=0; $i<scalar @gns; $i++) {
 	    # for plane 1+ ($flight > 0) check if any characters in it
 	    if ($flight > 0) {
 		my $flag = 0; # no character found yet
-                foreach $yp (0..15) {
-                    foreach $x (0..15) {  
+                foreach my $yp (0..15) {
+                    foreach my $x (0..15) {  
 		        my $ci = $yp*16 + $x;  # 0..255 value
 			# always seems to be something at
 			# ci = 32 (U=0020, space)
@@ -173,10 +173,10 @@ for ($i=0; $i<scalar @gns; $i++) {
 
 	    # draw grid of characters and information
 	    # yp character row value (0..F T to B)
-            foreach $yp (0..15) {
+            foreach my $yp (0..15) {
 		$y = 15 - $yp;  # y vertical (row) position T to B
                 print STDERR ".";
-                foreach $x (0..15) {  # x horizontal (column) position L to R
+                foreach my $x (0..15) {  # x horizontal (column) position L to R
                     $txt->translate($gLLx+($sx*$x),$gLLy+($sy*$y));
 		    my $ci = $yp*16 + $x;  # 0..255 value
 		    my $c  = chr($ci);

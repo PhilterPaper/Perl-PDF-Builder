@@ -17,7 +17,7 @@ my $sx = 33;
 my $sy = 45;
 my $fx = 20;
 
-my ($fn, $pdf, $f1, $gfx, $text, $page);
+my ($pdf, $f1, $gfx, $text, $page);
 # font name list
 my @fontnames = qw[ Ming Ming-Bold Ming-Italic Ming-BoldItalic
     Song Song-Bold Song-Italic Song-BoldItalic
@@ -25,7 +25,7 @@ my @fontnames = qw[ Ming Ming-Bold Ming-Italic Ming-BoldItalic
     KozMin KozMin-Bold KozMin-Italic KozMin-BoldItalic
     KozGo KozGo-Bold KozGo-Italic KozGo-BoldItalic ];
 
-foreach $fn (@fontnames) {
+foreach my $fn (@fontnames) {
    #if ($fn eq 'Ming-Bold') { last; } # for testing
 
     $pdf = PDF::Builder->new(-compress => $compress, -file => "$0.$fn.pdf");

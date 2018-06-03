@@ -6,7 +6,7 @@ use strict;
 no warnings qw( deprecated recursion uninitialized );
 
 # VERSION
-my $LAST_UPDATE = '3.003'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 use Carp;
 use Compress::Zlib qw();
@@ -94,7 +94,7 @@ sub outobjdeep {
         $self->{" $k"} = undef;
         delete($self->{" $k"});
     }
-    if ($self->{'-docompress'} == 1 && $self->{'Filter'}) {
+    if ($self->{'-docompress'} && $self->{'Filter'}) {
         $self->{' stream'} = Compress::Zlib::compress($self->{' stream'});
         $self->{' nofilt'} = 1;
         delete $self->{'-docompress'};
@@ -1262,6 +1262,12 @@ sub spline {
 
 =item $content->bogen($x1,$y1, $x2,$y2, $radius, $move, $larger, $reverse)
 
+=item $content->bogen($x1,$y1, $x2,$y2, $radius, $move, $larger)
+
+=item $content->bogen($x1,$y1, $x2,$y2, $radius, $move)
+
+=item $content->bogen($x1,$y1, $x2,$y2, $radius)
+
 (German for I<bow>, as in a segment (arc) of a circle. This is a segment
 of a circle defined by the intersection of two circles of a given radius, 
 with the two intersection points as inputs. There are four possible resulting
@@ -1272,19 +1278,21 @@ between C<[$x1,$y1]> to C<[$x2,$y2]>. The current position is then set
 to the endpoint of the arc (C<[$x2,$y2]>).
 
 Set C<$move> to a I<true> value if this arc is the beginning of a new
-path instead of the continuation of an existing path. Note that this 
+path instead of the continuation of an existing path. Note that the default 
 (C<$move> = I<false>) is
 I<not> a straight line to I<P1> and then the arc, but a blending into the curve
 from the current point. It will often I<not> pass through I<P1>!
 
 Set C<$larger> to a I<true> value to draw the larger ("outer") arc between the 
 two points, instead of the smaller one. Both arcs are
-drawn I<clockwise> from I<P1> to I<P2>.
+drawn I<clockwise> from I<P1> to I<P2>. The default value of I<false> draws
+the smaller arc.
 
 Set C<$reverse> to a I<true> value to draw the mirror image of the
 specified arc (flip it over, so that its center point is on the other
 side of the line connecting the two points). Both arcs are drawn
-I<counter-clockwise> from I<P1> to I<P2>.
+I<counter-clockwise> from I<P1> to I<P2>. The default (I<false>) draws 
+clockwise arcs.
 
 The C<$radius> value cannot be smaller than B<half> the distance from 
 C<[$x1,$y1]> to C<[$x2,$y2]>. If it is too small, the radius will be set to
@@ -1305,6 +1313,9 @@ sub bogen {
     if ($r <= 0.0) {
         die "bogen requires a positive radius";
     }
+    $move = 0 if !defined $move;
+    $larc = 0 if !defined $larc;
+    $spf  = 0 if !defined $spf;
 
     $dx = $x2 - $x1;
     $dy = $y2 - $y1;
@@ -2148,7 +2159,7 @@ Sets the font and font size.
 sub _font {
     my ($font, $size) = @_;
 
-    if ($font->isvirtual() == 1) {
+    if ($font->isvirtual()) {
         return '/'.$font->fontlist()->[0]->name().' '.float($size).' Tf';
     } else {
         return '/'.$font->name().' '.float($size).' Tf';
@@ -2175,7 +2186,7 @@ sub _fontset {
     $self->{' fontsize'} = $size;
     $self->{' fontset'} = 0;
 
-    if ($font->isvirtual() == 1) {
+    if ($font->isvirtual()) {
         foreach my $f (@{$font->fontlist()}) {
             $self->resource('Font', $f->name(), $f);
         }
@@ -2366,12 +2377,12 @@ horizontal space a text string will take up.
 sub advancewidth {
     my ($self, $text, %opts) = @_;
 
-    my ($k, $glyph_width, $num_space, $num_char, $word_spaces,
+    my ($glyph_width, $num_space, $num_char, $word_spaces,
 	$char_spaces, $advance);
 
     return 0 unless defined($text) and length($text);
     # fill %opts from current settings unless explicitly given
-    foreach $k (qw[ font fontsize wordspace charspace hscale]) {
+    foreach my $k (qw[ font fontsize wordspace charspace hscale]) {
         $opts{$k} = $self->{" $k"} unless defined $opts{$k};
     }
     # any other options given are ignored
@@ -2648,7 +2659,7 @@ sub add {
 sub _in_text_object {
     my ($self) = shift;
 
-    return defined($self->{' apiistext'}) && $self->{' apiistext'} == 1;
+    return defined($self->{' apiistext'}) && $self->{' apiistext'};
 }
 
 =item $content->compressFlate()

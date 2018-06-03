@@ -1,8 +1,8 @@
-use Test::More tests => 2;
-my $test_count = 2;
-
 use warnings;
 use strict;
+
+use Test::More tests => 2;
+my $test_count = 2;
 
 use PDF::Builder;
 
