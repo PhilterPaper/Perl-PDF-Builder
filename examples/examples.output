@@ -160,6 +160,8 @@ to see when the resulting PDFs are displayed.
 024_bdffonts  codec.bdf  (sample input)   BUGGY!
   024_pdffonts.codec.pdf
    190 pages 1 bitmapped char each, 1 page 16x16 char grid
+   appears to be Latin-1 character set, characters 32 (space) through 255 (y-umlaut)
+   eventually will get around to putting in a proper one-page grid (currently filled blocks)
 
 025_unifonts
  (fails with error messages about a bad UTF-8 character)
