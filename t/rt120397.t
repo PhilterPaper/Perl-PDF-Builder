@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 use warnings;
 use strict;
 
@@ -88,3 +89,5 @@ is($remainder, '(string)',
    q{Remainder doesn't get lost});
 
 done_testing();
+
+1;

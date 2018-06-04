@@ -1,7 +1,8 @@
-use Test::More tests => 70;
-
+#!/usr/bin/perl
 use warnings;
 use strict;
+
+use Test::More tests => 70;
 
 use PDF::Builder;
 
@@ -674,3 +675,5 @@ $gfx = $pdf->page->gfx();
 
 $gfx->nl(300);
 like($pdf->stringify, qr/T\* \[-3000\] TJ/, q{nl(300)});
+
+1;

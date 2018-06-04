@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 use warnings;
 use strict;
 
@@ -9,3 +10,5 @@ my $pdf = PDF::Builder->open('t/resources/sample.pdf');
 
 ok($pdf->stringify(),
    q{open() followed by saveas() doesn't crash});
+
+1;

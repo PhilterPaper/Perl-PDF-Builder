@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 use warnings;
 use strict;
 
@@ -30,3 +31,5 @@ SKIP: {
     like($font->{'Name'}->val(), qr/^\w+\+De/,
          q{Font has the expected name});
 }
+
+1;

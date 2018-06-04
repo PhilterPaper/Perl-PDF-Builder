@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 use warnings;
 use strict;
 
@@ -27,3 +28,5 @@ SKIP: {
 	 q{Font has the expected name});
 
 }
+
+1;

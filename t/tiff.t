@@ -1,7 +1,8 @@
-use Test::More tests => 11;
-
+#!/usr/bin/perl
 use warnings;
 use strict;
+
+use Test::More tests => 11;
 
 use PDF::Builder;
 
@@ -141,3 +142,5 @@ is($example, $expected, 'lzw (converted to flate)');
 unlink $pdfout, $tiff;
 
 ##############################################################
+
+1;
