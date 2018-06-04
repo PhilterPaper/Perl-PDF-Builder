@@ -343,7 +343,7 @@ foreach my $file ( @FILES ) {
 
 	print "Page Length data LineBottom $LineBottom - spacing $spacing - bottom $bottom \n" if $debug;
 	my $minSpace;
-	open ($FILEIN, '>', "$file") or die "$file - $!\n";
+	open (my $FILEIN, '<', "$file") or die "$file - $!\n"; ## no critic (RequireBriefOpen)
 	while(<$FILEIN>) {
 		# chomp is insufficient when dealing with EOL from different systems
     		# this little regex will make things a bit easier
@@ -497,8 +497,8 @@ foreach my $file ( @FILES ) {
 
 					# need to expand @tabs on new longest line?
 					# $i+1 is character column
-					while ($i+1 >= $tabs[$#tabs]) {
-						$tabs[1+$#tabs] = $tabs[$#tabs] + ($tabs[$#tabs]-$tabs[$#tabs-1]);
+					while ($i+1 >= $tabs[-1]) {
+						$tabs[1+$#tabs] = $tabs[-1] + ($tabs[-1]-$tabs[-2]);
 					}
 
 					if (substr($_, $i, 1) eq "\x09") {
@@ -637,10 +637,12 @@ sub newpage {
 	}
 	# body text font
 	$txt->font($font,$fontsize);
-}
+	return;
+} # end of newpage()
 
 sub FinishObjects {
 	$pdf->finishobjects($page,$gfx);
+	return;
 }
 
 sub setfonts {
@@ -656,6 +658,7 @@ sub setfonts {
 	$hdrftr = $pdf->corefont("Helvetica-Bold", -encode => 'latin1');
 	# for continuation line
 	$contline = $pdf->corefont("ZapfDingbats", -encode => 'latin1');
+	return;
 }
 
 # given a tab definition string such as '9 17', expand it into an array
@@ -673,10 +676,7 @@ sub tabDef {
 }
 
 sub usage {
-	print "\nUsage:\n\n";
-        print $0, " ";
-	print "\[options\] \<source file name or pattern\>...\n";
-	print << 'END_OF_USAGE'
+	my $message = <<"END_OF_USAGE";
 
 Options:
 
@@ -759,6 +759,11 @@ Options:
   Also, many thanks to the PDF::API2 community for such great ideas.
 
 END_OF_USAGE
+	print "\nUsage:\n\n";
+        print $0, " ";
+	print "\[options\] \<source file name or pattern\>...\n";
+	print $message;
+  return;
 }
 
 __END__

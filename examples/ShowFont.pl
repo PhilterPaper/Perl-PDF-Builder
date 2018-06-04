@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # list a font file's contents
 # outputs ShowFont.<type>.<fontname>.pdf
 # run without arguments to get help listing
@@ -7,7 +8,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.008'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 use PDF::Builder;
 use Encode;
@@ -327,13 +328,7 @@ $pdf->end();
 
 sub usage {
 
-  print "\nLoaded encodings:\n";
-   foreach (@list) { print $_."  "; }
-  print "\n\nAll encodings:\n";
-   foreach (@list_all) { print $_."  "; }
-  print "\n";
-
-  print << 'EOF'
+  my $message = <<"EOF"
 
 Usage:
 
@@ -372,6 +367,13 @@ Options:
     file that supplies metrics for the .pfa or .pfb glyph file.
 
 EOF
+  print "\nLoaded encodings:\n";
+   foreach (@list) { print $_."  "; }
+  print "\n\nAll encodings:\n";
+   foreach (@list_all) { print $_."  "; }
+  print "\n$message";
+
+  return;
 }
 
 sub newpage {
@@ -380,4 +382,5 @@ sub newpage {
     $page->mediabox('universal');
     $text = $page->text();
 #print "=== newpage. text=$text\n";
+    return;
 }

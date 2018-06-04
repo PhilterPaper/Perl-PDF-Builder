@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # exercise Content.pm as much as possible
 # outputs Content.pdf
 # author: Phil M Perry
@@ -6,7 +7,7 @@ use warnings;
 use strict;
 
 # VERSION
-my $LAST_UPDATE = '3.003'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 use Math::Trig;
 use List::Util qw(min max);
@@ -2231,6 +2232,7 @@ sub colors {
   $grfx->fillcolor($color);
   $text->strokecolor($color);
   $text->fillcolor($color);
+  return;
 }
 
 # ---------------------------------------
@@ -2255,6 +2257,7 @@ sub greenLine {
     $grfx->poly($points[$i],$points[$i+1], $points[$i],$points[$i+1]);
   }
   $grfx->stroke();
+  return;
 }
 
 # ---------------------------------------
@@ -2269,6 +2272,7 @@ sub nextPage {
   $text->font($font, 10);
   $text->fillcolor('black');
   $text->text_center($pageNo); # prefill page number before any other content
+  return;
 }
 
 # ---------------------------------------
@@ -2287,6 +2291,7 @@ sub makeCell {
  #$text->linewidth(1);
  #$text->rect($cellLocX,$cellLocY, $cellSizeW,$cellSizeH);
  #$text->clip(1);
+  return;
 }
 
 # ---------------------------------------
@@ -2315,7 +2320,7 @@ sub drawAxes {
   	      $axisOffset[0]+0+0, $axisOffset[1]+75+0, 
  	      $axisOffset[0]+0+2, $axisOffset[1]+75-2);
   $grfx->stroke();
-
+  return;
 }
 
 # ---------------------------------------
@@ -2342,7 +2347,7 @@ sub drawLabels {
   # Y axis label
   $text->distance(-75-2+0-4, 0+3+75+2);
   $text->text($Ylabel);
-
+  return;
 }
 
 # ---------------------------------------
@@ -2363,11 +2368,14 @@ sub drawCaption {
     $width = max($width, $text->advancewidth($_));
   }
 
-  for ($i=0, $y=20; $i<@captions; $i++, $y+=13) {
+  $y=20;  # to shut up perlcritic
+  for ($i=0; $i<@captions; $i++) {
+    $y+=13;  # to mollify perlcritic
     # $just = LC
     $text->translate($cellLoc[0]+$cellSize[0]/2-$width/2, $cellLoc[1]-$y);
     $text->text($captions[$i]);
   }
+  return;
 }
 
 # ---------------------------------------
