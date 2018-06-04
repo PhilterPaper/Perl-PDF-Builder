@@ -2370,10 +2370,10 @@ sub drawCaption {
 
   $y=20;  # to shut up perlcritic
   for ($i=0; $i<@captions; $i++) {
-    $y+=13;  # to mollify perlcritic
     # $just = LC
     $text->translate($cellLoc[0]+$cellSize[0]/2-$width/2, $cellLoc[1]-$y);
     $text->text($captions[$i]);
+    $y+=13;  # to mollify perlcritic
   }
   return;
 }

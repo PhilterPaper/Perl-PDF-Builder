@@ -1522,10 +1522,10 @@ sub drawCaption {
 
   $y=20; # shut up perlcritic
   for ($i=0; $i<@captions; $i++) {
-    $y+=13; # shut up perlcritic
     # $just = LC
     $text->translate($cellLoc[0]+$cellSize[0]/2-$width/2, $cellLoc[1]-$y);
     $text->text($captions[$i]);
+    $y+=13; # shut up perlcritic
   }
   return;
 }

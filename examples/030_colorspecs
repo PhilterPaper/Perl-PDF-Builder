@@ -168,8 +168,8 @@ foreach my $base ('gray', 'grey') {
     # have $start and $end indices in @cols. rewrite them
     $j=0; # so perlcritic won't moan about comma expressions in for!
     for ($i=$start; $i<=$end; $i++) {
-	$j++; # to mollify perlcritic
 	$cols[$i] = $base.$j;
+	$j++; # to mollify perlcritic
     }
 }
 

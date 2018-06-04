@@ -328,7 +328,7 @@ $pdf->end();
 
 sub usage {
 
-  my $message = <<"EOF"
+  my $message = <<"EOF";
 
 Usage:
 
