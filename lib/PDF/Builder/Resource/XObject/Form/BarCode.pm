@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.004'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 use PDF::Builder::Util;
 use PDF::Builder::Basic::PDF::Utils;
@@ -162,6 +162,7 @@ sub drawbar {
     $self->{' w'} = $x;
     $self->{' h'} = 2 * $self->{' quzn'} + $self->{' lmzn'} + $self->{' zone'} + $self->{' umzn'};
     $self->bbox(0, 0, $self->{' w'}, $self->{' h'});
+    return;
 }
 
 =item $width = $barcode->width()

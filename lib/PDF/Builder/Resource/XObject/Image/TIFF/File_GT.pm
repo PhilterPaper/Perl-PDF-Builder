@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.008'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 use IO::File;
 use Graphics::TIFF ':all';  # already confirmed to be installed

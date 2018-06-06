@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.004'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 use POSIX qw(ceil floor);
 
@@ -37,7 +37,7 @@ sub new {
         -Bufsize => 32768,
     );
     $self->{'infilt'} = Compress::Zlib::inflateInit();
-    bless $self, $class;
+    return bless $self, $class;
 }
 
 sub outfilt {
@@ -47,7 +47,7 @@ sub outfilt {
 
     $res = $self->{'outfilt'}->deflate($str);
     $res .= $self->{'outfilt'}->flush() if $isend;
-    $res;
+    return $res;
 }
 
 sub infilt {

@@ -99,7 +99,7 @@ sub outobjdeep {
         $self->{' nofilt'} = 1;
         delete $self->{'-docompress'};
     }
-    $self->SUPER::outobjdeep(@_);
+    return $self->SUPER::outobjdeep(@_);
 }
 
 =head2 Coordinate Transformations
@@ -2493,6 +2493,7 @@ sub _text_underline {
         $self->add_post(_restore());
         $pos++;
     }
+    return;
 }
 
 sub text {

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '2.029'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -63,6 +63,7 @@ sub _generate {
         print "    '$key' => '$n2u{$key}',\n";
     }
     print "};\n\n";
+    return;
 }
 
 # pasted in whenever update needed. approximately 9716 entries.

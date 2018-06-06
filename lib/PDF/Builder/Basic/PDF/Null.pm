@@ -18,7 +18,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.004'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -62,6 +62,7 @@ sub outobjdeep {
     my ($self, $fh, $pdf) = @_;
 
     $fh->print('null');
+    return;
 }
 
 =head2 $s->is_obj()

@@ -48,7 +48,7 @@ sub outobjdeep {
         $self->{" $k"} = undef;
         delete($self->{" $k"});
     }
-    $self->SUPER::outobjdeep(@opts);
+    return $self->SUPER::outobjdeep(@opts);
 }
 
 # ============== start of annotation types =======================

@@ -18,7 +18,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.004'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -59,6 +59,7 @@ sub outobjdeep {
         $fh->print(' ');
     }
     $fh->print(']');
+    return;
 }
 
 =head2 $a->removeobj($elem)
@@ -70,7 +71,8 @@ Removes all occurrences of an element from an array.
 sub removeobj {
     my ($self, $elem) = @_;
 
-    $self->{' val'} = [grep($_ ne $elem, @{$self->{' val'}})];
+    $self->{' val'} = [grep($_ ne $elem, @{$self->{' val'}})];  ## no critic
+    return $self;
 }
 
 =head2 $a->elementsof()

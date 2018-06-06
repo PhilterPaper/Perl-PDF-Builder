@@ -18,7 +18,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '2.031'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 our $mincache = 16 * 1024 * 1024;
 
@@ -104,6 +104,7 @@ sub filter {
         @filters = map { ref($_)? $_: PDF::Builder::Basic::PDF::Name->new($_) } @filters;
         $self->{'Filter'} = PDF::Builder::Basic::PDF::Array->new(@filters);
     # }
+    return $self->{'Filter'};
 }
 
 # Undocumented alias, which may be removed in a future release
@@ -226,6 +227,7 @@ sub outobjdeep {
 
         $fh->print("\nendstream"); # next is endobj which has the final cr
     }
+    return;
 }
 
 =head2 $d->read_stream($force_memory)

@@ -259,7 +259,7 @@ sub fixcontents {
     if (ref($self->{'Contents'}) !~ /Array$/) {
         $self->{'Contents'} = PDFArray($self->{'Contents'});
     }
-   #return;
+    return;
 }
 
 sub content {
@@ -287,7 +287,7 @@ sub addcontent {
 
     $self->fixcontents();
     $self->{'Contents'}->add_elements(@objs);
-   #return;
+    return;
 }
 
 sub precontent {
@@ -295,7 +295,7 @@ sub precontent {
 
     $self->fixcontents();
     unshift(@{$self->{'Contents'}->val()}, @objs);
-   #return;
+    return;
 }
 
 =item $gfx = $page->gfx($prepend)
