@@ -8,6 +8,7 @@ no warnings qw[ recursion uninitialized ];
 # VERSION
 my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
+use Carp;
 use Encode qw(:all);
 use Font::TTF::Font;
 use POSIX qw(ceil floor);
@@ -313,7 +314,7 @@ sub new {
 
     my $data = {};
 
-    die "cannot find font '$file' ..." unless -f $file;
+    confess "cannot find font '$file'" unless -f $file;
     my $font = Font::TTF::Font->open($file);
     $data->{'obj'} = $font;
 
