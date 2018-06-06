@@ -19,7 +19,9 @@ use List::Util qw(min max);
 
 use PDF::Builder;
 
-my $PDFname = 'Content.pdf';
+my $PDFname = $0;
+   $PDFname =~ s/\..*$//;  # remove extension
+   $PDFname .= '.pdf';     # add new extension
 my $globalX = 0; 
 my $globalY = 0;
 my $compress = 'none';

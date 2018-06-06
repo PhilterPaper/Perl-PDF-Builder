@@ -25,7 +25,9 @@ use PDF::Builder;
 my $compress = 'flate';  # compressed streams
 #my $compress = 'none';  # no stream compression, for debugging
 
-my $PDFname = 'BarCode.pdf';
+my $PDFname = $0;
+   $PDFname =~ s/\..*$//;  # remove extension
+   $PDFname .= '.pdf';     # add new extension
 my $globalX = 0; 
 my $globalY = 0;
 

@@ -11,6 +11,8 @@ perl examples\021_psfonts \Users\Phil\T1fonts\URWPalladioL-Roma.pfb
 perl examples\021_synfonts
 perl examples\022_truefonts C:\WINDOWS\fonts\times.ttf
 perl examples\022_truefonts_diacrits_utf8 C:\WINDOWS\fonts\tahoma.ttf
+echo === 023 to display the PDFs, you may need to install East Asian fonts
+echo ===     for your browser
 perl examples\023_cjkfonts
 echo === 024 needs a sample BDF font (not included with distribution)
 perl examples\024_bdffonts ..\work-PDF-Builder\codec\codec.bdf

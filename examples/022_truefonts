@@ -4,8 +4,6 @@
 # 256 bytes in one single-byte encoding, plus all glyphs in font by CId,
 # and some sample ASCII text.
 # -e encoding  (default is latin1) SINGLE BYTE ONLY!
-# note that use of -file in new() leaves the PDF in THIS directory, not the
-#   one with the 022_truefonts file!
 
 use strict;
 use warnings;
@@ -47,7 +45,7 @@ foreach my $fn (@ARGV) {
     $myName =~ s/\.[to]tf$//i;  # remove .ttf/.otf (any case)
 
     $pdf = PDF::Builder->new(-compress => $compress, 
-                          -file => basename($0).'.'.$myName.".pdf");
+                          -file => $0.'.'.$myName.".pdf");
 
     $f1 = $pdf->corefont('Helvetica', -encode => 'latin1');
     $f2 = $pdf->corefont('Helvetica-Bold', -encode => 'latin1');

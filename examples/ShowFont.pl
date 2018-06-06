@@ -157,6 +157,10 @@ foreach ($i=0; $i<scalar @ARGV; $i++) {
     }
 }
 
+# add correct path for output file
+my $outpath = $0;
+  $outpath =~ s#[^\\/]+$##;
+
 # see if all the settings look reasonable
 if ($fontfile eq '' || substr($fontfile, 0, 1) eq '-') {
     print "missing or incorrect font file: $fontfile\n";
@@ -323,7 +327,7 @@ if ($type eq 'corefont') { $type = 'core'; }
 if ($type eq 'type1') { $type = 'T1'; }
 if ($type eq 'truetype') { $type = 'TTF'; }
 # can't use $encode here... no longer set
-$pdf->saveas("$extra.$type.$fontname.pdf");
+$pdf->saveas("$outpath$extra.$type.$fontname.pdf");
 $pdf->end();
 
 sub usage {

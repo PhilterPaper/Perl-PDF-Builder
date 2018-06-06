@@ -3,8 +3,6 @@
 # given one or more .TTF files on the command line, display their contents:
 # 256 bytes in one single-byte encoding, plus some sample UTF-8 text.
 # -e encoding (default is latin1) SINGLE BYTE ONLY!
-# note that use of -file in new() leaves the PDF in THIS directory, not the
-#   one with the 022_truefonts_diacrits_utf8 file!
 
 use strict;
 use warnings;
@@ -47,7 +45,7 @@ foreach my $fn (@ARGV) {
     $myName =~ s/\.[ot]tf$//i;  # remove .ttf/.otf (any case)
 
     $pdf = PDF::Builder->new(-compress => $compress,
-	                  -file => basename($0).'.'.$myName.".pdf");
+	                  -file => $0.'.'.$myName.".pdf");
 
     $f1 = $pdf->corefont('Helvetica', -encode => 'latin1');
     $f2 = $pdf->corefont('Helvetica-Bold', -encode => 'latin1');
