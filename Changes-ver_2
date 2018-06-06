@@ -2,8 +2,8 @@ Change log for PDF::API2 version 2.xxx (predecessor to PDF::Builder)
 
 2.034     2018-06-02 (unreleased)
 
-    - (TBD) support last 6 years of Perl initial (.0) releases, plus one major 
-      release, which is currently 5.16 as the minimum. I'm considering this one.
+    - support last 6 years of Perl initial (.0) releases, plus one major 
+      release, which is currently 5.16 as the minimum.
 
     - Use confess instead of die (Carp.pm) in FontFile.pm
 

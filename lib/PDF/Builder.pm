@@ -150,10 +150,6 @@ your text is, so that the output routines can tell the PDF reader about it
 reader needs to know what the encoding in use is, so it knows what glyph to 
 associate with each byte (or byte sequence).
 
-By the way, it is recommended that you be using I<at least> Perl 5.10 if you
-are going to be using any non-ASCII characters. Perl 5.8 may be a little
-unpredictable in handling such text.
-
 =head1 LICENSE
 
 This software is Copyright (c) 2017 by Phil M. Perry.
@@ -2793,6 +2789,20 @@ sub named_destination {
 __END__
 
 =back
+
+=head1 SUPPORTED PERL VERSIONS
+
+PDF::Builder intends to support all major Perl versions that were released in
+the past six years, plus one, in order to continue working for the life of
+most long-term-stable (LTS) server distributions.
+
+For example, a version of PDF::Builder released on 2018-06-05 would support 
+the last major version of Perl released before 2012-06-05 (5.18), and then one 
+before that, which would be 5.16.
+
+If you need to use this module on a server with an extremely out-of-date version
+of Perl, consider using either plenv or Perlbrew to run a newer version of Perl
+without needing admin privileges.
 
 =head1 KNOWN ISSUES
 

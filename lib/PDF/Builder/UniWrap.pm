@@ -19,7 +19,7 @@ BEGIN {
 
     use Encode qw(:all);
 
-    use 5.008;
+   #use 5.008;  as of 3.010, 5.16 is the minimum
     use base 'Exporter';
 
     use Unicode::UCD;

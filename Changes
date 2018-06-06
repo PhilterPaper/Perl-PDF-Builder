@@ -3,7 +3,18 @@ into PDF::Builder.
 
 3.010     2018-06-06 (unreleased)
 
-TBD: .travis.yml, Makefile.PL, lib/PDF/Builder.pm consider minimum Perl level of 5.16.0 per PDF::API2 
+   .perl-version, dist.ini.old, .travis.yml, Makefile.PL, lib/PDF/Builder.pm,
+     lib/PDF/Builder/UniWrap.pm, MANIFEST change minimum Perl release level 
+     from 5.8.6 to Perl 5.16.0 per PDF::API2. The intent is to "support
+     major Perl versions released in the past six years, plus one major
+     release before that one. This should provide backward compatibility for
+     the life of most LTS server distributions, while eliminating the need to
+     troubleshoot warnings and bugs that only show up in increasingly-ancient
+     versions of Perl." For this release, it means that the minimum supported
+     Perl is 5.16 (first released 2012-05-20... see https://www.cpan.org/src/
+     "First release in each branch of Perl" for dates, NOT "Latest releases
+     in each branch of Perl"!). The next version bump (to 5.18) should be 
+     after 2019-05-18.
 
    lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm use confess (Carp.pm) 
      rather than die per PDF::API2. Per PDF::API2 change (perlcritic?).
