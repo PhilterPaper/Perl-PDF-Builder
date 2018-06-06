@@ -12,6 +12,7 @@ LICENSE
 Makefile.PL
 MANIFEST
 PATENTS
+pc.bat
 README
 SUPPORT
 t-tests.bat
