@@ -401,18 +401,20 @@ $grfx->translate(@base);
 $grfx->linecap(0);
 $grfx->linejoin(0);
 
+# draw red, including miter or bevel joint per setting (all that will show)
 $grfx->strokecolor('red');
 $grfx->linewidth($lw);
 $grfx->poly(@points);
 $grfx->stroke();
 
+# draw black each of the two thick bars (butt linecap), overlaying most red
 $grfx->strokecolor('black');
-for ($i=0; $i<@points; $i+=2) {
+for ($i=0; $i<scalar(@points)-2; $i+=2) {
   $grfx->poly($points[$i],$points[$i+1], $points[$i+2],$points[$i+3]);
   $grfx->stroke();
 }
 
-# gray overlap
+# gray overlap of bars, as custom-written filled shape
 $grfx->fillcolor('#333333');
 $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 @npts = ($points[2], $points[3], $points[2], $points[3]+$lw/2,
@@ -421,6 +423,7 @@ $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 $grfx->poly(@npts);
 $grfx->close();
 $grfx->fill();
+# dots and green centerline
 greenLine(\@points);
 
 # caption
@@ -445,18 +448,20 @@ $grfx->translate(@base);
 $grfx->linecap(0);
 $grfx->linejoin(1);
 
+# draw red, including miter or bevel joint per setting (all that will show)
 $grfx->strokecolor('red');
 $grfx->linewidth($lw);
 $grfx->poly(@points);
 $grfx->stroke();
 
+# draw black each of the two thick bars (butt linecap), overlaying most red
 $grfx->strokecolor('black');
-for ($i=0; $i<@points; $i+=2) {
+for ($i=0; $i<scalar(@points)-2; $i+=2) {
   $grfx->poly($points[$i],$points[$i+1], $points[$i+2],$points[$i+3]);
   $grfx->stroke();
 }
 
-# gray overlap
+# gray overlap of bars, as custom-written filled shape
 $grfx->fillcolor('#333333');
 $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 @npts = ($points[2], $points[3], $points[2], $points[3]+$lw/2,
@@ -465,6 +470,7 @@ $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 $grfx->poly(@npts);
 $grfx->close();
 $grfx->fill();
+# dots and green centerline
 greenLine(\@points);
 
 # caption
@@ -489,18 +495,20 @@ $grfx->translate(@base);
 $grfx->linecap(0);
 $grfx->linejoin(2);
 
+# draw red, including miter or bevel joint per setting (all that will show)
 $grfx->strokecolor('red');
 $grfx->linewidth($lw);
 $grfx->poly(@points);
 $grfx->stroke();
 
+# draw black each of the two thick bars (butt linecap), overlaying most red
 $grfx->strokecolor('black');
-for ($i=0; $i<@points; $i+=2) {
+for ($i=0; $i<scalar(@points)-2; $i+=2) {
   $grfx->poly($points[$i],$points[$i+1], $points[$i+2],$points[$i+3]);
   $grfx->stroke();
 }
 
-# gray overlap
+# gray overlap of bars, as custom-written filled shape
 $grfx->fillcolor('#333333');
 $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 @npts = ($points[2], $points[3], $points[2], $points[3]+$lw/2,
@@ -509,6 +517,7 @@ $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 $grfx->poly(@npts);
 $grfx->close();
 $grfx->fill();
+# dots and green centerline
 greenLine(\@points);
 
 # caption
@@ -539,18 +548,20 @@ $grfx->translate(@base);
 $grfx->linecap(0);
 $grfx->linejoin(0);
 
+# draw red, including miter or bevel joint per setting (all that will show)
 $grfx->strokecolor('red');
 $grfx->linewidth($lw);
 $grfx->poly(@points);
 $grfx->stroke();
 
+# draw black each of the two thick bars (butt linecap), overlaying most red
 $grfx->strokecolor('black');
-for ($i=0; $i<@points; $i+=2) {
+for ($i=0; $i<scalar(@points)-2; $i+=2) {
   $grfx->poly($points[$i],$points[$i+1], $points[$i+2],$points[$i+3]);
   $grfx->stroke();
 }
 
-# gray overlap
+# gray overlap of bars, as custom-written filled shape
 $grfx->fillcolor('#333333');
 $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 @npts = ($points[2], $points[3], $points[2], $points[3]+$lw/2,
@@ -559,6 +570,7 @@ $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 $grfx->poly(@npts);
 $grfx->close();
 $grfx->fill();
+# dots and green centerline
 greenLine(\@points);
 
 # caption
@@ -583,18 +595,20 @@ $grfx->translate(@base);
 $grfx->linecap(0);
 $grfx->linejoin(0);
 
+# draw red, including miter or bevel joint per setting (all that will show)
 $grfx->strokecolor('red');
 $grfx->linewidth($lw);
 $grfx->poly(@points);
 $grfx->stroke();
 
+# draw black each of the two thick bars (butt linecap), overlaying most red
 $grfx->strokecolor('black');
-for ($i=0; $i<@points; $i+=2) {
+for ($i=0; $i<scalar(@points)-2; $i+=2) {
   $grfx->poly($points[$i],$points[$i+1], $points[$i+2],$points[$i+3]);
   $grfx->stroke();
 }
 
-# gray overlap
+# gray overlap of bars, as custom-written filled shape
 $grfx->fillcolor('#333333');
 $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 @npts = ($points[2], $points[3], $points[2], $points[3]+$lw/2,
@@ -603,6 +617,7 @@ $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 $grfx->poly(@npts);
 $grfx->close();
 $grfx->fill();
+# dots and green centerline
 greenLine(\@points);
 
 # caption
@@ -627,18 +642,20 @@ $grfx->translate(@base);
 $grfx->linecap(0);
 $grfx->linejoin(0);
 
+# draw red, including miter or bevel joint per setting (all that will show)
 $grfx->strokecolor('red');
 $grfx->linewidth($lw);
 $grfx->poly(@points);
 $grfx->stroke();
 
+# draw black each of the two thick bars (butt linecap), overlaying most red
 $grfx->strokecolor('black');
-for ($i=0; $i<@points; $i+=2) {
+for ($i=0; $i<scalar(@points)-2; $i+=2) {
   $grfx->poly($points[$i],$points[$i+1], $points[$i+2],$points[$i+3]);
   $grfx->stroke();
 }
 
-# gray overlap
+# gray overlap of bars, as custom-written filled shape
 $grfx->fillcolor('#333333');
 $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 @npts = ($points[2], $points[3], $points[2], $points[3]+$lw/2,
@@ -647,6 +664,7 @@ $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 $grfx->poly(@npts);
 $grfx->close();
 $grfx->fill();
+# dots and green centerline
 greenLine(\@points);
 
 # caption
@@ -671,18 +689,20 @@ $grfx->translate(@base);
 $grfx->linecap(0);
 $grfx->linejoin(0);
 
+# draw red, including miter or bevel joint per setting (all that will show)
 $grfx->strokecolor('red');
 $grfx->linewidth($lw);
 $grfx->poly(@points);
 $grfx->stroke();
 
+# draw black each of the two thick bars (butt linecap), overlaying most red
 $grfx->strokecolor('black');
-for ($i=0; $i<@points; $i+=2) {
+for ($i=0; $i<scalar(@points)-2; $i+=2) {
   $grfx->poly($points[$i],$points[$i+1], $points[$i+2],$points[$i+3]);
   $grfx->stroke();
 }
 
-# gray overlap
+# gray overlap of bars, as custom-written filled shape
 $grfx->fillcolor('#333333');
 $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 @npts = ($points[2], $points[3], $points[2], $points[3]+$lw/2,
@@ -691,6 +711,7 @@ $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 $grfx->poly(@npts);
 $grfx->close();
 $grfx->fill();
+# dots and green centerline
 greenLine(\@points);
 
 # caption
@@ -715,18 +736,20 @@ $grfx->translate(@base);
 $grfx->linecap(0);
 $grfx->linejoin(0);
 
+# draw red, including miter or bevel joint per setting (all that will show)
 $grfx->strokecolor('red');
 $grfx->linewidth($lw);
 $grfx->poly(@points);
 $grfx->stroke();
 
+# draw black each of the two thick bars (butt linecap), overlaying most red
 $grfx->strokecolor('black');
-for ($i=0; $i<@points; $i+=2) {
+for ($i=0; $i<scalar(@points)-2; $i+=2) {
   $grfx->poly($points[$i],$points[$i+1], $points[$i+2],$points[$i+3]);
   $grfx->stroke();
 }
 
-# gray overlap
+# gray overlap of bars, as custom-written filled shape
 $grfx->fillcolor('#333333');
 $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 @npts = ($points[2], $points[3], $points[2], $points[3]+$lw/2,
@@ -735,6 +758,7 @@ $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 $grfx->poly(@npts);
 $grfx->close();
 $grfx->fill();
+# dots and green centerline
 greenLine(\@points);
 
 # caption
@@ -759,18 +783,20 @@ $grfx->translate(@base);
 $grfx->linecap(0);
 $grfx->linejoin(0);
 
+# draw red, including miter or bevel joint per setting (all that will show)
 $grfx->strokecolor('red');
 $grfx->linewidth($lw);
 $grfx->poly(@points);
 $grfx->stroke();
 
+# draw black each of the two thick bars (butt linecap), overlaying most red
 $grfx->strokecolor('black');
-for ($i=0; $i<@points; $i+=2) {
+for ($i=0; $i<scalar(@points)-2; $i+=2) {
   $grfx->poly($points[$i],$points[$i+1], $points[$i+2],$points[$i+3]);
   $grfx->stroke();
 }
 
-# gray overlap
+# gray overlap of bars, as custom-written filled shape
 $grfx->fillcolor('#333333');
 $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 @npts = ($points[2], $points[3], $points[2], $points[3]+$lw/2,
@@ -779,6 +805,7 @@ $angle = atan2($points[5]-$points[3], $points[4]-$points[2]);
 $grfx->poly(@npts);
 $grfx->close();
 $grfx->fill();
+# dots and green centerline
 greenLine(\@points);
 
 # caption
@@ -1139,7 +1166,7 @@ drawCaption(['curve()'], 'LC');
 $grfx->restore();
 
 # ----------------------------------------------------
-# 28. spline()  (cubic Bezier curve with synthesized control points)
+# 28. qbspline()  (cubic Bezier curve with synthesized control points)
 @cellLoc = makeCellLoc(0);
 @cellSize = (170, 131); 
 $grfx->save();
@@ -1157,14 +1184,55 @@ $grfx->translate(@base);
 @points = (40,75, 130,60); # EP1=20,20, CP1, EP2
 $grfx->linedash();
 $grfx->move(20, 20);
-$grfx->spline(@points);
+$grfx->qbspline(@points);
 $grfx->stroke();
 $grfx->linedash(4);
 greenLine([20, 20, @points]);
 $grfx->strokecolor('black');
 
 # caption
-drawCaption(['spline()'], 'LC');
+drawCaption(['qbspline()'], 'LC');
+
+$grfx->restore();
+
+# ----------------------------------------------------
+# 28A. qbspline()  (multipiece spline, and with line segment)
+@cellLoc = makeCellLoc(0);
+@cellSize = (170, 131); 
+$grfx->save();
+
+makeCell(@cellLoc, @cellSize);
+@base=@cellLoc;
+$base[0] += 10;
+$base[1] += 10;
+
+$grfx->strokecolor('black');
+$grfx->linewidth(2);
+$text->font($fontC, 8);
+$grfx->translate(@base);
+
+@points = (40,95, 50,70, 80,100, 130,70); # EP1=20,50, CP1, P2, CP2, P3
+$grfx->linedash();
+$grfx->move(20, 50);
+$grfx->qbspline(@points);
+$grfx->stroke();
+$grfx->linedash(4);
+greenLine([20, 50, @points]);
+$grfx->strokecolor('black');
+
+# currently excess point P4 is not drawn (line) as part of the qbspline
+@points = (40,55, 50,30, 80,60, 130,30, 135,10); # EP1=20,10, CP1, P2, CP2, P3, P4
+$grfx->linewidth(2);
+$grfx->linedash();
+$grfx->move(20, 10);
+$grfx->qbspline(@points);
+$grfx->stroke();
+$grfx->linedash(4);
+greenLine([20, 10, @points]);
+$grfx->strokecolor('black');
+
+# caption
+drawCaption(['multi qbspline()'], 'LC');
 
 $grfx->restore();
 
@@ -1497,7 +1565,7 @@ $grfx->restore();
 
 # ----------------------------------------------------
 # 37. clip(): filled circle with box cut out
-@cellLoc = makeCellLoc(1);
+@cellLoc = makeCellLoc(0);
 @cellSize = (170, 131); 
 $grfx->save();
 

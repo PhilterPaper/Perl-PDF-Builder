@@ -92,6 +92,10 @@ pdfile    method in Annotation.pm
    "pdfile" to "pdf_file". pdfile is scheduled to be removed on or after
    November, 2019.
 
+spline    method in Content.pm
+   This functionality was renamed to qbspline() [quadratic Bezier spline].
+   Simply rename any call to "spline" to "qbspline". spline is scheduled to
+   be removed on or after June, 2020.
 
 *** If I have missed any deprecated interfaces, please let me know! ***
 

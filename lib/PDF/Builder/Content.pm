@@ -576,12 +576,13 @@ join. The practical effect is that lines meeting at shallow
 angles are chopped off instead of producing long pointed corners.
 
 The default miter limit is 10.0 (approximately 11.5 degree cutoff angle).
+The smaller the limit, the larger the cutoff angle.
 
 If no C<$ratio> is given, the current setting is B<returned>. If the ratio is
 being set, C<$self> is B<returned> so that calls may be chained.
 
 B<Note:> This was originally misnamed as I<meterlimit>. That name is deprecated
-and will be removed some time in the future, so you should change any usage in
+and will be removed in the future, so you should change any usage in
 your code from C<meterlimit> to C<miterlimit>.
 
 =cut
@@ -756,10 +757,9 @@ sub move {
     my ($self) = shift;
 
     my ($x,$y);
-    while (defined($x = shift)) {
+    while (scalar @_ >= 2) {
+        $x = shift;
         $y = shift;
-        $self->{' x'}  = $x;
-        $self->{' y'}  = $y;
         $self->{' mx'} = $x;
         $self->{' my'} = $y;
         if ($self->_in_text_object()) {
@@ -767,7 +767,12 @@ sub move {
         } else {
             $self->add(floats($x,$y), 'm');
         }
+        $self->{' x'}  = $x;  # set new current position
+        $self->{' y'}  = $y;
     }
+   #if (scalar @_) {    leftovers ignored, as is usual practice
+   #    warn "move() has leftover coordinate(s) (ignored).";
+   #}
 
     return $self;
 }
@@ -840,16 +845,20 @@ sub line {
     my ($self) = shift;
 
     my ($x,$y);
-    while (defined($x = shift)) {
+    while (scalar @_ >= 2) {
+	$x = shift;
         $y = shift;
-        $self->{' x'} = $x;
-        $self->{' y'} = $y;
         if ($self->_in_text_object()) {
             $self->add_post(floats($x,$y), 'l');
         } else {
             $self->add(floats($x,$y), 'l');
         }
+        $self->{' x'} = $x;   # new current point
+        $self->{' y'} = $y;
     }
+   #if (scalar @_) {    leftovers ignored, as is usual practice
+   #    warn "line() has leftover coordinate (ignored).";
+   #}
 
     return $self;
 }
@@ -872,7 +881,8 @@ sub hline {
     } else {
         $self->add(floats($x, $self->{' y'}), 'l');
     }
-    $self->{' x'} = $x;
+    # extraneous inputs discarded
+    $self->{' x'} = $x;   # update current position
 
     return $self;
 }
@@ -885,7 +895,8 @@ sub vline {
     } else {
         $self->add(floats($self->{' x'}, $y), 'l');
     }
-    $self->{' y'} = $y;
+    # extraneous inputs discarded
+    $self->{' y'} = $y;   # update current position
 
     return $self;
 }
@@ -933,13 +944,17 @@ sub rect {
     my $self = shift;
 
     my ($x,$y, $w,$h);
-    while (defined($x = shift)) {
+    while (scalar @_ >= 4) {
+        $x = shift;
         $y = shift;
         $w = shift;
         $h = shift;
         $self->add(floats($x,$y, $w,$h), 're');
     }
-    $self->{' x'} = $x;
+   #if (scalar @_) {   # usual practice is to ignore extras
+   #    warn "rect() extra coordinates discarded.\n";
+   #}
+    $self->{' x'} = $x;   # set new current position
     $self->{' y'} = $y;
 
     return $self;
@@ -1033,7 +1048,7 @@ sub _arctocurve {
     while ($alpha < 0.0)   { $alpha += 360.0; }
     while ( $beta < 0.0)   {  $beta += 360.0; }
     while ($alpha > 360.0) { $alpha -= 360.0; }
-    while ($beta > 360.0) { $beta -= 360.0; }
+    while ( $beta > 360.0) {  $beta -= 360.0; }
 
     # Note that there is a problem with the original code, when the 0 degree
     # angle is crossed. It especially shows up in arc() and pie(). Therefore, 
@@ -1131,7 +1146,7 @@ sub arc {
 
     $self->move($p0_x,$p0_y) if $move;
 
-    while (scalar @points > 0) {
+    while (scalar @points >= 6) {
         $p1_x = $xc + shift @points;
         $p1_y = $yc + shift @points;
         $p2_x = $xc + shift @points;
@@ -1141,9 +1156,11 @@ sub arc {
         $self->curve($p1_x,$p1_y, $p2_x,$p2_y, $p3_x,$p3_y);
         shift @points;
         shift @points;
-        $self->{' x'} = $p3_x;
+        $self->{' x'} = $p3_x;   # set new current position
         $self->{' y'} = $p3_y;
     }
+    # should we worry about anything left over in @points?
+    # supposed to be blocks of 8 (4 points)
 
     return $self;
 }
@@ -1202,7 +1219,8 @@ sub curve {
     my ($self) = shift;
 
     my ($cx1,$cy1, $cx2,$cy2, $x,$y);
-    while (defined($cx1 = shift)) {
+    while (scalar @_ >= 6) {
+        $cx1 = shift;
         $cy1 = shift;
         $cx2 = shift;
         $cy2 = shift;
@@ -1213,49 +1231,69 @@ sub curve {
         } else {
             $self->add(floats($cx1,$cy1, $cx2,$cy2, $x,$y), 'c');
         }
-        $self->{' x'} = $x;
+        $self->{' x'} = $x;   # set new current position
         $self->{' y'} = $y;
     }
 
     return $self;
 }
 
-=item $content->spline($cx1,$cy1, $x,$y)
+=item $content->qbspline($cx1,$cy1, $x,$y)
 
 This extends the path in a curve from the current point to C<[$x,$y]>,
-using the two specified points to create a spline, and updates the
-current position to be the new point.
+using the two specified points to create a quadratic Bezier curve, and updates 
+the current position to be the new point.
 
-Internally, these splines are cubic Bezier curves (see C<curve>) with the 
-two control points synthesized from the two given points.
+Internally, these splines are one or more cubic Bezier curves (see C<curve>) 
+with the two control points synthesized from the two given points (a control 
+point and the end point of a I<quadratic> Bezier curve).
 
 Note that while multiple sets of two C<[x,y]> pairs are permitted, these
-are treated as I<independent> splines. There is no attempt made to
-smoothly blend one spline into the next!
+are treated as I<independent> quadratic Bezier curves. There is no attempt 
+made to smoothly blend one curve into the next!
 
-Further note that this "spline" may not match a common definition of
-a spline being a curve passing I<through> B<all> the given points! It is a
-piecewise cubic Bezier curve. Use with care, and do not make assumptions about
-splines for you or your readers.
+Further note that this "spline" does not match the common definition of
+a spline being a I<continuous> curve passing I<through> B<all> the given 
+points! It is a piecewise non-continuous cubic Bezier curve. Use with care, and 
+do not make assumptions about splines for you or your readers.
+
+Pairs of points (control point and end point) are consumed in a loop. If one 
+point or coordinate is left over at the end, it is discarded (as usual practice
+for excess data to a routine). There is no check for duplicate points or other 
+degeneracies.
+
+The former name of B<spline> has been deprecated and will be removed.
 
 =cut
 
-# TBD consider a cspline() call for a cubic spline that DOES pass through all points
-
 sub spline {
+    warn "Use qbspline instead of spline";
+    return  qbspline(@_); 
+}
+sub qbspline {
     my ($self) = shift;
 
     while (scalar @_ >= 4) {
-        my $cx = shift;
+        my $cx = shift;  # single Control Point
         my $cy = shift;
-        my $x = shift;
+        my $x = shift;   # new end point
         my $y = shift;
+	# synthesize 2 cubic Bezier control points from two given points
         my $c1x = (2*$cx + $self->{' x'})/3;
         my $c1y = (2*$cy + $self->{' y'})/3;
         my $c2x = (2*$cx + $x)/3;
         my $c2y = (2*$cy + $y)/3;
         $self->curve($c1x,$c1y, $c2x,$c2y, $x,$y);
     }
+   ## one left over point? straight line (silent error recovery)
+   #if (scalar @_ >= 2) {
+   #    my $x = shift;   # new end point
+   #    my $y = shift;
+   #    $self->line($x,$y);
+   #}
+   #if (scalar @_) {    leftovers ignored, as is usual practice
+   #    warn "qbspline() has leftover coordinate (ignored).";
+   #}
 
     return $self;
 }
@@ -1812,7 +1850,7 @@ different scaling factors in X and Y, although it is now possible for when
 that effect is desirable.
 
 B<Note> that while this method is named form I<image>, it is also used for the 
-psedoimages created by the barcode routines. Images are naturally dimensionless 
+pseudoimages created by the barcode routines. Images are naturally dimensionless
 (1 point square) and need at some point to be scaled up to the desired point 
 size. Barcodes are naturally sized in points, and should be scaled at 
 approximately I<1>. Therefore, it would greatly overscale barcodes to multiply 

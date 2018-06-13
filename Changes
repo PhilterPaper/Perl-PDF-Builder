@@ -1,28 +1,48 @@
 See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 
-3.010     2018-06-06 (unreleased)
+3.010     2018-06-13 (unreleased)
+
+*  docs/, docs/buildDoc.pl, MANIFEST
+     provide a tool and place to build the HTML pages from PODs in the
+     PDF::Builder module sources. The .html files are NOT shipped with either
+     the Perl build or on GitHub.   TBD
+
+*  lib/PDF/Builder/Resource/XObject/Image/PNG.pm
+     [ref RT 124349] code cleanup    TBD
+
+*  lib/PDF/Builder/Content.pm, examples/Content.pl, t/content.t
+     [ref CTS 8] add "bspline" method to draw a smoothly continuous curve 
+     (using blended cubic Bezier curves) through all the given points. In 
+     addition, the first and/or last points may be specified as visible or 
+     invisible straight line segments in order to constrain the spline's 
+     behavior at the endpoints.  TBD
+
+   lib/PDF/Builder/Content.pm, examples/Content.pl, DEPRECATED
+     [ref CTS 8] change "spline" method name to "qbspline", and deprecate 
+     "spline". This is to reflect that this method is actually a piecewise 
+     (non-continuous) series of quadratic Bezier curves, and not a true spline. 
 
    .perl-version, dist.ini.old, .travis.yml, Makefile.PL, lib/PDF/Builder.pm,
-     lib/PDF/Builder/UniWrap.pm, MANIFEST change minimum Perl release level 
-     from 5.8.6 to Perl 5.16.0 per PDF::API2. The intent is to "support
-     major Perl versions released in the past six years, plus one major
-     release before that one. This should provide backward compatibility for
-     the life of most LTS server distributions, while eliminating the need to
-     troubleshoot warnings and bugs that only show up in increasingly-ancient
-     versions of Perl." For this release, it means that the minimum supported
-     Perl is 5.16 (first released 2012-05-20... see https://www.cpan.org/src/
-     "First release in each branch of Perl" for dates, NOT "Latest releases
-     in each branch of Perl"!). The next version bump (to 5.18) should be 
-     after 2019-05-18.
+     lib/PDF/Builder/UniWrap.pm, MANIFEST
+    change minimum Perl release level from 5.8.6 to Perl 5.16.0, per PDF::API2. 
+     The intent is to "support major Perl versions released in the past six 
+     years, plus one major release before that one. This should provide 
+     backward compatibility for the life of most LTS server distributions, 
+     while eliminating the need to troubleshoot warnings and bugs that only 
+     show up in increasingly-ancient versions of Perl." For this release, it 
+     means that the minimum supported Perl is 5.16 (first released 2012-05-20...
+     see https://www.cpan.org/src/ "First release in each branch of Perl" for 
+     dates, NOT "Latest releases in each branch of Perl"!). The next version 
+     bump (to 5.18) should be after 2019-05-18.
 
-   lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm use confess (Carp.pm) 
-     rather than die per PDF::API2. Per PDF::API2 change (perlcritic?).
+   lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm
+     use confess (Carp.pm) rather than die, per PDF::API2.
 
-   examples/*, examples.bat moved output PDFs for several examples from the
-     current directory to the examples directory, in the same style as the
-     rest of the example outputs. Note that contrib still outputs in the
-     current directory.
+   examples/*, examples.bat
+     moved output PDFs for several examples from the current directory to the 
+     examples directory, in the same style as the rest of the example outputs. 
+     Note that contrib.bat still outputs in the current directory.
 
    contrib/text2pdf.pl, examples/020_corefonts--021_psfonts--021_synfonts--
        022_truefonts--022_truefonts_diacrits_utf8--023_cjkfonts--026_unifont2--
@@ -31,9 +51,10 @@ into PDF::Builder.
      lib/PDF/Builder/Basic/PDF/Page.pm--Pages.pm, 
      lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm,
      lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm, t/author-critic.t--
-       author-pod-syntax.t--font-synfont.t--font-ttf.t--font-type1.t--rt120397.t
-     rt120450.t minor code styling changes to make perlcritic (level 5) happy.
-     Some changes from PDF::API2 for level 4/5.
+       author-pod-syntax.t--font-synfont.t--font-ttf.t--font-type1.t--
+     rt120397.t--rt120450.t
+    minor code styling changes to make perlcritic (level 5) happy. Some changes 
+     from PDF::API2 for level 4/5.
 
    t/*, contrib/pdf-debug.pl--text2pdf.pl, examples/012_pages--021_psfonts--
        030_colorspecs--BarCode.pl--Content.pl--ContentText.pl--ShowFont.pl, 
@@ -50,7 +71,7 @@ into PDF::Builder.
      lib/PDF/Builder/Resource/Font/CoreFont.pm, 
      lib/PDF/Builder/Resource/XObject/Form/BarCode.pm, 
      lib/PDF/Builder/Resource/XObject/Image/GIF.pm
-   minor code styling changes to make perlcritic (level 4) happy, including 
+    minor code styling changes to make perlcritic (level 4) happy, including 
      adding explicit "return" on all routines where missing, and not using 
      variables $a and $b ("magic" according to perlcritic). Some changes 
      suggested by PDF::API2 for this. There are many other level 4 errors yet 
@@ -64,28 +85,35 @@ into PDF::Builder.
      but a few, such as "grep" and "map" formats, have been suppressed with 
      "no critic" statements. Those might be revisited later.
 
-   pc.bat add batch file to run perlcritic
+   pc.bat
+     add batch file to run perlcritic
 
-   lib/PDF/Builder/Page.pm a few minor code styling changes. Most of the
-     PDF::API2 changes were already in PDF::Builder, and some I declined
-     because the style was not consistent.
+   lib/PDF/Builder/Page.pm
+     a few minor code styling changes, per PDF::API2. Most of the PDF::API2 
+     changes were already in PDF::Builder, and some I declined because the 
+     style was not consistent.
 
-   examples.bat, examples/024_bdffonts, examples/examples.output some minor
-     improvements to bitmapped (BDF) display output. Still very buggy!
+   examples.bat, examples/024_bdffonts, examples/examples.output
+     some minor improvements to bitmapped (BDF) display output. Still very 
+     buggy!
 
-   lib/PDF/Builder.pm stringify() make sure return value has at least empty
-     string for content. Several cases of -unicodemap check for true, not 1.
-     After PDF::API2 changes.
+   lib/PDF/Builder.pm 
+     stringify() make sure return value has at least empty string for content. 
+     Several cases of -unicodemap check for true, not 1. After PDF::API2 
+     changes.
 
-   lib/PDF/Builder/Content.pm outobjdeep() check -docompress is true, not 1.
-     bogen() explicitly default move, larger, reverse to "false" (0). 
-     isvirtual(), ' apiistext' check for true, not 1. After PDF::API2 changes.
+   lib/PDF/Builder/Content.pm
+     outobjdeep() check -docompress is true, not 1. bogen() explicitly default 
+     move, larger, reverse to "false" (0). isvirtual(), ' apiistext' check for 
+     true, not 1. After PDF::API2 changes.
 
-   lib/PDF/Builder/Basic/PDF/File.pm add support for cross-reference streams 
-     using 64-bit field widths, per PDF::API2
+   lib/PDF/Builder/Basic/PDF/File.pm
+     add support for cross-reference streams using 64-bit field widths, per 
+     PDF::API2
 
-   .travis.yml restore (from .tgravis.yml). Will attempt at some point to make
-     use of Travis for testing.
+*  .travis.yml
+     restore (from .tgravis.yml). Will attempt at some point to make use of 
+     Travis for testing.  TBD
 
 3.009     2017-11-27  
 
