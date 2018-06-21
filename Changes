@@ -18,6 +18,9 @@ into PDF::Builder.
      invisible straight line segments in order to constrain the spline's 
      behavior at the endpoints.  TBD
 
+   lib/PDF/Builder.pm 
+     Add POD commentary on input and output PDF version supported.
+
    lib/PDF/Builder/Content.pm, examples/Content.pl, DEPRECATED
      [ref CTS 8] change "spline" method name to "qbspline", and deprecate 
      "spline". This is to reflect that this method is actually a piecewise 

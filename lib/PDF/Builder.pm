@@ -72,7 +72,9 @@ PDF::Builder - Facilitates the creation and modification of PDF files
     # Save the PDF
     $pdf->saveas('/path/to/new.pdf');
 
-=head1 A NOTE ON STRINGS (CHARACTER TEXT)
+=head1 SOME SPECIAL NOTES
+
+=head2 STRINGS (CHARACTER TEXT)
 
 Perl, and hence PDF::Builder, use strings that support the full range of
 Unicode characters. When importing strings into a Perl program, for example
@@ -106,7 +108,7 @@ and for declaring output glyph generation).
 See C<corefont>, C<psfont>, and C<ttfont> in L<FONT METHODS> for additional 
 information.
 
-=head2 Some Internal Details
+=head3 Some Internal Details
 
 Some of the following may be a bit scary or confusing to beginners, so don't 
 be afraid to skip over it until you're ready for it...
@@ -150,9 +152,37 @@ your text is, so that the output routines can tell the PDF reader about it
 reader needs to know what the encoding in use is, so it knows what glyph to 
 associate with each byte (or byte sequence).
 
+=head2 PDF VERSIONS SUPPORTED
+
+When creating a PDF file using the functions in PDF::Builder, the output is
+marked as PDF 1.4. This does not mean that all I<PDF> functionality up through 
+1.4 is supported! There are almost surely features missing as far back as the
+PDF 1.0 standard. 
+
+The big problem is when a PDF of version 1.5 or higher is imported or opened
+in PDF::Builder. If it contains content that is actually unsupported by this
+software, there is a chance that something will break. This does not guarantee
+that a PDF marked as "1.7" will go down in flames when read by PDF::Builder,
+or that a PDF written back out will break in a Reader, but the possibility is
+there. Much PDF writer software simply marks its output as the highest version
+of PDF at the time (usually 1.7), even if there is no content beyond, say, 1.2.
+There is I<some> handling of PDF 1.5 items in PDF::Builder, such as cross 
+reference streams, but support beyond 1.4 is very limited. All we can say is to 
+be careful when handling PDFs whose version is above 1.4, and test thoroughly, 
+as they may break at some point.
+
+Future plans for PDF::Builder include some sort of version control, where input
+PDFs greater than 1.4 (or whatever the default output level is) will receive a
+warning of some sort (that the output might be corrupt). Default output will 
+probaly remain at 1.4, but the use of certain features may trigger the output
+level to be 1.5 or higher, or else produce an error and be forbidden if beyond
+the selected output level. This hasn't been decided yet. Additional PDF 
+features at 1.5 or higher may be added at any time (a few are already in), but 
+should be guarded to prevent output in a PDF declared to be 1.4.
+
 =head1 LICENSE
 
-This software is Copyright (c) 2017 by Phil M. Perry.
+This software is Copyright (c) 2017-2018 by Phil M. Perry.
 
 This is free software, licensed under:
 
