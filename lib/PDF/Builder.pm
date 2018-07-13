@@ -2849,7 +2849,7 @@ PDF::Builder is currently being maintained by Phil M. Perry.
 
 Full source is on https://github.com/PhilterPaper/Perl-PDF-Builder
 
-Bug reports are on https://github.com/PhilterPaper/Perl-PDF-Builder/issues?q=is%3Aissue+sort%3Aupdated-desc and general discussions are on http://www.catskilltech.com/forum/pdf-builder-general-discussions/. Please do not use the RT.cpan system to report issues, as it is not regularly monitored.
+Bug reports are on https://github.com/PhilterPaper/Perl-PDF-Builder/issues?q=is%3Aissue+sort%3Aupdated-desc and general discussions are on https://www.catskilltech.com/forum/pdf-builder-general-discussions/. Please do not use the RT.cpan system to report issues, as it is not regularly monitored.
 
 Release distribution is on CPAN: https://metacpan.org/pod/PDF::Builder
 

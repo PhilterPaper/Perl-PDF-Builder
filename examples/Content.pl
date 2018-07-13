@@ -1237,6 +1237,41 @@ drawCaption(['multi qbspline()'], 'LC');
 $grfx->restore();
 
 # ----------------------------------------------------
+# 28B. bspline()  (multipiece cubic Bezier spline)
+@cellLoc = makeCellLoc(0);
+@cellSize = (170, 131); 
+$grfx->save();
+
+makeCell(@cellLoc, @cellSize);
+@base=@cellLoc;
+$base[0] += 10;
+$base[1] += 10;
+
+$grfx->strokecolor('black');
+$grfx->linewidth(2);
+$text->font($fontC, 8);
+$grfx->translate(@base);
+
+@points = (0,0, 20,40, 70,50, 115,40, 145,35, 145,45, 115,40, 70,5); 
+$grfx->linedash();
+$grfx->move(0,0);
+$grfx->bspline(\@points, -debug=>4);
+$grfx->stroke();
+
+@points = (0,65, 20,105, 70,115, 115,105, 145,100, 145,110, 115,105, 70,70); 
+$grfx->linedash();
+$grfx->move(0,65);
+$grfx->bspline(\@points, -debug=>1);
+$grfx->stroke();
+
+# caption
+drawCaption(['bspline() with', 'constructors'], 'LC');
+
+$grfx->restore();
+
+# ----------------------------------------------------
+
+# ----------------------------------------------------
 # 29. bogen()  (circular arc segment) 1/4  smaller arc, non-flipped
 @cellLoc = makeCellLoc(0);
 @cellSize = (170, 131); 
@@ -1451,7 +1486,7 @@ $grfx->restore();
 
 # ----------------------------------------------------
 # 33. fill(): 5 pt star with both rules
-@cellLoc = makeCellLoc(0);
+@cellLoc = makeCellLoc(1);
 @cellSize = (170, 131); 
 $grfx->save();
 
@@ -1565,7 +1600,7 @@ $grfx->restore();
 
 # ----------------------------------------------------
 # 37. clip(): filled circle with box cut out
-@cellLoc = makeCellLoc(0);
+@cellLoc = makeCellLoc(1);
 @cellSize = (170, 131); 
 $grfx->save();
 

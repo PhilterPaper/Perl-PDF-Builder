@@ -29,6 +29,7 @@ perl examples\050_pagelabels
 perl examples\055_outlines
 perl examples\060_transparency
 perl examples\BarCode.pl
+perl examples\Bspline.pl
 perl examples\Content.pl
 perl examples\ContentText.pl
 perl examples\ShowFont.pl Helvetica

@@ -76,10 +76,6 @@ affect the operation or results of otherwise correct code.
     
      Read the updated POD to clarify what is returned by a method call.
 
-3.002     2017-03-21 
-
-   No known incompatibilities added.
-
 3.001     2017-01-30 
 
    lib/PDF/Builder/Util.pm  *HexValues() calls, pad with '0' to minimum length

@@ -2,9 +2,9 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.010     2018-07-09 (unreleased)
+3.010     2018-07-13 (unreleased)
 
-   Changes, Changes_2017
+   Changes, Changes_2017, MANIFEST
      split up Change logs by year, to make them easier to handle.
 
 *  docs/, docs/buildDoc.pl, MANIFEST
@@ -16,14 +16,15 @@ See also Changes_2017 for earlier version 3 release logs.
      [ref RT 124349] code cleanup while looking at issue of why PNG RGBA
      processing is so incredibly slow.    TBD
 
-*  lib/PDF/Builder/Content.pm, examples/Content.pl, t/content.t
-     [ref CTS 8] add "bspline" method to draw a smoothly continuous curve 
+   lib/PDF/Builder/Content.pm, examples/Content.pl, examples/Bspline.pl, 
+     t/content.t, MANIFEST, examples.bat
+    [ref CTS 8] add "bspline" method to draw a smoothly continuous curve 
      (using blended cubic Bezier curves) through all the given points. In 
      addition, the first and/or last points may be specified as visible or 
      invisible straight line or curved segments in order to constrain the 
-     spline's behavior at the endpoints.  TBD
+     spline's behavior at the endpoints.
 
-   lib/PDF/Builder/Content.pm, examples/Content.pl, DEPRECATED
+   lib/PDF/Builder/Content.pm, examples/Content.pl, t/content.t, DEPRECATED
      [ref CTS 8] change "spline" method name to "qbspline", and deprecate 
      "spline". This is to reflect that this method is actually a piecewise 
      (non-continuous) series of quadratic Bezier curves, and not a true spline. 
@@ -121,7 +122,7 @@ See also Changes_2017 for earlier version 3 release logs.
      add support for cross-reference streams (PDF 1.5) using 64-bit field 
      widths, per PDF::API2 changes.
 
-   .travis.yml.HOLD
+   .travis.yml.HOLD, MANIFEST
      name restore (from .tgravis.yml). May attempt at some point to make use of 
      Travis for testing. Currently my system seems to not be supportive of
      Travis modules, and I don't have a Travis account. I vaguely recall the

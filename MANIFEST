@@ -1,8 +1,9 @@
 # This file is manually maintained
 .perlcriticrc
 .perl-version
-.travis.yml
+.travis.yml.HOLD
 Changes
+Changes_2017
 Changes-ver_2
 contrib.bat
 DEPRECATED
@@ -48,6 +49,7 @@ examples/050_pagelabels
 examples/055_outlines
 examples/060_transparency
 examples/BarCode.pl
+examples/Bspline.pl
 examples/Content.pl
 examples/ContentText.pl
 examples/examples.output

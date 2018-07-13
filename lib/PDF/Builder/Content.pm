@@ -770,8 +770,8 @@ sub move {
         $self->{' x'}  = $x;  # set new current position
         $self->{' y'}  = $y;
     }
-   #if (scalar @_) {    leftovers ignored, as is usual practice
-   #    warn "move() has leftover coordinate(s) (ignored).";
+   #if (scalar @_) {   # normal practice is to discard unused values
+   #    warn "extra coordinate(s) ignored in move\n";
    #}
 
     return $self;
@@ -846,7 +846,7 @@ sub line {
 
     my ($x,$y);
     while (scalar @_ >= 2) {
-	$x = shift;
+        $x = shift;
         $y = shift;
         if ($self->_in_text_object()) {
             $self->add_post(floats($x,$y), 'l');
@@ -1255,7 +1255,9 @@ made to smoothly blend one curve into the next!
 Further note that this "spline" does not match the common definition of
 a spline being a I<continuous> curve passing I<through> B<all> the given 
 points! It is a piecewise non-continuous cubic Bezier curve. Use with care, and 
-do not make assumptions about splines for you or your readers.
+do not make assumptions about splines for you or your readers. You may wish
+to use the C<bspline> call to have a continuously smooth spline to pass through
+all given points.
 
 Pairs of points (control point and end point) are consumed in a loop. If one 
 point or coordinate is left over at the end, it is discarded (as usual practice
@@ -1296,6 +1298,782 @@ sub qbspline {
    #}
 
     return $self;
+}
+
+=item $content->bspline($ptsRef, %opts)
+
+=item $content->bspline($ptsRef)
+
+This extends the path in a curve from the current point to the end of a list
+of coordinate pairs in the array referenced by C<$ptsRef>. Smoothly continuous
+cubic Bezier splines are used to create a curve that passes through I<all>
+the given points. Multiple control points are synthesized; they are not 
+supplied in the call. The current position is updated to the last point.
+
+Internally, these splines are one cubic Bezier curve (see C<curve>) per pair
+of input points, with the two control points synthesized from the tangent 
+through each point as set by the polyline that would connect each point to its
+neighbors. The intent is that the resulting curve should follow reasonably 
+closely a polyline that would connect the points, and should avoid any major 
+excursions. See the discussions below for the handling of the control points
+at the endpoints (current point and last input point). The point at the end
+of the last line or curve drawn becomes the new current point.
+
+%opts
+
+=over
+
+=item -firstseg => 'I<mode>'
+
+where I<mode> is 
+
+=over
+
+=item curve
+
+This is the B<default> behavior.
+This forces the first segment (from the current point to the first given point)
+to be drawn as a cubic Bezier curve. This means that the direction of the curve
+coming off the current point is unconstrained (it will end up being a reflection
+of the tangent at the first given point).
+
+=item line1
+
+This forces the first segment (from the current point to the first given point)
+to be drawn as a curve, with the tangent at the current point to be constrained 
+as parallel to the polyline segment. 
+
+=item line2
+
+This forces the first segment (from the current point to the first given point)
+to be drawn as a line segment. This also sets the tangent through the first
+given point as a continuation of the line, as well as constraining the direction
+of the line at the current point.
+
+=item constraint1
+
+This forces the first segment (from the current point to the first given point)
+to B<not> be drawn, but to be an invisible curve (like mode=line1) to leave
+the tangent at the first given point unconstrained. A I<move> will be made to 
+the first given point, and the current point is otherwise ignored.
+
+=item constraint2
+
+This forces the first segment (from the current point to the first given point)
+to B<not> be drawn, but to be an invisible line (like mode=line2) to constrain
+the tangent at the first given point. A I<move> will be made to the first given
+point, and the current point is otherwise ignored.
+
+=back
+
+=item -lastseg => 'I<mode>'
+
+where I<mode> is 
+
+=over
+
+=item curve
+
+This is the B<default> behavior.
+This forces the last segment (to the last given input point)
+to be drawn as a cubic Bezier curve. This means that the direction of the curve
+goin to the last point is unconstrained (it will end up being a reflection
+of the tangent at the next-to-last given point).
+
+=item line1
+
+This forces the last segment (to the last given input point) to be drawn as a 
+curve with the the tangent through the last given point parallel to the 
+polyline segment, thus constraining the direction of the line at the last 
+point.
+
+=item line2
+
+This forces the last segment (to the last given input point)
+to be drawn as a line segment. This also sets the tangent through the 
+next-to-last given point as a back continuation of the line, as well as 
+constraining the direction of the line at the last point.
+
+=item constraint1
+
+This forces the last segment (to the last given input point)
+to B<not> be drawn, but to be an invisible curve (like mode=line1) to leave
+the tangent at the next-to-last given point unconstrained. The last given 
+input point is ignored, and next-to-last point becomes the new current point.
+
+=item constraint2
+
+This forces the last segment (to the last given input point)
+to B<not> be drawn, but to be an invisible line (like mode=line2) to constrain
+the tangent at the next-to-last given point. The last given input point is
+ignored, and next-to-last point becomes the new current point.
+
+=back
+
+=item -ratio => I<n>
+
+I<n> is the ratio of the length from a point to a control point to the length
+of the polyline segment on that side of the given point. It must be greater
+than 0.1, and the default is 0.3333 (1/3).
+
+=item -colinear => 'I<mode>'
+
+This describes how to handle the middle segment when there are four or more 
+colinear points in the input set. A I<mode> of 'line' specifies that a line 
+segment will be drawn between each of the interior colinear points. A I<mode> 
+of 'curve' (this is the default) will draw a Bezier curve between each of those 
+points.
+
+C<-colinear> applies only to interior runs of colinear points, between curves. 
+It does not apply to runs at the beginning or end of the point list, which are
+drawn as line segments or linear constraints regardless of I<-firstseg> and 
+I<-lastseg> settings.
+
+=item -debug => I<N>
+
+If I<N> is 0 (the default), only the spline is returned. If it is greater than
+0, a number of additional items will be drawn: (N>0) the points, (N>1) a green 
+solid polyline connecting them, (N>2) blue original tangent lines at each 
+interior point, and (N>3) red dashed lines and hollow points representing the 
+Bezier control points.
+
+=back
+
+=head3 Special cases
+
+Adjacent points which are duplicates are consolidated. 
+An extra coordinate at the end of the input point list (not a full 
+C<[x,y]> pair) will, as usual, be ignored.
+
+=over
+
+=item 0 given points (after duplicate consolidation)
+
+This leaves only the current point (unchanged), so it is a no-op.
+
+=item 1 given point (after duplicate consolidation)
+
+This leaves the current point and one point, so it is rendered as a line,
+regardless of %opt flags.
+
+=item 2 given points (after duplicate consolidation)
+
+This leaves the current point, an intermediate point, and the end point. If
+the three points are colinear, two line segments will be drawn. Otherwise, both
+segments are curves (through the tangent at the intermediate point). If either
+end segment mode is requested to be a line or constraint, it is treated as a 
+B<line1> mode request instead. 
+
+=item I<N> colinear points at beginning or end 
+
+I<N> colinear points at beginning or end of the point set causes I<N-1> line 
+segments (C<line2> or C<constraint2>, regardless of the settings of 
+C<-firstseg>, C<-lastseg>, and C<-colinear>.
+
+=back
+
+=cut
+
+sub bspline {
+    my ($self, $ptsRef, %opts) = @_;
+    my @inputPts = @$ptsRef;
+    my ($firstseg, $lastseg, $ratio, $colinear, $debug);
+    my (@oldColor, @oldFill, $oldWidth, @oldDash);
+    # specific treatment of the first and last segments of the spline
+    # code will be checking for line[12] and constraint[12], and assume it's
+    # 'curve' if nothing else matches (silent error)
+    if (defined $opts{'-firstseg'}) {
+	$firstseg = $opts{'-firstseg'};
+    } else {
+	$firstseg = 'curve';
+    }
+    if (defined $opts{'-lastseg'}) {
+	$lastseg = $opts{'-lastseg'};
+    } else {
+	$lastseg = 'curve';
+    }
+    # ratio of the length of a Bezier control point line to the distance
+    # between the points
+    if (defined $opts{'-ratio'}) {
+        $ratio = $opts{'-ratio'};
+	# clamp it (silent error) to be >0.1. probably no need to limit high end
+	if ($ratio <= 0.1) { $ratio = 0.1; }
+    } else {
+	$ratio = 0.3333;  # default
+    }
+    # colinear points (4 or more) draw a line instead of a curve
+    if (defined $opts{'-colinear'}) {
+	$colinear = $opts{'-colinear'}; # 'line' or 'curve'
+    } else {
+	$colinear = 'curve';  # default
+    }
+    # debug options to draw out intermediate stages
+    if (defined $opts{'-debug'}) {
+	$debug = $opts{'-debug'};
+    } else {
+	$debug = 0;  # default
+    }
+
+    # copy input point list pairs, checking for duplicates
+    my (@inputs, $x,$y);
+    @inputs = ([$self->{' x'}, $self->{' y'}]); # initialize to current point
+    while (scalar(@inputPts) >= 2) {
+	$x = shift @inputPts;
+	$y = shift @inputPts;
+	push @inputs, [$x, $y];
+	# eliminate duplicate point just added
+        if ($inputs[-2][0] == $inputs[-1][0] &&
+            $inputs[-2][1] == $inputs[-1][1]) {
+	    # duplicate
+	    pop @inputs; 
+	}
+    }
+   #if (scalar @inputPts) {    leftovers ignored, as is usual practice
+   #    warn "bspline() has leftover coordinate (ignored).";
+   #}
+
+    # handle special cases of 1, 2, or 3 points in @inputs
+    if      (scalar @inputs == 1) {
+	# only current point in list: no-op
+	return $self;
+    } elsif (scalar @inputs == 2) {
+	# just two points: draw a line
+	$self->line($inputs[1][0],$inputs[1][1]);
+	return $self;
+    } elsif (scalar @inputs == 3) {
+	# just 3 points: adjust flags
+	if ($firstseg ne 'curve') { $firstseg = 'line1'; }
+	if ($lastseg ne 'curve') { $lastseg = 'line1'; }
+	# note that if colinear, will become line2 for both
+    } 
+
+    # save existing settings if -debug draws anything
+    if ($debug > 0) {
+	@oldColor = $self->strokecolor();
+	@oldFill  = $self->fillcolor();
+        $oldWidth = $self->linewidth();
+	@oldDash  = $self->linedash(-1);
+    }
+    # initialize working arrays
+    #  dx,dy are unit vector (sum of squares is 1)
+    #   polyline [n][0] = dx, [n][1] = dy, [n][2] = length for segment between
+    #     points n and n+1
+    #   colinpt [n] = 0 if not, 1 if it is interior colinear point
+    #   type [n] = 0 it's a Bezier curve, 1 it's a line between pts n, n+1
+    #              2 it's a curve constraint (not drawn), 3 line constraint ND
+    #   tangent [n][0] = dx, [n][1] = dy for tangent line direction (forward)
+    #     at point n
+    #   cp [n][0][0,1] = dx,dy direction to control point "before" point n
+    #            [2] = distance from point n to this control point
+    #         [1]  likewise for control point "after" point n
+    #     n=0 doesn't use "before" and n=last doesn't use "after"
+    #
+    # every time a tangent is set, also set the cp unit vectors, so nothing
+    # is overlooked, even if a tangent may be changed later
+    my ($i,$j,$k, $x,$y,$l, $dx,$dy, @polyline, @colinpt, @type, @tangent, @cp);
+    my $last = $#inputs; # index number of last point (first is 0)
+
+    for ($i=0; $i<=$last; $i++) {  # through all points
+	$polyline[$i] = [0,0,0];
+	if ($i < $last) {  # polyline[i] is line point i to i+1
+	    $dx = $inputs[$i+1][0] - $inputs[$i][0];
+	    $dy = $inputs[$i+1][1] - $inputs[$i][1];
+	    $polyline[$i][2] = $l = sqrt($dx*$dx + $dy*$dy);
+            $polyline[$i][0] = $dx/$l;
+            $polyline[$i][1] = $dy/$l;
+	}
+
+	$colinpt[$i] = 0; # default: not colinear at this point i
+	$type[$i] = 0;    # default: using a curve at this point i to i+1
+	                  # N/A if i=last, will ignore
+	if ($i > 0 && $i < $last) { # colinpt... look at polyline unit vectors
+		                    # of lines coming into and out of point i
+	    if ($polyline[$i-1][0] == $polyline[$i][0] &&
+		$polyline[$i-1][1] == $polyline[$i][1]) {
+		$colinpt[$i] = 1; # same unit vector at prev point
+		                  # so point is colinear (inside run)
+		# set type[i] even if may change later
+		if ($i == 1) {
+		    # point 1 is colinear? force line2 or constraint2
+		    if ($firstseg =~ m#^constraint#) {
+		        $firstseg = 'constraint2';
+			$type[0] = 3;
+		    } else {
+		        $firstseg = 'line2';
+			$type[0] = 1;
+		    }
+		    $colinpt[0] = 1; # if 1 is colinear, so is 0
+		    $type[1] = 1;
+		}
+		if ($i == $last-1) {
+		    # point last-1 is colinear? force line2 or constraint2
+		    if ($lastseg =~ m#^constraint#) {
+		        $lastseg = 'constraint2';
+			$type[$i] = 3;
+		    } else {
+		        $lastseg = 'line2';
+			$type[$i] = 1;
+		    }
+		    $colinpt[$last] = 1; # if last-1 is colinear, so is last
+		    $type[$last-2] = 1;
+		}
+	    } # it is colinear
+	}  # looking for colinear interior points
+	# if 3 or more colinear points at beginning or end, handle later
+
+	$tangent[$i] = [0,0];  # set tangent at each point
+	# endpoints & interior colinear points just use the polyline they're on
+        #
+	# at point $i, [0 1] "before" for previous curve and "after"
+	# each [dx, dy, len] from this point to control point
+	$cp[$i] = [[0,0,0], [0,0,0]];
+	# at least can set the lengths here. uvecs will be set to tangents,
+	# even though some may be changed later
+	
+	if ($i > 0) { # do 'before' cp length
+	    $cp[$i][0][2] = $polyline[$i-1][2] * $ratio;
+	}
+	if ($i < $last) { # do 'after' cp length
+	    $cp[$i][1][2] = $polyline[$i][2] * $ratio;
+	}
+
+	if      ($i == 0 || $i < $last && $colinpt[$i]) {
+	    $cp[$i][1][0] = $tangent[$i][0] = $polyline[$i][0];
+	    $cp[$i][1][1] = $tangent[$i][1] = $polyline[$i][1];
+	    if ($i > 0) { 
+		$cp[$i][0][0] = -$cp[$i][1][0];
+	        $cp[$i][0][1] = -$cp[$i][1][1]; 
+	    }
+	} elsif ($i == $last) {
+	    $tangent[$i][0] = $polyline[$i-1][0];
+	    $tangent[$i][1] = $polyline[$i-1][1];
+	    $cp[$i][0][0] = -$tangent[$i][0];
+	    $cp[$i][0][1] = -$tangent[$i][1];
+	} else {
+	    # for other points, add the incoming and outgoing polylines
+	    # and normalize to unit length
+	    $dx = $polyline[$i-1][0] + $polyline[$i][0];
+	    $dy = $polyline[$i-1][1] + $polyline[$i][1];
+	    $l = sqrt($dx*$dx + $dy*$dy);
+	    # degenerate sequence A-B-A would give a length of 0, so avoid /0
+	    # TBD: look at entry and exit curves to instead have assigned
+	    #      tangent go left instead of right, to avoid in some cases a
+	    #      twist in the loop
+	    if ($l == 0) { 
+		# still no direction to it. assign 90 deg right turn
+		# on outbound A-B (at point B)
+	        my $theta = atan2($polyline[$i-1][1], $polyline[$i-1][0]) - Math::Trig::pip2;
+		$cp[$i][1][0] = $tangent[$i][0] = cos($theta);
+		$cp[$i][1][1] = $tangent[$i][1] = sin($theta);
+	    } else {
+	        $cp[$i][1][0] = $tangent[$i][0] = $dx/$l;
+	        $cp[$i][1][1] = $tangent[$i][1] = $dy/$l;
+	    }
+	    $cp[$i][0][0] = -$cp[$i][1][0];
+	    $cp[$i][0][1] = -$cp[$i][1][1];
+	}
+    } # for loop to initialize all arrays
+
+    # debug: show points, polyline, and original tangents
+    if ($debug > 0) {
+	$self->linedash();  # solid
+        $self->linewidth(2);
+	$self->strokecolor('green');
+	$self->fillcolor('green');
+
+	# points (debug = 1+)
+	for ($i=0; $i<=$last; $i++) {
+	    $self->circle($inputs[$i][0],$inputs[$i][1], 2);
+	}
+	$self->fillstroke();
+	# polyline (@inputs not in correct format for poly() call)
+	if ($debug > 1) {
+	    $self->move($inputs[0][0], $inputs[0][1]);
+	    for ($i=1; $i<=$last; $i++) {
+		$self->line($inputs[$i][0], $inputs[$i][1]);
+	    }
+	    $self->stroke();
+	    $self->fillcolor(@oldFill);
+        }
+
+	# original tangents (before adjustment)
+	if ($debug > 2) {
+	    $self->linewidth(1);
+	    $self->strokecolor('blue');
+	    for ($i=0; $i<=$last; $i++) {
+	        $self->move($inputs[$i][0], $inputs[$i][1]);
+	        $self->line($inputs[$i][0] + 20*$tangent[$i][0],
+	                    $inputs[$i][1] + 20*$tangent[$i][1]);
+	    }
+	    $self->stroke();
+	}
+
+	# prepare for control points and dashed lines
+	if ($debug > 3) {
+	    $self->linedash(2);  # repeating 2 on 2 off (solid for points)
+	    $self->linewidth(2); # 1 for points (circles)
+	    $self->strokecolor('red');
+	}
+    } # debug dump of intermediate results
+    # at this point, @tangent unit vectors need to be adjusted for several 
+    # reasons, and @cp unit vectors need to await final tangent vectors.
+    # @type is "displayed curve" (0) for all segments ex possibly first and last
+
+    # follow colinear segments at beginning and end (not interior).
+    # follow colinear segments from 1 to $last-1, and same $last-1 to 1,
+    # setting type to 1 (line segment). once type set to non-zero, will
+    # not revisit it. we should have at least 3 points ($last >= 2), and points
+    # 0, 1, last-1, and last should already have been set. tangents already set.
+    for ($i=1; $i<$last-1; $i++) {
+	if ($colinpt[$i]) {
+	    $type[$i] = 1;
+	    $cp[$i+1][1][0] =  $tangent[$i+1][0] = $polyline[$i][0];
+	    $cp[$i+1][1][1] =  $tangent[$i+1][1] = $polyline[$i][1];
+	    $cp[$i+1][0][0] = -$tangent[$i+1][0];
+	    $cp[$i+1][0][1] = -$tangent[$i+1][1];
+	} else {
+	    last;
+        }
+    }
+    for ($i=$last-1; $i>1; $i--) {
+	if ($colinpt[$i]) {
+	    $type[$i-1] = 1;
+	    $cp[$i-1][1][0] =  $tangent[$i-1][0] = $polyline[$i-1][0];
+	    $cp[$i-1][1][1] =  $tangent[$i-1][1] = $polyline[$i-1][1];
+	    $cp[$i-1][0][0] = -$tangent[$i-1][0];
+	    $cp[$i-1][0][1] = -$tangent[$i-1][1];
+	} else {
+            last;
+        }
+    }
+
+    # now the major work of deciding whether line segment or Bezier curve
+    # at each polyline segment, and placing the control points for the curves
+    #
+    # handle first and last segments first, as they affect tangents.
+    # then go through, setting colinear sections to lines if requested,
+    # or setting tangents if curves. calculate all control points from final
+    # tangents, and draw them if debug.
+    my ($ptheta, $ttheta, $dtheta);
+    # special treatments for first segment
+    if      ($firstseg eq 'line1') {
+	# Bezier curve from point 0 to 1, constrained to polyline at point 0
+	# but no constraint on tangent at point 1.
+	# should already be type 0 between points 0 and 1
+	# point 0 tangent should already be on polyline segment
+    } elsif ($firstseg eq 'line2') {
+	# line drawn from point 0 to 1, constraining the tangent at point 1
+	$type[0] = 1; # set to type 1 between points 0 and 1
+	# no need to set tangent at point 0, or set control points
+	$cp[1][1][0] = $tangent[1][0] = $polyline[0][0];
+	$cp[1][1][1] = $tangent[1][1] = $polyline[0][1];
+	$cp[1][0][0] = -$tangent[1][0];
+	$cp[1][0][1] = -$tangent[1][1];
+    } elsif ($firstseg eq 'constraint1') {
+	# Bezier curve from point 0 to 1, constrained to polyline at point 0
+	# (not drawn, allows unconstrained tangent at point 1)
+	$type[0] = 2; 
+	# no need to set after and before, as is not drawn
+    } elsif ($firstseg eq 'constraint2') {
+	# line from point 0 to 1 (not drawn, only sets tangent at point 1)
+	$type[0] = 3;
+	# no need to set before, as is not drawn and is line anyway
+	$cp[1][1][0] = $tangent[1][0] = $polyline[0][0];
+	$cp[1][1][1] = $tangent[1][1] = $polyline[0][1];
+    } else { # 'curve'
+	# Bezier curve from point 0 to 1. both ends unconstrained, at point 0
+	# it is just a reflection of the tangent at point 1
+       #$type[0] = 0; # should already be 0
+	$ptheta = atan2($polyline[0][1], $polyline[0][0]);
+	$ttheta = atan2(-$tangent[1][1], -$tangent[1][0]);
+	$dtheta = _leftright($ptheta, $ttheta);
+	$ptheta = atan2(-$polyline[0][1], -$polyline[0][0]);
+	$ttheta = _sweep($ptheta, $dtheta);
+	$cp[0][1][0] =  $tangent[0][0] = cos($ttheta); # also 'after' uvec at 0
+	$cp[0][1][1] =  $tangent[0][1] = sin($ttheta);
+    }
+    # special treatments for last segment
+    if      ($lastseg eq 'line1') {
+	# Bezier curve from point last-1 to last, constrained to polyline at 
+	# point last but no constraint on tangent at point last-1
+	# should already be type 0 at last-1
+	# point last tangent should already be on polyline segment
+    } elsif ($lastseg eq 'line2') {
+	# line drawn from point last-1 to last, constraining the tangent at point last-1
+	$type[$last-1] = 1;
+	# no need to set tangent at point last, or set control points at last
+	$cp[$last-1][1][0] = $tangent[$last-1][0] = $polyline[$last-1][0];
+	$cp[$last-1][1][1] = $tangent[$last-1][1] = $polyline[$last-1][1];
+	$cp[$last-1][0][0] = -$tangent[$last-1][0];
+	$cp[$last-1][0][1] = -$tangent[$last-1][1];
+    } elsif ($lastseg eq 'constraint1') {
+	# Bezier curve from point last-1 to last, constrained to polyline at point last
+	# (not drawn, allows unconstrained tangent at point last-1)
+	$type[$last-1] = 2; 
+    } elsif ($lastseg eq 'constraint2') {
+	# line from point last-1 to last (not drawn, only sets tangent at point last-1)
+	$type[$last-1] = 3;
+	# no need to set after, as is not drawn and is line anyway
+	$tangent[$last-1][0] = $polyline[$last-1][0];
+	$tangent[$last-1][1] = $polyline[$last-1][1];
+	$cp[$last-1][0][0] = -$tangent[$last-1][0];
+	$cp[$last-1][0][1] = -$tangent[$last-1][1];
+    } else { # 'curve'
+	# Bezier curve from point last-1 to last. both ends unconstrained, at point last
+	# it is just a reflection of the tangent at point last-1
+       #$type[$last-1] = 0; # should already be 0
+	$ptheta = atan2($polyline[$last-1][1], $polyline[$last-1][0]);
+	$ttheta = atan2($tangent[$last-1][1], $tangent[$last-1][0]);
+	$dtheta = _leftright($ptheta, $ttheta);
+	$ptheta = atan2(-$polyline[$last-1][1], -$polyline[$last-1][0]);
+	$ttheta = _sweep($ptheta, $dtheta);
+	$tangent[$last][0] = -cos($ttheta);
+	$tangent[$last][1] = -sin($ttheta);
+	$cp[$last][0][0] = -$tangent[$last][0]; # set 'before' unit vector at point 1
+	$cp[$last][0][1] = -$tangent[$last][1];
+    }
+
+    # go through interior points (2..last-2) and set tangents if colinear
+    # (and not forcing lines). by default are curves.
+    for ($i=2; $i<$last-1; $i++) {
+	if ($colinpt[$i]) {
+	    # this is a colinear point (1 or more in a row with endpoints of
+	    # run). first, find run
+	    for ($j=$i+1; $j<$last-1; $j++) {
+		if (!$colinpt[$j]) { last; }
+	    }
+	    $j--; # back up one
+	    # here with $i = first of a run of colinear points, and $j = last
+	    # of the run. $i may equal $j (no lines to force)
+            if ($colinear eq 'line' && $j>$i) {
+		for ($k=$i; $k<$j; $k++) {
+	            $type[$k] = 1; # force a drawn line, ignore tangents/cps
+		}
+	    } else {
+		# colinear, will draw curve
+		my ($pthetap, $tthetap, $dthetap, $count, $odd, $kk, 
+		    $center, $tthetax, $same);
+		# odd number of points or even?
+		$count = $j - $i + 1; # only interior colinear points (>= 1)
+		$odd = $count % 2; # odd = 1 if odd count, 0 if even
+
+		# need to figure tangents for each colinear point (draw curves)
+		# first get d-theta for entry angle, d-theta' for exit angle
+		# for which side of polyline the entry, exit control points are
+	        $ptheta = atan2($polyline[$i-1][1], $polyline[$i-1][0]);
+	        $ttheta = atan2($tangent[$i-1][1], $tangent[$i-1][0]);
+	        $dtheta = _leftright($ptheta, $ttheta); # >=0 CCW left side
+		                                        #  <0 CW right side
+	        $pthetap = atan2(-$polyline[$j][1], -$polyline[$j][0]);
+	        $tthetap = atan2(-$tangent[$j+1][1], -$tangent[$j+1][0]);
+	        $dthetap = _leftright($pthetap, $tthetap); # >=0 CCW right side
+		                                           #  <0 CW left side
+
+                # both dtheta and dtheta' are modified below, so preserve here
+		if ($dtheta >= 0 && $dthetap  < 0 ||
+		    $dtheta  < 0 && $dthetap >= 0) {
+		    # non-colinear end tangents are on same side
+		    $same = 1;
+		} else {
+		    # non-colinear end tangents are on opposite sides
+		    $same = 0;
+		}
+		# $kk is how many points on each side to set tangent at,
+		# including $i and $j (but excluding $center)
+		if ($odd) {
+		    # center (i + (count-1)/2) stays flat tangent,
+		    $kk = ($count-1)/2; # ignore if 0
+		    $center = $i + $kk;
+		} else {
+                    # center falls between i+count/2 and i+count/2+1
+		    $kk = $count/2; # minimum 1
+		    $center = -1;  # not used
+		}
+
+		# dtheta[p]/2,3,4... towards center alternating
+		#     direction from initial dtheta[p]
+		# from left, i, i+1, i+2,...,i+kk-1, (center)
+		# from right, j, j-1, j-2,...,j-kk+1, (center)
+		for ($k=0; $k<$kk; $k++) {
+		    # handle i+k and j-k points
+		    $dtheta = -$dtheta;
+	            $tthetax = _sweep($ptheta, -$dtheta/($k+2));
+		    $cp[$i+$k][1][0] =  $tangent[$i+$k][0] = cos($tthetax);
+		    $cp[$i+$k][1][1] =  $tangent[$i+$k][1] = sin($tthetax);
+		    $cp[$i+$k][0][0] = -$tangent[$i+$k][0];
+		    $cp[$i+$k][0][1] = -$tangent[$i+$k][1];
+
+		    $dthetap = -$dthetap;
+	            $tthetax = _sweep($pthetap, -$dthetap/($k+2));
+		    $cp[$j-$k][1][0] =  $tangent[$j-$k][0] = -cos($tthetax);
+		    $cp[$j-$k][1][1] =  $tangent[$j-$k][1] = -sin($tthetax);
+		    $cp[$j-$k][0][0] = -$tangent[$j-$k][0];
+		    $cp[$j-$k][0][1] = -$tangent[$j-$k][1];
+		}
+
+		# if odd (there is a center point), either flat or averaged
+		if ($odd) {
+		    if ($same) {
+		        # non-colinear tangents are on same side,
+		        # so tangent is flat (in line with polyline)
+			# tangent[center] should already be set to polyline
+		    } else {
+		        # non-colinear tangents are on opposite sides
+		        # so tangent is average of both neighbors dtheta's
+		        # and is opposite sign of the left neighbor
+		        $dtheta = -($dtheta + $dthetap)/2/($kk+2);
+		        $tthetax = _sweep($ptheta, -$dtheta);
+		        $tangent[$center][0] = cos($tthetax);
+		        $tangent[$center][1] = sin($tthetax);
+		    }
+		    # finally, the cps for the center. redundant for flat
+		    $cp[$center][0][0] = -$tangent[$center][0];
+		    $cp[$center][0][1] = -$tangent[$center][1];
+		    $cp[$center][1][0] =  $tangent[$center][0];
+		    $cp[$center][1][1] =  $tangent[$center][1];
+	        } # odd length of run
+	    } # it IS a colinear point
+
+	    # done dealing with run of colinear points
+	    $i = $j; # jump ahead over the run
+	    next;
+            # end of handling colinear points
+	} else {
+	    # non-colinear. just set cp before and after uvecs (lengths should
+	    # already be set)
+	}
+    } # end of for loop through interior points
+
+    # all cp entries should be set, and all type entries should be set. if
+    # debug flag, output control points (hollow red circles) with dashed 2-2
+    # red lines from their points
+    if ($debug > 3) {
+	for ($i=0; $i<$last; $i++) {
+	    # if a line or constraint line, no cp/line to draw
+	    # don't forget, for i=last-1 and type=0 or 2, need to draw at last
+	    if ($i < $last && ($type[$i] == 1 || $type[$i] == 3)) { next; }
+
+	    # have point i that is end of curve, so draw dashed line to
+	    # control point, change to narrow solid line, draw open circle,
+	    # change back to heavy dashed line for next
+	    for ($j=0; $j<2; $j++) {
+		# j=0 'after' control point for point $i 
+		# j=1 'before' control point for point $i+1
+
+		# dashed red line
+		$self->move($inputs[$i+$j][0], $inputs[$i+$j][1]);
+		$self->line($inputs[$i+$j][0] + $cp[$i+$j][1-$j][0]*$cp[$i+$j][1-$j][2], 
+			    $inputs[$i+$j][1] + $cp[$i+$j][1-$j][1]*$cp[$i+$j][1-$j][2]);
+		$self->stroke();
+		# red circle
+		$self->linewidth(1);
+		$self->linedash();
+		$self->circle($inputs[$i+$j][0] + $cp[$i+$j][1-$j][0]*$cp[$i+$j][1-$j][2], 
+			      $inputs[$i+$j][1] + $cp[$i+$j][1-$j][1]*$cp[$i+$j][1-$j][2], 
+			      2);
+		$self->stroke();
+		# prepare for next line
+		$self->linewidth(2);
+		$self->linedash(2);
+	    }
+	} # loop through all points
+    } # debug == 3
+
+    # restore old settings 
+    if ($debug > 0) {
+	$self->fillstroke();
+	$self->strokecolor(@oldColor);
+        $self->linewidth($oldWidth);
+	$self->linedash(@oldDash);
+    }
+
+    # the final act: go through each segment and draw either a line or a
+    # curve
+    if ($type[0] < 2) {  # start drawing at 0 or 1? 
+        $self->move($inputs[0][0], $inputs[0][1]);
+    } else {
+        $self->move($inputs[1][0], $inputs[1][1]);
+    }
+    for ($i=0; $i<$last; $i++) {
+	if ($type[$i] > 1) { next; } # 2, 3 constraints, not drawn
+	if ($type[$i] == 0) {
+	    # Bezier curve, use $cp[$i][1] and $cp[$i+1][0] to generate 
+	    # points for curve call
+	    $self->curve($inputs[$i][0]   + $cp[$i][1][0]*$cp[$i][1][2], 
+		         $inputs[$i][1]   + $cp[$i][1][1]*$cp[$i][1][2],
+	                 $inputs[$i+1][0] + $cp[$i+1][0][0]*$cp[$i+1][0][2], 
+		         $inputs[$i+1][1] + $cp[$i+1][0][1]*$cp[$i+1][0][2],
+			 $inputs[$i+1][0],
+			 $inputs[$i+1][1]);
+	} else {
+	    # line to next point
+ 	    $self->line($inputs[$i+1][0], $inputs[$i+1][1]);
+	}
+    }
+    
+    return $self;
+}
+# helper function for bspline()
+# given two unit vectors (direction in radians), return the delta change in
+# direction (radians) of the first vector to the second. left is positive.
+sub _leftright {
+    my ($ptheta, $ttheta) = @_;
+    # ptheta is the angle (radians) of the polyline vector from one
+    # point to the next, and ttheta is the tangent vector at the point
+    my ($dtheta, $antip);
+
+    if ($ptheta >= 0 && $ttheta >= 0 || # both in top half (QI, QII)
+        $ptheta < 0 && $ttheta < 0) { # both in bottom half (QIII, QIV)
+	$dtheta = $ttheta - $ptheta;
+    } else {  # p in top half (QI, QII), t,antip in bottom half (QIII, QIV)
+	      # or p in bottom half, t,antip in top half
+	if ($ttheta < 0) {
+	    $antip = $ptheta - pi;
+	} else {
+	    $antip = $ptheta + pi;
+	}
+	if ($ttheta <= $antip) {
+	    $dtheta = pi - $antip + $ttheta; # pi - (antip - ttheta)
+	} else {
+	    $dtheta = $ttheta - $antip - pi; # (ttheta - antip) - pi
+	}
+    }
+
+    return $dtheta;
+}
+# helper function. given a unit direction ptheta, swing +dtheta radians right,
+# return normalized result
+sub _sweep {
+    my ($ptheta, $dtheta) = @_;
+    my ($max, $result);
+
+    if ($ptheta >= 0) { # p in QI or QII
+	if ($dtheta >= 0) { # delta CW radians
+	    $result = $ptheta - $dtheta; # OK to go into bottom quadrants
+	} else { # delta CCW radians
+	    $max = pi - $ptheta; # max delta (>0) to stay in top quadrants
+	    if ($max >= -$dtheta) { # end up still in top quadrants
+		$result = $ptheta - $dtheta;
+	    } else { # into bottom quadrants
+		$dtheta += $max; # remaining CCW amount from -pi
+                $result = -pi - $dtheta;
+	    }
+	}
+    } else { # p in QIII or QIV
+	if ($dtheta >= 0) { # delta CW radians
+	    $max = pi + $ptheta; # max delta (>0) to stay in bottom quadrants
+	    if ($max >= $dtheta) { # end up still in bottom quadrants
+		$result = $ptheta - $dtheta;
+	    } else { # into top quadrants
+		$dtheta -= $max; # remaining CCW amount from +pi
+                $result = pi - $dtheta;
+	    }
+	} else { # delta CCW radians
+            $result = $ptheta - $dtheta; # OK to go into top quadrants
+	}
+    }
+
+    return $result;
 }
 
 =item $content->bogen($x1,$y1, $x2,$y2, $radius, $move, $larger, $reverse)
