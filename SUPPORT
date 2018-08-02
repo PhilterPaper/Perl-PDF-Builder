@@ -14,18 +14,16 @@ Currently, PDF::Builder source is hosted on GitHub
 (https://github.com/PhilterPaper/Perl-PDF-Builder), with the Perl
 installable module download offered on CPAN (PDF::Builder).
 
-Please raise issues (bug reports, etc.) on GitHub. Feature Requests
-should be tagged "enhancement". The maintainer will close (and tag
-as appropriate) resolved or rejected issues. Please do NOT use the
-CPAN RT ticket system -- it is not being regularly monitored by the
-owner.
+Please raise issues (bug reports, etc.) on GitHub, under the "issues" tab,
+with label "bugs". Feature Requests should be labeled "enhancement". The 
+maintainer will close (and tag as appropriate) resolved or rejected issues. 
+Please do NOT use the CPAN RT ticket system -- it is not being regularly 
+monitored by the owner.
 
 General discussions not pertaining to a specific issue (bug) may be
-conducted on the forum at http://www.catskilltech.com/forum/index.html
-in the PDF::Builder/General Discussions board. It is possible that at
-some time, this board will be renamed and moved to the "Free Software"
-category, so look there if the "PDF::Builder" category seems to have
-disappeared.
+conducted on the forum at https://www.catskilltech.com/forum/index.html
+in the PDF::Builder/General Discussions board. Alternately, use the "general
+discussion" label under the GitHub system. 
 
 If you do not have a CPAN or GitHub account with which to open a ticket,
 you can use my Contact form at the above forum URL. Look for a link "Post
