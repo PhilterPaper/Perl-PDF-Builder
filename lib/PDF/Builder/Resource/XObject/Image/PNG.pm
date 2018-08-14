@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.004'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 use Compress::Zlib;
 use POSIX qw(ceil floor);
@@ -19,6 +19,18 @@ use Scalar::Util qw(weaken);
 =head1 NAME
 
 PDF::Builder::Resource::XObject::Image::PNG - support routines for PNG image library. Inherits from L<PDF::Builder::Resource::XObject::Image>
+
+=item $res = PDF::Builder::Resource::XObject::Image::PNG->new($pdf, $file, $name, %opts)
+
+=item $res = PDF::Builder::Resource::XObject::Image::PNG->new($pdf, $file, $name)
+
+=item $res = PDF::Builder::Resource::XObject::Image::PNG->new($pdf, $file)
+
+Returns a PNG-image object. C<$pdf> is the PDF object being added to, C<$file>
+is the input PNG file, and the optional C<$name> of the new parent image object
+defaults to PxAAA.
+
+opts: -notrans
 
 =cut
 

@@ -136,6 +136,8 @@ sub encodeByData {
     return $self;
 }
 
+=head1 METHODS
+
 =over
 
 =item $font->automap()

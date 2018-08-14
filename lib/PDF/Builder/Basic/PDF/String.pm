@@ -179,7 +179,7 @@ sub val {
     return $_[0]->{'val'};
 }
 
-=head2 $->as_pdf()
+=head2 $s->as_pdf()
 
 Returns the string formatted for output as PDF for PDF File object $pdf.
 

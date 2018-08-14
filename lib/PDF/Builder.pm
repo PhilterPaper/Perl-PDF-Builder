@@ -74,6 +74,44 @@ PDF::Builder - Facilitates the creation and modification of PDF files
 
 =head1 SOME SPECIAL NOTES
 
+=head2 SOFTWARE DEVELOPMENT KIT
+
+There are four levels of involvement with PDF::Builder. Depending on what you
+want to do, different kinds of installs are recommended.
+
+B<1.> Simply installing PDF::Builder as a prerequisite for running some other
+package. All you need to do is install the CPAN package for PDF::Builder, and
+it will load the .pm files into your Perl library. If the other package prereqs
+PDF::Builder, its installer may download and install PDF::Builder automatically.
+
+B<2.> You want to write a Perl program that uses PDF::Builder functions. In 
+addition to installing PDF::Builder from CPAN, you will want documentation on
+it. Obtain a copy of the product from GitHub (https://github.com/PhilterPaper/Perl-PDF-Builder) or as a gzipped tar file from CPAN. This includes a utility to 
+build (from POD) a library of HTML documents, as well as examples (examples/ 
+directory) and contributed sample programs (contrib/ directory).
+
+B<3.> You want to modify PDF::Builder files. In addition to the CPAN and GitHub
+distributions, you I<may> choose to keep a local Git repository for tracking
+your changes. Depending on whether or not your PDF::Builder copy is being used
+for production purposes, you may want to do your editing and testing in the Perl
+library installation (I<live>) or in a different place. The "t" tests (t/
+directory) and examples provide good regression tests to ensure that you haven't
+broken anything. If you do your editing on the live code, don't forget when done
+to copy the changes back into the master version you keep!
+
+B<4.> You want to contribute to the development of PDF::Builder. You will need a
+local Git repository (and a GitHub account), so that when you've got it all 
+done, you can issue a "Pull Request" to bring it to our attention. We can't 
+guarantee that your work will be incorporated into the project, but at least we
+will look at it. From time to time, a new CPAN version will be issued.
+
+If you want to make substantial changes for public use, and can't come to a 
+meeting of minds with us, you can even start your own GitHub project and 
+register a new CPAN project (that's what we did, I<forking> PDF::API2). Please 
+don't just assume that we don't want your changes -- at least propose what you 
+want to do in writing, so we can consider it. We're always looking for people to
+help out and expand PDF::Builder.
+
 =head2 STRINGS (CHARACTER TEXT)
 
 Perl, and hence PDF::Builder, use strings that support the full range of
@@ -203,24 +241,6 @@ later version.
 This library is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
-
-=head1 HISTORY
-
-PDF::API2 was originally written by Alfred Reibenschuh, derived from Martin
-Hosken's Text::PDF via the Text::PDF::API wrapper. 
-In 2009, Otto Hirr started the PDF::API3 fork, but it never went anywhere.
-In 2011, maintenance was taken over by Steve Simms. In 2017, PDF::Builder 
-was forked by Phil M. Perry, who desired a more aggressive schedule of new
-features and bug fixes than Simms was providing. 
-
-At Simms's request, the name of the new offering was changed from PDF::API4
-to PDF::Builder, to reduce the chance of confusion due to parallel development.
-Perry's intent is to keep all internal methods as upwardly compatible with
-PDF::API2 as possible, although it is likely that there will be some drift
-(incompatibilities) over time. At least initially, any program written based on 
-PDF::API2 should be convertable to PDF::Builder simply by changing "API2" 
-anywhere it occurs to "Builder". See the KNOWN_INCOMP known incompatibilities
-file for further information.
 
 =head1 GENERIC METHODS
 
@@ -2838,6 +2858,29 @@ without needing admin privileges.
 
 This module does not work with perl's -l command-line switch.
 
+There is a file KNOWN_INCOMP which lists known incompatibilities with PDF::API2,
+in case you're thinking of porting over something from that world, or have 
+experience there and want to try PDF::Builder. There is also a file DEPRECATED
+which lists things which are planned to be removed at some point.
+
+=head1 HISTORY
+
+PDF::API2 was originally written by Alfred Reibenschuh, derived from Martin
+Hosken's Text::PDF via the Text::PDF::API wrapper. 
+In 2009, Otto Hirr started the PDF::API3 fork, but it never went anywhere.
+In 2011, maintenance was taken over by Steve Simms. In 2017, PDF::Builder 
+was forked by Phil M. Perry, who desired a more aggressive schedule of new
+features and bug fixes than Simms was providing. 
+
+At Simms's request, the name of the new offering was changed from PDF::API4
+to PDF::Builder, to reduce the chance of confusion due to parallel development.
+Perry's intent is to keep all internal methods as upwardly compatible with
+PDF::API2 as possible, although it is likely that there will be some drift
+(incompatibilities) over time. At least initially, any program written based on 
+PDF::API2 should be convertable to PDF::Builder simply by changing "API2" 
+anywhere it occurs to "Builder". See the KNOWN_INCOMP known incompatibilities
+file for further information.
+
 =head1 AUTHOR
 
 PDF::API2 was originally written by Alfred Reibenschuh. See the HISTORY section
@@ -2846,6 +2889,8 @@ for more information.
 It was maintained by Steve Simms.
 
 PDF::Builder is currently being maintained by Phil M. Perry.
+
+=head2 SUPPORT
 
 Full source is on https://github.com/PhilterPaper/Perl-PDF-Builder
 
