@@ -2,7 +2,13 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.010     2018-07-13 (unreleased)
+3.010     2018-08-13 (unreleased)
+
+   Changes_2017, Changes-ver_2, DEPRECATED, KNOWN_INCOMP, LICENSE, PATENTS,
+     README, SUPPORT
+    move to new INFO/ directory, as things were starting to get a little
+     crowded in the root directory. Changes and MANIFEST are used by the 
+     system and can not be moved. MANIFEST updated to reflect new structure.
 
    Changes, Changes_2017, MANIFEST
      split up Change logs by year, to make them easier to handle.
