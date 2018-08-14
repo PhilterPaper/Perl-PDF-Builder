@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.004'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Util;
@@ -14,7 +14,8 @@ use Scalar::Util qw(weaken);
 
 =head1 NAME
 
-PDF::Builder::Resource::ColorSpace::DeviceN - colorspace handling for Device CMYK. Inherits from L<PDF::Builder::Reource::ColorSpace>
+PDF::Builder::Resource::ColorSpace::DeviceN - colorspace handling for Device 
+CMYK. Inherits from L<PDF::Builder::Resource::ColorSpace>
 
 =cut
 

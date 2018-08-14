@@ -29,7 +29,8 @@ use PDF::Builder::Basic::PDF::Name;
 
 =head1 NAME
 
-PDF::Builder::Basic::PDF::Dict - PDF Dictionaries and Streams. Inherits from L<PDF::Objind>
+PDF::Builder::Basic::PDF::Dict - PDF Dictionaries and Streams. Inherits from 
+L<PDF::Builder::Basic::PDF::Objind>
 
 =head1 INSTANCE VARIABLES
 

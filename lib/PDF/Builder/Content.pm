@@ -1439,6 +1439,8 @@ Bezier control points.
 
 =back
 
+=back
+
 =head3 Special cases
 
 Adjacent points which are duplicates are consolidated. 
@@ -2075,6 +2077,8 @@ sub _sweep {
 
     return $result;
 }
+
+=over
 
 =item $content->bogen($x1,$y1, $x2,$y2, $radius, $move, $larger, $reverse)
 

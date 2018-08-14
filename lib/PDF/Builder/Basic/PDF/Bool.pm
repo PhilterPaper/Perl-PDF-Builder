@@ -18,11 +18,12 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.004'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Basic::PDF::Bool - A special form of L<PDF::String> which holds the strings
+PDF::Builder::Basic::PDF::Bool - A special form of 
+L<PDF::Builder::Basic::PDF::String> which holds the strings
 B<true> or B<false>
 
 =head1 METHODS

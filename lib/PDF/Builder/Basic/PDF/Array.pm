@@ -22,7 +22,8 @@ my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Basic::PDF::Array - Corresponds to a PDF array. Inherits from L<PDF::Objind>
+PDF::Builder::Basic::PDF::Array - Corresponds to a PDF array. 
+Inherits from L<PDF::Builder::Basic::PDF::Objind>
 
 =head1 METHODS
 
