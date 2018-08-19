@@ -2,7 +2,12 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.010     2018-08-13 (unreleased)
+3.010     2018-08-19 (unreleased)
+
+   lib/PDF/Builder/Basic/PDF/Array.pm-Bool.pm-Dict.pm, 
+     lib/PDF/Builder/Content.pm, lib/PDF/Builder/Resource/ColorSpace/DeviceN.pm,
+     lib/PDF/Builder/Resource/XObject/Image/PNG.pm
+    fix some minor POD errors
 
    Changes_2017, Changes-ver_2, DEPRECATED, KNOWN_INCOMP, LICENSE, PATENTS,
      README, SUPPORT
@@ -13,10 +18,10 @@ See also Changes_2017 for earlier version 3 release logs.
    Changes, Changes_2017, MANIFEST
      split up Change logs by year, to make them easier to handle.
 
-*  docs/, docs/buildDoc.pl, MANIFEST
+   docs/, docs/buildDoc.pl, MANIFEST
      provide a tool and place to build the HTML pages from PODs in the
      PDF::Builder module sources. The .html files are NOT shipped with either
-     the Perl build or on GitHub.   TBD
+     the Perl build or on GitHub. 
 
 *  lib/PDF/Builder/Resource/XObject/Image/PNG.pm
      [ref RT 124349] code cleanup while looking at issue of why PNG RGBA

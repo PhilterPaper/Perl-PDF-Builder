@@ -23,6 +23,7 @@ contrib/pdf-debug.pl
 contrib/pdf-deoptimize.pl
 contrib/pdf-optimize.pl
 contrib/text2pdf.pl
+docs/buildDoc.pl
 examples/resources/aptfrontview.jpg
 examples/resources/sample_55.pdf
 examples/resources/sample.txt
