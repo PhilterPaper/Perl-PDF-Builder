@@ -9,6 +9,8 @@
 *.swp
 # ignore leftover POD-to-HTML stuff
 pod2htmd.tmp
+# ignore .html documentation
+*.html
 # local build process
 /PDFbuild.pl
 /version

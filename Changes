@@ -4,6 +4,10 @@ See also Changes_2017 for earlier version 3 release logs.
 
 3.010     2018-08-20 (unreleased)
 
+   .gitignore, Changes, docs/buildDoc.pl, lib/PDF/Builder/Content.pm,
+     lib/PDF/Builder/Resource/XObject/Image/PNG.com
+    fix some minor glitches discovered in final testing
+
    lib/PDF/Builder/Basic/PDF/Array.pm-Bool.pm-Dict.pm, 
      lib/PDF/Builder/Content.pm, lib/PDF/Builder/Resource/ColorSpace/DeviceN.pm,
      lib/PDF/Builder/Resource/XObject/Image/PNG.pm
@@ -25,7 +29,8 @@ See also Changes_2017 for earlier version 3 release logs.
 
    lib/PDF/Builder/Resource/XObject/Image/PNG.pm
      [ref RT 124349] code cleanup while looking at issue of why PNG RGBA
-     processing is so incredibly slow. To be continued...
+     processing is so incredibly slow. Suspect that the heavy use of the
+     Perl vec() call may have something to do with it. To be continued...
 
    lib/PDF/Builder/Content.pm, examples/Content.pl, examples/Bspline.pl, 
      t/content.t, MANIFEST, examples.bat

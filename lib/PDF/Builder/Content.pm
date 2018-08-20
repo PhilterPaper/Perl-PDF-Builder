@@ -1572,7 +1572,7 @@ sub bspline {
     #
     # every time a tangent is set, also set the cp unit vectors, so nothing
     # is overlooked, even if a tangent may be changed later
-    my ($i,$j,$k, $x,$y,$l, $dx,$dy, @polyline, @colinpt, @type, @tangent, @cp);
+    my ($i,$j,$k, $l, $dx,$dy, @polyline, @colinpt, @type, @tangent, @cp);
     my $last = $#inputs; # index number of last point (first is 0)
 
     for ($i=0; $i<=$last; $i++) {  # through all points

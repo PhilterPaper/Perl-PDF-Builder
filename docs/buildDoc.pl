@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # buildDoc.pl builds documentation tree from Perl .pm files (POD)
 # 
 # (c) copyright 2018 Catskill Technology Services, LLC
@@ -7,7 +8,8 @@
 # existing documentation tree with specific name(s), but the whole process
 # is fast enough that it didn't seem worthwhile to do anything but --all
 #
-# -h or --help for help
+# -h or --help or (nothing) for help
+# --all if you have no other command line parameters
 
 use strict;
 use warnings;

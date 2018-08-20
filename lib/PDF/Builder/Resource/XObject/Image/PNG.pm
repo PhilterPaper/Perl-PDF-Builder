@@ -37,6 +37,33 @@ defaults to PxAAA.
 
 opts: -notrans
 
+   No transparency -- ignore tRNS chunk if provided, ignore Alpha channel
+   if provided.
+
+=head3 Supported PNG types
+
+   (0) Gray scale of depth 1, 2, 4, or 8 bits per pixel (2, 4, 16, or 256 gray
+       levels). 16 bps is not currently supported. Transparency via the tRNS
+       chunk is allowed, unless the -notrans option is given.
+
+   (2) RGB 24-bit truecolor with 8 bits per sample (16.7 million colors). 
+       16 bps is not currently supported. Transparency via the tRNS chunk is
+       allowed, unless the -notrans option is given.
+
+   (3) Palette color with 1, 2, 4, or 8 bits per pixel depth (2, 4, 16, or
+       256 color table entries). 16 bpp is not currently supported. Transparency
+       via the tRNS chunk is allowed, unless the -notrans option is given.
+
+   (4) Gray scale of depth 8 bits per pixel plus 8 bit Alpha channel (256
+       gray levels and 256 levels of transparency). 16 bpp is not currently
+       supported. The Alpha channel is ignored if the -notrans option is
+       given. The tRNS chunk is not permitted.
+
+   (6) RGB 24-bit truecolor with 8 bits per sample (16.7 million colors) plus
+       8 bit Alpha channel (256 levels of transparency). 16 bps is not 
+       currently supported. The Alpha channel is ignored if the -notrans
+       option is given. The tRNS chunk is not permitted.
+
 =cut
 
 sub new {
@@ -97,7 +124,8 @@ sub new {
     $self->width($w);
     $self->height($h);
 
-    if      ($cs == 0){     # greyscale
+    if      ($cs == 0){     # greyscale (1,2,4,8 bps, 16 not supported here)
+	                    # transparency via tRNS chunk allowed
         # scanline = ceil(bpc * comp / 8)+1
         if ($bpc > 8) {
             die ">8 bits of greylevel in PNG is not supported.";
@@ -117,7 +145,8 @@ sub new {
                 $self->{'Mask'} = PDFArray(PDFNum($n), PDFNum($m));
             }
         }
-    } elsif ($cs == 2) {  # RGB 8/16 bits
+    } elsif ($cs == 2) {  # RGB 8 bps (16 not supported here)
+	                  # transparency via tRNS chunk allowed
         if ($bpc > 8) {
             die ">8 bits of RGB in PNG is not supported.";
         } else {
@@ -151,7 +180,8 @@ sub new {
                 $self->{'Mask'} = PDFArray(map { PDFNum($_) } @v);
             }
         }
-    } elsif ($cs == 3) {  # palette
+    } elsif ($cs == 3) {  # palette 1,2,4,8 bpp depth (is 16 legal?)
+	                  # transparency via tRNS chunk allowed
         if ($bpc > 8) {
             die ">8 bits of palette in PNG is not supported.";
         } else {
@@ -185,15 +215,15 @@ sub new {
                 my $scanline = 1 + ceil($bpc * $w/8);
                 my $bpp = ceil($bpc/8);
                 my $clearstream = unprocess($bpc, $bpp, 1, $w,$h, $scanline, \$self->{' stream'});
-                foreach my $n (0..($h*$w)-1) {
+                foreach my $n (0 .. ($h*$w)-1) {
                     vec($dict->{' stream'}, $n, 8) = vec($trns, vec($clearstream, $n, $bpc), 8);
                 #    print STDERR vec($trns,vec($clearstream,$n,$bpc),8)."=".vec($clearstream,$n,$bpc).",";
                 }
                 # print STDERR "\n";
             }
         }
-    } elsif ($cs == 4) {        # greyscale+alpha
-        # die "greylevel+alpha in png not supported.";
+    } elsif ($cs == 4) {        # greyscale+alpha 8 bps (16 not supported here)
+	                        # transparency via tRNS chunk NOT allowed
         if ($bpc > 8) {
             die ">8 bits of greylevel+alpha in PNG is not supported.";
         } else {
@@ -224,13 +254,13 @@ sub new {
             my $clearstream = unprocess($bpc, $bpp, 2, $w,$h, $scanline, \$self->{' stream'});
             delete $self->{' nofilt'};
             delete $self->{' stream'};
-            foreach my $n (0..($h*$w)-1) {
+            foreach my $n (0 .. ($h*$w)-1) {
                 vec($dict->{' stream'}, $n, $bpc) = vec($clearstream, ($n*2)+1,$bpc);
                 vec($self->{' stream'}, $n, $bpc) = vec($clearstream, $n*2, $bpc);
             }
         }
-    } elsif ($cs == 6) {  # rgb+alpha
-        # die "rgb+alpha in png not supported.";
+    } elsif ($cs == 6) {  # RGB+alpha 8 bps (16 not supported here)
+	                  # transparency via tRNS chunk NOT allowed
         if ($bpc > 8) {
             die ">8 bits of RGB+alpha in PNG is not supported.";
         } else {
@@ -261,7 +291,9 @@ sub new {
             my $clearstream = unprocess($bpc, $bpp, 4, $w,$h, $scanline, \$self->{' stream'});
             delete $self->{' nofilt'};
             delete $self->{' stream'};
-            foreach my $n (0..($h*$w)-1) {
+	    # this appears to be rearrangement of bytes for Endian ordering
+	    # PLUS remove the A channel (3 Bpp output)?
+            foreach my $n (0 .. ($h*$w)-1) {
                 vec($dict->{' stream'}, $n, $bpc) = vec($clearstream, $n*4+3, $bpc);
                 vec($self->{' stream'}, $n*3, $bpc) = vec($clearstream, $n*4, $bpc);
                 vec($self->{' stream'}, $n*3+1, $bpc) = vec($clearstream, $n*4+1, $bpc);
@@ -318,7 +350,6 @@ sub unprocess {
                 vec($clear, $x, 8) = (vec($line, $x, 8) + floor((vec($clear, $x-$bpp, 8) + vec($prev, $x, 8))/2))%256;
             }
         } elsif ($filter == 4) {
-            # die "paeth/png filter not supported.";
             foreach my $x (0 .. length($line)-1) {
                 vec($clear, $x, 8) = (vec($line, $x, 8) + PaethPredictor(vec($clear, $x-$bpp, 8), vec($prev, $x, 8), vec($prev, $x-$bpp, 8)))%256;
             }
