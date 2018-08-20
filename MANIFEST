@@ -165,6 +165,7 @@ lib/PDF/Builder/Resource/uniglyph.txt
 lib/PDF/Builder/Resource/XObject.pm
 lib/PDF/Builder/Annotation.pm
 lib/PDF/Builder/Content.pm
+lib/PDF/Builder/Docs.pm
 lib/PDF/Builder/Lite.pm
 lib/PDF/Builder/Matrix.pm
 lib/PDF/Builder/NamedDestination.pm

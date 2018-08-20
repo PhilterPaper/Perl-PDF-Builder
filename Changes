@@ -2,7 +2,7 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.010     2018-08-19 (unreleased)
+3.010     2018-08-20 (unreleased)
 
    lib/PDF/Builder/Basic/PDF/Array.pm-Bool.pm-Dict.pm, 
      lib/PDF/Builder/Content.pm, lib/PDF/Builder/Resource/ColorSpace/DeviceN.pm,
@@ -23,9 +23,9 @@ See also Changes_2017 for earlier version 3 release logs.
      PDF::Builder module sources. The .html files are NOT shipped with either
      the Perl build or on GitHub. 
 
-*  lib/PDF/Builder/Resource/XObject/Image/PNG.pm
+   lib/PDF/Builder/Resource/XObject/Image/PNG.pm
      [ref RT 124349] code cleanup while looking at issue of why PNG RGBA
-     processing is so incredibly slow.    TBD
+     processing is so incredibly slow. To be continued...
 
    lib/PDF/Builder/Content.pm, examples/Content.pl, examples/Bspline.pl, 
      t/content.t, MANIFEST, examples.bat
@@ -40,10 +40,10 @@ See also Changes_2017 for earlier version 3 release logs.
      "spline". This is to reflect that this method is actually a piecewise 
      (non-continuous) series of quadratic Bezier curves, and not a true spline. 
 
-   lib/PDF/Builder.pm 
+   lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm, MANIFEST 
      Add POD commentary on input and output PDF version supported.
-*    Move POD function details out of Builder.pm to lower level routines, in
-       order to reduce the POD clutter. TBD
+     Move POD function details out of Builder.pm to a lower level "Docs" 
+       routine, in order to reduce the POD clutter.
 
    .perl-version, dist.ini.old, .travis.yml.HOLD, Makefile.PL, 
      lib/PDF/Builder.pm, lib/PDF/Builder/UniWrap.pm, MANIFEST
