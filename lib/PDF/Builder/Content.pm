@@ -692,7 +692,13 @@ sub linedash {
 =item $content->flatness($tolerance)
 
 I<(Advanced)> Sets the maximum variation in output pixels when drawing
-curves.
+curves. The defined range of C<$tolerance> is 0 to 100, with 0 meaning I<use 
+the device default flatness>. According to the PDF specification, you should 
+not try to force visible line segments (the curve's approximation); results 
+will be unpredictable. Usually, results for different flatness settings will be 
+indistinguishable to the eye.
+
+The C<$tolerance> value is silently clamped to be between 0 and 100.
 
 If no C<$tolerance> is given, the current setting is B<returned>. If the 
 tolerance is being set, C<$self> is B<returned> so that calls may be chained.
@@ -702,6 +708,8 @@ tolerance is being set, C<$self> is B<returned> so that calls may be chained.
 sub _flatness {
     my ($tolerance) = @_;
 
+    if ($tolerance < 0  ) { $tolerance = 0;   }
+    if ($tolerance > 100) { $tolerance = 100; }
     return ($tolerance, 'i');
 }
 
