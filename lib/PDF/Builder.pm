@@ -6,7 +6,7 @@ no warnings qw[ deprecated recursion uninitialized ];
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
 our $VERSION = '3.010'; # VERSION
-my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.011'; # manually update whenever code is changed
 
 use Carp;
 use Encode qw(:all);
@@ -96,11 +96,16 @@ for details.
 PDF::Builder intends to support all major Perl versions that were released in
 the past six years, plus one, in order to continue working for the life of
 most long-term-stable (LTS) server distributions.
+See the L<https://www.cpan.org/src/> table 
+B<First release in each branch of Perl> x.xxxx0 "Major" release dates.
 
 For example, a version of PDF::Builder released on 2018-06-05 would support 
-the last major version of Perl released before 2012-06-05 (5.18), and then one 
-before that, which would be 5.16.
+the last major version of Perl released I<on or after> 2012-06-05 (5.18), and 
+then one before that, which would be 5.16. Alternatively, the last major 
+version of Perl released I<before> 2012-06-05 is 5.16.
 
+The intent is to avoid expending unnecessary effort in supporting very old
+(obsolete) versions of Perl.
 If you need to use this module on a server with an extremely out-of-date version
 of Perl, consider using either plenv or Perlbrew to run a newer version of Perl
 without needing admin privileges.
