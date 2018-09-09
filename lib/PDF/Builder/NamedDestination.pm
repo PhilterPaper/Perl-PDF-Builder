@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.005'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.011'; # manually update whenever code is changed
 
 use Encode qw(:all);
 
@@ -40,10 +40,10 @@ sub new {
 
 # Deprecated (warning added in 2.031)
 sub new_api {
-    my ($class, $api2, @options) = @_;
-    warnings::warnif('deprecated', q{Call to deprecated method "new_api($api2, ...)".  Replace with "new($api2->{'pdf'}, ...)"});
+    my ($class, $api, @options) = @_;
+    warnings::warnif('deprecated', q{Call to deprecated method "new_api($api, ...)".  Replace with "new($api->{'pdf'}, ...)"});
 
-    my $destination = $class->new($api2->{'pdf'}, @options);
+    my $destination = $class->new($api->{'pdf'}, @options);
     return $destination;
 }
 
