@@ -2,17 +2,57 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.011     2018-08-24 (unreleased)
+3.011     2018-09-10 (unreleased)
+
+*   take a look at
+   - check PODs... comment out internal routine PODs (not API) and make
+     sure no missing API doc
+   - 125917 Annotation Link might be simple fix
+   - CTS 1 barcodes using other libraries
+   - 124349 slow RGBA in PNG... look at libpng, or vec() replace
+   - finish file annotation 117942
+   - 33497 and 117031 UTF-8 problems
+   - CTS 2 UserUnits and exceed 200". UU def 1, new method to explicitly set,
+       at output generate UU if not 1. if media size exceeds 3240 Pt, warn
+       user that Acrobat < 4 will fail, if > 14400 set UU with warning that
+       Acrobat < 7 will fail. need to investigate if any inputs need to be
+       divided by UU, possibly require setting UU at very beginning? maybe as
+       new(-UserUnits => 100) and autodivide all lengths after that.
+   - default MediaBox (required?) default "Universal", carry along and update
+       if explicit page size setting, output at beginning?
+   - a LOT of problems with PDF > 1.4 import files corrupting things
+
+   lib/PDF/Builder.pm  [ref #93] Bringing PDF::Builder into the 21st century
+    add -outver option (default: 1.4) to new() as output PDF version. It will
+     be increased by any PDF file read in with a higher PDF level (with message)
+     or by a call to version().
+    add -msgver option (default: 1) to output (value 1) a warning message when
+     the PDF output version is increased by verCheckInput() or verCheckOutput().
+     A value of 0 suppresses the warning messages.
+    add verCheckInput(version) to give warning if PDF just read in is of higher 
+     PDF version than the current version, and to increase the current version 
+     to that level. Implemented for reading of PDF files.
+    add verCheckOutput(version, description) to increase the output PDF version 
+     if a PDF feature that requires a higher PDF version is requested. At this
+     time, there are no output features higher than 1.4.
+    in version(), give warning if LOWERING the output PDF version (not 
+     suppressed by -msgver).
+   lib/PDF/Builder.pm, lib/PDF/Builder/Basic/PDF/File.pm-Name.pm
+    internally store PDF version as full number (e.g., 1.4) instead of just the
+     minor version (e.g., 4), as PDF 2.0 has been announced.
+   t/02-xrefstm.t, t/03-xrefstm-index.t
+    both t-tests read in a PDF-1.5 file, so add a call to new(-outver=>1.5) to
+     silence the warning message that the maximum version is being increased.
 
    lib/PDF/Builder/Resource/Basefont.pm-CIDFont.pm-UniFont.pm
     fix typo variable name $ident to $indent (indentation)
    lib/PDF/Builder/Resource/UniFont.pm
-    fix RT 126274/#96 (reporter: fcc_del) by adding missing indentation
+    [ref RT 126274/#96] (reporter: fcc_del) by adding missing indentation
      value to recursive text() call (rather than reporter's more complex fix).
 
    lib/PDF/Builder/Content.pm
-    close RT 98539 (need to verify flatness function). According to PDF spec,
-     there's no real way to tell by eye whether it's within tolerance, and
+    [ref RT 98539] (need to verify flatness function) close. According to PDF 
+     spec, there's no real way to tell by eye whether it's within tolerance, and
      results are unpredictable if you try to force visible line segments with
      a higher tolerance. Also update POD to clarify the range of permissible
      tolerance values, and silently clamp the input value to be in that range.

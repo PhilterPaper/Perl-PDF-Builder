@@ -31,8 +31,12 @@ use Scalar::Util qw(weaken);
 
 our @FontDirs = ( (map { "$_/PDF/Builder/fonts" } @INC),
                   qw[ /usr/share/fonts /usr/local/share/fonts c:/windows/fonts c:/winnt/fonts ] );
-our @MSG_COUNT = (0,  # Graphics::TIFF not installed
+our @MSG_COUNT = (0,  # [0] Graphics::TIFF not installed
+	              0,  # [1] TBD
 	         );
+our $outVer = 1.4; # desired PDF version for output, bump up w/ warning on read or feature output
+our $msgVer = 1;   # 0=don't, 1=do issue message when PDF output version is bumped up
+our $myself;       # holds self->pdf
 
 =head1 NAME
 
@@ -171,11 +175,39 @@ PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 
 =item $pdf = PDF::Builder->new(%options)
 
-Creates a new PDF object.  If you will be saving it as a file and
+Creates a new PDF object. 
+
+=over
+
+B<Options>
+
+=item -file
+
+If you will be saving it as a file and
 already know the filename, you can give the '-file' option to minimize
-possible memory requirements later on. The '-compress' option can be
+possible memory requirements later on. 
+
+=item -compress
+
+The '-compress' option can be
 given to specify stream compression: default is 'flate', 'none' is no
-compression.
+compression. No other compression methods are currently supported.
+
+=item -outver
+
+The '-outver' option defaults to 1.4 as the output PDF version and the highest 
+allowed feature version (attempts to use anything higher will give a warning).
+If an existing PDF with a higher version is read in, -outver will be increased 
+to that version, with a warning.
+
+=item -msgver
+
+The '-msgver' option value of 1 (default) gives a warning message if the 
+'-outver' PDF level has to be bumped up due to either a higher PDF level file 
+being read in, or a higher level feature was requested. A value of 0 
+suppresses the warning message.
+
+=back
 
 B<Example:>
 
@@ -203,7 +235,11 @@ sub new {
     bless $self, $class;
     $self->{'pdf'} = PDF::Builder::Basic::PDF::File->new();
 
-    $self->{'pdf'}->{' version'} = 4;
+    # make available to other routines
+    $myself = $self->{'pdf'};
+
+    # default output version
+    $self->{'pdf'}->{' version'} = $outVer;
     $self->{'pages'} = PDF::Builder::Basic::PDF::Pages->new($self->{'pdf'});
     $self->{'pages'}->proc_set(qw(PDF Text ImageB ImageC ImageI));
     $self->{'pages'}->{'Resources'} ||= PDFDict();
@@ -222,6 +258,20 @@ sub new {
       # for compatibility with old usage where forcecompress is directly set. 
     }
     $self->preferences(%options);
+    if (defined $options{'-outver'}) {
+        if ($options{'-outver'} >= 1.4) {
+	        $self->{'pdf'}->{' version'} = $outVer = $options{'-outver'};
+	    } else {
+	        print STDERR "Invalid -outver given, or less than 1.4. Ignored.\n";
+	    }
+    }
+    if (defined $options{'-msgver'}) {
+	    if ($options{'-msgver'} == 0 || $options{'-msgver'} == 1) {
+            $msgVer = $options{'-msgver'};
+	    } else {
+	        print STDERR "Invalid -msgver given, not 0 or 1. Ignored.\n";
+	    }
+    }
     if ($options{'-file'}) {
         $self->{' filed'} = $options{'-file'};
         $self->{'pdf'}->create_file($options{'-file'});
@@ -281,6 +331,56 @@ sub open {
     return $self;
 } # end of open()
 
+# when outputting a PDF feature, verCheckOutput(n, 'feature name') returns TRUE if 
+# n > $pdf->{' version'), plus a warning message. It returns FALSE otherwise.
+#
+#  a typical use:
+#
+#  PDF::Builder->verCheckOutput(1.6, "portzebie with foo-dangle");
+#
+#  if -msgver defaults to 1, a message will be output if the output PDF version has to be increased to 1.6
+#  in order to use the "portzebie" feature
+#
+# this is still somewhat experimental, and as experience is gained, it might have to be modified.
+#
+sub verCheckOutput {
+    my ($dummy, $PDFver, $featureName) = @_;  # $self will be this package's
+
+    # check if feature required PDF version is higher than planned output
+    # ' version' should be the same as $outVer
+    if ($PDFver > $outVer) {
+        if ($msgVer) {
+	    print "PDF version of requested feature '$featureName'\n  is higher than outVer of $outVer (outVer reset to $PDFver)\n";
+	}
+        $outVer = $myself->{' version'} = $PDFver;
+        return 1;
+    } else {
+        return 0;
+    }
+}
+# when reading in a PDF, verCheckInput(n) gives a warning message if n (the PDF 
+# version just read in) > outVer, and resets outVer to n. return TRUE if 
+# outVer changed, FALSE otherwise. outVer is used instead of 
+# $pdf->{' version'} because the latter is often overwritten by a file read 
+# operation.
+#
+# this is still somewhat experimental, and as experience is gained, it might have to be modified.
+#
+sub verCheckInput {
+    my ($self, $PDFver) = @_;
+
+    # warning message and bump up outVer if read-in PDF level higher
+    if ($PDFver > $outVer) {
+        if ($msgVer) {
+	    print "PDF version just read in is higher than outVer of $outVer (outVer reset to $PDFver)\n";
+	}
+        $outVer = $self->{'pdf'}->{' version'} = $PDFver;
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 =item $pdf = PDF::Builder->open_scalar($pdf_string, %options)
 
 =item $pdf = PDF::Builder->open_scalar($pdf_string)
@@ -322,11 +422,18 @@ sub open_scalar {
     my $fh;
     CORE::open($fh, '+<', \$content) or die "Can't begin scalar IO";
 
+    # this would replace any existing self->pdf with a new one
     $self->{'pdf'} = PDF::Builder::Basic::PDF::File->open($fh, 1);
     $self->{'pdf'}->{'Root'}->realise();
     $self->{'pages'} = $self->{'pdf'}->{'Root'}->{'Pages'}->realise();
     weaken $self->{'pages'};
-    $self->{'pdf'}->{' version'} ||= 3;
+
+    $self->{'pdf'}->{' version'} ||= 1.4; # default minimum
+    # if version higher than desired output PDF level, give warning and
+    # bump up desired output PDF level
+#print "open_scalar read version=".($self->{'pdf'}->{' version'})." and outVer=$outVer\n";
+    $self->verCheckInput($self->{'pdf'}->{' version'});
+
     my @pages = proc_pages($self->{'pdf'}, $self->{'pages'});
     $self->{'pagestack'} = [sort { $a->{' pnum'} <=> $b->{' pnum'} } @pages];
     weaken $self->{'pagestack'}->[$_] for (0 .. scalar @{$self->{'pagestack'}});
@@ -511,7 +618,13 @@ sub default {
 
 =item $version = $pdf->version()
 
-Get/set the PDF version (e.g. 1.4)
+Get/set the PDF version (e.g. 1.4). 
+
+For compatibility with earlier releases, if no decimal point is given, assume
+"1." precedes the number given.
+
+A warning message is given if you attempt to I<decrease> the PDF version, as you
+might have already read in a higher level file, or used a higher level feature.
 
 =cut
 
@@ -519,11 +632,15 @@ sub version {
     my $self = shift();
     if (scalar @_) {
         my $version = shift();
-        croak "Invalid version $version" unless $version =~ /^(?:1\.)?([0-9]+)$/;
-        $self->{'pdf'}->{' version'} = $1;
+	if ($version =~ m/^\d+$/) { $version = "1.$version"; }  # no x.? assume it's 1.something
+        croak "Invalid version $version" unless $version =~ /^(\d+\.\d+)$/;
+	if ($outVer > $1) { 
+	    print "Warning: call to self->version() to LOWER the output PDF version number!\n";
+	}
+        $self->{'pdf'}->{' version'} = $outVer = $1;
     }
 
-    return '1.' . $self->{'pdf'}->{' version'};
+    return $self->{'pdf'}->{' version'};
 }
 
 =item $bool = $pdf->isEncrypted()
