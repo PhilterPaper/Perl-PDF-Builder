@@ -175,11 +175,13 @@ PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 
 =item $pdf = PDF::Builder->new(%options)
 
+=item $pdf = PDF::Builder->new()
+
 Creates a new PDF object. 
 
-=over
-
 B<Options>
+
+=over
 
 =item -file
 

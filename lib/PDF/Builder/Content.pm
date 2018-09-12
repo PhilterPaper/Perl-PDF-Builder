@@ -3251,7 +3251,7 @@ Options:
 =item -indent => $distance
 
 Indents the text by the number of points (A value less than 0 gives an
-I<outdent>.
+I<outdent>).
 
 =item -underline => 'auto'
 
@@ -3271,6 +3271,25 @@ Example:
     #   distance 7, thickness 1.5, color yellow
     #   distance 11, thickness 2, color (strokecolor default)
     -underline=>[4,[1,'red'],7,[1.5,'yellow'],11,2],
+
+=item -strikethru => 'auto'
+
+=item -strikethru => $distance
+
+=item -strikethru => [$distance, $thickness, ...]
+
+Strikes through the text (like HTML I<s> tag). A value of 'auto' places the
+line about 30% of the font size above the baseline, or a specified C<$distance>
+(above the baseline) and C<$thickness> (in points).
+Multiple strikethroughs can be made by passing several distances and
+thicknesses.
+
+Example:
+ 
+    # 2 strikethroughs:
+    #   distance 4, thickness 1, color red
+    #   distance 7, thickness 1.5, color yellow
+    -strikethru=>[4,[1,'red'],7,[1.5,'yellow']],
 
 =back
 
@@ -3324,6 +3343,58 @@ sub _text_underline {
     return;
 }
 
+sub _text_strikethru {
+    my ($self, $xy1,$xy2, $strikethru, $color) = @_;
+
+    $color ||= 'black';
+    my @strikethru = ();
+    if (ref($strikethru) eq 'ARRAY') {
+        @strikethru = @{$strikethru};
+    } else {
+        @strikethru = ($strikethru, 1);
+    }
+    push @strikethru,1 if @strikethru%2;
+
+   # fonts define an underline position and thickness, but not strikethrough
+   # ideally would be just under 1ex
+   #my $strikethruposition = (-$self->{' font'}->strikethruposition()*$self->{' fontsize'}/1000||1);
+    my $strikethruposition = 3*($self->{'fontsize'}/1000||1);  # >0 is up
+   # let's borrow the underline thickness for strikethrough purposes
+    my $strikethruthickness = ($self->{' font'}->underlinethickness()*$self->{' fontsize'}/1000||1);
+    my $pos = 1;
+
+    while (@strikethru) {
+        $self->add_post(_save());
+
+        my $distance = shift @strikethru;
+        my $thickness = shift @strikethru;
+        my $scolor = $color;
+        if (ref $thickness) {
+            ($thickness, $scolor) = @{$thickness};
+        }
+
+        if ($distance eq 'auto') {
+            $distance = $pos*$strikethruposition;
+        }
+        if ($thickness eq 'auto') {
+            $thickness = $strikethruthickness;
+        }
+
+        my ($x1,$y1) = $self->_textpos(@{$xy1}, 0, $distance+($thickness/2));
+        my ($x2,$y2) = $self->_textpos(@{$xy2}, 0, $distance+($thickness/2));
+
+        $self->add_post($self->_strokecolor($scolor));
+        $self->add_post(_linewidth($thickness));
+        $self->add_post(_move($x1,$y1));
+        $self->add_post(_line($x2,$y2));
+        $self->add_post(_stroke);
+
+        $self->add_post(_restore());
+        $pos++;
+    }
+    return;
+}
+
 sub text {
     my ($self, $text, %opts) = @_;
 
@@ -3356,6 +3427,10 @@ sub text {
 
     if (defined $opts{'-underline'}) {
         $self->_text_underline($ulxy1,$ulxy2, $opts{'-underline'}, $opts{'-strokecolor'});
+    }
+
+    if (defined $opts{'-strikethru'}) {
+        $self->_text_strikethru($ulxy1,$ulxy2, $opts{'-strikethru'}, $opts{'-strokecolor'});
     }
 
     return $wd;

@@ -2,7 +2,7 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.011     2018-09-10 (unreleased)
+3.011     2018-09-11 (unreleased)
 
 *   take a look at
    - check PODs... comment out internal routine PODs (not API) and make
@@ -21,6 +21,10 @@ See also Changes_2017 for earlier version 3 release logs.
    - default MediaBox (required?) default "Universal", carry along and update
        if explicit page size setting, output at beginning?
    - a LOT of problems with PDF > 1.4 import files corrupting things
+
+   lib/PDF/Builder/Content.pm, examples/Content.pl
+    [ref RT 124218] add -strikethru text capability similar to -underline.
+     New example of strike-through in Content.pl examples.
 
    lib/PDF/Builder.pm  [ref #93] Bringing PDF::Builder into the 21st century
     add -outver option (default: 1.4) to new() as output PDF version. It will

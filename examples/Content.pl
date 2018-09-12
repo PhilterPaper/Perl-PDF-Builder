@@ -2243,6 +2243,46 @@ drawCaption(['text() underline, indent'], 'LC');
 $grfx->restore();
 
 # ----------------------------------------------------
+# 53A. text() with 3 strikethroughs
+@cellLoc = makeCellLoc(0);
+@cellSize = (170, 131); 
+$grfx->save();
+
+makeCell(@cellLoc, @cellSize);
+@base=@cellLoc;
+#$base[0] += 10;
+#$base[1] += 10;
+$text->font($fontR, 12);
+$text->strokecolor('black');
+$text->fillcolor('black');
+$text->lead(15);
+
+$text->translate($base[0]+12, $base[1]+85);
+$text->text('Auto ');
+$text->text('struck-through', -strikethru=>'auto');
+$text->text(' text.');
+
+$text->translate($base[0]+12, $base[1]+65);
+$text->text('Positioned ');
+$text->text('struck-through', -strikethru=>4.5);
+$text->text(' text.');
+
+$text->translate($base[0]+12, $base[1]+45);
+$text->text('Doubly ');
+$text->text('struck-through', -strikethru=>[5, 0.7, 2, 0.7]);
+$text->text(' text.');
+
+$text->translate($base[0]+12, $base[1]+25);
+$text->text('Color ');
+$text->text('struck-through', -strikethru=>[5, [0.4, 'green'], 2, [0.6, 'red']]);
+$text->text(' text.');
+
+# caption
+drawCaption(['text() strikethru'], 'LC');
+
+$grfx->restore();
+
+# ----------------------------------------------------
 # 54. advancewidth(): show some text, draw box around based on aw, leading
 @cellLoc = makeCellLoc(0);
 @cellSize = (170, 131); 
