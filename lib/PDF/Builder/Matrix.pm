@@ -34,6 +34,7 @@ sub new {
     return $self;
 }
 
+# internal routine
 sub transpose {
     my $self = shift;
     my @result;
@@ -51,6 +52,7 @@ sub transpose {
     return PDF::Builder::Matrix->new(@result);
 }
 
+# internal routine
 sub vekpro {
     my ($a, $b) = @_;
     my $result = 0;
@@ -61,6 +63,7 @@ sub vekpro {
     return $result;
 }
 
+# used by Content.pm
 sub multiply {
     my $self  = shift;
     my $other = shift->transpose();

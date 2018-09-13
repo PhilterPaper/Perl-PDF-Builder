@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.011'; # manually update whenever code is changed
 
 use Encode qw(:all);
 
@@ -529,6 +529,7 @@ sub content {
     return $self;
 }
 
+# unused internal routine? TBD
 sub name {
     my ($self, $n) = @_;
 

@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.011'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Util;
@@ -39,6 +39,7 @@ sub new {
     return $self;
 }
 
+# unused?
 sub parent {
     my $self = shift;
 
@@ -48,6 +49,7 @@ sub parent {
     return $self->{'Parent'};
 }
 
+# internal routine
 sub prev {
     my $self = shift;
 
@@ -57,6 +59,7 @@ sub prev {
     return $self->{'Prev'};
 }
 
+# internal routine
 sub next {
     my $self = shift;
 
@@ -66,6 +69,7 @@ sub next {
     return $self->{'Next'};
 }
 
+# internal routine
 sub first {
     my $self = shift;
 
@@ -74,6 +78,7 @@ sub first {
     return $self->{'First'};
 }
 
+# internal routine
 sub last {
     my $self = shift;
 
@@ -82,6 +87,7 @@ sub last {
     return $self->{'Last'};
 }
 
+# internal routine
 sub count {
     my $self = shift;
 
@@ -91,6 +97,7 @@ sub count {
     return $cnt;
 }
 
+# internal routine
 sub fix_outline {
     my ($self) = @_;
 
@@ -165,7 +172,7 @@ sub outline {
 
 Sets the destination page of the outline.
 
-=item $otl->dest($page, -fit => 1)
+  B<Example:> $otl->dest($page, -fit => 1)
 
 Display the page designated by C<$page>, with its contents magnified just enough
 to fit the entire page within the window both horizontally and vertically. If 
@@ -229,8 +236,7 @@ parameter is to be retained unchanged.
 
 =cut
 
-sub dest
-{
+sub dest {
     my ($self, $page, %opts) = @_;
 
     if (ref $page) {

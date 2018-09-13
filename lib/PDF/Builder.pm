@@ -436,7 +436,7 @@ sub open_scalar {
 #print "open_scalar read version=".($self->{'pdf'}->{' version'})." and outVer=$outVer\n";
     $self->verCheckInput($self->{'pdf'}->{' version'});
 
-    my @pages = proc_pages($self->{'pdf'}, $self->{'pages'});
+    my @pages = _proc_pages($self->{'pdf'}, $self->{'pages'});
     $self->{'pagestack'} = [sort { $a->{' pnum'} <=> $b->{' pnum'} } @pages];
     weaken $self->{'pagestack'}->[$_] for (0 .. scalar @{$self->{'pagestack'}});
     $self->{'catalog'} = $self->{'pdf'}->{'Root'};
@@ -884,7 +884,7 @@ sub finishobjects {
     }
 }
 
-sub proc_pages {
+sub _proc_pages {
     my ($pdf, $object) = @_;
 
     if (defined $object->{'Resources'}) {
@@ -898,7 +898,7 @@ sub proc_pages {
     foreach my $page ($object->{'Kids'}->elementsof()) {
         $page->realise();
         if ($page->{'Type'}->val() eq 'Pages') {
-            push @pages, proc_pages($pdf, $page);
+            push @pages, _proc_pages($pdf, $page);
         }
         else {
             $pdf->{' apipagecount'}++;
@@ -913,7 +913,7 @@ sub proc_pages {
     }
 
     return @pages;
-} # end of proc_pages()
+} # end of _proc_pages()
 
 =item $pdf->update()
 
@@ -963,6 +963,19 @@ sub saveas {
 
     $self->end();
 }
+
+=item $pdf->save()
+
+Save the document to an already-defined file (or filename) and 
+remove the object structure from memory.
+
+B<Example:>
+
+    $pdf = PDF::Builder->new(-file => 'file_to_output');
+    ...
+    $pdf->save();
+
+=cut
 
 sub save {
     my ($self) = @_;
@@ -1019,6 +1032,8 @@ sub stringify {
     return $str;
 }
 
+# there IS a release() method defined and documented in Basic/PDF/File.pm
+# it's not clear whether this release is just an internal (rename to _release)
 sub release {
     my $self = shift;
     $self->end();
@@ -1222,7 +1237,7 @@ sub openpage {
     return $page;
 } # end of openpage()
 
-
+# appears to be internal. TBD change to _walk_obj?
 sub walk_obj {
     my ($object_cache, $source_pdf, $target_pdf, $source_object, @keys) = @_;
 
@@ -1550,7 +1565,18 @@ sub pages {
 
 =item $pdf->mediabox($llx,$lly, $urx,$ury)
 
-Sets the global mediabox.
+Sets the global MediaBox. This defines the width and height (or corner
+coordinates, or by standard name) of the output page itself, such as the
+physical paper size. 
+
+Note that many printers can B<not> print all the way to the
+physical edge of the paper, so you should plan to leave some blank margin,
+even outside of any crop marks and bleeds. Printers and on-screen readers are 
+free to discard any content found outside the MediaBox, and printers may 
+discard some material just inside the MediaBox.
+
+It is required; if not given, the displayed media size is unpredictable. 
+A global setting can be inherited by each page, or can be overridden.
 
 B<Example:>
 
@@ -1585,7 +1611,12 @@ sub mediabox {
 
 =item $pdf->cropbox($llx,$lly, $urx,$ury)
 
-Sets the global cropbox.
+Sets the global CropBox. This will define the media size to which the output
+will later be cropped (trimmed) or clipped. Note that this does B<not> itself 
+output any crop marks to guide cutting of the paper! PDF Readers should 
+consider this to be the I<visible> portion of the page, and anything found
+outside it may be clipped (invisible). By default, it is equal to the MediaBox.
+A global setting can be inherited by each page, or can be overridden.
 
 =cut
 
@@ -1603,7 +1634,11 @@ sub cropbox {
 
 =item $pdf->bleedbox($llx,$lly, $urx,$ury)
 
-Sets the global bleedbox.
+Sets the global BleedBox. This is another form of CropBox, typically used in
+printing on paper where you want color (such as thumb tabs) to be printed a
+bit beyond the final paper size, to ensure that the cut goes I<through> the 
+ink, rather than accidentally leaving some white paper visible outside. 
+The default value is equal to the CropBox.
 
 =cut
 
@@ -1621,7 +1656,11 @@ sub bleedbox {
 
 =item $pdf->trimbox($llx,$lly, $urx,$ury)
 
-Sets the global trimbox.
+Sets the global TrimBox. Another form of CropBox, it is supposed to be the
+actual dimensions of the finished page (after trimming of the paper). In some
+production environments, it is useful to have printer's instructions, cut marks,
+and so on outside of the trim box.
+The default value is equal to CropBox.
 
 =cut
 
@@ -1639,7 +1678,11 @@ sub trimbox {
 
 =item $pdf->artbox($llx,$lly, $urx,$ury)
 
-Sets the global artbox.
+Sets the global ArtBox. Another form of CropBox, this is supposed to define 
+"the extent of the page's I<meaningful> content (including [margins])". It
+might exclude some content, such as Headlines or headings. Any
+binding or punched-holes margin would typically be outside of the ArtBox.
+The default value is equal to the CropBox.
 
 =cut
 
@@ -2063,7 +2106,7 @@ sub colorspace_act {
 
 =item $cs = $pdf->colorspace_web()
 
-Returns a new colorspace-object based on the web color palette.
+Returns a new colorspace-object based on the "web-safe" color palette.
 
 =cut
 
