@@ -5,8 +5,6 @@ See also Changes_2017 for earlier version 3 release logs.
 3.011     2018-09-11 (unreleased)
 
 *   take a look at
-   - check PODs... comment out internal routine PODs (not API) and make
-     sure no missing API doc
    - 125917 Annotation Link might be simple fix
    - CTS 1 barcodes using other libraries
    - 124349 slow RGBA in PNG... look at libpng, or vec() replace
@@ -21,6 +19,20 @@ See also Changes_2017 for earlier version 3 release logs.
    - default MediaBox (required?) default "Universal", carry along and update
        if explicit page size setting, output at beginning?
    - a LOT of problems with PDF > 1.4 import files corrupting things
+
+   lib/PDF/Builder.pm  internal routine proc_pages() renamed _proc_pages(),
+    add POD for save() method. There is a release() method that is undocumented
+    but it's not clear whether it's internal. Improve documentation of mediabox
+    and other *box methods.
+   lib/PDF/Builder/Annotation.pm-Matrix.pm-Outline.pm-Page.pm minor POD fixes.
+   There are a lot of low level calls (e.g., Array.pm) that perhaps should not
+    be considered as part of the User API (i.e., remove from POD).
+
+   lib/PDF/Builder/Outline.pm-NamedDestination.pm-Annotation.pm, INFO/DEPRECATED
+    deprecate pdfile() method and replace by pdf_file() (same as done earlier
+     for Annotation.pm). pdfile() will be removed on or after October, 2020.
+   lib/PDF/Builder/XObject/Resource/Image/TIFF_GT.pm-TIFF.pm, INFO/DEPRECATED
+    remove warning and support for Blackls1 (should be BlackIs1).
 
    lib/PDF/Builder/Content.pm, examples/Content.pl
     [ref RT 124218] add -strikethru text capability similar to -underline.

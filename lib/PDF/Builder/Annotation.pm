@@ -173,6 +173,7 @@ removed at some time in the future.
 # to be removed no earlier than November 16, 2019
 sub pdfile {
     my ($self, $url, $pnum, %opts) = @_;
+    warn "use pdf_file() method instead of pdfile()";
     return $self->pdf_file($url, $pnum, %opts);
 }
 

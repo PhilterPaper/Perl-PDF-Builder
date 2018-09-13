@@ -303,16 +303,26 @@ sub file {
     return $self;
 }
 
-=item $otl->pdfile($pdfile, $pagenum, %opts)
+=item $otl->pdf_file($pdffile, $pagenum, %opts)
 
-=item $otl->pdfile($pdfile, $pagenum)
+=item $otl->pdf_file($pdffile, $pagenum)
 
-Defines the destination of the outline as PDF-file with filepath 
-C<$pdfile, $pagenum> and options %opts (same as dest()).
+Defines the destination of the outline as a PDF-file with filepath 
+C<$pdffile>, on page C<$pagenum>, and options %opts (same as dest()).
+
+The old name, I<pdfile>, is still available but is B<deprecated> and will be
+removed at some time in the future.
 
 =cut
 
+# to be removed no earlier than October, 2020
 sub pdfile {
+    my ($self, $file, $pnum, %opts) = @_;
+    warn "use pdf_file() method instead of pdfile()";
+    return $self->pdf_file($file, $pnum, %opts);
+}
+
+sub pdf_file {
     my ($self, $file, $pnum, %opts) = @_;
 
     delete $self->{'Dest'};

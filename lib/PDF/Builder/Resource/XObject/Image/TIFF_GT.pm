@@ -8,7 +8,7 @@ use warnings;
 no warnings 'uninitialized';
 
 # VERSION
-my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.011'; # manually update whenever code is changed
 
 use Compress::Zlib;
 
@@ -121,9 +121,6 @@ sub handle_ccitt {
     $decode->{'K'} = (($tif->{'ccitt'} == 4 || (defined $tif->{'g3Options'} && $tif->{'g3Options'} & 0x1))? PDFNum(-1): PDFNum(0));
     $decode->{'Columns'} = PDFNum($tif->{'imageWidth'});
     $decode->{'Rows'} = PDFNum($tif->{'imageHeight'});
-    # deprecated Blackls1 (incorrectly named). will be removed 8/2018 or later
-    # it creates harmless extra entry /Blackls1 true
-    $decode->{'Blackls1'} = 
     # not sure why whiteIsZero needs to be flipped around???
     $decode->{'BlackIs1'} = PDFBool($tif->{'whiteIsZero'} == 0? 1: 0);
     $decode->{'DamagedRowsBeforeError'} = PDFNum(100);
