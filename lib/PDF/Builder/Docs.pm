@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.011'; # manually update whenever code is changed
 
 # originally part of Builder.pm, it was split out due to its length
 
@@ -153,14 +153,14 @@ reference streams, but support beyond 1.4 is very limited. All we can say is to
 be careful when handling PDFs whose version is above 1.4, and test thoroughly, 
 as they may break at some point.
 
-Future plans for PDF::Builder include some sort of version control, where input
-PDFs greater than 1.4 (or whatever the default output level is) will receive a
-warning of some sort (that the output might be corrupt). Default output will 
-probaly remain at 1.4, but the use of certain features may trigger the output
-level to be 1.5 or higher, or else produce an error and be forbidden if beyond
-the selected output level. This hasn't been decided yet. Additional PDF 
-features at 1.5 or higher may be added at any time (a few are already in), but 
-should be guarded to prevent output in a PDF declared to be 1.4.
+PDF::Builder includes a simple version control mechanism, where the initial
+PDF version to be output (default 1.4) can be set by the programmer. Input
+PDFs greater than 1.4 (current output level) will receive a warning (can be
+suppressed) that the output level will be raised to that level. The use of PDF
+features greater than the current output level will likewise trigger a warning
+that the output level is to be raised to the necessary level. If this is not
+desired, you should avoid using those PDF features which are higher than the
+desired PDF output level.
 
 =head2 History
 

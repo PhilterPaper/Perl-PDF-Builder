@@ -20,6 +20,12 @@ See also Changes_2017 for earlier version 3 release logs.
        if explicit page size setting, output at beginning?
    - a LOT of problems with PDF > 1.4 import files corrupting things
 
+   docs/buildDoc.pl modified to first look for .pod files, and then .pm files
+    for producing documentation .html files. It still has some issues with
+    finding too much input, but is generally workable. The POD search path
+    needs further work, as references to other packages often don't work 
+    (don't produce a working link, but a severe error message).
+
    lib/PDF/Builder.pm  internal routine proc_pages() renamed _proc_pages(),
     add POD for save() method. There is a release() method that is undocumented
     but it's not clear whether it's internal. Improve documentation of mediabox
