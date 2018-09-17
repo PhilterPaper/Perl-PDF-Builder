@@ -2,7 +2,7 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.011     2018-09-11 (unreleased)
+3.011     2018-09-15 (unreleased)
 
 *   take a look at
    - 125917 Annotation Link might be simple fix
@@ -19,6 +19,13 @@ See also Changes_2017 for earlier version 3 release logs.
    - default MediaBox (required?) default "Universal", carry along and update
        if explicit page size setting, output at beginning?
    - a LOT of problems with PDF > 1.4 import files corrupting things
+
+   lib/PDF/Builder.pm while working on 124349, I noticed that a partially 
+    transparent RGBA PNG file (white background made transparent) with -notrans 
+    option was showing as transparent. The problem was found to be that no
+    options given in the image_png() call were being passed to the PNG
+    routine. This has been fixed, but non-white backgrounds in the image are
+    now black, so there are some problems in PNG image handling.
 
    docs/buildDoc.pl modified to first look for .pod files, and then .pm files
     for producing documentation .html files. It still has some issues with
@@ -53,7 +60,14 @@ See also Changes_2017 for earlier version 3 release logs.
      A value of 0 suppresses the warning messages.
     add verCheckInput(version) to give warning if PDF just read in is of higher 
      PDF version than the current version, and to increase the current version 
-     to that level. Implemented for reading of PDF files.
+     to that level. Implemented for reading of PDF files. 
+    WARNING: just because the PDF output version has been increased does NOT 
+     guarantee that any particular content will be handled correctly! There 
+     are many known cases of PDF 1.5 and up files being read in, that have 
+     content that PDF::Builder does not handle correctly, corrupting the 
+     resulting PDF. Pay attention to run-time warning messages that the PDF 
+     output level has been increased due to a PDF file being read in, and check 
+     the resulting file carefully.
     add verCheckOutput(version, description) to increase the output PDF version 
      if a PDF feature that requires a higher PDF version is requested. At this
      time, there are no output features higher than 1.4.

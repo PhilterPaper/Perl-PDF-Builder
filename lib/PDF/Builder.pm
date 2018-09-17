@@ -333,17 +333,18 @@ sub open {
     return $self;
 } # end of open()
 
-# when outputting a PDF feature, verCheckOutput(n, 'feature name') returns TRUE if 
-# n > $pdf->{' version'), plus a warning message. It returns FALSE otherwise.
+# when outputting a PDF feature, verCheckOutput(n, 'feature name') returns TRUE 
+# if n > $pdf->{' version'), plus a warning message. It returns FALSE otherwise.
 #
 #  a typical use:
 #
 #  PDF::Builder->verCheckOutput(1.6, "portzebie with foo-dangle");
 #
-#  if -msgver defaults to 1, a message will be output if the output PDF version has to be increased to 1.6
-#  in order to use the "portzebie" feature
+#  if -msgver defaults to 1, a message will be output if the output PDF version 
+#  has to be increased to 1.6 in order to use the "portzebie" feature
 #
-# this is still somewhat experimental, and as experience is gained, it might have to be modified.
+# this is still somewhat experimental, and as experience is gained, the code 
+# might have to be modified.
 #
 sub verCheckOutput {
     my ($dummy, $PDFver, $featureName) = @_;  # $self will be this package's
@@ -366,8 +367,17 @@ sub verCheckOutput {
 # $pdf->{' version'} because the latter is often overwritten by a file read 
 # operation.
 #
-# this is still somewhat experimental, and as experience is gained, it might have to be modified.
+# this is still somewhat experimental, and as experience is gained, the code 
+# might have to be modified.
 #
+#    WARNING: just because the PDF output version has been increased does NOT 
+#    guarantee that any particular content will be handled correctly! There are 
+#    many known cases of PDF 1.5 and up files being read in, that have content 
+#    that PDF::Builder does not handle correctly, corrupting the resulting PDF. 
+#    Pay attention to run-time warning messages that the PDF output level has 
+#    been increased due to a PDF file being read in, and check the resulting 
+#    file carefully.
+
 sub verCheckInput {
     my ($self, $PDFver) = @_;
 
@@ -2024,7 +2034,7 @@ sub image_png {
     my ($self, $file, %opts) = @_;
 
     require PDF::Builder::Resource::XObject::Image::PNG;
-    my $obj = PDF::Builder::Resource::XObject::Image::PNG->new($self->{'pdf'}, $file);
+    my $obj = PDF::Builder::Resource::XObject::Image::PNG->new($self->{'pdf'}, $file, 'Px'.pdfkey(), %opts);
     $self->{'pdf'}->out_obj($self->{'pages'});
     
     return $obj;
