@@ -8,14 +8,14 @@ use ExtUtils::MakeMaker 6.5503;
 my $PERL_version = '5.016000';  # can't use in "use" statement above! eval?
                                 # could read from .perl-version file otherwise
 my $MakeMaker_version = '6.5503';
-my $version = '3.010';          # PDFbuild.pl updates from 'version' file
+my $version = '3.011';          # PDFbuild.pl updates from 'version' file
 
 # EVERY RELEASE: check https://www.cpan.org/src/ "First release in each branch
 #   of Perl" (NOT "Latest releases in each branch of Perl"!) and subtract 
 #   6 years to get date of oldest release, and then go one release before that. 
 #   Update the required Perl minimum here and in .perl-version, dist.ini[.old], 
 #   and .travis.yml[.HOLD], and commit to repository.
-#   Can't fully automate, since "use $PERL_version;" is invalid. eval?
+#   Can't fully automate, since "use $PERL_version;" is invalid (eval?).
 #   Would be nice to read cpan First Release and figure out min Perl version.
 
 # for future consideration
@@ -52,6 +52,7 @@ my %WriteMakefileArgs =
     "Font::TTF" => 1.04,
     # === "optional prerequisites", used if present, but not mandatory
     #"Graphics::TIFF" => 0,
+    #"Image::PNG::Libpng" => 0,
     # === found in CORE, so no need to explicitly list
     #"utf8" => 0,
     #"File::Temp" => 0,
@@ -79,6 +80,8 @@ my %WriteMakefileArgs =
           url => 'git://github.com/PhilterPaper/Perl-PDF-Builder.git',
           web => 'https://github.com/PhilterPaper/Perl-PDF-Builder',
       },
+
+      bugtracker => 'https://github.com/PhilterPaper/Perl-PDF-Builder/issues',
 
     },
 

@@ -71,6 +71,12 @@ sub new {
 Returns 1 if Graphics::TIFF installed and used, 0 if not installed, or -1 if
 installed but not used (-nouseGT option given to C<image_tiff>).
 
+B<Caution:> this method can only be used I<after> the image object has been
+created. It can't tell you whether Graphics::TIFF is available in
+advance of actually using it, in case you want to use some functionality
+available only in TIFF_GT. See the <PDF::Builder> LA_GT() call if you
+need to know in advance.
+
 =back
 
 =cut

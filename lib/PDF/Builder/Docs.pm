@@ -687,7 +687,8 @@ filehandle for C<$file>.
 
 PDF::Builder will use the Graphics::TIFF support library for TIFF functions, if
 it is available, unless explicitly told not to. Your code can test whether
-Graphics::TIFF is available by examining C<< $tiff->usesLib() >>.
+Graphics::TIFF is available by examining C<< $tiff->usesLib() >> or
+C<< $pdf->LA_GT() >>.
 
 =over
 
@@ -723,6 +724,55 @@ such as when you want to use a file I<handle> instead of a I<name>.
 Do not give the message that Graphics::TIFF is not B<installed>. This message
 will be given only once, but you may want to suppress it, such as during 
 t-tests.
+
+=back
+
+=head3 PNG Images
+
+PDF::Builder will use the Image::PNG::Libpng support library for PNG functions, 
+if it is available, unless explicitly told not to. Your code can test whether
+Image::PNG::Libpng is available by examining C<< $png->usesLib() >> or
+C<< $pdf->LA_IPL() >>.
+
+=over
+
+=item = -1 
+
+Image::PNG::Libpng I<is> installed, but your code has specified C<-nouseIPL>, 
+to I<not> use it. The old, pure Perl, code (slower and less capable) will be 
+used instead, as if Image::PNG::Libpng was not installed.
+
+=item = 0
+
+Image::PNG::Libpng is I<not> installed. Not all systems are able to successfully
+install this package, as it requires libpng.a.
+
+=item = 1
+
+Image::PNG::Libpng is installed and is being used.
+
+=back
+
+Options:
+
+=over
+
+=item -nouseIPL => 1
+
+Do B<not> use the Image::PNG::Libpng library, even if it's available. Normally
+you I<would> want to use this library, when available, but there may be cases 
+where you don't.
+
+=item -silent => 1
+
+Do not give the message that Image::PNG::Libpng is not B<installed>. This 
+message will be given only once, but you may want to suppress it, such as 
+during t-tests.
+
+=item -notrans => 1
+
+No transparency -- ignore tRNS chunk if provided, ignore Alpha channel if
+provided.
 
 =back
 

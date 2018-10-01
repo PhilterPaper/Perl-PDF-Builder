@@ -32,7 +32,8 @@ use Scalar::Util qw(weaken);
 our @FontDirs = ( (map { "$_/PDF/Builder/fonts" } @INC),
                   qw[ /usr/share/fonts /usr/local/share/fonts c:/windows/fonts c:/winnt/fonts ] );
 our @MSG_COUNT = (0,  # [0] Graphics::TIFF not installed
-	              0,  # [1] TBD
+	          0,  # [1] Image::PNG::Libpng not installed
+		  0,  # [2] TBD...
 	         );
 our $outVer = 1.4; # desired PDF version for output, bump up w/ warning on read or feature output
 our $msgVer = 1;   # 0=don't, 1=do issue message when PDF output version is bumped up
@@ -1247,8 +1248,7 @@ sub openpage {
     return $page;
 } # end of openpage()
 
-# appears to be internal. TBD change to _walk_obj?
-sub walk_obj {
+sub _walk_obj {
     my ($object_cache, $source_pdf, $target_pdf, $source_object, @keys) = @_;
 
     if (ref($source_object) =~ /Objind$/) {
@@ -1269,14 +1269,14 @@ sub walk_obj {
         $target_object->{' val'} = [];
         foreach my $k ($source_object->elementsof()) {
             $k->realise() if ref($k) =~ /Objind$/;
-            $target_object->add_elements(walk_obj($object_cache, $source_pdf, $target_pdf, $k));
+            $target_object->add_elements(_walk_obj($object_cache, $source_pdf, $target_pdf, $k));
         }
     } elsif (ref($source_object) =~ /Dict$/) {
         @keys = keys(%$target_object) unless scalar @keys;
         foreach my $k (@keys) {
             next if $k =~ /^ /;
             next unless defined $source_object->{$k};
-            $target_object->{$k} = walk_obj($object_cache, $source_pdf, $target_pdf, $source_object->{$k});
+            $target_object->{$k} = _walk_obj($object_cache, $source_pdf, $target_pdf, $source_object->{$k});
         }
         if ($source_object->{' stream'}) {
             if ($target_object->{'Filter'}) {
@@ -1292,7 +1292,7 @@ sub walk_obj {
     delete $target_object->{' streamsrc'};
 
     return $target_object;
-} # end of walk_obj()
+} # end of _walk_obj()
 
 =item $xoform = $pdf->importPageIntoForm($source_pdf, $source_page_number)
 
@@ -1347,9 +1347,9 @@ sub importPageIntoForm {
     # This should never get past MediaBox, since it's a required object.
     foreach my $k (qw(MediaBox ArtBox TrimBox BleedBox CropBox)) {
        #next unless defined $s_page->{$k};
-       #my $box = walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, $self->{'pdf'}, $s_page->{$k});
+       #my $box = _walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, $self->{'pdf'}, $s_page->{$k});
         next unless defined $s_page->find_prop($k);
-        my $box = walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, $self->{'pdf'}, $s_page->find_prop($k));
+        my $box = _walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, $self->{'pdf'}, $s_page->find_prop($k));
         $xo->bbox(map { $_->val() } $box->elementsof());
         last;
     }
@@ -1365,7 +1365,7 @@ sub importPageIntoForm {
             $s_page->{$k}->{$sk}->realise() if ref($s_page->{$k}->{$sk}) =~ /Objind$/;
             foreach my $ssk (keys %{$s_page->{$k}->{$sk}}) {
                 next if $ssk =~ /^ /;
-                $xo->resource($sk, $ssk, walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, $self->{'pdf'}, $s_page->{$k}->{$sk}->{$ssk}));
+                $xo->resource($sk, $ssk, _walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, $self->{'pdf'}, $s_page->{$k}->{$sk}->{$ssk}));
             }
         }
     }
@@ -1477,7 +1477,7 @@ sub import_page {
         my $prop = $s_page->find_prop($k);
         next unless defined $prop;
 
-        my $box = walk_obj({}, $s_pdf->{'pdf'}, $self->{'pdf'}, $prop);
+        my $box = _walk_obj({}, $s_pdf->{'pdf'}, $self->{'pdf'}, $prop);
         my $method = lc $k;
 
         $t_page->$method(map { $_->val() } $box->elementsof());
@@ -1492,7 +1492,7 @@ sub import_page {
         if (my $a = $s_pdf->{'pdf'}->{'Root'}->realise()->{'AcroForm'}) {
             $a->realise();
 
-            $AcroForm = walk_obj({}, $s_pdf->{'pdf'}, $self->{'pdf'}, $a, qw(NeedAppearances SigFlags CO DR DA Q));
+            $AcroForm = _walk_obj({}, $s_pdf->{'pdf'}, $self->{'pdf'}, $a, qw(NeedAppearances SigFlags CO DR DA Q));
         }
         my @Fields = ();
         my @Annots = ();
@@ -1539,7 +1539,7 @@ sub import_page {
             foreach my $k (keys %ky) {
                 next unless defined $a->{$k};
                 $a->{$k}->realise();
-                $t_a->{$k} = walk_obj({}, $s_pdf->{'pdf'}, $self->{'pdf'}, $a->{$k});
+                $t_a->{$k} = _walk_obj({}, $s_pdf->{'pdf'}, $self->{'pdf'}, $a->{$k});
             }
             $t_a->{'P'} = $t_page;
             push @Annots, $t_a;
@@ -1975,7 +1975,7 @@ sub image_tiff {
 	}
     }
     if ($rc == 1) {
-	# Graphics::TIFF available and to be used
+	# Graphics::TIFF (_GT suffix) available and to be used
         require PDF::Builder::Resource::XObject::Image::TIFF_GT;
         $obj = PDF::Builder::Resource::XObject::Image::TIFF_GT->new($self->{'pdf'}, $file);
         $self->{'pdf'}->out_obj($self->{'pages'});
@@ -2002,6 +2002,35 @@ sub image_tiff {
     return $obj;
 }
 
+=item $rc = $pdf->LA_GT()
+
+Returns 1 if the library name (package) Graphics::TIFF is installed, and 
+0 otherwise. For this optional library, this call can be used to know if it 
+is safe to use certain functions. For example:
+
+    if ($pdf->LA_GT() {
+        # is installed and usable
+    } else {
+        # not available. you will be running the old, pure PERL code
+    }
+
+=cut
+
+# there doesn't seem to be a way to pass in a string (or bare) package name,
+# to make a generic check routine
+sub LA_GT {
+    my ($self) = @_;
+
+    my ($rc);
+    $rc = eval {
+        require Graphics::TIFF;
+	1;
+    };
+    if (!defined $rc) { $rc = 0; }  # else is 1
+
+    return $rc;
+}
+
 =item $pnm = $pdf->image_pnm($file)
 
 Imports and returns a new PNM image object. C<$file> may be either a filename 
@@ -2021,23 +2050,85 @@ sub image_pnm {
     return $obj;
 }
 
+=item $png = $pdf->image_png($file, %options) 
+
 =item $png = $pdf->image_png($file)
 
-Imports and returns a new PNG image object. C<$file> may be either a filename 
-or a filehandle.
+Imports and returns a new PNG image object. C<$file> may be either 
+a filename or a filehandle.
+For details, see L<PDF::Builder::Docs> section B<PNG Images>.
 
 =cut
-
-# =item $png = $pdf->image_png($file, %options)   no current options
 
 sub image_png {
     my ($self, $file, %opts) = @_;
 
-    require PDF::Builder::Resource::XObject::Image::PNG;
-    my $obj = PDF::Builder::Resource::XObject::Image::PNG->new($self->{'pdf'}, $file, 'Px'.pdfkey(), %opts);
-    $self->{'pdf'}->out_obj($self->{'pages'});
-    
+    my ($rc, $obj);
+    $rc = eval {
+        require Image::PNG::Libpng;
+	1;
+    };
+    if (!defined $rc) { $rc = 0; }  # else is 1
+    if ($rc) {
+	# Image::PNG::Libpng available
+	if (defined $opts{'-nouseIPL'} && $opts{'-nouseIPL'} == 1) {
+	   $rc = -1;  # don't use it
+	}
+    }
+    if ($rc == 1) {
+	# Image::PNG::Libpng (_IPL suffix) available and to be used
+        require PDF::Builder::Resource::XObject::Image::PNG_IPL;
+        $obj = PDF::Builder::Resource::XObject::Image::PNG_IPL->new($self->{'pdf'}, $file, 'Px'.pdfkey(), %opts);
+        $self->{'pdf'}->out_obj($self->{'pages'});
+    } else {
+	# Image::PNG::Libpng not available, or is but is not to be used
+        require PDF::Builder::Resource::XObject::Image::PNG;
+        $obj = PDF::Builder::Resource::XObject::Image::PNG->new($self->{'pdf'}, $file, 'Px'.pdfkey(), %opts);
+        $self->{'pdf'}->out_obj($self->{'pages'});
+
+	if ($rc == 0 && $MSG_COUNT[1]++ == 0) {
+	    # TBD give warning message once, unless silenced (-silent) or
+	    # deliberately not using Image::PNG::Libpng (rc == -1)
+	    if (!defined $opts{'-silent'} || $opts{'-silent'} == 0) {
+	        print STDERR "Your system does not have Image::PNG::Libpng installed, so some\nPNG functions may not run correctly.\n";
+		# even if -silent only once, COUNT still incremented
+	    }
+	}
+    }
+    $obj->{'usesIPL'} = PDFNum($rc);  # -1 available but unused
+                                      #  0 not available
+		 	              #  1 available and used
+		        	      # $png->usesLib() to get number
     return $obj;
+}
+
+=item $rc = $pdf->LA_IPL()
+
+Returns 1 if the library name (package) Image::PNG::Libpng is installed, and 
+0 otherwise. For this optional library, this call can be used to know if it 
+is safe to use certain functions. For example:
+
+    if ($pdf->LA_IPL() {
+        # is installed and usable
+    } else {
+        # not available. don't use 16bps or interlaced PNG image files
+    }
+
+=cut
+
+# there doesn't seem to be a way to pass in a string (or bare) package name,
+# to make a generic check routine
+sub LA_IPL {
+    my ($self) = @_;
+
+    my ($rc);
+    $rc = eval {
+        require Image::PNG::Libpng;
+	1;
+    };
+    if (!defined $rc) { $rc = 0; }  # else is 1
+
+    return $rc;
 }
 
 =item $gif = $pdf->image_gif($file)
