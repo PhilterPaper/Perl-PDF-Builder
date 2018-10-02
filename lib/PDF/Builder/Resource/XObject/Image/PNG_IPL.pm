@@ -49,7 +49,7 @@ opts: -notrans
    No transparency -- ignore tRNS chunk if provided, ignore Alpha channel
    if provided.
 
-=head3 Supported PNG types
+=head2 Supported PNG types
 
    (0) Gray scale of depth 1, 2, 4, 8, or 16 bits per pixel (2, 4, 16, 256,
        or 65536 gray levels). Full transparency (of one 16-bit gray value) 
@@ -558,6 +558,8 @@ sub new {
     return($self);
 }
 
+=over
+
 =item  $mode = $png->usesLib()
 
 Returns 1 if Image::PNG::Libpng installed and used, 0 if not installed, or -1 
@@ -566,8 +568,10 @@ if installed but not used (-nouseIPL option given to C<image_png>).
 B<Caution:> this method can only be used I<after> the image object has been
 created. It can't tell you whether Image::PNG::Libpng is available in
 advance of actually using it, in case you want to use some functionality
-available only in PNG_IPL. See the <PDF::Builder> LA_IPL() call if you
+available only in PNG_IPL. See the L<PDF::Builder> LA_IPL() call if you
 need to know in advance.
+
+=back
 
 =cut
 
