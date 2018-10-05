@@ -2,21 +2,7 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.011     2018-10-02 (unreleased)
-
-*   take a look at
-   - CTS 1 barcodes using other libraries
-   - finish file annotation 117942 -- in general, finish up all annotation
-   - 33497 and 117031 UTF-8 problems
-   - CTS 2 UserUnits and exceed 200". UU def 1, new method to explicitly set,
-       at output generate UU if not 1. if media size exceeds 3240 Pt, warn
-       user that Acrobat < 4 will fail, if > 14400 set UU with warning that
-       Acrobat < 7 will fail. need to investigate if any inputs need to be
-       divided by UU, possibly require setting UU at very beginning? maybe as
-       new(-UserUnits => 100) and autodivide all lengths after that.
-   - default MediaBox (required?) default "Universal", carry along and update
-       if explicit page size setting, output at beginning?
-   - a LOT of problems with importing files PDF > 1.4 corrupting things
+3.011     2018-10-04 (unreleased)
 
    lib/PDF/Builder/Annotation.pm  [ref RT 125917] minor fix to properly 
      implement a default target page fit (-xyz), otherwise the link() 
@@ -35,11 +21,15 @@ See also Changes_2017 for earlier version 3 release logs.
      it is not be used via the -nouseIPL option, the existing pure Perl 
      PNG library (PNG.pm) will be used. The new library (PNG_IPL.pm) is 
      considerably faster than the old one and offers support for 16 bits 
-     per sample and interlaced images. Documentation has been updated in 
+     per sample and interlaced images*. Documentation has been updated in 
      TIFF and TIFF_GT, and functions LA_GT() and LA_IPL() have been added 
      to Builder to check LibraryAvailability (package availability) for 
      Graphics::TIFF and Image::PNG::Libpng, so you can know in advance 
      whether it is safe to try to use certain image functionality.
+
+     * interlacing is removed during processing, so it is irrelevant to
+       PDF, and 16bps channels (force PDF 1.5) can be reduced to 8bps, 
+       permitting PDF 1.4 output, by use of the -force8bps option.
 
    Makefile.PL  try directing support issues to GitHub rather than CPAN RT
 

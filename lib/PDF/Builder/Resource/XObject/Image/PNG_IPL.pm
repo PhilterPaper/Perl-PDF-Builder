@@ -44,10 +44,21 @@ If the Image::PNG::Libpng package is installed, and its use is not suppressed
 via the C<-nouseIPL> flag (see Builder documentation for C<image_png>), the
 PNG_IPL library will be used. Otherwise, the PNG library will be used instead.
 
-opts: -notrans
+B<opts:>
 
-   No transparency -- ignore tRNS chunk if provided, ignore Alpha channel
-   if provided.
+=over
+
+=item -notrans => 1
+
+No transparency -- ignore tRNS chunk if provided, ignore Alpha channel
+if provided.
+
+=item -force8bps => 1
+
+If the PNG source is 16bps, tell the libpng library to strip down all
+channels to 8bps, permitting use on PDF 1.4 output.
+
+=back
 
 =head2 Supported PNG types
 
@@ -77,10 +88,10 @@ opts: -notrans
        channel is ignored if the -notrans option is given. The tRNS 
        chunk is not permitted.
 
-In all cases, 16 bits per sample forces PDF 1.5 (or higher) output.
-If you wish to force PDF 1.4 output from a 16-bps PNG, an option could be 
-added to "strip" 16 bit samples to 8 bits (not currently implemented, but 
-could be added). The libpng.a library is assuming standard "network" bit and 
+In all cases, 16 bits per sample forces PDF 1.5 (or higher) output, unless
+you give the C<-force8bps> option, to "strip" 16 bit samples to 8 bits, and
+permit PDF 1.4-compatible output.
+The libpng.a library is assuming standard "network" bit and 
 byte ordering (Big Endian), although flags might be added to change this.
 
 The transparency chunk (tRNS) will specify one gray level entry or one RGB
@@ -128,9 +139,13 @@ sub new {
     my $xform = PNG_TRANSFORM_IDENTITY;  # default bit flag (0)
     my $transparency = 1; # default YES, allow transparency/Alpha
     if ($opts{'-notrans'}) { 
-	    $transparency = 0;
-	    $xform |= PNG_TRANSFORM_STRIP_ALPHA; 
-	    # this appears to turn cs=4 into cs=0, and cs=6 into cs=2
+        $transparency = 0;
+	$xform |= PNG_TRANSFORM_STRIP_ALPHA; 
+	# this appears to turn cs=4 into cs=0, and cs=6 into cs=2
+    }
+    if ($opts{'-force8bps'}) {
+	$xform |= PNG_TRANSFORM_STRIP_16;
+	# this reduces 16bps channels to 8bps
     }
     $png->read_png($xform);
     close($fh);
@@ -155,18 +170,18 @@ sub new {
     $bpc = $IHDR->{'bit_depth'}; # bits-per-channel
     if ($bpc > 8) {
         PDF::Builder->verCheckOutput(1.5, "image sample depth > 8 bits");
-        # if don't want to allow > 8 bits, can use PNG_TRANSFORM_STRIP_16
+        # if don't want to allow > 8 bits, can use -force8bps
         # if later PDFs allow other depths > 8, give them their own test
     }
 
     $im = $IHDR->{'interlace_method'};
     # im = 0 : PNG_INTERLACE_NONE
     # im = 1 : PNG_INTERLACE_ADAM7 
-#   if ($IHDR->{'interlace_method'} != PNG_INTERLACE_NONE) {
-#       die "Unsupported interlace method $im (must be NONE)\n";
-#   }
-# we don't care what the original interlacing was, as the data should be
-# arranged in the non-interlaced order by the time we see it.
+   #if ($IHDR->{'interlace_method'} != PNG_INTERLACE_NONE) {
+   #    die "Unsupported interlace method $im (must be NONE)\n";
+   #}
+   # we don't care what the original interlacing was, as the data should be
+   # arranged in the non-interlaced order by the time we see it.
      
     $cs = $IHDR->{'color_type'}; 
    #print "\ncs (color type) = $cs\n"; # if Alpha stripped, is cs-4
