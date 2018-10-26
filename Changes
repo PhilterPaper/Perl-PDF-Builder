@@ -2,6 +2,12 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
+3.012     2018-10=26
+
+   new PNG_IPL module got caught by t/00-all-usable.t on test systems that did 
+     not have Image::PNG::Libpng installed. Exclude from test, and add 
+     reminder in Makefile.PL to update 00-all-usable.t.
+
 3.011     2018-10-25
 
    move .travis.yml.HOLD and dist.ini.old from the root to INFO/, to unclutter

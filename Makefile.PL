@@ -51,6 +51,7 @@ my %WriteMakefileArgs =
     "Compress::Zlib" => 1.0,
     "Font::TTF" => 1.04,
     # === "optional prerequisites", used if present, but not mandatory
+    #     update t/00-all-usable.t to exclude modules using these libraries!
     #"Graphics::TIFF" => 0,
     #"Image::PNG::Libpng" => 0,
     # === found in CORE, so no need to explicitly list
