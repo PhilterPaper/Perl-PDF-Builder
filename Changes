@@ -2,7 +2,10 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.011     2018-10-04 (unreleased)
+3.011     2018-10-25
+
+   move .travis.yml.HOLD and dist.ini.old from the root to INFO/, to unclutter
+     the root. It is unknown when and if they will ever be used.
 
    lib/PDF/Builder/Annotation.pm  [ref RT 125917] minor fix to properly 
      implement a default target page fit (-xyz), otherwise the link() 

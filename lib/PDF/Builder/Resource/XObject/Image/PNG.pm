@@ -81,16 +81,19 @@ opts: -notrans
 
 In all cases, 16 bits per sample are not implemented. A fatal error will be
 returned if a PNG image with 16-bps data is supplied. The code is assuming
-standard "network" bit ordering (Big Endian).
+standard "network" bit ordering (Big Endian). Interlaced (progressive) display
+images are not supported. Use the PNG_IPL version if you need to support 16 bps
+or interlaced images.
 
 The transparency chunk (tRNS) will specify one gray level entry or one RGB
 entry to be treated as transparent (Alpha = 0). For palette color, up to 
 256 palette entry 8-bit Alpha values are specified (256 levels of transparency, 
 from 0 = transparent to 255 = opaque).
 
-Only a limited number of chunks are handled: IHDR, IDAT, PLTE, tRNS, and IEND. 
-All other chunks are ignored at this time. Certain filters and compressions 
-applied to data will be handled, but there may be unsupported methods.
+Only a limited number of chunks are handled: IHDR, IDAT (internally), PLTE, 
+tRNS, and IEND (internally). All other chunks are ignored at this time. Certain 
+filters and compressions applied to data will be handled, but there may be 
+unsupported methods.
 
 =cut
 

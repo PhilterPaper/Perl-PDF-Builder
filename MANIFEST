@@ -1,18 +1,18 @@
 # This file is manually maintained
 .perlcriticrc
 .perl-version
-.travis.yml.HOLD
 Changes
 contrib.bat
-dist.ini.old
 examples.bat
 Makefile.PL
 MANIFEST
 pc.bat
 t-tests.bat
+INFO/.travis.yml.HOLD
 INFO/Changes_2017
 INFO/Changes-ver_2
 INFO/DEPRECATED
+INFO/dist.ini.old
 INFO/KNOWN_INCOMP
 INFO/LICENSE
 INFO/PATENTS

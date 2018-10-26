@@ -643,6 +643,9 @@ magnified by the factor C<$zoom>. A zero (0) value for any of the parameters
 C<$left>, C<$top>, or C<$zoom> specifies that the current value of that 
 parameter is to be retained unchanged.
 
+This is the B<default> fit setting, with position (left and top) and zoom
+the same as the calling page's.
+
 =back
 
 =item $ant->dest($name)

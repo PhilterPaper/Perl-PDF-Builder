@@ -20,19 +20,19 @@ use Scalar::Util qw(weaken);
 
 =head1 NAME
 
-PDF::Builder::Resource::XObject::Image::PNG - support routines for PNG image 
-library (using Image::PNG::Libpng). 
+PDF::Builder::Resource::XObject::Image::PNG_IPL - support routines for PNG 
+image library (using Image::PNG::Libpng). 
 Inherits from L<PDF::Builder::Resource::XObject::Image>
 
 =head1 METHODS
 
 =over
 
-=item $res = PDF::Builder::Resource::XObject::Image::PNG->new($pdf, $file, $name, %opts)
+=item $res = PDF::Builder::Resource::XObject::Image::PNG_IPL->new($pdf, $file, $name, %opts)
 
-=item $res = PDF::Builder::Resource::XObject::Image::PNG->new($pdf, $file, $name)
+=item $res = PDF::Builder::Resource::XObject::Image::PNG_IPL->new($pdf, $file, $name)
 
-=item $res = PDF::Builder::Resource::XObject::Image::PNG->new($pdf, $file)
+=item $res = PDF::Builder::Resource::XObject::Image::PNG_IPL->new($pdf, $file)
 
 =back 
 

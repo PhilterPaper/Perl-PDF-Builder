@@ -7,7 +7,7 @@ use warnings;
 use strict;
 
 # VERSION
-my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.011'; # manually update whenever code is changed
 
 use Math::Trig;
 use List::Util qw(min max);

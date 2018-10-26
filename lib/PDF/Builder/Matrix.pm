@@ -14,7 +14,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.011'; # manually update whenever code is changed
 
 =head1 NAME
 
