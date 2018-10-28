@@ -8,7 +8,7 @@ use ExtUtils::MakeMaker 6.5503;
 my $PERL_version = '5.016000';  # can't use in "use" statement above! eval?
                                 # could read from .perl-version file otherwise
 my $MakeMaker_version = '6.5503';
-my $version = '3.011';          # PDFbuild.pl updates from 'version' file
+my $version = '3.012';          # PDFbuild.pl updates from 'version' file
 
 # EVERY RELEASE: check https://www.cpan.org/src/ "First release in each branch
 #   of Perl" (NOT "Latest releases in each branch of Perl"!) and subtract 
@@ -17,6 +17,10 @@ my $version = '3.011';          # PDFbuild.pl updates from 'version' file
 #   and .travis.yml[.HOLD], and commit to repository.
 #   Can't fully automate, since "use $PERL_version;" is invalid (eval?).
 #   Would be nice to read cpan First Release and figure out min Perl version.
+#
+#   Perhaps build Makefile.PL (and some other files?) during build process,
+#   so proper Perl version can be inserted into a template then? Perl version
+#   could come from .perl-version (reformatted), or scraped from cpan.org page.
 
 # for future consideration
 #my $master  = 'lib/PDF/Builder.pm';
