@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.011'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.013'; # manually update whenever code is changed
 
 use Encode qw(:all);
 
@@ -101,11 +101,11 @@ sub url {
     $self->{'A'} = PDFDict();
     $self->{'A'}->{'S'} = PDFName('URI');
     if (is_utf8($url)) {
-        # URI must be 7-bit ascii
+        # URI must be 7-bit ASCII
         utf8::downgrade($url);
     }
     $self->{'A'}->{'URI'} = PDFStr($url);
-    # this will come again -- since the utf8 urls are coming !
+    # this will come again -- since the UTF-8 urls are coming !
     # -- fredo
     #if (is_utf8($url) || utf8::valid($url)) {
     #    $self->{'A'}->{'URI'} = PDFUtf($url);
@@ -135,11 +135,11 @@ sub file {
     $self->{'A'} = PDFDict();
     $self->{'A'}->{'S'} = PDFName('Launch');
     if (is_utf8($url)) {
-        # URI must be 7-bit ascii
+        # URI must be 7-bit ASCII
         utf8::downgrade($url);
     }
     $self->{'A'}->{'F'} = PDFStr($url);
-    # this will come again -- since the utf8 urls are coming !
+    # this will come again -- since the UTF-8 urls are coming !
     # -- fredo
     #if (is_utf8($url) || utf8::valid($url)) {
     #    $self->{'A'}->{'F'} = PDFUtf($url);
@@ -181,11 +181,11 @@ sub pdf_file {
     $self->{'A'} = PDFDict();
     $self->{'A'}->{'S'} = PDFName('GoToR');
     if (is_utf8($url)) {
-        # URI must be 7-bit ascii
+        # URI must be 7-bit ASCII
         utf8::downgrade($url);
     }
     $self->{'A'}->{'F'} = PDFStr($url);
-    # this will come again -- since the utf8 urls are coming !
+    # this will come again -- since the UTF-8 urls are coming !
     # -- fredo
     #if (is_utf8($url) || utf8::valid($url)) {
     #    $self->{'A'}->{'F'} = PDFUtf($url);
@@ -355,7 +355,7 @@ sub file_attachment {
     $self->{'T'} = PDFStr($opts{'-text'}) if exists $opts{'-text'};
 
     if (is_utf8($file)) {
-	# URI must be 7-bit ascii
+	# URI must be 7-bit ASCII
 	utf8::downgrade($file);
     }
     # UTF-8 file names are coming?
@@ -478,10 +478,13 @@ Defining option:
 =over
 
 =item -border => [CRh CRv W]
+=item -border => [CRh CRv W [on off...]]
 
 Set annotation B<border style> of horizontal and vertical corner radii C<CRh> 
 and C<CRv> (value 0 for squared corners) and width C<W> (value 0 for no border).
 The default is squared corners and a solid line of width 1 ([0 0 1]).
+Optionally, a dash pattern array may be given (C<on> length, C<off> length,
+one or more I<pairs>). The default is a solid line.
 
 The border vector seems to ignore the first two settings (corner radii), but 
 the line thickness works, on basic Readers. 
@@ -491,31 +494,17 @@ The radii I<may> work on some other Readers.
 
 =cut
 
-#-border option. There are three or four entries in the array:
-#horizontal and vertical corner radii, border width, and (optionally) dash
-#pattern array [len_on, len_off].
-#
-#A dash pattern [C<on> length, C<off> length] may optionally be given.
-#The default is a solid line.
-#
-#=item -border => [CRh CRv W [on off]]
- 
-# TBD the dash pattern does work, if manually inserted into the PDF, something
-# like /Border [ 0 0 1 [ 5 3 2 1 ] ], but I haven't yet figured out how to
-# turn -border => [ 0,0,1, [5,3, 2,1] ] into that. I don't think PDFArray(map)
-# is going to do the job ... might have to manually build the /Border clause.
-
 sub border {
     my ($self, @b) = @_;
 
     if      (scalar @b == 3) {
         $self->{'Border'} = PDFArray( map { PDFNum($_) } $b[0],$b[1],$b[2]);
-   #} elsif (scalar @b == 4) {
+    } elsif (scalar @b == 4) {
 	# b[3] is an anonymous array
-   #    $self->{'Border'} = PDFArray( map { PDFNum($_) } $b[0],$b[1],$b[2],@{$b[3]});
+	my @first = map { PDFNum($_) } $b[0], $b[1], $b[2];
+        $self->{'Border'} = PDFArray( @first, PDFArray( map { PDFNum($_) } @{$b[3]} ));
     } else {
-       #die "annotation->border() style requires 3 or 4 parameters ";
-        die "annotation->border() style requires 3 parameters ";
+        die "annotation->border() style requires 3 or 4 parameters ";
     }
     return $self;
 }
@@ -527,6 +516,7 @@ This is a text string.
 
 =cut
 
+# TBD allow array of text strings. glue together with x0D or \n
 sub content {
     my ($self, $t) = @_;
     

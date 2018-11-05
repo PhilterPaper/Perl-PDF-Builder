@@ -2,7 +2,15 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.012     2018-10=26
+3.013     2018-11-05 (unreleased)
+
+    lib/PDF/Builder/Annotation.pm enable dash pattern in -border option.
+    lib/PDF/Builder/NamedDestination.pm remove -border and -rect options
+      from POD, as there seems to be no code to implement them. A link (with
+      -rect and -border) to a Named Destination should be taken care of in the
+      Annotation module.
+
+3.012     2018-10-26
 
    new PNG_IPL module got caught by t/00-all-usable.t on test systems that did 
      not have Image::PNG::Libpng installed. Exclude from test, and add 
