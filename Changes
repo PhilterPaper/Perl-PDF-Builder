@@ -2,7 +2,36 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.013     2018-11-05 (unreleased)
+3.013     2018-11-07 (unreleased)
+
+    lib/PDF/Builder/Resource/Font/CoreFont/verdana*.pm change "gimel" width from
+      0 to 620 (but still doesn't show up, gets "invalid character" box marker)
+    lib/PDF/Builder/Resource/Font/CoreFont/times*.pm change "macron" width from
+      333 to 520 (width was too narrow)
+    lib/PDF/Builder/Resource/Font/CoreFont/helvetica*.pm change "macron" width
+      from 333 to 580 (width was too narrow)
+    lib/PDF/Builder/Resource/Glyphs.pm, uniglyph.txt change character 'dblgrave'
+      (U+F6D6) to 'dblgravecmb' (U+030F) and add width to all CoreFont/*.pm. 
+      020_corefonts, etc. now shows a double grave accent at x0E (where available
+      in a typeface).
+    lib/PDF/Builder/Resource/Glyphs.pm, uniglyph.txt change dotlessj from U+F6BE
+      to U+0237; still not displaying at x1F with my font collection.
+    lib/PDF/Builder/Resource/Font/CoreFont.pm, lib/PDF/examples/020_corefonts,
+      lib/PDF/Builder/Resource/Font/CoreFont/bankgothic.pm
+     enable full bankgothic (not just regular). Unfortunately, this appears to
+      be the older Bank Gothic (not "Pro"), which has only medium weight (bold, 
+      bolditalic are no different than regular and italic). Corrected widths on 
+      'mu' (increased from missing/300 to 689) and 'germandbls' (reduced from 
+      1327 to 847). bankgothic.pm is used by all four variants, so at this time
+      there appears to be no need to create bold, italic, and bolditalic 
+      versions. (other fonts have different widths for some glyphs in different
+      variants)
+    lib/PDF/Builder/Resource/Font/CoreFont/bankgothic.pm remove 'euro', as the
+      only entry in the font is named 'Euro'. add 'macron' with width.
+    lib/PDF/examples/020_corefonts-ShowFont.pl, 
+      lib/PDF/Builder/Resource/Font/BaseFont.pm core fonts with no assigned
+      width, show background of light red to flag them. Add method 
+      'wxMissingByEnc()' to flag a missing core font width.
 
     lib/PDF/Builder/Annotation.pm enable dash pattern in -border option.
     lib/PDF/Builder/NamedDestination.pm remove -border and -rect options

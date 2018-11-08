@@ -48,7 +48,7 @@ my $to = 0x3FF;  # default end value for UTF-8 (-r)
 my $extra = "ShowFont";
 my $T1metrics = '';  # no default
 
-my ($f, $i,$j, $font, $page, $text);
+my ($f, $i,$j, $font, $page, $text, $grfx);
 my $pdf = PDF::Builder->new(-compress => 'none');
 my $title_font = $pdf->corefont('Helvetica');
 my $grid_font = $pdf->corefont('Helvetica-Bold');
@@ -303,6 +303,18 @@ foreach my $encode (@encode_list) {
 		$c_val = $page_start + (15-$row)*16 + $col;
 		if ($c_val < $from || $c_val > $to) { next; }
 	       #if ($c_val < 32) { next; } # control characters
+	        if ($type eq 'corefont' && 
+		    $planes[$plane]->wxMissingByEnc($c_val)) {
+	            $grfx->fillcolor(1.0, 0.7, 0.7); # for missing width
+		    $grfx->move($x_list[$col], $y_list[15-$row]-2);
+		    $grfx->line($x_list[$col], $y_list[15-$row]+18);
+		    $grfx->line($x_list[$col]+20, $y_list[15-$row]+18);
+		    $grfx->line($x_list[$col]+20, $y_list[15-$row]-2);
+		    $grfx->close();
+		    $grfx->fill();
+	            $grfx->fillcolor('black');
+	        }
+		# other font types get their widths from their files
 
 		$text->translate($x_list[$col]+20, $y_list[15-$row]);
 		# $c_val > x7F should be interpreted as either single byte
@@ -384,6 +396,7 @@ sub newpage {
     $page = $pdf->page();
 #print "=== newpage. page=$page\n";
     $page->mediabox('universal');
+    $grfx = $page->gfx(); # define first, so bg fill is under char fg
     $text = $page->text();
 #print "=== newpage. text=$text\n";
     return;

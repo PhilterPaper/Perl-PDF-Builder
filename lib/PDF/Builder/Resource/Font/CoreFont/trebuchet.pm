@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '2.029'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.013'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -556,6 +556,7 @@ sub data { return {
         'ring' => '524',                         # U+0x02DA
         'ogonek' => '524',                       # U+0x02DB
         'hungarumlaut' => '524',                 # U+0x02DD
+        'dblgravecmb' => '524',                  # U+0x030F
         'Delta' => '584',                        # U+0x0394
         'Omega' => '668',                        # U+0x03A9
         'pi' => '601',                           # U+0x03C0

@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.011'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.013'; # manually update whenever code is changed
 
 use Compress::Zlib;
 use Encode qw(:all);
@@ -636,6 +636,22 @@ sub wxByEnc {
    	$ret = 300;
     }
     return $ret;
+}
+
+=item $flag = $font->wxMissingByEnc($char)
+
+Returns true if the character's width (based on the current encoding) is
+supplied by "missing width" of font.
+
+=cut
+
+sub wxMissingByEnc {
+    my ($self, $e) = @_;
+
+    my $g = $self->glyphByEnc($e);
+    my $ret = $self->data()->{'wx'}->{$g};
+
+    return !defined($ret);
 }
 
 =item $width = $font->wxByMap($char)
