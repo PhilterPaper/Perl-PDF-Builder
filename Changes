@@ -2,7 +2,11 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.013     2018-11-07 (unreleased)
+3.013     2018-11-11 (unreleased)
+
+    lib/PDF/Builder/Annotation.pm  [ref RT 117942]
+      Do some more cleanup of annotations. Unable to get same icon behavior
+      between text and file_attachment, even though the same code is produced.
 
     lib/PDF/Builder/Resource/Font/CoreFont/verdana*.pm change "gimel" width from
       0 to 620 (but still doesn't show up, gets "invalid character" box marker)

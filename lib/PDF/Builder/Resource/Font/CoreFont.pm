@@ -54,6 +54,8 @@ I<-pdfname> ... changes the reference-name of the font from its default.
 The reference-name is normally generated automatically and can be
 retrieved via C<$pdfname=$font->name()>.
 
+=back
+
 =head2 Supported typefaces
 
 B<standard PDF types>
@@ -219,6 +221,8 @@ sub new {
 
     return $self;
 }
+
+=over
 
 =item PDF::Builder::Resource::Font::CoreFont->loadallfonts()
 

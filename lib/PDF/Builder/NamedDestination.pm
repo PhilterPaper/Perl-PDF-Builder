@@ -79,6 +79,7 @@ sub link {
 }
 
 =item $dest->url($url, %opts)
+
 =item $dest->url($url)
 
 Defines the destination as launch-url with url C<$url> and
@@ -107,6 +108,7 @@ sub url {
 }
 
 =item $dest->file($file, %opts)
+
 =item $dest->file($file)
 
 Defines the destination as launch-file with filepath C<$file> and
@@ -135,6 +137,7 @@ sub file {
 }
 
 =item $dest->pdf_file($pdffile, $pagenum, %opts)
+
 =item $dest->pdf_file($pdffile, $pagenum)
 
 Defines the destination as a PDF-file with filepath C<$pdffile>, on page

@@ -53,6 +53,9 @@ sub outobjdeep {
 
 # ============== start of annotation types =======================
 
+# note that %opts is given as the only format in most cases, as -rect
+# is a mandatory "option"
+
 =back
 
 =head2 Annotation types
@@ -61,10 +64,9 @@ sub outobjdeep {
 
 =item $ant->link($page, %opts)
 
-=item $ant->link($page)
-
 Defines the annotation as a launch-page with page C<$page> (within I<this>
-document) and options %opts (-rect, -border, I<fit>, -color (border's)).
+document) and options %opts (-rect, -border, -color, I<fit>: see descriptions
+below).
 
 =cut
 
@@ -79,88 +81,19 @@ sub link {
     $self->dest($page, %opts);
     $self->rect(@{$opts{'-rect'}}) if defined $opts{'-rect'};
     $self->border(@{$opts{'-border'}}) if defined $opts{'-border'};
-    # border color
     $self->Color(@{ $opts{'-color'} }) if defined $opts{'-color'};
-
-    return $self;
-}
-
-=item $ant->url($url, %opts)
-
-=item $ant->url($url)
-
-Defines the annotation as a launch-url with url C<$url> and
-options %opts (-rect, -border, and -color (border's)).
-
-=cut
-
-sub url {
-    my ($self, $url, %opts) = @_;
-
-    $self->{'Subtype'} = PDFName('Link');
-    $self->{'A'} = PDFDict();
-    $self->{'A'}->{'S'} = PDFName('URI');
-    if (is_utf8($url)) {
-        # URI must be 7-bit ASCII
-        utf8::downgrade($url);
-    }
-    $self->{'A'}->{'URI'} = PDFStr($url);
-    # this will come again -- since the UTF-8 urls are coming !
-    # -- fredo
-    #if (is_utf8($url) || utf8::valid($url)) {
-    #    $self->{'A'}->{'URI'} = PDFUtf($url);
-    #} else {
-    #    $self->{'A'}->{'URI'} = PDFStr($url);
-    #}
-    $self->rect(@{$opts{'-rect'}}) if defined $opts{'-rect'};
-    $self->border(@{$opts{'-border'}}) if defined $opts{'-border'};
-    $self->Color(@{ $opts{'-color'} }) if defined $opts{'-color'};
-
-    return $self;
-}
-
-=item $ant->file($file, %opts)
-
-=item $ant->file($file)
-
-Defines the annotation as a launch-file with filepath C<$file> and
-options %opts (-rect, -border, and -color (border's)).
-
-=cut
-
-sub file {
-    my ($self, $url, %opts) = @_;
-
-    $self->{'Subtype'} = PDFName('Link');
-    $self->{'A'} = PDFDict();
-    $self->{'A'}->{'S'} = PDFName('Launch');
-    if (is_utf8($url)) {
-        # URI must be 7-bit ASCII
-        utf8::downgrade($url);
-    }
-    $self->{'A'}->{'F'} = PDFStr($url);
-    # this will come again -- since the UTF-8 urls are coming !
-    # -- fredo
-    #if (is_utf8($url) || utf8::valid($url)) {
-    #    $self->{'A'}->{'F'} = PDFUtf($url);
-    #} else {
-    #    $self->{'A'}->{'F'} = PDFStr($url);
-    #}
-    $self->rect(@{$opts{'-rect'}}) if defined $opts{'-rect'};
-    $self->border(@{$opts{'-border'}}) if defined $opts{'-border'};
-    $self->Color(@{ $opts{'-color'} }) if defined $opts{'-color'};
-    # descriptive text on mouse rollover
-    $self->{'T'} = PDFStr($opts{'-text'}) if exists $opts{'-text'};
 
     return $self;
 }
 
 =item $ant->pdf_file($pdffile, $pagenum, %opts)
 
-=item $ant->pdf_file($pdffile, $pagenum)
-
 Defines the annotation as a PDF-file with filepath C<$pdffile>, on page 
-C<$pagenum>, and options %opts (-rect, -border, I<fit>, and -color (border's)).
+C<$pagenum>, and options %opts (-rect, -border, -color, I<fit>: see descriptions
+below). This differs from the C<link> call in that the target is found in a
+different PDF file, not the current document.
+
+C<$pagenum> is the physical page number, starting at 1: 1, 2,...
 
 The old name, I<pdfile>, is still available but is B<deprecated> and will be
 removed at some time in the future.
@@ -176,6 +109,7 @@ sub pdfile {
 
 sub pdf_file {
     my ($self, $url, $pnum, %opts) = @_;
+    # note that although "url" is used, it may be a local file
 
     $self->{'Subtype'} = PDFName('Link');
     $self->{'A'} = PDFDict();
@@ -184,31 +118,99 @@ sub pdf_file {
         # URI must be 7-bit ASCII
         utf8::downgrade($url);
     }
-    $self->{'A'}->{'F'} = PDFStr($url);
     # this will come again -- since the UTF-8 urls are coming !
     # -- fredo
     #if (is_utf8($url) || utf8::valid($url)) {
     #    $self->{'A'}->{'F'} = PDFUtf($url);
     #} else {
-    #    $self->{'A'}->{'F'} = PDFStr($url);
+        $self->{'A'}->{'F'} = PDFStr($url);
     #}
 
+    $pnum--;  # wants it numbered starting at 0
     $self->dest(PDFNum($pnum), %opts);
     $self->rect(@{$opts{'-rect'}}) if defined $opts{'-rect'};
     $self->border(@{$opts{'-border'}}) if defined $opts{'-border'};
     $self->Color(@{ $opts{'-color'} }) if defined $opts{'-color'};
-    # descriptive text on mouse rollover
-    $self->{'T'} = PDFStr($opts{'-text'}) if exists $opts{'-text'};
+
+    return $self;
+}
+
+=item $ant->file($file, %opts)
+
+Defines the annotation as a launch-file with filepath C<$file> (a local file)
+and options %opts (-rect, -border, -color: see descriptions below). I<How> the
+file is displayed depends on the operating system, type of file, and local
+configuration or mapping.
+
+=cut
+
+sub file {
+    my ($self, $file, %opts) = @_;
+    # TBD whether or not UTF-8 string can be allowed as a filepath.
+
+    $self->{'Subtype'} = PDFName('Link');
+    $self->{'A'} = PDFDict();
+    $self->{'A'}->{'S'} = PDFName('Launch');
+    if (is_utf8($file)) {
+        # URI must be 7-bit ASCII
+        utf8::downgrade($file);
+    }
+    # this will come again -- since the UTF-8 paths are coming !
+    # -- fredo
+    #if (is_utf8($file) || utf8::valid($file)) {
+    #    $self->{'A'}->{'F'} = PDFUtf($file);
+    #} else {
+        $self->{'A'}->{'F'} = PDFStr($file);
+    #}
+    $self->rect(@{$opts{'-rect'}}) if defined $opts{'-rect'};
+    $self->border(@{$opts{'-border'}}) if defined $opts{'-border'};
+    $self->Color(@{ $opts{'-color'} }) if defined $opts{'-color'};
+
+    return $self;
+}
+
+=item $ant->url($url, %opts)
+
+Defines the annotation as a launch-url with url C<$url> and
+options %opts (-rect, -border, -color: see descriptions below). This page is
+usually brought up in a browser, and may be remote.
+
+=cut
+
+sub url {
+    my ($self, $url, %opts) = @_;
+
+    $self->{'Subtype'} = PDFName('Link');
+    $self->{'A'} = PDFDict();
+    $self->{'A'}->{'S'} = PDFName('URI');
+    if (is_utf8($url)) {
+        # URI must be 7-bit ASCII
+        utf8::downgrade($url);
+    }
+    # this will come again -- since the UTF-8 urls are coming !
+    # -- fredo
+    #if (is_utf8($url) || utf8::valid($url)) {
+    #    $self->{'A'}->{'URI'} = PDFUtf($url);
+    #} else {
+        $self->{'A'}->{'URI'} = PDFStr($url);
+    #}
+    $self->rect(@{$opts{'-rect'}}) if defined $opts{'-rect'};
+    $self->border(@{$opts{'-border'}}) if defined $opts{'-border'};
+    $self->Color(@{ $opts{'-color'} }) if defined $opts{'-color'};
 
     return $self;
 }
 
 =item $ant->text($text, %opts)
 
-=item $ant->text($text)
-
 Defines the annotation as a text note with content string C<$text> and
-options %opts (-rect, -border, -color (border's), and -open). 
+options %opts (-rect, -color, -text, -open: see descriptions below). 
+
+C<-text> is the popup's label string.
+
+The icon appears in the upper left corner of the C<-rect> selection rectangle,
+and its active clickable area is fixed by the icon (it is I<not> equal to the 
+rectangle). The icon size is fixed, and its fill color set by C<-color>.
 
 Additional options:
 
@@ -232,8 +234,8 @@ A I<reference> to an icon may be passed instead of a name.
 
 =cut
 
-# "None" seems to be ignored.
-#C<None> is a custom invisible icon defined by PDF::Builder.
+# the icon size appears to be fixed. the last font size used does not affect it
+# and enabling icon_appearance() for it doesn't seem to do anything
 
 sub text {
     my ($self, $text, %opts) = @_;
@@ -242,10 +244,9 @@ sub text {
     $self->content($text);
 
     $self->rect(@{$opts{'-rect'}}) if defined $opts{'-rect'};
-    $self->border(@{$opts{'-border'}}) if defined $opts{'-border'};
-    $self->open($opts{'-open'}) if defined $opts{'-open'};
     $self->Color(@{ $opts{'-color'} }) if defined $opts{'-color'};
-    # descriptive text on mouse rollover
+    $self->open($opts{'-open'}) if defined $opts{'-open'};
+    # popup label (title)
     $self->{'T'} = PDFStr($opts{'-text'}) if exists $opts{'-text'};
 
     # Icon Name will be ignored if there is an AP.
@@ -260,40 +261,48 @@ sub text {
 
 =item $ant->movie($file, $contentType, %opts)
 
-=item $ant->movie($file, $contentType)
-
 Defines the annotation as a movie from C<$file> with C<$contentType> and
-options %opts (-rect, -border, -color (border's)).
+options %opts (-rect, -border, -color: see descriptions below).
+
+The C<-rect> rectangle also serves as the area where the movie is played, so it
+should be of usable size and aspect ratio. It does not use a separate popup
+player. It is known to play .avi and .wav files -- others have not been tested.
+Using Adobe Reader, it will not play .mpg files (unsupported type). More work
+is probably needed on this annotation method.
 
 =cut
+
+# TBD: allow embedding of movie file, per original API2 code. might be useful
+#      for very short clips.
 
 sub movie {
     my ($self, $file, $contentType, %opts) = @_;
 
-    $self->{'Subtype'} = PDFName('Movie');
-    $self->{'A'} = PDFBool(1);
+    $self->{'Subtype'} = PDFName('Movie'); # subtype = movie (req)
+    $self->{'A'} = PDFBool(1);  # play using default activation parameters
     $self->{'Movie'} = PDFDict();
-    $self->{'Movie'}->{'F'} = PDFDict();
-    $self->{' apipdf'}->new_obj($self->{'Movie'}->{'F'});
-    my $f = $self->{'Movie'}->{'F'};
-    $f->{'Type'} = PDFName('EmbeddedFile');
-    $f->{'Subtype'} = PDFName($contentType);
-    $f->{' streamfile'} = $file;
+   #$self->{'Movie'}->{'S'} = PDFName($contentType);
+    $self->{'Movie'}->{'F'} = PDFStr($file);
 
     $self->rect(@{$opts{'-rect'}}) if defined $opts{'-rect'};
     $self->border(@{$opts{'-border'}}) if defined $opts{'-border'};
     $self->Color(@{ $opts{'-color'} }) if defined $opts{'-color'};
-    # descriptive text on mouse rollover
-    $self->{'T'} = PDFStr($opts{'-text'}) if exists $opts{'-text'};
+    # popup label (title)  DOESN'T SEEM TO SHOW UP ANYWHERE
+    #  self->A->T and self->T also fail to display
+    $self->{'Movie'}->{'T'} = PDFStr($opts{'-text'}) if exists $opts{'-text'};
 
     return $self;
 }
 
 =item $ant->file_attachment($file, %opts)
 
-Defines the annotation as a file attachment with file $file and options %opts.
+Defines the annotation as a file attachment with file $file and options %opts
+(-rect, -color: see descriptions below). Note that C<-color> applies to
+the icon fill color, not to a selectable area outline. The icon is resized
+(including aspect ratio changes) based on the selectable rectangle given by
+C<-rect>, so watch your rectangle dimensions!
 
-The file, along with its name, is embedded in the PDF document and may be
+The file, along with its name, is I<embedded> in the PDF document and may be
 extracted for viewing with the appropriate viewer.
 
 This differs from the C<file> method in that C<file> looks for and launches
@@ -323,7 +332,8 @@ C<PushPin>), and others may be
 defined by the Reader. C<Paperclip>, C<Graph>, and C<Tag> are also supposed to 
 be available on all PDF Readers. Note that the name I<case> must exactly match.
 C<None> is a custom invisible icon defined by PDF::Builder.
-The icon is stretched to fill the defined target rectangle.
+The icon is stretched/squashed to fill the defined target rectangle, so take
+care when defining C<-rect> dimensions.
 Any I<AP> dictionary entry will override the -icon setting. 
 
 A I<reference> to an icon may be passed instead of a name.
@@ -332,6 +342,10 @@ A I<reference> to an icon may be passed instead of a name.
 
 If given, show the entire path and file name on mouse rollover, rather than
 just the file name.
+
+=item -text => string
+
+A text label for the popup (on mouseover) that contains the file name.
 
 =back
 
@@ -348,11 +362,10 @@ sub file_attachment {
     $icon = $opts{'-icon'} if exists $opts{'-icon'};
 
     $self->rect(@{$opts{'-rect'}}) if defined $opts{'-rect'};
-    $self->border(@{$opts{'-border'}}) if defined $opts{'-border'};
-
-    $self->{'Subtype'} = PDFName('FileAttachment');
     # descriptive text on mouse rollover
     $self->{'T'} = PDFStr($opts{'-text'}) if exists $opts{'-text'};
+
+    $self->{'Subtype'} = PDFName('FileAttachment');
 
     if (is_utf8($file)) {
 	# URI must be 7-bit ASCII
@@ -448,7 +461,7 @@ Defining option. I<Note that this "option" is actually B<required>.>
 
 =over
 
-=item -rect => [LLx LLy URx URy]
+=item -rect => [LLx, LLy, URx, URy]
 
 Set annotation rectangle at C<[LLx,LLy]> to C<[URx,URy]> (lower left and
 upper right coordinates). LL to UR is customary, but any diagonal is allowed.
@@ -471,20 +484,25 @@ Sets the border-style of the annotation, if applicable, as given by the
 -border option. There are three entries in the array:
 horizontal and vertical corner radii, and border width.
 
-The default is [0 0 1] (solid line of width 1, sharp corners).
+A border is used in annotations where text or some other material is put down,
+and a clickable rectangle is defined over it (-rect). A border is not used
+when an icon is being used to mark the clickable area.
+
+The default is [0 0 1] (solid line of width 1, with sharp corners).
 
 Defining option:
 
 =over
 
-=item -border => [CRh CRv W]
-=item -border => [CRh CRv W [on off...]]
+=item -border => [CRh, CRv, W]
+
+=item -border => [CRh, CRv, W [, on, off...]]
 
 Set annotation B<border style> of horizontal and vertical corner radii C<CRh> 
 and C<CRv> (value 0 for squared corners) and width C<W> (value 0 for no border).
 The default is squared corners and a solid line of width 1 ([0 0 1]).
 Optionally, a dash pattern array may be given (C<on> length, C<off> length,
-one or more I<pairs>). The default is a solid line.
+as one or more I<pairs>). The default is a solid line.
 
 The border vector seems to ignore the first two settings (corner radii), but 
 the line thickness works, on basic Readers. 
@@ -685,7 +703,8 @@ sub dest {
 Set the icon's fill color. The color is an array of 1, 3, or 4 numbers, each
 in the range 0.0 to 1.0. If 1 number is given, it is the grayscale value (0 = 
 black to 1 = white). If 3 numbers are given, it is an RGB color value. If 4
-numbers are given, it is a CMYK color value.
+numbers are given, it is a CMYK color value. Currently, named colors (strings)
+are not handled.
 
 For link and url annotations, this is the color of the rectangle border 
 (-border given with a width of at least 1).
@@ -697,6 +716,10 @@ is black.
 Defining option:
 
 =over
+
+=item -color => [ ] or more than 4 numbers
+
+A medium gray (0.5 value) will be used if an invalid color is given.
 
 =item -color => [ g ]
 
@@ -717,9 +740,6 @@ white, [ 1, 0, 1, 0 ] is green, and [ 1, 1, 1, 1 ] is black.
 =back
 
 =cut
-
-# possible future enhancement: if array is empty (0 length), set color to
-# some default such as medium gray (0.5).
 
 sub Color {
     my ($self, @color) = @_;
@@ -749,9 +769,7 @@ sub Color {
 =item -text => string
 
 Specify an optional B<text label> for annotation. This text or comment only
-shows up in the pop-up containing the file or text, when the mouse is rolled
-over the target rectangle. It does not normally show for link, url, etc.
-annotations.
+shows up I<as a title> in the pop-up containing the file or text.
 
 =cut
 
@@ -761,7 +779,8 @@ sub icon_appearance {
     # if a string (text), has already defined /Name. "None" and ref handle here.
     # options of interest: -rect (to define size of icon)
 
-    return unless $self->{'Subtype'}->val() eq 'FileAttachment';
+   # text also permits icon and custom icon, including None
+   #return unless $self->{'Subtype'}->val() eq 'FileAttachment';
 
     my @r;  # perlcritic doesn't want 2 lines combined
     @r = @{$opts{'-rect'}} if defined $opts{'-rect'};
