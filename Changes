@@ -2,7 +2,11 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.013     2018-11-11 (unreleased)
+3.013     2018-11-23 (unreleased)
+
+    lib/PDF/Builder/Resource/XObject/Image/GIF.pm [ref RT 44877]
+      Fixed library to process GIFs with 3 more types of extension blocks,
+      and updated the POD.
 
     lib/PDF/Builder/Annotation.pm  [ref RT 117942]
       Do some more cleanup of annotations. Unable to get same icon behavior
@@ -16,8 +20,8 @@ See also Changes_2017 for earlier version 3 release logs.
       from 333 to 580 (width was too narrow)
     lib/PDF/Builder/Resource/Glyphs.pm, uniglyph.txt change character 'dblgrave'
       (U+F6D6) to 'dblgravecmb' (U+030F) and add width to all CoreFont/*.pm. 
-      020_corefonts, etc. now shows a double grave accent at x0E (where available
-      in a typeface).
+      020_corefonts, etc. now shows a double grave accent at x0E (where 
+      available in a typeface).
     lib/PDF/Builder/Resource/Glyphs.pm, uniglyph.txt change dotlessj from U+F6BE
       to U+0237; still not displaying at x1F with my font collection.
     lib/PDF/Builder/Resource/Font/CoreFont.pm, lib/PDF/examples/020_corefonts,
@@ -59,10 +63,10 @@ See also Changes_2017 for earlier version 3 release logs.
      method would not go to the desired target page. Some minor POD updates
      to indicate that some functionality depends on the PDF reader (e.g.,
      mouseover text on a link).
-   lib/PDF/Builder/XObject/Resource/Image/PNG.pm-PNG_IPL.pm
+   lib/PDF/Builder/Resource/XObject/Image/PNG.pm-PNG_IPL.pm
      minor POD updates
 
-   lib/PDF/Builder/XObject/Resource/Image/PNG-PNG_IPL-TIFF-TIFF_GT.pm,
+   lib/PDF/Builder/Resource/XObject/Image/PNG-PNG_IPL-TIFF-TIFF_GT.pm,
      Makefile.PL, MANIFEST, lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm,
      t/png.t
     [ref RT 124349] If libpng.a and its wrapper, Image::PNG::Libpng are 
@@ -106,7 +110,7 @@ See also Changes_2017 for earlier version 3 release logs.
    lib/PDF/Builder/Outline.pm-NamedDestination.pm-Annotation.pm, INFO/DEPRECATED
     deprecate pdfile() method and replace by pdf_file() (same as done earlier
      for Annotation.pm). pdfile() will be removed on or after October, 2020.
-   lib/PDF/Builder/XObject/Resource/Image/TIFF_GT.pm-TIFF.pm, INFO/DEPRECATED
+   lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm-TIFF.pm, INFO/DEPRECATED
     remove warning and support for Blackls1 (should be BlackIs1).
 
    lib/PDF/Builder/Content.pm, examples/Content.pl
