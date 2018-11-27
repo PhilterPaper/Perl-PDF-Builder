@@ -2,7 +2,11 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.013     2018-11-26 (unreleased)
+3.013     2018-11-27 (unreleased)
+
+    README, MANIFEST
+      Add a README stub in the root to shut up Kwalitee's complaint. The real
+      README is still in INFO/.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Annotation.pm-NamedDestination.pm-
       Outline.pm, lib/PDF/Builder/Basic/PDF/Utils.pm, 

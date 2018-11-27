@@ -1,0 +1,7 @@
+README stub to keep Kwalitee tool quiet...
+
+See INFO/README for full README. INFO/ also has older Changes, the LICENSE,
+PATENTS information, SUPPORT information, a list of DEPRECATED features, and
+a list of KNOWN INCOMPatibilites with PDF::API2 product.
+
+There are also some build tool files that are not currently used.
