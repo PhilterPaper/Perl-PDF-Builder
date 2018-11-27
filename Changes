@@ -2,11 +2,34 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.013     2018-11-23 (unreleased)
+3.013     2018-11-26 (unreleased)
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Annotation.pm-NamedDestination.pm-
+      Outline.pm, lib/PDF/Builder/Basic/PDF/Utils.pm, 
+      lib/PDF/Builder/Resource/BaseFont.pm-CIDFont.pm, 
+      lib/PDF/Builder/Resource/CIDFont/CJKFont.pm, 
+      lib/PDF/Builder/Resource/Font/BdFont.pm, t/annotate.t
+      [ref RT 33497, RT 117031]
+     Consolidate PDFStr() and PDFUtf() calls (and associated is_utf() etc.
+      checks) into new function PDFString(), which is given the string and
+      usage code, and returns either PDFStr() or PDFUtf(), based on the
+      usage and whether UTF-8 is permitted for that usage, and what the
+      original string encoding was. This fixes RT 33497, and appears to fix 
+      RT 117031 too, as I have not seen any documentation that forbids UTF-8
+      characters in metadata (PDFString usage 'm'). If such turns up, I will
+      update PDF::Builder::Basic::PDF::Utils to move metadata usage from UTF-8
+      permitted to disallowed.
+
+      Various Annotation titles and labels now permit UTF-8 text. Named 
+      Destinations currently permit UTF-8, as I have not seen any restrictions 
+      against this. Outline titles permit UTF-8. The annotate t-test was
+      updated because PDFUtf() format <hex quartets> is no longer forced for
+      annotations.
 
     lib/PDF/Builder/Resource/XObject/Image/GIF.pm [ref RT 44877]
       Fixed library to process GIFs with 3 more types of extension blocks,
-      and updated the POD.
+      and updated the POD. The new extension blocks are read, but ignored,
+      so they no longer produce an error.
 
     lib/PDF/Builder/Annotation.pm  [ref RT 117942]
       Do some more cleanup of annotations. Unable to get same icon behavior

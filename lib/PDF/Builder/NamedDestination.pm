@@ -91,19 +91,8 @@ sub url {
     my ($self, $url, %opts) = @_;
 
     $self->{'S'} = PDFName('URI');
-    if (is_utf8($url)) {
-        # URI must be 7-bit ASCII
-        utf8::downgrade($url);
-    }
-    $self->{'URI'} = PDFStr($url);
+    $self->{'URI'} = PDFString($url, 'u');
 
-    # this will come again -- since the UTF-8 urls are coming !
-    # -- fredo
-    #if (is_utf8($url) || utf8::valid($url)) {
-    #    $self->{'URI'} = PDFUtf($url);
-    #} else {
-    #    $self->{'URI'} = PDFStr($url);
-    #}
     return $self;
 }
 
@@ -120,19 +109,8 @@ sub file {
     my ($self, $url, %opts) = @_;
 
     $self->{'S'} = PDFName('Launch');
-    if (is_utf8($url)) {
-        # URI must be 7-bit ASCII
-        utf8::downgrade($url);
-    }
-    $self->{'F'} = PDFStr($url);
+    $self->{'F'} = PDFString($url, 'u');
 
-    # this will come again -- since the UTF-8 urls are coming !
-    # -- fredo
-    #if (is_utf8($url) || utf8::valid($url)) {
-    #    $self->{'F'} = PDFUtf($url);
-    #} else {
-    #    $self->{'F'} = PDFStr($url);
-    #}
     return $self;
 }
 
@@ -159,19 +137,7 @@ sub pdf_file {
     my ($self, $url, $pnum, %opts) = @_;
 
     $self->{'S'} = PDFName('GoToR');
-    if (is_utf8($url)) {
-        # URI must be 7-bit ASCII
-        utf8::downgrade($url);
-    }
-    $self->{'F'} = PDFStr($url);
-
-    # this will come again -- since the UTF-8 urls are coming !
-    # -- fredo
-    #if (is_utf8($url) || utf8::valid($url)) {
-    #    $self->{'F'} = PDFUtf($url);
-    #} else {
-    #    $self->{'F'} = PDFStr($url);
-    #}
+    $self->{'F'} = PDFString($url, 'u');
 
     $self->dest(PDFNum($pnum), %opts);
 
@@ -236,6 +202,9 @@ positioned at the top-left corner of the window and the contents of the page
 magnified by the factor C<$zoom>. A zero (0) value for any of the parameters 
 C<$left>, C<$top>, or C<$zoom> specifies that the current value of that 
 parameter is to be retained unchanged.
+
+This is the B<default> fit setting, with position (left and top) and zoom
+the same as the calling page's.
 
 =cut
 

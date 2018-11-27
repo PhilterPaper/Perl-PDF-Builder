@@ -114,17 +114,7 @@ sub pdf_file {
     $self->{'Subtype'} = PDFName('Link');
     $self->{'A'} = PDFDict();
     $self->{'A'}->{'S'} = PDFName('GoToR');
-    if (is_utf8($url)) {
-        # URI must be 7-bit ASCII
-        utf8::downgrade($url);
-    }
-    # this will come again -- since the UTF-8 urls are coming !
-    # -- fredo
-    #if (is_utf8($url) || utf8::valid($url)) {
-    #    $self->{'A'}->{'F'} = PDFUtf($url);
-    #} else {
-        $self->{'A'}->{'F'} = PDFStr($url);
-    #}
+    $self->{'A'}->{'F'} = PDFString($url, 'u');
 
     $pnum--;  # wants it numbered starting at 0
     $self->dest(PDFNum($pnum), %opts);
@@ -146,22 +136,11 @@ configuration or mapping.
 
 sub file {
     my ($self, $file, %opts) = @_;
-    # TBD whether or not UTF-8 string can be allowed as a filepath.
 
     $self->{'Subtype'} = PDFName('Link');
     $self->{'A'} = PDFDict();
     $self->{'A'}->{'S'} = PDFName('Launch');
-    if (is_utf8($file)) {
-        # URI must be 7-bit ASCII
-        utf8::downgrade($file);
-    }
-    # this will come again -- since the UTF-8 paths are coming !
-    # -- fredo
-    #if (is_utf8($file) || utf8::valid($file)) {
-    #    $self->{'A'}->{'F'} = PDFUtf($file);
-    #} else {
-        $self->{'A'}->{'F'} = PDFStr($file);
-    #}
+    $self->{'A'}->{'F'} = PDFString($file, 'f');
     $self->rect(@{$opts{'-rect'}}) if defined $opts{'-rect'};
     $self->border(@{$opts{'-border'}}) if defined $opts{'-border'};
     $self->Color(@{ $opts{'-color'} }) if defined $opts{'-color'};
@@ -183,17 +162,7 @@ sub url {
     $self->{'Subtype'} = PDFName('Link');
     $self->{'A'} = PDFDict();
     $self->{'A'}->{'S'} = PDFName('URI');
-    if (is_utf8($url)) {
-        # URI must be 7-bit ASCII
-        utf8::downgrade($url);
-    }
-    # this will come again -- since the UTF-8 urls are coming !
-    # -- fredo
-    #if (is_utf8($url) || utf8::valid($url)) {
-    #    $self->{'A'}->{'URI'} = PDFUtf($url);
-    #} else {
-        $self->{'A'}->{'URI'} = PDFStr($url);
-    #}
+    $self->{'A'}->{'URI'} = PDFString($url, 'u');
     $self->rect(@{$opts{'-rect'}}) if defined $opts{'-rect'};
     $self->border(@{$opts{'-border'}}) if defined $opts{'-border'};
     $self->Color(@{ $opts{'-color'} }) if defined $opts{'-color'};
@@ -247,7 +216,7 @@ sub text {
     $self->Color(@{ $opts{'-color'} }) if defined $opts{'-color'};
     $self->open($opts{'-open'}) if defined $opts{'-open'};
     # popup label (title)
-    $self->{'T'} = PDFStr($opts{'-text'}) if exists $opts{'-text'};
+    $self->{'T'} = PDFString($opts{'-text'}, 'p') if exists $opts{'-text'};
 
     # Icon Name will be ignored if there is an AP.
     my $icon;  # perlcritic doesn't want 2 lines combined
@@ -282,14 +251,14 @@ sub movie {
     $self->{'A'} = PDFBool(1);  # play using default activation parameters
     $self->{'Movie'} = PDFDict();
    #$self->{'Movie'}->{'S'} = PDFName($contentType);
-    $self->{'Movie'}->{'F'} = PDFStr($file);
+    $self->{'Movie'}->{'F'} = PDFString($file, 'f');
 
     $self->rect(@{$opts{'-rect'}}) if defined $opts{'-rect'};
     $self->border(@{$opts{'-border'}}) if defined $opts{'-border'};
     $self->Color(@{ $opts{'-color'} }) if defined $opts{'-color'};
     # popup label (title)  DOESN'T SEEM TO SHOW UP ANYWHERE
     #  self->A->T and self->T also fail to display
-    $self->{'Movie'}->{'T'} = PDFStr($opts{'-text'}) if exists $opts{'-text'};
+    $self->{'Movie'}->{'T'} = PDFString($opts{'-text'}, 'p') if exists $opts{'-text'};
 
     return $self;
 }
@@ -363,20 +332,9 @@ sub file_attachment {
 
     $self->rect(@{$opts{'-rect'}}) if defined $opts{'-rect'};
     # descriptive text on mouse rollover
-    $self->{'T'} = PDFStr($opts{'-text'}) if exists $opts{'-text'};
+    $self->{'T'} = PDFString($opts{'-text'}, 'p') if exists $opts{'-text'};
 
     $self->{'Subtype'} = PDFName('FileAttachment');
-
-    if (is_utf8($file)) {
-	# URI must be 7-bit ASCII
-	utf8::downgrade($file);
-    }
-    # UTF-8 file names are coming?
-    #if (is_utf8($file) || utf8::valid($file)) {
-    #    $self->{'FS'}->{'F'} = PDFUtf($file);
-    #} else {
-    #    $self->{'FS'}->{'F'} = PDFStr($file);
-    #}
 
     # 9 0 obj <<
     #    /Type /Annot
@@ -406,7 +364,7 @@ sub file_attachment {
     if (!defined $opts{'-notrimpath'}) {
         if ($cName =~ m#([^/\\]+)$#) { $cName = $1; }
     }
-    $self->{'Contents'} = PDFStr($cName);
+    $self->{'Contents'} = PDFString($cName, 's');
 
     # Icon Name will be ignored if there is an AP.
     $self->{'Name'} = PDFName($icon) if $icon && !ref($icon); # icon name
@@ -415,7 +373,7 @@ sub file_attachment {
 
     # The File Specification.
     $self->{'FS'} = PDFDict();
-    $self->{'FS'}->{'F'} = PDFStr($file);
+    $self->{'FS'}->{'F'} = PDFString($file, 'f');
     $self->{'FS'}->{'Type'} = PDFName('F');
     $self->{'FS'}->{'EF'} = PDFDict($file);
     $self->{'FS'}->{'EF'}->{'F'} = PDFDict($file);
@@ -540,11 +498,7 @@ sub content {
     
    # originally @t, but caller only passed a single text string (scalar) anyway
    #my $t = join("\n", @t);
-    if (is_utf8($t) || utf8::valid($t)) {
-        $self->{'Contents'} = PDFUtf($t);
-    } else {
-        $self->{'Contents'} = PDFStr($t);
-    }
+    $self->{'Contents'} = PDFString($t, 's');
     return $self;
 }
 
@@ -692,7 +646,7 @@ sub dest {
             $self->{'A'}->{'D'} = PDFArray($page, PDFName('XYZ'), map {defined $_ ? PDFNum($_) : PDFNull()} @{$opts{'-xyz'}});
         }
     } else {
-        $self->{'Dest'} = PDFStr($page);
+        $self->{'Dest'} = PDFString($page, 'n');
     }
 
     return $self;

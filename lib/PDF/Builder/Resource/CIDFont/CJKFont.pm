@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.013'; # manually update whenever code is changed
 
 use PDF::Builder::Util;
 use PDF::Builder::Basic::PDF::Utils;
@@ -146,8 +146,8 @@ sub new {
     $de->{'Subtype'} = PDFName('CIDFontType0');
     $de->{'BaseFont'} = PDFName($self->fontname());
     $de->{'DW'} = PDFNum($self->missingwidth());
-    $de->{'CIDSystemInfo'}->{'Registry'} = PDFStr($emap->{'reg'});
-    $de->{'CIDSystemInfo'}->{'Ordering'} = PDFStr($emap->{'ord'});
+    $de->{'CIDSystemInfo'}->{'Registry'} = PDFString($emap->{'reg'}, 'x');
+    $de->{'CIDSystemInfo'}->{'Ordering'} = PDFString($emap->{'ord'}, 'x');
     $de->{'CIDSystemInfo'}->{'Supplement'} = PDFNum($emap->{'sup'});
     ## $de->{'CIDToGIDMap'} = PDFName($emap->{'map'}); # ttf only
 

@@ -85,7 +85,7 @@ sub descrByData {
             $des->{'Style'} = PDFDict();
             $des->{'Style'}->{'Panose'} = PDFStrHex($self->data()->{'panose'});
         }
-        $des->{'FontFamily'} = PDFStr($self->data()->{'fontfamily'})
+        $des->{'FontFamily'} = PDFString($self->data()->{'fontfamily'}, 'x')
             if defined $self->data()->{'fontfamily'};
         $des->{'FontWeight'} = PDFNum($self->data()->{'fontweight'})
             if defined $self->data()->{'fontweight'};
@@ -138,8 +138,8 @@ sub tounicodemap {
     $tuni->{'Type'} = PDFName('CMap');
     $tuni->{'CMapName'} = PDFName(sprintf(qq|pdfbldr-%s+0|, $self->name()));
     $tuni->{'CIDSystemInfo'} = PDFDict();
-    $tuni->{'CIDSystemInfo'}->{'Registry'} = PDFStr($self->name());
-    $tuni->{'CIDSystemInfo'}->{'Ordering'} = PDFStr('XYZ');
+    $tuni->{'CIDSystemInfo'}->{'Registry'} = PDFString($self->name(), 'x');
+    $tuni->{'CIDSystemInfo'}->{'Ordering'} = PDFString('XYZ', 'x');
     $tuni->{'CIDSystemInfo'}->{'Supplement'} = PDFNum(0);
 
     $self->{' apipdf'}->new_obj($tuni);

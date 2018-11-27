@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.011'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.013'; # manually update whenever code is changed
 
 use Encode qw(:all);
 
@@ -47,8 +47,8 @@ sub new {
 
     $de->{'Type'} = PDFName('Font');
     $de->{'CIDSystemInfo'} = PDFDict();
-    $de->{'CIDSystemInfo'}->{'Registry'} = PDFStr('Adobe');
-    $de->{'CIDSystemInfo'}->{'Ordering'} = PDFStr('Identity');
+    $de->{'CIDSystemInfo'}->{'Registry'} = PDFString('Adobe', 'x');
+    $de->{'CIDSystemInfo'}->{'Ordering'} = PDFString('Identity', 'x');
     $de->{'CIDSystemInfo'}->{'Supplement'} = PDFNum(0);
     $de->{'CIDToGIDMap'} = PDFName('Identity');
 
