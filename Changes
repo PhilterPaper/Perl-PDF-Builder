@@ -4,6 +4,10 @@ See also Changes_2017 for earlier version 3 release logs.
 
 3.013     2018-11-27 (unreleased)
 
+    t/00-all-usable.t
+      Check for optional libraries and do auto-OK only if missing. If an
+      optional library is present, do the normal "use" test.
+
     README, MANIFEST
       Add a README stub in the root to shut up Kwalitee's complaint. The real
       README is still in INFO/.
