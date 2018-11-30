@@ -17,7 +17,6 @@ INFO/dist.ini.old
 INFO/KNOWN_INCOMP
 INFO/LICENSE
 INFO/PATENTS
-INFO/README
 INFO/SUPPORT
 contrib/combine_pdfs.pl
 contrib/pdf-debug.pl

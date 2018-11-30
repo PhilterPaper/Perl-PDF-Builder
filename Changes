@@ -2,15 +2,19 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.013     2018-11-27 (unreleased)
+3.013     2018-11-30 (unreleased)
+
+    Makefile.PL
+      Try a different format for bugtracker entry, to point to GitHub issues
+      rather than the default RT ticket system.
 
     t/00-all-usable.t
       Check for optional libraries and do auto-OK only if missing. If an
       optional library is present, do the normal "use" test.
 
     README, MANIFEST
-      Add a README stub in the root to shut up Kwalitee's complaint. The real
-      README is still in INFO/.
+      Moved README back to the root to shut up Kwalitee's complaint about no
+      README file.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Annotation.pm-NamedDestination.pm-
       Outline.pm, lib/PDF/Builder/Basic/PDF/Utils.pm, 

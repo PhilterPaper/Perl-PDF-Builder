@@ -1,7 +1,20 @@
-README stub to keep Kwalitee tool quiet...
 
-See INFO/README for full README. INFO/ also has older Changes, the LICENSE,
-PATENTS information, SUPPORT information, a list of DEPRECATED features, and
-a list of KNOWN INCOMPatibilites with PDF::API2 product.
+This archive contains the distribution PDF::Builder.
+See Changes file for the version.
 
-There are also some build tool files that are not currently used.
+  Facilitates the creation and modification of PDF files
+
+This software is Copyright (c) 2017-2018 by Phil M. Perry.
+
+This is free software, licensed under:
+
+  The GNU Lesser General Public License, Version 2.1, February 1999
+
+See INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues.
+See INFO/DEPRECATED file for information on deprecated features.
+See INFO/KNOWN_INCOMP file for known incompatibilities with PDF::API2.
+See INFO/Changes* files for older change logs.
+See INFO/PATENTS file for information on patents.
+See INFO/LICENSE file for the license.
+
+INFO/ also has some build tool files that are not currently used.

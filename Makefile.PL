@@ -86,7 +86,10 @@ my %WriteMakefileArgs =
           web => 'https://github.com/PhilterPaper/Perl-PDF-Builder',
       },
 
-      bugtracker => 'https://github.com/PhilterPaper/Perl-PDF-Builder/issues',
+      bugtracker => {
+	  web => 'https://github.com/PhilterPaper/Perl-PDF-Builder/issues',
+	  mailto => 'support2854 [at] catskilltech.com',
+      },
 
     },
 
