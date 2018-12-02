@@ -85,6 +85,12 @@ There are four levels of involvement with PDF::Builder. Depending on what you
 want to do, different kinds of installs are recommended.
 See L<PDF::Builder::Docs> section B<Software Development Kit> for suggestions.
 
+=head2 OPTIONAL LIBRARIES
+
+PDF::Builder can make use of some optional libraries, which are not I<required>
+for a successful installation, but improve speed and capabilities. See 
+L<PDF::Builder::Docs> section B<Optional Libraries> for more information.
+
 =head2 STRINGS (CHARACTER TEXT)
 
 There are some things you should know about character encoding (for text),
