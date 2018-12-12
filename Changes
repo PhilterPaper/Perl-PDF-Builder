@@ -2,7 +2,12 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.013     2018-11-30 (unreleased)
+3.013     2018-12-12 (unreleased)
+
+    examples/Content.pl
+      Add a sample showing the use of multiple text and graphics objects to
+      have some text under a graphic, and other over it, and change one image
+      to show it rotated and clipped.
 
     Makefile.PL
       Try a different format for bugtracker entry, to point to GitHub issues
