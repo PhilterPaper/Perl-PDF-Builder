@@ -2,7 +2,12 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.013     2018-12-12 (unreleased)
+3.013     2018-12-13 (unreleased)
+
+    examples/BarCode.pl
+      Clean up by consolidating Helvetica font into one place, rather than
+      once per barcode Xobject (much smaller file). Note that barcodes still
+      appear to have some problems with bars merging with each other.
 
     examples/Content.pl
       Add a sample showing the use of multiple text and graphics objects to
