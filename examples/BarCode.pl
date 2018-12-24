@@ -599,6 +599,8 @@ $grfx->restore();
 $pdf->saveas($PDFname);
 
 # =====================================================================
+# note that formimage() will output to absolute position on page, and
+# not relative to the graphics current position!
 sub centerbc {
   my ($img, $wcapacity,$hcapacity, @base) = @_;
 
