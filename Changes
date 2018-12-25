@@ -2,7 +2,18 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.013     2018-12-23 (unreleased)
+3.013     2018-12-24 (unreleased)
+
+    MANIFEST, 1_pc.pl, 2_t-tests.pl, 3_examples.pl, 4_contrib.pl, INFO/pc.bat,
+      INFO/t-tests.bat, INFO/examples.bat, INFO/contrib.bat
+     Convert the various test suites from Windows .bat files to Perl .pl 
+      files, so that they may be used on any system. Some configuration may
+      need to be adjusted for Linux or Unix systems (such as directory
+      separators and available font file names). The old .bat files have been 
+      moved to INFO, in case you'd rather use them (they would need to first 
+      either be moved back to the root, or their internal paths updated). The 
+      Perl replacements are numbered in the suggested order for running them 
+      (only 3 and 4 are critical to use in that order).
 
     examples/BarCode.pl
       Clean up by consolidating Helvetica font declaration into one place, 
