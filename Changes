@@ -2,18 +2,20 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.013     2018-12-24 (unreleased)
+3.013     2018-12-26 (unreleased)
 
-    MANIFEST, 1_pc.pl, 2_t-tests.pl, 3_examples.pl, 4_contrib.pl, INFO/pc.bat,
-      INFO/t-tests.bat, INFO/examples.bat, INFO/contrib.bat
+    MANIFEST, 1_pc.pl, 2_t-tests.pl, 3_examples.pl, 4_contrib.pl, 
+      INFO/old/pc.bat, INFO/old/t-tests.bat, INFO/old/examples.bat, 
+      INFO/old/contrib.bat
      Convert the various test suites from Windows .bat files to Perl .pl 
       files, so that they may be used on any system. Some configuration may
       need to be adjusted for Linux or Unix systems (such as directory
       separators and available font file names). The old .bat files have been 
-      moved to INFO, in case you'd rather use them (they would need to first 
-      either be moved back to the root, or their internal paths updated). The 
-      Perl replacements are numbered in the suggested order for running them 
-      (only 3 and 4 are critical to use in that order).
+      moved to INFO/old, in case you'd rather use them (they would need to 
+      first either be moved back to the root, or their internal paths updated,
+      and checked to see if they need updating). The Perl replacements are 
+      numbered in the suggested order for running them (only 3 and 4 are 
+      critical to use in that order).
 
     examples/BarCode.pl
       Clean up by consolidating Helvetica font declaration into one place, 
@@ -112,8 +114,8 @@ See also Changes_2017 for earlier version 3 release logs.
 
 3.011     2018-10-25
 
-   move .travis.yml.HOLD and dist.ini.old from the root to INFO/, to unclutter
-     the root. It is unknown when and if they will ever be used.
+   move .travis.yml.HOLD and dist.ini.old from the root to INFO/old/, to 
+     unclutter the root. It is unknown when and if they will ever be used.
 
    lib/PDF/Builder/Annotation.pm  [ref RT 125917] minor fix to properly 
      implement a default target page fit (-xyz), otherwise the link() 

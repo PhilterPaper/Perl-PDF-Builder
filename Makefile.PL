@@ -56,6 +56,10 @@ my %WriteMakefileArgs =
     "Font::TTF" => 1.04,
     # === "optional prerequisites", used if present, but not mandatory
     #     update t/00-all-usable.t to exclude modules using these libraries!
+    #   TBD: there is some sort of "recommends" entry, but I can't find
+    #        any documentation on it, or whether it ever tries to install
+    #        the listed modules, or whether PDF::Builder shows up in the
+    #        modules' Reverse Dependencies list
     #"Graphics::TIFF" => 0,
     #"Image::PNG::Libpng" => 0,
     # === found in CORE, so no need to explicitly list
