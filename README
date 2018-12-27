@@ -4,7 +4,8 @@ See Changes file for the version.
 
   Facilitates the creation and modification of PDF files
 
-The installable Perl package may be obtained from cpan.org, as PDF::Builder.
+The installable Perl package may be obtained from https://www.cpan.org, 
+as PDF::Builder.
 
 This software is Copyright (c) 2017-2018 by Phil M. Perry.
 
@@ -19,4 +20,4 @@ See INFO/Changes* files for older change logs.
 See INFO/PATENTS file for information on patents.
 See INFO/LICENSE file for the license.
 
-INFO/old/ also has some build tool files that are not currently used.
+INFO/old/ also has some build and test tool files that are not currently used.

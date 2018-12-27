@@ -24,6 +24,7 @@ my $pause;
 # check if any of the needed PDF files (from examples run) have been erased
 # or not created yet.
 my $noRun = 0;
+my $createdAtTop = 0;
 
 # combine_pdfs
 fileCheck("examples/011_open_update.BASE.pdf");
@@ -39,6 +40,7 @@ if ($noRun) {
 	system("perl examples/011_open_update");
 	system("perl examples/012_pages");
 	$noRun = 0;
+        $createdAtTop = 1;
     }
 }
 if ($noRun) { exit(1); }
@@ -94,12 +96,18 @@ system("contrib".$dirSep."text2pdf.pl contrib/text2pdf.pl");
 print "Press Enter to continue\n";
 $pause = <>;
 
-print "\nIf you are done with the input and output files, should I erase them now?[n]\n";
+print "\nIf you are done with the output files, should I erase them now?[n]\n";
 $pause = <>;
 if ($pause =~ m/^y/i) {
-    unlink("examples/011_open_update.BASE.pdf");
-    unlink("examples/012_pages.pdf");
-    unlink("examples/011_open_update.UPDATED.pdf");
+    if ($createdAtTop) {
+        unlink("examples/011_open_update.BASE.pdf");
+        unlink("examples/011_open_update.UPDATED.pdf");
+        if (-f "examples/011_open_update.STRING.pdf") {
+	    # left over from run of 011 at the top
+            unlink("examples/011_open_update.STRING.pdf");
+        }
+        unlink("examples/012_pages.pdf");
+    }
 
     unlink("combined.pdf");
     unlink("combined.deopt.pdf");

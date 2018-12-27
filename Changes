@@ -2,7 +2,18 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2017 for earlier version 3 release logs.
 
-3.013     2018-12-26 (unreleased)
+3.013     2018-12-27
+
+    examples/022_truefonts-022_truefonts_diacrits_utf8-023_cjkfonts-
+      024_bdffonts-026_unifont2
+     Minor cleanup to end "dot" line.
+    3_examples.pl, 4_contrib.pl
+     Minor cleanup to contrib tests, examples -step and -cont command line
+      flag to stop after each test to allow tester to read expected results
+      description (new) and look at PDF file(s) before going on to next test,
+      or run them all in one fell swoop.
+     Note that the failure in 025_unifonts is probably reading the data line
+      right after __END__ (there is no __DATA__).
 
     MANIFEST, 1_pc.pl, 2_t-tests.pl, 3_examples.pl, 4_contrib.pl, 
       INFO/old/pc.bat, INFO/old/t-tests.bat, INFO/old/examples.bat, 
