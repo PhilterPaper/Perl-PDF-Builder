@@ -2,10 +2,35 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2018 for earlier version 3 release logs.
 
-3.014     2018-12-30  (unreleased)
+3.014     2019-01-01  (unreleased)
 
+* consider: 3_examples.pl -step allow "skip" as entry, to bypass a long test
+            coming up next (need to label what's coming up next).
 * issue: why do *.pl show up as siblings to Builder.pm? something in
          PDFbuild.pl routine when it updates .pl file VERSIONs?
+
+    lib/PDF/Builder/Basic/PDF/File.pm
+      [ref RT 106020 and RT 117210] add some tolerance for out-of-spec PDF 
+      files. Initially this is permitting a comment between the PDF version
+      number in the header and the EOL, and extra whitespace in the cross
+      reference listing and some other wigglies (e.g., starting object 1, not
+      0, 0 entries per subsection, lots of warnings). These files don't 
+      strictly meet the PDF formatting spec, but many readers seem to tolerate 
+      them (fix them up), so PDF::Builder should, too. Note that PDF::Builder 
+      already is happy to read a Mac-style PDF using only CR for an EOL (one 
+      byte, not the required two). 
+
+      There is one more that I haven't added yet: there are reports of 
+      sightings "in the wild" (e.g., RT 106020) of a PDF version header 
+      followed by a comment followed by the first object (n 0 obj) before 
+      encountering the first $cr. If I can come up with or obtain a "working" 
+      PDF like this, I will look into adding tolerance code for it.
+
+      For future consideration: save header comments (in-line and after header)
+      for output at overall header. Should coordinate with being able to 
+      specify a header comment (in .pl code) and possibly comments within 
+      objects. Other out-of-spec conditions that most readers tolerate will be
+      added over time.
 
     CONTRIBUTING, MANIFEST
       Add file (at CPAN's request) suggesting how best to contribute to 

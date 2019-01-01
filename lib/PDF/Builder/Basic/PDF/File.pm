@@ -17,7 +17,7 @@ package PDF::Builder::Basic::PDF::File;
 use strict;
 
 # VERSION
-my $LAST_UPDATE = '3.011'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.014'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -150,6 +150,8 @@ $ws_char    = '[ \t\r\n\f\0]';
 $delim_char = '[][<>{}()/%]';
 $reg_char   = '[^][<>{}()/% \t\r\n\f\0]';
 $irreg_char = '[][<>{}()/% \t\r\n\f\0]';
+# TBD a line-end character is space CR ' \r', space LF ' \n', or CR LF '\r\n'
+#     have seen working PDFs with just a CR and space CR
 $cr         = '\s*(?:\015|\012|(?:\015\012))';
 
 my $re_comment = qr/(?:\%[^\r\n]*)/;
@@ -243,11 +245,15 @@ sub open {
     binmode $fh, ':raw';
     $fh->seek(0, 0);            # go to start of file
     $fh->read($buffer, 255);
-    unless ($buffer =~ m/^\%PDF\-(\d+\.\d+)\s*$cr/mo) {
+    unless ($buffer =~ m/^\%PDF\-(\d+\.\d+)(.*?)$cr/mo) {
         die "$filename does not contain a PDF version";
     }
     $self->{' version'} = $1;
     # can't run verCheckInput() yet, as full ' version' not set
+    if (defined $2 && length($2) > 0) {
+       #$comment = $2;  TBD later, save for output as comment
+       print STDERR "Warning: PDF header contains extra text '$2', ignored as comment.\n";
+    }
 
     $fh->seek(0, 2);            # go to end of file
     my $end = $fh->tell();
@@ -403,6 +409,8 @@ sub create_file {
     $self->{' OUTFILE'} = $fh;
     $fh->print('%PDF-' . ($self->{' version'} || '1.4') . "\n");
     $fh->print("%\xC6\xCD\xCD\xB5\n");   # and some binary stuff in a comment
+    # TBD does this "binary stuff" have any meaning? They're not UTF-8
+    # TBD future output as comments any comments read in from PDF files
 
     return $self;
 }
@@ -499,6 +507,7 @@ sub readval {
         $str = update($fh, $str) if $update;
         # streams can't be followed by a lone carriage-return.
         # fredo: yes they can !!! -- use the MacOS, Luke.
+	# TBD isn't this covered by $cr as space CR?
         if (($str =~ s/^stream(?:(?:\015\012)|\012|\015)//) and ($result->{'Length'}->val() != 0)) {   # stream
             my $length = $result->{'Length'}->val();
             $result->{' streamsrc'} = $fh;
@@ -1124,12 +1133,13 @@ sub _unpack_xref_stream {
 
 sub readxrtr {
     my ($self, $xpos) = @_;
+    # $xpos SHOULD be pointing to "xref" keyword
 
     my ($tdict, $buf, $xmin, $xnum, $xdiff);
 
     my $fh = $self->{' INFILE'};
     $fh->seek($xpos, 0);
-    $fh->read($buf, 22);
+    $fh->read($buf, 22);  # 22 should overlap into first subsection
     $buf = update($fh, $buf); # fix for broken JAWS xref calculation.
 
     my $xlist = {};
@@ -1141,26 +1151,162 @@ sub readxrtr {
    #    $buf = update($fh, $buf);
    #}
 
-    if ($buf =~ s/^xref$cr//i) {
+    if ($buf =~ s/^xref$cr//i) {   # remove xrefEOL from buffer
         # Plain XRef tables.
+	#
+	# look to match startobj# count# EOL of first (or only) subsection
+	# supposed to be single ASCII space between numbers, but this is
+	#   more lenient for some writers, allowing 1 or more whitespace
+	my $subsection_count = 0;
+	my $entry_format_error = 0;
+
         while ($buf =~ m/^$ws_char*([0-9]+)$ws_char+([0-9]+)$ws_char*$cr(.*?)$/s) {
             my $old_buf = $buf;
-            $xmin = $1;
-            $xnum = $2;
-            $buf  = $3;
+            $xmin = $1;   # starting object number of this subsection
+            $xnum = $2;   # number of entries in this subsection 
+            $buf  = $3;   # remainder of buffer
+	    $subsection_count++;
+	    # go back and warn if other than single space separating numbers
             unless ($old_buf =~ /^[0-9]+ [0-9]+$cr/) {
                 # See PDF 1.7 section 7.5.4: Cross-Reference Table
-                warn q{Malformed xref in PDF file: subsection shall begin with a line containing two numbers separated by a SPACE (20h)};
+                print STDERR "Warning: malformed xref: subsection header needs a single ASCII space between the numbers and no extra spaces.\n";
             }
-            $xdiff = length($buf);
+            $xdiff = length($buf); # how much remaining in buffer
 
-            $fh->read($buf, 20 * $xnum - $xdiff + 15, $xdiff);
-            while ($xnum-- > 0 and $buf =~ s/^0*([0-9]*)$ws_char+0*([0-9]+)$ws_char+([nf])$cr//) {
-                $xlist->{$xmin} = [$1, $2, $3] unless exists $xlist->{$xmin};
+	    # in case xnum == 0 is permitted (or used and tolerated by readers),
+	    #   skip over entry reads and go to next subsection
+	    if ($xnum < 1) { 
+		print STDERR "Warning: xref subsection has 0 entries. Skipped.\n";
+	        next; 
+	    }
+
+	    # read chunk of entire subsection list
+	    my $entry_size = 20;
+	    # test read first entry, see if $cr in expected place, adjust size
+	    $fh->read($buf, $entry_size * 1 - $xdiff + 15, $xdiff);
+	    $buf =~ m/^(.*?)$cr/;
+	    $entry_size = length($1) + 2;
+	    if ($entry_size != 20) {
+		print STDERR "Warning: xref entries supposed to be 20 bytes long, are $entry_size.\n";
+	    }
+	    $xdiff = length($buf);
+
+	    # read remaining entries
+            $fh->read($buf, $entry_size * $xnum - $xdiff + 15, $xdiff);
+	    # each entry is two integers and flag. spec says single ASCII space 
+	    #   between each field and certain length for each (10, 5, 1), so 
+	    #   this appears to be more lenient than spec
+	    # is object 0 supposed to be in subsection 1, or is any place OK?
+            while ($xnum-- > 0 and 
+		   $buf =~ m/^$ws_char*(\d+)$ws_char+(\d+)$ws_char+([nf])$ws_char*$cr/) {
+		# check if format doesn't match spec
+                if ($buf =~ m/^\d{10} \d{5} [nf]$cr/ ||
+		    $entry_format_error) {
+		    # format OK or have already reported format problem
+		} else {
+		    print STDERR "Warning: xref entry readable, but doesn't meet PDF spec.\n";
+		    $entry_format_error++;
+		}
+
+	        $buf =~ s/^$ws_char*(\d+)$ws_char+(\d+)$ws_char+([nf])$ws_char*$cr//;
+		# $1 = object's starting offset in file (n) or 
+		#      next object in free list (f) [0 if last]
+		# $2 = generation number (n) or 65535 for object 0 (f) or
+		#      next generation number (f)
+		# $3 = flag (n = object in use, f = free)
+		# buf reduced by entry just processed
+		if (exists $xlist->{$xmin}) {
+		    print STDERR "Warning: duplicate object number $xmin in xref table ignored.\n";
+		} else {
+                    $xlist->{$xmin} = [$1, $2, $3];
+		    if ($xmin == 0 && $subsection_count > 1) {
+			print STDERR "Warning: xref object 0 entry not in first subsection.\n";
+		    }
+		}
                 $xmin++;
-            }
-        }
+            } # traverse one subsection for objects xmin through xmin+xnum-1 
+	    # go back for next subsection (if any)
+        } # loop through xref subsections
+	# fall through to here when run out of xref subsections
+	# xlist should have two or more object entries, may not be contiguous
+	
+	# should have an object 0
+	#   at this point, no idea if object 0 was in first subsection (legal?)
+	#   could attempt a fixup if no object 0 found. many fixups are quite
+	#     risky and could end up corrupting the free list.
+	#   there's no guarantee that a proper free list will result, but any
+	#     error should hopefully be caught further on
+	if (!exists $xlist->{'0'}) {
+	    # for now, 1 subsection starting with 1, and only object 1 in
+	    #   free list, try to fix up
+	    if ($subsection_count == 1 && exists $xlist->{'1'}) {
+		# apparently a common enough error in PDF writers
+		
+		if ($xlist->{'1'}[0] == 0 &&  # only member of free list
+		    $xlist->{'1'}[1] == 65535 &&
+		    $xlist->{'1'}[2] eq 'f') {
+	            # object 1 appears to be the free list head, so shift down 
+		    #   all objects
+		    print STDERR "Warning: xref appears to be mislabeled starting with 1. Shift down all elements.\n";
+                    my $next = 1;
+		    while (exists $xlist->{$next}) {
+			$xlist->{$next - 1} = $xlist->{$next};
+			$next++;
+		    }
+		    delete $xlist->{--$next};
 
+		} else {
+	            # if object 1 does not appear to be a free list head, 
+		    #   insert a new object 0
+		    print STDERR "Warning: xref appears to be missing object 0. Insert a new one.\n";
+		    $xlist->{'0'} = [0, 65535, 'f'];
+	        }
+	    } else {
+	        die "Malformed cross reference list in PDF file $self->{' fname'} -- no object 0 (free list head)\n";
+	    }
+	} # no object 0 entry
+
+	# build/validate the free list (and no active objects have f flag)
+	my @free_list;
+	foreach (sort {$a <=> $b} keys %{ $xlist }) {
+	    # if 'f' flag, is in free list
+	    if      ($xlist->{$_}[2] eq 'f') {
+		if ($xlist->{$_}[1] <= 0) {
+		    print STDERR "Warning: xref free list entry $_ with bad next generation number.\n";
+		} else {
+		    push @free_list, $_; # should be in numeric order (0 first)
+		}
+	    } elsif ($xlist->{$_}[2] eq 'n') {
+		if ($xlist->{$_}[0] <= 0) {
+		    print STDERR "Warning: xref active object $_ entry with bad length ".($xlist->{$_}[1])."\n";
+		}
+		if ($xlist->{$_}[1] < 0) {
+		    print STDERR "Warning: xref active object $_ entry with bad generation number ".($xlist->{$_}[1])."\n";
+		}
+	    } else {
+		print STDERR "Warning: xref entry has flag that is not 'f' or 'n'.\n";
+	    }
+	} # go through xlist and build free_list and check entries
+	# traverse free list and check that "next object" is also in free list
+	my $next_free = 0;  # object 0 should always be in free list
+	if ($xlist->{'0'}[1] != 65535) {
+	    print STDERR "Warning: object 0 next generation is not 65535.\n";
+	}
+	do {
+	    if ($xlist->{$next_free}[2] ne 'f') {
+		print STDERR "Warning: corrupted free object list: next=$next_free is not a free object.\n";
+		$next_free = 0; # force end of free list
+	    } else { 
+		$next_free = $xlist->{$next_free}[0];
+	    }
+	    # remove this entry from free list array
+	    splice(@free_list, index(@free_list, $next_free), 1);
+	} while ($next_free && exists $xlist->{$next_free});
+	if (scalar @free_list) {
+	    print STDERR "Warning: corrupted xref list: object(s) @free_list marked as free, but are not in free chain.\n";
+	}
+
+	# done with cross reference table, so go on to trailer
         if ($buf !~ /^\s*trailer\b/i) {
             die "Malformed trailer in PDF file $self->{' fname'} at " . ($fh->tell() - length($buf));
         }
