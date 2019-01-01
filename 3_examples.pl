@@ -54,7 +54,7 @@ my (@example_list, @example_results);
   push @example_results, "create examples/024_bdffonts.<font name>.pdf, showing one page per character\n and a consolidated glyphs page.\n";
 
   push @example_list, "025_unifonts";
-  push @example_results, "fails with error, no output file created.\n";
+  push @example_results, "create examples/025_unifonts.pdf, with the first 45 lines of an attached PDF-J\n file in four different Western+CJK fonts.\n";
 
   push @example_list, "026_unifont2";
   push @example_results, "create examples/026_unifont2.pdf, showing pages with labeled sections and\n full descriptive name on each character.\n";
@@ -146,12 +146,6 @@ if ('023_cjkfonts' ~~ @example_list) {
     print "023_cjkfonts: to display the resulting PDFs, you may need to install\n";
     print "  East Asian fonts for your PDF reader.\n";
     $pause = ' ';
-}
-if ('025_unifonts' ~~ @example_list) {
-    print "025_unifonts will fail with error messages about a bad UTF-8 character\n";
-    print "  Don't worry about it.\n";
-    $pause = ' ';
-    # suspect it's reading an invalid char on line after __END__
 }
 if ($pause eq ' ') {
     print "Press Enter to continue: ";
