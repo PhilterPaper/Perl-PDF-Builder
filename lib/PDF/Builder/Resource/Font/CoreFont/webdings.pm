@@ -9,6 +9,7 @@ my $LAST_UPDATE = '2.029'; # manually update whenever code is changed
 =head1 NAME
 
 PDF::Builder::Resource::Font::CoreFont::webdings - font-specific information for WebDings symbol font
+(I<not> standard PDF core)
 
 =cut
 

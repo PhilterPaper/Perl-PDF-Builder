@@ -9,6 +9,7 @@ my $LAST_UPDATE = '3.013'; # manually update whenever code is changed
 =head1 NAME
 
 PDF::Builder::Resource::Font::CoreFont::verdanabolditalic - font-specific information for bold weight + italic Verdana font
+(I<not> standard PDF core)
 
 =cut
 

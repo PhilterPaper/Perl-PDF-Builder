@@ -9,6 +9,7 @@ my $LAST_UPDATE = '3.013'; # manually update whenever code is changed
 =head1 NAME
 
 PDF::Builder::Resource::Font::CoreFont::trebuchetbold - font-specific information for bold-weight Trebuchet font
+(I<not> standard PDF core)
 
 =cut
 
