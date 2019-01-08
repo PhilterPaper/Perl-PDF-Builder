@@ -96,6 +96,12 @@ pdfile    method in Outline.pm, NamedDestination.pm
    "pdfile" to "pdf_file". pdfile is scheduled to be removed on or after
    October, 2020.
 
+-slant    option in Synfont.pm
+   This option was renamed to -condense, as it is the factor to condense
+   (multiply width by < 1) or expand (multiply width by > 1) text characters. 
+   Use "-condense" instead. -slant is scheduled to be removed on or after
+   January, 2021.
+
 *** If I have missed any deprecated interfaces, please let me know! ***
 
 ======= Deprecated items that already have been removed ======================

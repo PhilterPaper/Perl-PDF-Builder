@@ -6,7 +6,7 @@ no warnings qw[ deprecated recursion uninitialized ];
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
 our $VERSION = '3.013'; # VERSION
-my $LAST_UPDATE = '3.013'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.014'; # manually update whenever code is changed
 
 use Carp;
 use Encode qw(:all);
@@ -165,7 +165,7 @@ The GNU Lesser General Public License (LGPL) Version 2.1, February 1999
 Copyright (C) 1991, 1999 Free Software Foundation, Inc. 59
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-I<Please see the> INFO/LICENSE I<file in the distribution root for full 
+I<Please see the> INFO/LICENSE I<file in the distribution root for full
 details.>
 
 This program is free software; you can redistribute it and/or modify it under
@@ -1853,9 +1853,8 @@ sub cjkfont {
 
 =item $font = $pdf->synfont($basefont)
 
-Returns a new synthetic font object. These are modifications to a core font
-(technically, variants supplied by the font creator, not on-the-fly changes),
-where the font may be replaced by a Type1 or Type3 PostScript font.
+Returns a new synthetic font object. These are modifications to a core (or 
+other) font, where the font may be replaced by a Type1 or Type3 PostScript font.
 For details, see L<PDF::Builder::Docs> section B<Synthetic Fonts>.
 
 See also L<PDF::Builder::Resource::Font::SynFont>

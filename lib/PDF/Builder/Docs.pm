@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.011'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.014'; # manually update whenever code is changed
 
 # originally part of Builder.pm, it was split out due to its length
 
@@ -664,25 +664,32 @@ readers and other aids to disabled users from working correctly!
 B<Examples:>
 
     $cf  = $pdf->corefont('Times-Roman', -encode => 'latin1');
-    $sf  = $pdf->synfont($cf, -slant => 0.85);  # compressed 85%
-    $sfb = $pdf->synfont($cf, -bold => 1);      # embolden by 10em
-    $sfi = $pdf->synfont($cf, -oblique => -12); # italic at -12 degrees
+    $sf  = $pdf->synfont($cf, -condense => 0.85);   # compressed 85%
+    $sfb = $pdf->synfont($cf, -bold => 1);          # embolden by 10em
+    $sfi = $pdf->synfont($cf, -oblique => -12);     # italic at -12 degrees
 
 Valid %options are:
 
 =over
 
+=item -condense
+
+Character width condense/expand factor (0.1-0.9 = condense, 1 = normal/default, 
+1.1+ = expand). It is the multiplier to apply to the width of each character.
+
 =item -slant
 
-Slant/expansion factor (0.1-0.9 = slant, 1.1+ = expansion).
+B<DEPRECATED>. It is the old name for C<-condense>, and will eventually be
+removed. Use C<-condense> instead.
 
 =item -oblique
 
-Italic angle (+/-)
+Italic angle (+/- degrees, default 0), sets B<skew> of character box.
 
 =item -bold
 
-Emboldening factor (0.1+, bold = 1, heavy = 2, ...)
+Emboldening factor (0.1+, bold = 1, heavy = 2, ...), additional thickness to
+draw outline of character (with a heavier B<line width>) before filling.
 
 =item -space
 
@@ -690,11 +697,20 @@ Additional character spacing in ems (0-1000)
 
 =item -caps
 
-0 for normal text, 1 for small caps. Note that not all lower case letters
-appear to have small caps equivalents defined for them. These include, but are
-not limited to, 'n U+0149, fi ligature U+FB01, fl ligature U+FB02, German eszet
-(sharp s) U+00DF, and doubtless others. In such cases, you may want to consider
-replacing these ligatures with separate characters: '+n, f+i, f+l, s+s, etc.
+0 for normal text, 1 for small caps. 
+Implemented by asking the font what the uppercased translation (single 
+character) is for a given character, and outputting it at 80% height and
+88% width (heavier vertical stems are better looking than a straight 80%
+scale).
+
+Note that only lower case letters which appear in the "standard" font (plane 0
+for core fonts and PS fonts) will be small-capped. This may include eszett
+(German sharp s), which becomes SS, and dotless i and j which become I and J
+respectively. There are many other accented Latin alphabet letters which I<may> 
+show up in planes 1 and higher. Ligatures (e.g., ij and ffl) do not have
+uppercase equivalents, nor does a long s. If you have text which includes such
+characters, you may want to consider preprocessing it to replace them with
+Latin character expansions (e.g., i+j and f+f+l) before small-capping.
 
 =back
 

@@ -2,12 +2,30 @@ See also Changes-ver_2 for changes released for PDF::API2, and incorporated
 into PDF::Builder.
 See also Changes_2018 for earlier version 3 release logs.
 
-3.014     2019-01-01  (unreleased)
+3.014     2019-01-07  (unreleased)
 
 * consider: 3_examples.pl -step allow "skip" as entry, to bypass a long test
             coming up next (need to label what's coming up next).
 * issue: why do *.pl show up as siblings to Builder.pm? something in
          PDFbuild.pl routine when it updates .pl file VERSIONs?
+
+    lib/PDF/Builder/Resource/Font/SynFont.pm, lib/PDF/Builder/Docs.pm,
+      lib/PDF/Builder.pm, DEPRECATED, examples/021_synfonts, examples/README,
+      examples/example.output
+     Deprecate -slant option, replacing by -condense, for the option to
+      condense or expand character widths in a synthetic font. Expand and 
+      clarify documentation. 021_synfonts add a page of text showing all the 
+      options in use together, and command-line type. There is still much to be 
+      done to make synthetic fonts completely usable, and I am exploring some 
+      alternatives. 
+
+      Fonts are limited to single byte encoding (you may wish to select an 
+      alternate plane as a font and run that through synfont()). A major 
+      problem I have not been able to solve is the expansion of Latin alphabet 
+      ligatures to multiletter capital strings (e.g., ffi to F+F+I) for 
+      small-caps usage, as well as small-caps for things like "long s" which 
+      are not in the base plane, because the ASCII letters do not appear to be 
+      available in other planes.
 
     lib/PDF/Builder/Basic/PDF/File.pm
       [ref RT 106020 and RT 117210] add some tolerance for out-of-spec PDF 
