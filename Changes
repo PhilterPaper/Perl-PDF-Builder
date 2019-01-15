@@ -1,13 +1,25 @@
-See also Changes-ver_2 for changes released for PDF::API2, and incorporated
-into PDF::Builder.
-See also Changes_2018 for earlier version 3 release logs.
+See also INFO/Changes-ver_2 for changes released for PDF::API2, and 
+incorporated into PDF::Builder.
+See also INFO/Changes_2018 for earlier version 3 release logs.
 
-3.014     2019-01-07  (unreleased)
+3.014     2019-01-15  (unreleased)
 
 * consider: 3_examples.pl -step allow "skip" as entry, to bypass a long test
             coming up next (need to label what's coming up next).
 * issue: why do *.pl show up as siblings to Builder.pm? something in
-         PDFbuild.pl routine when it updates .pl file VERSIONs?
+         PDFbuild.pl routine when it updates .pl file VERSIONs? It's not
+         harmful, just slightly annoying.
+
+    Makefile.PL, README, lib/PDF/Builder/Docs.pm
+      Move "optional" libraries (modules), currently Graphics::TIFF and
+      Image::PNG::Libpng, to "recommends" section in Makefile.PL. Your 
+      installer MAY attempt to automatically install these as prerequisites. 
+      If it does, and fails, no need to panic: they aren't vital to the 
+      operation of PDF::Builder, and should NOT cause an overall installation
+      failure! You are free to remove these optional libraries from your Perl
+      installation if you do not plan to use them. More information is in 
+      PDF::Builder::Docs. PDF::Builder is now expected to show up in CPAN's 
+      listing of "Reverse dependencies" for these libraries.
 
     lib/PDF/Builder/Resource/Font/SynFont.pm, lib/PDF/Builder/Docs.pm,
       lib/PDF/Builder.pm, DEPRECATED, examples/021_synfonts, examples/README,
@@ -63,5 +75,5 @@ See also Changes_2018 for earlier version 3 release logs.
     INFO/Changes_2018, Changes, MANIFEST, lib/PDF/Builder.pm, README
       2019 copyright, archive 2018 changes.
       
-(see Changes_2018 for earlier changes)
-(see Changes-ver_2 for changes to PDF::API2 up through 2.033)
+(see INFO/Changes_2018 for earlier changes)
+(see INFO/Changes-ver_2 for changes to PDF::API2 up through 2.033)
