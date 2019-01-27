@@ -26,7 +26,9 @@ PDF::Builder, its installer may download and install PDF::Builder automatically.
 
 B<2.> You want to write a Perl program that uses PDF::Builder functions. In 
 addition to installing PDF::Builder from CPAN, you will want documentation on
-it. Obtain a copy of the product from GitHub (https://github.com/PhilterPaper/Perl-PDF-Builder) or as a gzipped tar file from CPAN. This includes a utility to 
+it. Obtain a copy of the product from GitHub 
+(https://github.com/PhilterPaper/Perl-PDF-Builder) or as a gzipped tar file from CPAN. 
+This includes a utility to 
 build (from POD) a library of HTML documents, as well as examples (examples/ 
 directory) and contributed sample programs (contrib/ directory).
 

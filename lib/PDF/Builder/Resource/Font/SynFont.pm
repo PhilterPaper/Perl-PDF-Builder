@@ -75,7 +75,7 @@ I<-space>
 
 I<-caps>
 ... create synthetic small-caps. 0 = no, 1 = yes. These are capitals of 
-lowercase letters, at 80% scale.
+lowercase letters, at 80% height and 88% width.
 
 =back
 
