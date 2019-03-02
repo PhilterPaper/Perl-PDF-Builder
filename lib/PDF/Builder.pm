@@ -125,10 +125,11 @@ without needing admin privileges.
 
 This module does not work with perl's -l command-line switch.
 
-There is a file KNOWN_INCOMP which lists known incompatibilities with PDF::API2,
-in case you're thinking of porting over something from that world, or have 
-experience there and want to try PDF::Builder. There is also a file DEPRECATED
-which lists things which are planned to be removed at some point.
+There is a file INFO/KNOWN_INCOMP which lists known incompatibilities with 
+PDF::API2, in case you're thinking of porting over something from that world, 
+or have experience there and want to try PDF::Builder. There is also a file 
+INFO/DEPRECATED, which lists things which are planned to be removed at some 
+point.
 
 =head2 HISTORY
 

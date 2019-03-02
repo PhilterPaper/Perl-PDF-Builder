@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.013'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.014'; # manually update whenever code is changed
 
 use PDF::Builder::Util;
 use PDF::Builder::Basic::PDF::Utils;
@@ -73,12 +73,13 @@ sub _look_for_font {
     }
 }
 
+# identical routine in Resource/CIDFont/TrueType/FontFile.pm
 sub _look_for_cmap {
     my $fname = lc(shift);
 
     $fname =~ s/[^a-z0-9]+//gi;
     return ({%{$cmap->{$fname}}}) if defined $cmap->{$fname};
-    eval "require \"PDF/Builder/Resource/CIDFont/CMap/$fname.cmap\""; ## no critic
+    eval "require 'PDF/Builder/Resource/CIDFont/CMap/$fname.cmap'"; ## no critic
     unless ($@) {
         return({%{$cmap->{$fname}}});
     } else {

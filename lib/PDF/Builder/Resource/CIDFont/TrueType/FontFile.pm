@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.014'; # manually update whenever code is changed
 
 use Carp;
 use Encode qw(:all);
@@ -24,12 +24,13 @@ PDF::Builder::Resource::CIDFont::TrueType::FontFile - additional code support fo
 
 =cut
 
+# identical routine in Resource/CIDFont/CJKFont.pm
 sub _look_for_cmap {
     my $fname = lc(shift);
 
     $fname =~ s/[^a-z0-9]+//gi;
     return ({%{$cmap->{$fname}}}) if defined $cmap->{$fname};
-    eval "require 'PDF/Builde/Resource/CIDFont/CMap/$fname.cmap'"; ## no critic
+    eval "require 'PDF/Builder/Resource/CIDFont/CMap/$fname.cmap'"; ## no critic
     unless ($@) {
         return {%{$cmap->{$fname}}};
     } else {
@@ -433,6 +434,9 @@ sub new {
             'Adobe:CNS1'   => 'traditional',
             'Adobe:GB1'    => 'simplified',
         );
+        if ($cffcmap{"$data->{'cff'}->{'ROS'}->[0]:$data->{'cff'}->{'ROS'}->[1]"} eq '') {
+            print "CMap ".$data->{'cff'}->{'ROS'}->[0]."-".$data->{'cff'}->{'ROS'}->[1]." not supported\n";
+        }
         my $ccmap = _look_for_cmap($cffcmap{"$data->{'cff'}->{'ROS'}->[0]:$data->{'cff'}->{'ROS'}->[1]"});
         $data->{'u2g'} = $ccmap->{'u2g'};
         $data->{'g2u'} = $ccmap->{'g2u'};

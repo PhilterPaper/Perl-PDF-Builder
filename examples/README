@@ -37,9 +37,9 @@ tested against 3.004 July 2017
                  should just get rid of support for them. Considering how many 
                  "good" fonts there are out there (just TrueType alone, not to 
                  mention Type 1/PS), the only use I can think of for BDF fonts 
-                 is for novelty effect, where you want a blocky, crude letter 
-                 or symbol. You certainly wouldn't want to read a page of
-                 this stuff!
+                 is for novelty or decorative effect, where you want a blocky, 
+                 crude letter or symbol. You certainly wouldn't want to read a 
+                 page of this stuff!
 
 BarCode.pl       Demonstrate the bar code library, 1 page (11 one-dimensional
                  barcodes). It appears to mostly be there, but some heavy bars 
@@ -117,7 +117,7 @@ BarCode.pl       Demonstrate the bar code library, 1 page (11 one-dimensional
 
  026_unifont2    a selection of Unicode alphabets and symbols, in several
                  font faces (Helvetica Bold, Times Roman, symbols). Note that
-                 the glyph name is printed at an angle, due the the length.
+                 the glyph name is printed at an angle, due to its length.
 
  030_colorspecs  displays 16 pages each of RGB, RGB Gamma 2.2, CMYK, and L*a*b
                  colorspaces, and almost 3 pages of named colors. 16 pages of

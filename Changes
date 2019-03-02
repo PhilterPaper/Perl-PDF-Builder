@@ -2,13 +2,26 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
-3.014     2019-01-15  (unreleased)
+3.014     2019-03-02  (unreleased)
 
 * consider: 3_examples.pl -step allow "skip" as entry, to bypass a long test
             coming up next (need to label what's coming up next).
 * issue: why do *.pl show up as siblings to Builder.pm? something in
          PDFbuild.pl routine when it updates .pl file VERSIONs? It's not
          harmful, just slightly annoying.
+
+    lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm add some diagnostic
+      output (per RT 128674) to help user understand why a requested CMap
+      wasn't found (giving part of the ROS, e.g., Adobe-Identity) for 
+      ttfont(). Have not yet been able to give similar diagnostics for 
+      ../CJKFont.pm, as the ROS isn't explicitly given. If someone comes up
+      with a sample CJK that passes an empty string to _look_for_cmap(), I
+      may be able to do something with it. In general, for RT 128674, I 
+      need to find out how to create additional *.cmap files (possibly
+      supplying a tool to create them from other sources, as they are rather
+      large, and I don't want to bloat PDF::Builder with a lot of new ones).
+     Various random documentation updates made, particularly regarding the
+      use of "core" fonts, and recommending using TTF/OTF instead.
 
     Makefile.PL, README, lib/PDF/Builder/Docs.pm
       Move "optional" libraries (modules), currently Graphics::TIFF and

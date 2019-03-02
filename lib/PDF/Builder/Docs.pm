@@ -521,12 +521,36 @@ Enables kerning if data is available.
 
 =back
 
-B<Note:> even though these are called "core" fonts, they are I<not> shipped
+B<Notes:> 
+
+Even though these are called "core" fonts, they are I<not> shipped
 with PDF::Builder, but are expected to be found on the machine with the PDF
 reader. Most core fonts are installed with a PDF reader, and thus are not
 coordinated with PDF::Builder. PDF::Builder I<does> ship with core font 
 I<metrics> files (width, glyph names, etc.), but these cannot be guaranteed to 
 be in sync with what the PDF reader has installed!
+
+There are some 14 core fonts (regular, italic, bold, and bold-italic for
+Times [serif], Helvetica [sans serif], Courier [fixed pitch]; plus two symbol 
+fonts) that are supposed to be available on any PDF reader, B<although other 
+fonts with very similar metrics are often substituted.> You should I<not> count 
+on any of the 15 Windows core fonts (Bank Gothic, Georgia, Trebuchet, Verdana, 
+and two more symbol fonts) being present, especially on Linux, Mac, or other 
+non-Windows platforms. Be aware if you are producing PDFs to be read on a
+variety of different systems!
+
+If you want to ensure the widest portability for a PDF document you produce,
+you should consider using TTF fonts (instead of core fonts) and embedding them 
+in the document. This ensures that there will be no substitutions, that all
+metrics are known and match the glyphs, UTF-8 encoding can be used, and 
+that the glyphs I<will> be available on the reader's machine. At least on
+Windows platforms, most of the fonts are TTF anyway, which are used behind the
+scenes for "core" fonts, while missing most of the capabilities of TTF (now
+or possibly later in PDF::Builder) such as embedding, ligatures, UTF-8, etc.
+The downside is, obviously, that the resulting PDF file will be larger because
+it includes the font(s). There I<might> also be copyright or licensing issues 
+with the redistribution of font files in this manner (you might want to check,
+before widely distributing a PDF document with embedded fonts!).
 
 See also L<PDF::Builder::Resource::Font::CoreFont>.
 
