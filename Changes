@@ -2,13 +2,23 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
-3.014     2019-03-02  (unreleased)
+3.014     2019-03-23  (unreleased)
 
 * consider: 3_examples.pl -step allow "skip" as entry, to bypass a long test
             coming up next (need to label what's coming up next).
 * issue: why do *.pl show up as siblings to Builder.pm? something in
          PDFbuild.pl routine when it updates .pl file VERSIONs? It's not
          harmful, just slightly annoying.
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm add documentation (POD) 
+      explaining how the interaction between text objects and graphics objects
+      may result in (apparently wrong) unexpected order of output (rendering
+      order).
+
+    examples/022_truefonts add a flag --full (or -f) to force 65536 characters
+      to be output, rather than whatever the count of CIDs is reported in the
+      font. This may be useful for seeing all the defined glyphs if there are
+      gaps in the CID sequence.
 
     lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm add some diagnostic
       output (per RT 128674) to help user understand why a requested CMap

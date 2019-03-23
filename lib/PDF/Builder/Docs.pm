@@ -165,6 +165,301 @@ By the way, it is recommended that you be using I<at least> Perl 5.10 if you
 are going to be using any non-ASCII characters. Perl 5.8 may be a little
 unpredictable in handling such text.
 
+=head2 Rendering Order
+
+For better or worse, for compatibility purposes, PDF::Builder continues the 
+same rendering model as used by PDF::API2 (and possibly its predecessors). That 
+is, all graphics are put into one record, and all text output goes into another 
+record. Which one is output first, is whichever is declared first. This can 
+lead to unexpected results, where objects are rendered in (apparently) the 
+wrong order. That is, text and graphics objects are not necessarily output 
+(rendered) in the same order as they were created in code. Two items in the 
+same object (e.g., C<$text>) I<will> be rendered in the same order as they were 
+coded, but items from different objects may not be rendered in the expected 
+order. The following example (source code and annotated PDF excerpts) will 
+hopefully illustrate the issue:
+
+ use strict;
+ use warnings;
+ use PDF::Builder;
+
+ # demonstrate text and graphics object order
+ # 
+ my $fname = "objorder";
+
+ my $paper_size = "Letter";
+
+ # see the text and graphics stream contents
+ my $pdf = PDF::Builder->new(-compress => 'none');
+ $pdf->mediabox($paper_size);
+ my $page = $pdf->page();
+ # adjust path for your operating system
+ my $fontTR = $pdf->ttfont('C:\\Windows\\Fonts\\timesbd.ttf');
+
+For the first group, you might expect the "under" line to be output, then the
+filled circle (disc) partly covering it, then the "over" line covering the
+disc, and finally a filled rectangle (bar) over both lines. What actually
+happened is that the C<$grfx> graphics object was declared first, so everything
+in that object (the disc and bar) is output first, and the text object C<$text> 
+(both lines) comes afterwards. The result is that the text lines are on I<top> 
+of the graphics drawings.
+ 
+ # ----------------------------
+ # 1. text, orange ball over, text over, bar over
+
+ my $grfx1 = $page->gfx();
+ my $text1 = $page->text();
+ $text1->font($fontTR, 20);  # 20 pt Times Roman bold
+
+ $text1->fillcolor('black');
+ $grfx1->strokecolor('blue');
+ $grfx1->fillcolor('orange');
+
+ $text1->translate(50,700);
+ $text1->text_left("This text should be under everything.");
+
+ $grfx1->circle(100,690, 30);
+ $grfx1->fillstroke();
+
+ $text1->translate(50,670);
+ $text1->text_left("This text should be over the ball and under the bar.");
+
+ $grfx1->rect(160,660, 20,70);
+ $grfx1->fillstroke();
+
+ % ---------------- group 1: define graphics object first, then text
+ 11 0 obj << /Length 690 >> stream   % obj 11 is graphics for (1)
+  0 0 1 RG    % stroke blue
+ 1 0.647059 0 rg   % fill orange
+ 130 690 m ... c h B   % draw and fill circle
+ 160 660 20 70 re B   % draw and fill bar
+ endstream endobj
+
+ 12 0 obj << /Length 438 >> stream   % obj 12 is text for (1)
+   BT  
+ /TiCBA 20 Tf   % Times Roman Bold 20pt
+ 0 0 0 rg   % fill black
+ 1 0 0 1 50 700 Tm   % position text
+ <0037 ... 0011> Tj   % "under" line
+ 1 0 0 1 50 670 Tm   % position text
+ <0037 ... 0011> Tj   % "over" line
+   ET   
+ endstream endobj
+
+The second group is the same as the first, with the only difference being
+that the text object was declared first, and then the graphics object. The
+result is that the two text lines are rendered first, and then the disc and
+bar are drawn I<over> them.
+
+ # ----------------------------
+ # 2. (1) again, with graphics and text order reversed
+
+ my $text2 = $page->text();
+ my $grfx2 = $page->gfx();
+ $text2->font($fontTR, 20);  # 20 pt Times Roman bold
+
+ $text2->fillcolor('black');
+ $grfx2->strokecolor('blue');
+ $grfx2->fillcolor('orange');
+
+ $text2->translate(50,600);
+ $text2->text_left("This text should be under everything.");
+
+ $grfx2->circle(100,590, 30);
+ $grfx2->fillstroke();
+
+ $text2->translate(50,570);
+ $text2->text_left("This text should be over the ball and under the bar.");
+
+ $grfx2->rect(160,560, 20,70);
+ $grfx2->fillstroke();
+
+ % ---------------- group 2: define text object first, then graphics
+ 13 0 obj << /Length 438 >> stream    % obj 13 is text for (2)
+   BT  
+ /TiCBA 20 Tf   % Times Roman Bold 20pt
+ 0 0 0 rg   % fill black
+ 1 0 0 1 50 600 Tm   % position text
+ <0037 ... 0011> Tj   % "under" line
+ 1 0 0 1 50 570 Tm   % position text
+ <0037 ... 0011> Tj   % "over" line
+   ET   
+ endstream endobj
+
+ 14 0 obj << /Length 690 >> stream   % obj 14 is graphics for (2)
+  0 0 1 RG   % stroke blue
+ 1 0.647059 0 rg   % fill orange
+ 130 590 m ... h B   % draw and fill circle
+ 160 560 20 70 re B   % draw and fill bar
+ endstream endobj
+
+The third group defines two text and two graphics objects, in the order that
+they are expected in. The "under" text line is output first, then the orange
+disc graphics is output, partly covering the text. The "over" text line is now
+output -- it's actually I<over> the disc, but is orange because the previous
+object stream (first graphics object) left the fill color (used for text) as 
+orange, because we didn't explicitly set the fill color before outputting the 
+second text line. This is not "inheritance" so much as it is whatever the 
+graphics (drawing) state (used for both "graphics" and "text") is left in at 
+the end of one object, it's the state at the beginning of the next object. 
+If you wish to control this, consider surrounding the graphics or text calls
+with C<save()> and C<restore()> calls to save and restore (push and pop) the
+graphics state to what it was at the C<save()>. Finally, the bar is drawn over 
+everything.
+
+ # ----------------------------
+ # 3. (2) again, with two graphics and two text objects
+
+ my $text3 = $page->text();
+ my $grfx3 = $page->gfx();
+ $text3->font($fontTR, 20);  # 20 pt Times Roman bold
+ my $text4 = $page->text();
+ my $grfx4 = $page->gfx();
+ $text4->font($fontTR, 20);  # 20 pt Times Roman bold
+
+ $text3->fillcolor('black');
+ $grfx3->strokecolor('blue');
+ $grfx3->fillcolor('orange');
+ # $text4->fillcolor('yellow');
+ # $grfx4->strokecolor('red');
+ # $grfx4->fillcolor('purple');
+
+ $text3->translate(50,500);
+ $text3->text_left("This text should be under everything.");
+
+ $grfx3->circle(100,490, 30);
+ $grfx3->fillstroke();
+
+ $text4->translate(50,470);
+ $text4->text_left("This text should be over the ball and under the bar.");
+
+ $grfx4->rect(160,460, 20,70);
+ $grfx4->fillstroke();
+
+ % ---------------- group 3: define text1, graphics1, text2, graphics2
+ 15 0 obj << /Length 206 >> stream   % obj 15 is text1 for (3)
+   BT  
+ /TiCBA 20 Tf   % Times Roman Bold 20pt
+ 0 0 0 rg  % fill black
+ 1 0 0 1 50 500 Tm   % position text
+ <0037 ... 0011> Tj   % "under" line
+   ET   
+ endstream endobj
+
+ 16 0 obj << /Length 671 >> stream   % obj 16 is graphics1 for (3) circle
+  0 0 1 RG   % stroke blue
+ 1 0.647059 0 rg   % fill orange
+ 130 490 m ... h B   % draw and fill circle
+ endstream endobj
+
+ 17 0 obj << /Length 257 >> stream   % obj 17 is text2 for (3)
+   BT  
+ /TiCBA 20 Tf   % Times Roman Bold 20pt
+ 1 0 0 1 50 470 Tm   % position text
+ <0037 ... 0011> Tj   % "over" line
+   ET   
+ endstream endobj
+
+ 18 0 obj << /Length 20 >> stream   % obj 18 is graphics for (3) bar
+  160 460 20 70 re B   % draw and fill bar
+ endstream endobj
+
+The fourth group is the same as the third, except that we define the fill color
+for the text in the second line. This makes it clear that the "over" line (in
+yellow) was written I<after> the orange disc, and still before the bar.
+
+ # ----------------------------
+ # 4. (3) again, a new set of colors for second group
+
+ my $text3 = $page->text();
+ my $grfx3 = $page->gfx();
+ $text3->font($fontTR, 20);  # 20 pt Times Roman bold
+ my $text4 = $page->text();
+ my $grfx4 = $page->gfx();
+ $text4->font($fontTR, 20);  # 20 pt Times Roman bold
+
+ $text3->fillcolor('black');
+ $grfx3->strokecolor('blue');
+ $grfx3->fillcolor('orange');
+ $text4->fillcolor('yellow');
+ $grfx4->strokecolor('red');
+ $grfx4->fillcolor('purple');
+
+ $text3->translate(50,400);
+ $text3->text_left("This text should be under everything.");
+
+ $grfx3->circle(100,390, 30);
+ $grfx3->fillstroke();
+
+ $text4->translate(50,370);
+ $text4->text_left("This text should be over the ball and under the bar.");
+
+ $grfx4->rect(160,360, 20,70);
+ $grfx4->fillstroke();
+
+ % ---------------- group 4: define text1, graphics1, text2, graphics2 with colors for 2
+ 19 0 obj << /Length 206 >> stream   % obj 19 is text1 for (4)
+   BT  
+ /TiCBA 20 Tf   % Times Roman Bold 20pt
+ 0 0 0 rg  % fill black
+ 1 0 0 1 50 400 Tm   % position text
+ <0037 ... 0011> Tj   % "under" line
+   ET   
+ endstream endobj
+
+ 20 0 obj << /Length 671 >> stream   % obj 20 is graphics1 for (4) circle
+  0 0 1 RG   % stroke blue
+ 1 0.647059 0 rg   % fill orange
+ 130 390 m ... h B   % draw and fill circle
+ endstream endobj
+
+ 21 0 obj << /Length 266 >> stream   % obj 21 is text2 for (4)
+   BT  
+ /TiCBA 20 Tf   % Times Roman Bold 20pt
+ 1 1 0 rg   % fill yellow
+ 1 0 0 1 50 370 Tm   % position text
+ <0037 ... 0011> Tj   % "over" line
+   ET   
+ endstream endobj
+
+ 22 0 obj << /Length 52 >> stream   % obj 22 is graphics for (4) bar
+  1 0 0 RG   % stroke red
+ 0.498039 0 0.498039 rg   % fill purple
+ 160 360 20 70 re B   % draw and fill rectangle (bar)
+ endstream endobj
+
+ # ----------------------------
+ $pdf->saveas("$fname.pdf");
+
+The separation of text and graphics means that only some text methods are
+available in a graphics object, and only some graphics methods are available
+in a text object. There is much overlap, but they differ. There's really no
+reason the code couldn't have been written (in PDF::API2, or earlier) as
+outputting to a single object, which would keep everything in the same order as
+the method calls. An advantage would be less object and stream overhead in the
+PDF file. The only drawback might be that an object might more easily 
+overflow and require splitting into multiple objects, but that should be rare.
+
+You should always be able to manually split an object by simply ending output
+to the first object, and picking up with output to the second object, I<so long
+as it was created immediately after the first object.> The graphics state at
+the end of the first object should be the initial state at the beginning of the
+second object.
+
+ $text1 = $page->text();
+ $text2 = $page->text();
+ # write a huge amount of stuff to $text1
+ # write a huge amount of stuff to $text2, picking up where $text1 left off
+
+In any case, now that you understand the rendering order and how the order
+of object declarations affects it, how text and graphics are drawn can now be
+completely controlled as desired. There is really no need to add another "both"
+type object that will handle all graphics and text objects, as that would
+probably be a major code bloat for very little benefit. However, it could be
+considered in the future if there is a demonstrated need for it, such as 
+serious PDF file size bloat due to the extra object overhead when interleaving
+text and graphics output.
+
 =head2 PDF Versions Supported
 
 When creating a PDF file using the functions in PDF::Builder, the output is

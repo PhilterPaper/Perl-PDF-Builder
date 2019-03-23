@@ -96,6 +96,12 @@ L<PDF::Builder::Docs> section B<Optional Libraries> for more information.
 There are some things you should know about character encoding (for text),
 before you dive in to coding. Please go to L<PDF::Builder::Docs> B<Strings> and have a read.
 
+=head2 RENDERING ORDER
+
+Invoking "text" and "graphics" methods can lead to unexpected results (a 
+different ordering of output than intended). See L<PDF::Builder::Docs> 
+B<Rendering Order> for more information.
+
 =head2 PDF VERSIONS SUPPORTED
 
 PDF::Builder is mostly PDF 1.4-compliant, but there I<are> complications you
