@@ -2,7 +2,7 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
-3.014     2019-03-23  (unreleased)
+3.014     2019-03-28  (unreleased)
 
 * consider: 3_examples.pl -step allow "skip" as entry, to bypass a long test
             coming up next (need to label what's coming up next).
@@ -15,6 +15,11 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       may result in (apparently wrong) unexpected order of output (rendering
       order).
 
+    lib/PDF/Builder/Content.pm, lib/PDF/Builder/Docs.pm, examples/Content.pl
+      further explanation (mostly POD) on text and graphics object
+      interactions, and especially the effect on clipping, particularly of
+      text glyphs.
+
     examples/022_truefonts add a flag --full (or -f) to force 65536 characters
       to be output, rather than whatever the count of CIDs is reported in the
       font. This may be useful for seeing all the defined glyphs if there are
@@ -24,7 +29,7 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       output (per RT 128674) to help user understand why a requested CMap
       wasn't found (giving part of the ROS, e.g., Adobe-Identity) for 
       ttfont(). Have not yet been able to give similar diagnostics for 
-      ../CJKFont.pm, as the ROS isn't explicitly given. If someone comes up
+      ../CJKFont.pm, as the ROS isn8t explicitly given. If someone comes up
       with a sample CJK that passes an empty string to _look_for_cmap(), I
       may be able to do something with it. In general, for RT 128674, I 
       need to find out how to create additional *.cmap files (possibly

@@ -169,10 +169,11 @@ unpredictable in handling such text.
 
 For better or worse, for compatibility purposes, PDF::Builder continues the 
 same rendering model as used by PDF::API2 (and possibly its predecessors). That 
-is, all graphics are put into one record, and all text output goes into another 
+is, all graphics I<for one graphics object> are put into one record, and all 
+text output I<for one text object> goes into another 
 record. Which one is output first, is whichever is declared first. This can 
-lead to unexpected results, where objects are rendered in (apparently) the 
-wrong order. That is, text and graphics objects are not necessarily output 
+lead to unexpected results, where items are rendered in (apparently) the 
+wrong order. That is, text and graphics items are not necessarily output 
 (rendered) in the same order as they were created in code. Two items in the 
 same object (e.g., C<$text>) I<will> be rendered in the same order as they were 
 coded, but items from different objects may not be rendered in the expected 
@@ -297,9 +298,9 @@ The third group defines two text and two graphics objects, in the order that
 they are expected in. The "under" text line is output first, then the orange
 disc graphics is output, partly covering the text. The "over" text line is now
 output -- it's actually I<over> the disc, but is orange because the previous
-object stream (first graphics object) left the fill color (used for text) as 
-orange, because we didn't explicitly set the fill color before outputting the 
-second text line. This is not "inheritance" so much as it is whatever the 
+object stream (first graphics object) left the fill color (also used for text) 
+as orange, because we didn't explicitly set the fill color before outputting 
+the second text line. This is not "inheritance" so much as it is whatever the 
 graphics (drawing) state (used for both "graphics" and "text") is left in at 
 the end of one object, it's the state at the beginning of the next object. 
 If you wish to control this, consider surrounding the graphics or text calls
@@ -444,12 +445,15 @@ You should always be able to manually split an object by simply ending output
 to the first object, and picking up with output to the second object, I<so long
 as it was created immediately after the first object.> The graphics state at
 the end of the first object should be the initial state at the beginning of the
-second object.
+second object. B<However,> use caution when dealing with text objects -- the
+PDF specification states that the Text matrices are I<not> carried over from
+one object to the next (B<BT> resets them), so you may need to reset some
+settings.
 
- $text1 = $page->text();
- $text2 = $page->text();
- # write a huge amount of stuff to $text1
- # write a huge amount of stuff to $text2, picking up where $text1 left off
+ $grfx1 = $page->gfx();
+ $grfx2 = $page->gfx();
+ # write a huge amount of stuff to $grfx1
+ # write a huge amount of stuff to $grfx2, picking up where $grfx1 left off
 
 In any case, now that you understand the rendering order and how the order
 of object declarations affects it, how text and graphics are drawn can now be
@@ -503,8 +507,8 @@ Perry's intent is to keep all internal methods as upwardly compatible with
 PDF::API2 as possible, although it is likely that there will be some drift
 (incompatibilities) over time. At least initially, any program written based on 
 PDF::API2 should be convertable to PDF::Builder simply by changing "API2" 
-anywhere it occurs to "Builder". See the KNOWN_INCOMP known incompatibilities
-file for further information.
+anywhere it occurs to "Builder". See the INFO/KNOWN_INCOMP known 
+incompatibilities file for further information.
 
 =head1 DETAILED NOTES ON METHODS
 
@@ -845,7 +849,8 @@ or possibly later in PDF::Builder) such as embedding, ligatures, UTF-8, etc.
 The downside is, obviously, that the resulting PDF file will be larger because
 it includes the font(s). There I<might> also be copyright or licensing issues 
 with the redistribution of font files in this manner (you might want to check,
-before widely distributing a PDF document with embedded fonts!).
+before widely distributing a PDF document with embedded fonts, although many
+I<do> permit the part of the font used, to be embedded.).
 
 See also L<PDF::Builder::Resource::Font::CoreFont>.
 
