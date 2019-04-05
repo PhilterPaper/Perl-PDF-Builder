@@ -2,13 +2,18 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
-3.014     2019-03-28  (unreleased)
+3.014     2019-04-05  (unreleased)
 
-* consider: 3_examples.pl -step allow "skip" as entry, to bypass a long test
-            coming up next (need to label what's coming up next).
-* issue: why do *.pl show up as siblings to Builder.pm? something in
-         PDFbuild.pl routine when it updates .pl file VERSIONs? It's not
-         harmful, just slightly annoying.
+    lib/PDF/Builder/Basic/PDF/File.pm, Objind.pm, Pages.pm [ref RT 121911]
+      contributed by Vadim (futuramedium@yandex.ru) fixes to deal with 
+      failure of adding new pages to an existing document. This apparently
+      had something to do with circular references, improper 'realise' of
+      objects, and other things.
+
+      There were three other issues raised in this ticket: rebuild_tree
+      didn't work (already dealt with in PDF::Builder), a useless line of
+      code (already removed from PDF::API2 and PDF::Builder), and LZWDecode/
+      FlateDecode optimizations (maybe look at again later).
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm add documentation (POD) 
       explaining how the interaction between text objects and graphics objects
@@ -29,7 +34,7 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       output (per RT 128674) to help user understand why a requested CMap
       wasn't found (giving part of the ROS, e.g., Adobe-Identity) for 
       ttfont(). Have not yet been able to give similar diagnostics for 
-      ../CJKFont.pm, as the ROS isn8t explicitly given. If someone comes up
+      ../CJKFont.pm, as the ROS isn't explicitly given. If someone comes up
       with a sample CJK that passes an empty string to _look_for_cmap(), I
       may be able to do something with it. In general, for RT 128674, I 
       need to find out how to create additional *.cmap files (possibly
@@ -40,7 +45,7 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
 
     Makefile.PL, README, lib/PDF/Builder/Docs.pm
       Move "optional" libraries (modules), currently Graphics::TIFF and
-      Image::PNG::Libpng, to "recommends" section in Makefile.PL. Your 
+      Image::PNG::Libpng, to new "recommends" section in Makefile.PL. Your 
       installer MAY attempt to automatically install these as prerequisites. 
       If it does, and fails, no need to panic: they aren't vital to the 
       operation of PDF::Builder, and should NOT cause an overall installation

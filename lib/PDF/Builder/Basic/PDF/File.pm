@@ -531,6 +531,8 @@ sub readval {
 
         if (defined $result->{'Type'} and defined $types{$result->{'Type'}->val()}) {
             bless $result, $types{$result->{'Type'}->val()};
+            $result->{' outto'} = [ $self ];
+            weaken $_ for @{$result->{' outto'}};
         }
         # gdj: FIXME: if any of the ws chars were crs, then the whole
         # string might not have been read.
@@ -548,7 +550,7 @@ sub readval {
         }
         $result->{' parent'} = $self;
         weaken $result->{' parent'};
-        $result->{' realised'} = 0;
+##      $result->{' realised'} = 0;
         # gdj: FIXME: if any of the ws chars were crs, then the whole
         # string might not have been read.
 
