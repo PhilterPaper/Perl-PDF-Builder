@@ -961,7 +961,42 @@ Enables kerning if data is available.
 
 =item -noembed
 
-Disables embedding of the font file.
+Disables embedding of the font file. B<Note that this is potentially hazardous,
+as the glyphs provided on the PDF reader machine may not match what was used on
+the PDF writer machine (the one running PDF::Builder)!> If you know I<for sure> that all PDF readers will be using the same TTF or OTF file you're using with
+PDF::Builder; not embedding the font may be acceptable, in return for a smaller
+PDF file size.
+
+=item -debug
+
+If set to 1 (default is 0), diagnostic information is output about the CMap
+processing.
+
+=item -usecmf
+
+If set to 1 (default is 0), the first priority is to make use of one of the
+four C<.cmap> files for CJK fonts. This is the I<old> way of processing TTF
+files. If, after all is said and done, a working I<internal> CMap hasn't been
+found (for -usecmf=>0), C<ttfont()> will fall back to using a C<.cmap> file
+if possible.
+
+=item -cmaps
+
+This flag may be set to a string listing the Platform/Encoding pairs to look 
+for of any internal CMaps in the font file, in the desired order (highest 
+priority first). If one list (comma and/or space-separated pairs) is given, it 
+is used for both Windows and non-Windows platforms (on which PDF::Builder is 
+running, I<not> the PDF reader's). Two lists, separated by a semicolon ; may be 
+given, with the first being used for a Windows platform and the second for 
+non-Windows. The default list is C<0/6 3/10 0/4 3/1 0/3; 0/6 0/4 3/10 0/3 3/1>. 
+Finally, instead of a P/E list, a string C<find_ms> may be given to tell it to 
+simply call the Font::TTF C<find_ms()> method to find a (preferably Windows) 
+internal CMap. C<-cmaps> set to 'find_ms' would emulate the I<old> way of 
+looking for CMaps. Symbol fonts (3/0) always use find_ms(), and the new default 
+lookup is (if C<.cmap> isn't used, see C<-usecmf>) to try to get a match with 
+the default list for the appropriate OS. If none can be found, find_ms() is 
+tried, and as last resort use the C<.cmap> (if available), even if C<-usecmf> 
+is not 1.
 
 =back
 

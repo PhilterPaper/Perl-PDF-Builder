@@ -162,7 +162,7 @@ Makes sure that the object is fully read in, etc.
 sub realise {
     my $self = shift;
 
-    return $self if $self->{' realised'} or 
+    return $self if $self->{' realised'} || 
 	            !$self->{' objnum'};
 
     $self->{' realised'} = 1;

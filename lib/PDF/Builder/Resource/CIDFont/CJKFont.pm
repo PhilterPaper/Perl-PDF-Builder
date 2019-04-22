@@ -87,6 +87,8 @@ sub _look_for_cmap {
     }
 }
 
+# compare to TrueType/FontFile.pm: .data and .cmap files are apparently
+# required when using cjkfont(), so no looking at internal cmap tables
 sub new {
     my ($class, $pdf, $name, @opts) = @_;
 

@@ -2,7 +2,34 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
-3.014     2019-04-05  (unreleased)
+3.014     2019-04-22  (unreleased)
+
+    lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm [ref RT 128674]
+      rewrite CMap handling, with contributions by Alfred Reibenschuh 
+      (original PDF::API2 author) and Bob Hallissy (TTF::Font author).
+      Only attempt to use the original four .cmap files, and now only if 
+      -usecmf flag set to 1. Otherwise -cmaps flag can set a list of 
+      Platform/Encoding pairs in priority order to look for a match in the
+      font's internal cmap tables, or use the default set, or force a
+      lookup with the find_ms() method. In all cases, either one list can
+      be given, and will be used for both Windows and non-Windows platforms,
+      or two lists can be given, separated by a semicolon, with the first
+      one being for a Windows platform and the second for non-Windows.
+      A debug flag -debug may be set to 1 to show various diagnostic 
+      information while processing the CMap/.cmap section. Now the default
+      processing is to use the default list of internal cmaps, and if no
+      match is found, call find_ms(), and as a last resort, if there is
+      a .cmap file found, use that. To emulate the old CID mapping, set
+      -usecmf=>1 and -cmaps=>'find_ms'.
+     Various random documentation updates made, particularly regarding the
+      use of "core" fonts, and recommending using TTF/OTF instead.
+     Have not yet found a good data source to generate updated .cmap files
+      for FontFile's use -- still TBD. Could not generate a generic
+      "Adobe:Identity" .cmap file. The ticket is being held open for now as
+      a reminder to deal with .cmap updates.
+    lib/PDF/Builder/Resource/CIDFont/CJKFont.pm notes added as to why 
+      FontFile changes not made here (.data and .cmap files are required,
+      no searching of internal cmaps).
 
     lib/PDF/Builder/Basic/PDF/File.pm, Objind.pm, Pages.pm [ref RT 121911]
       contributed by Vadim (futuramedium@yandex.ru) fixes to deal with 
@@ -29,19 +56,6 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       to be output, rather than whatever the count of CIDs is reported in the
       font. This may be useful for seeing all the defined glyphs if there are
       gaps in the CID sequence.
-
-    lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm add some diagnostic
-      output (per RT 128674) to help user understand why a requested CMap
-      wasn't found (giving part of the ROS, e.g., Adobe-Identity) for 
-      ttfont(). Have not yet been able to give similar diagnostics for 
-      ../CJKFont.pm, as the ROS isn't explicitly given. If someone comes up
-      with a sample CJK that passes an empty string to _look_for_cmap(), I
-      may be able to do something with it. In general, for RT 128674, I 
-      need to find out how to create additional *.cmap files (possibly
-      supplying a tool to create them from other sources, as they are rather
-      large, and I don't want to bloat PDF::Builder with a lot of new ones).
-     Various random documentation updates made, particularly regarding the
-      use of "core" fonts, and recommending using TTF/OTF instead.
 
     Makefile.PL, README, lib/PDF/Builder/Docs.pm
       Move "optional" libraries (modules), currently Graphics::TIFF and
