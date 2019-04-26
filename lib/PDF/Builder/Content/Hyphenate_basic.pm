@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.006'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.014'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -42,7 +42,7 @@ sub splitWord {
     my $minBegin = 2;  # minimum 2 characters before split
     my $minEnd   = 2;  # minimum 2 characters to next line
    #my $hyphen = '-';
-    my $hyphen = '\xAD';  # add a hyphen at split, unless splitting at -
+    my $hyphen = "\xAD";  # add a hyphen at split, unless splitting at -
                        # or other dash character
     # NOTE: PDF-1.7 14.8.2.2.3 suggests using a soft hyphen (\AD) when splitting
     #       a word at the end of the line, so that when text is extracted for

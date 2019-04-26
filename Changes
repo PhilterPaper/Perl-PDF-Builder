@@ -2,7 +2,21 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
-3.014     2019-04-22  (unreleased)
+3.014     2019-04-26 
+    
+    MANIFEST, tools/*.pl move four developmental test .pl files from root into
+      new tools directory. They were not intended to be installed into the
+      Perl lib/PDF/ production directory, but for some reason that's where they
+      were ending up. This change should keep them out of lib/PDF/ when 
+      installed via CPAN and the like.
+
+    lib/PDF/Builder/Basic/PDF/File.pm [ref RT 117184] fix contributed by 
+      Vadim Repin to allow PDF::Builder to write out a cross reference stream,
+      if one was read in with an existing PDF (forcing a PDF 1.5 output level).
+      This does not (yet) create an XRef stream from scratch.
+    lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm update documentation for save(),
+      saveas(), and stringify() to reinforce that the $pdf object is unusable 
+      after calling these methods.
 
     lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm [ref RT 128674]
       rewrite CMap handling, with contributions by Alfred Reibenschuh 
@@ -32,10 +46,9 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       no searching of internal cmaps).
 
     lib/PDF/Builder/Basic/PDF/File.pm, Objind.pm, Pages.pm [ref RT 121911]
-      contributed by Vadim (futuramedium@yandex.ru) fixes to deal with 
-      failure of adding new pages to an existing document. This apparently
-      had something to do with circular references, improper 'realise' of
-      objects, and other things.
+      fixes contributed by Vadim Repin to deal with the failure of adding new 
+      pages to an existing document. This apparently had something to do with 
+      circular references, improper 'realise' of objects, and other things.
 
       There were three other issues raised in this ticket: rebuild_tree
       didn't work (already dealt with in PDF::Builder), a useless line of

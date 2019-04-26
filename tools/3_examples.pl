@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.013'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.014'; # manually update whenever code is changed
 
 # command line:
 #   -step  = stop after each test to let the tester look at the PDF file

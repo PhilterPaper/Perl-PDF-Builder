@@ -512,6 +512,15 @@ incompatibilities file for further information.
 
 =head1 DETAILED NOTES ON METHODS
 
+=head2 After saving a file...
+
+Note that a PDF object such as C<$pdf> cannot continue to be used after saving
+an output PDF file or string with $pdf->C<save()>, C<saveas()>, or 
+C<stringify()>. There is some cleanup and other operations done internally 
+which make the object unusable for further operations. You will likely receive
+an error message about B<can't call method new_obj on an undefined value> if
+you try to keep using a PDF object.
+
 =head2 Preferences - set user display preferences
 
 =over

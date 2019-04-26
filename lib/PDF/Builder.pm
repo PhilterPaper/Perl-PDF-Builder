@@ -5,7 +5,7 @@ no warnings qw[ deprecated recursion uninitialized ];
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
-our $VERSION = '3.013'; # VERSION
+our $VERSION = '3.014'; # VERSION
 my $LAST_UPDATE = '3.014'; # manually update whenever code is changed
 
 use Carp;
@@ -956,6 +956,10 @@ sub update {
 
 Save the document to $file and remove the object structure from memory.
 
+B<Caution:> Although the object C<$pdf> will still exist, it is no longer
+usable for any purpose after invoking this method! You will receive error
+messages about "can't call method new_obj on an undefined value".
+
 B<Example:>
 
     $pdf = PDF::Builder->new();
@@ -988,6 +992,10 @@ sub saveas {
 Save the document to an already-defined file (or filename) and 
 remove the object structure from memory.
 
+B<Caution:> Although the object C<$pdf> will still exist, it is no longer
+usable for any purpose after invoking this method! You will receive error
+messages about "can't call method new_obj on an undefined value".
+
 B<Example:>
 
     $pdf = PDF::Builder->new(-file => 'file_to_output');
@@ -1013,6 +1021,10 @@ sub save {
 =item $string = $pdf->stringify()
 
 Return the document as a string and remove the object structure from memory.
+
+B<Caution:> Although the object C<$pdf> will still exist, it is no longer
+usable for any purpose after invoking this method! You will receive error
+messages about "can't call method new_obj on an undefined value".
 
 B<Example:>
 

@@ -1414,8 +1414,9 @@ sub out_trailer {
     $tdict->{'Size'} = PDFNum($self->{' maxobj'});
 
     my $tloc = $fh->tell();
-    $fh->print("xref\n");
-
+##  $fh->print("xref\n");
+    # instead of directly outputting (fh->print) xreflist, we accumulate in @out
+    my @out; 
     my @xreflist = sort { $self->{' objects'}{$a->uid()}[0] <=> $self->{' objects'}{$b->uid()}[0] } (@{$self->{' printed'} || []}, @{$self->{' free'} || []});
 
     my ($i, $j, $k);
@@ -1446,24 +1447,30 @@ sub out_trailer {
         #     $fh->printf("0 1\n%010d 65535 f \n", $ff);
         # }
         if ($i > $#xreflist || $self->{' objects'}{$xreflist[$i]->uid()}[0] != $j + 1) {
-            $fh->print(($first == -1 ? "0 " : "$self->{' objects'}{$xreflist[$first]->uid()}[0] ") . ($i - $first) . "\n");
+##          $fh->print(($first == -1 ? "0 " : "$self->{' objects'}{$xreflist[$first]->uid()}[0] ") . ($i - $first) . "\n");
+            push @out, ($first == -1 ? "0 " : "$self->{' objects'}{$xreflist[$first]->uid()}[0] ") . ($i - $first) . "\n";
             if ($first == -1) {
-                $fh->printf("%010d 65535 f \n", defined $freelist[$k] ? $self->{' objects'}{$freelist[$k]->uid()}[0] : 0);
+##              $fh->printf("%010d 65535 f \n", defined $freelist[$k] ? $self->{' objects'}{$freelist[$k]->uid()}[0] : 0);
+                push @out, sprintf("%010d 65535 f \n", defined $freelist[$k] ? $self->{' objects'}{$freelist[$k]->uid()}[0] : 0);
                 $first = 0;
             }
             for ($j = $first; $j < $i; $j++) {
                 my $xref = $xreflist[$j];
                 if (defined $freelist[$k] && defined $xref && "$freelist[$k]" eq "$xref") {
                     $k++;
-                    $fh->print(pack("A10AA5A4",
+##                  $fh->print(pack("A10AA5A4",
+                    push @out, pack("A10AA5A4",
                                     sprintf("%010d", (defined $freelist[$k] ?
                                                       $self->{' objects'}{$freelist[$k]->uid()}[0] : 0)), " ",
                                     sprintf("%05d", $self->{' objects'}{$xref->uid()}[1] + 1),
-                                    " f \n"));
+##                                  " f \n"));
+                                    " f \n");
                 } else {
-                    $fh->print(pack("A10AA5A4", sprintf("%010d", $self->{' locs'}{$xref->uid()}), " ",
+##                  $fh->print(pack("A10AA5A4", sprintf("%010d", $self->{' locs'}{$xref->uid()}), " ",
+                    push @out, pack("A10AA5A4", sprintf("%010d", $self->{' locs'}{$xref->uid()}), " ",
                             sprintf("%05d", $self->{' objects'}{$xref->uid()}[1]),
-                            " n \n"));
+##                          " n \n"));
+                            " n \n");
                 }
             }
             $first = $i;
@@ -1473,9 +1480,70 @@ sub out_trailer {
             $j++;
         }
     } # end for loop through xreflists
-    $fh->print("trailer\n");
-    $tdict->outobjdeep($fh, $self);
-    $fh->print("\nstartxref\n$tloc\n%%EOF\n");
+##  $fh->print("trailer\n");
+##  $tdict->outobjdeep($fh, $self);
+##  $fh->print("\nstartxref\n$tloc\n%%EOF\n");
+## start new code for 117184 fix by Vadim. @out has array of xref content
+    if (exists $tdict->{'Type'} and $tdict->{'Type'}->val() eq 'XRef') {
+
+        my (@index, @stream);
+        for (@out) {  # @out is the accumulated cross reference list
+            my @a = split;
+            @a == 2 ? push @index, @a : push @stream, \@a;
+        }
+        my $i = $self->{' maxobj'}++;
+        $self->add_obj($tdict, $i, 0);
+        $self->out_obj($tdict);
+
+        push @index, $i, 1;
+        push @stream, [ $tloc, 0, 'n' ];
+
+        my $len = $tloc > 0xFFFF ? 4 : 2;           # don't expect files > 4 Gb
+        my $tpl = $tloc > 0xFFFF ? 'CNC' : 'CnC';   # don't expect gennum > 255, it's absurd.
+                                                    # Adobe doesn't use them anymore anyway
+        my $sstream = '';
+        my @prev = ( 0 ) x ( $len + 2 );  # init prev to all 0's
+        for (@stream) {
+	    # OK to zero out gennum of 65535 for a cross reference stream, 
+	    # rather than just truncating to 255 -- Vadim
+	    $_->[ 1 ] = 0 if $_->[ 1 ] == 65535 and
+	                     $_->[ 2 ] eq 'f';
+            # make sure is 0..255, since will pack with 'C' code -- Phil
+	    if ($_->[1] > 0xFF) {
+		print "generation number ".($_->[1])." in entry '$_->[0] $_->[1] $_->[2]' exceeds 256, reduced to ".($_->[1] & 0x00FF)."\n";
+	    }
+	    $_->[ 1 ] &= 0x00FF;  
+            my @line = unpack 'C*', pack $tpl, $_->[ 2 ] eq 'n'? 1 : 0, @{ $_ }[ 0 .. 1 ];
+
+            $sstream .= pack 'C*', 2, # prepend filtering method, "PNG Up"
+                map {($line[ $_ ] - $prev[ $_ ] + 256) % 256} 0 .. $#line;
+            @prev    = @line;
+        }
+	# build a dictionary for the cross reference stream
+        $tdict->{'Size'} = PDFNum($i + 1);
+        $tdict->{'Index'} = PDFArray(map { PDFNum($_) } @index);
+        $tdict->{'W'} = PDFArray(map { PDFNum($_) } 1, $len, 1);
+        $tdict->{'Filter'} = PDFName('FlateDecode');
+
+	# it's compressed
+        $tdict->{'DecodeParms'} = PDFDict();
+        $tdict->{'DecodeParms'}->val()->{'Predictor'} = PDFNum(12);
+        $tdict->{'DecodeParms'}->val()->{'Columns'} = PDFNum($len + 2);
+
+        $sstream = PDF::Builder::Basic::PDF::Filter::FlateDecode->new()->outfilt($sstream, 1);
+        $tdict->{' stream'} = $sstream;
+        $tdict->{' nofilt'} = 1;
+        delete $tdict->{'Length'};
+        $self->ship_out();
+    } else {
+	# almost the original code
+        $fh->print("xref\n", @out, "trailer\n");
+        $tdict->outobjdeep($fh, $self);
+        $fh->print("\n");
+    }
+    $fh->print("startxref\n$tloc\n%%EOF\n");
+## end of new code
+
     return;
 } # end of out_trailer()
 
