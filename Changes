@@ -2,6 +2,22 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
+*****************************************
+    There were problems (on the CPAN.org end) with the 3.014 upload process, 
+      resulting in some anomalies in MetaCPAN. The cpan update process doesn't 
+      seem to work, "Testers" does not show passed/failed/other on the Meta 
+      page, and reverse dependencies (Graphics::TIFF, et al.) are not showing 
+      PDF::Builder as depending on these optional items. See if anything 
+      improves when 3.015 is uploaded. IN THE MEANTIME, YOU PROBABLY CANNOT
+      SUCCESSFULLY INSTALL FROM THE CPAN VERSION! YOU'LL HAVE TO INSTALL OR
+      UPDATE FROM GitHub. I have notified the Keepers of CPAN, asking them
+      to re-index PDF::Builder.
+*****************************************
+
+3.015     2019-05-01
+
+    Add some comments to CONTRIBUTING pointing to the Software Development Kit.
+
 3.014     2019-04-26 
     
     MANIFEST, tools/*.pl move four developmental test .pl files from root into
