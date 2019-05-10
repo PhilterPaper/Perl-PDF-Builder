@@ -16,6 +16,9 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
 
 3.015     2019-05-01
 
+    lib/PDF/Builder/Basic/PDF/Pages.pm [ref CTS 3] remove for now, as has 
+      never been implemented.
+
     Add some comments to CONTRIBUTING pointing to the Software Development Kit.
 
 3.014     2019-04-26 
