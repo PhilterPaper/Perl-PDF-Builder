@@ -6,7 +6,7 @@ no warnings qw[ deprecated recursion uninitialized ];
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
 our $VERSION = '3.014'; # VERSION
-my $LAST_UPDATE = '3.014'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.015'; # manually update whenever code is changed
 
 use Carp;
 use Encode qw(:all);
@@ -338,6 +338,11 @@ sub open {
     while (not $disk_fh->eof()) {
         $disk_fh->read($data, 512);
         $scalar_fh->print($data);
+    }
+    # check if final %%EOF lacks a carriage return on the end (add one)
+    if ($data =~ m/%%EOF$/) {
+       #print "open() says missing final EOF\n";
+        $scalar_fh->print("\n");
     }
     $disk_fh->close();
     $scalar_fh->seek(0, 0);

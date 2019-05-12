@@ -14,10 +14,35 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       to re-index PDF::Builder.
 *****************************************
 
-3.015     2019-05-01
+3.015     2019-05-12
 
-    lib/PDF/Builder/Basic/PDF/Pages.pm [ref CTS 3] remove for now, as has 
-      never been implemented.
+    The keepers of CPAN refused to re-index PDF::Builder 3.014, which had many
+      reported problems with its load, so I'll kick out 3.015 earlier than I
+      normally would. Hopefully, with a good load, "Testers" will show passed/
+      failed/other on the Meta page, and PDF::Builder will show up in the
+      reverse dependencies of other products.
+
+    lib/PDF/Builder.pm [ref RT 117184] in open(), if read-in PDF is missing an 
+      EOL after the final %%EOF, add one so that material added after isn't 
+      run-on in comment (most readers can handle this, but better to be clear).
+    lib/PDF/Builder/Basic/PDF/File.pm [ref RT 117184] an empty xref (0 0) is
+      now allowed to go through without tripping the fatal Malformed message. I
+      don't think it's legal PDF, but Acrobat Reader passes it without comment,
+      so I'll let it go (still may produce warning messages). Late add of 
+      'hybrid.pdf' to RT 117184 has a number of problems reported as warnings 
+      in PDF::Builder (Acrobat Reader is silent on them), but seems to produce 
+      an acceptable PDF. 
+
+      Also don't add an EOL after overwriting the PDF version -- there should 
+      already be one there. Finally, there doesn't seem to be any point in 
+      explicitly handling a "run-on" header comment as described in RT 117210, 
+      as we merely copy the old file to the output (with version updated if 
+      necessary). If any Readers have trouble with such and need the comment 
+      stripped out, it might be done (1. don't change object offsets, and 2. 
+      put the new comment AFTER any binary comment).
+
+    lib/PDF/Builder/Basic/PDF/Pages.pm [ref CTS 3] remove rebuild_tree() for 
+      now, as it has never been properly implemented.
 
     Add some comments to CONTRIBUTING pointing to the Software Development Kit.
 
