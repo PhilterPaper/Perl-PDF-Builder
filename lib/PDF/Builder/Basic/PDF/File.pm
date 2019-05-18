@@ -1193,7 +1193,7 @@ sub readxrtr {
 	    #   skip over entry reads and go to next subsection
 	    if ($xnum < 1) { 
 		print STDERR "Warning: xref subsection has 0 entries. Skipped.\n";
-	 	    $xrefListEmpty = 1;
+		    $xrefListEmpty = 1;
 	        next; 
 	    }
 
@@ -1551,6 +1551,8 @@ sub out_trailer {
         delete $tdict->{'Length'};
         $self->ship_out();
     } else {
+	# delete may be moved later by Vadim closer to where XRefStm created
+	delete $tdict->{'XRefStm'};
 	# almost the original code
         $fh->print("xref\n", @out, "trailer\n");
         $tdict->outobjdeep($fh, $self);
