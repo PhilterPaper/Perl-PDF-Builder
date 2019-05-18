@@ -14,13 +14,25 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       to re-index PDF::Builder.
 *****************************************
 
-3.015     2019-05-12
+3.015     2019-05-18 UNRELEASED
 
-    The keepers of CPAN refused to re-index PDF::Builder 3.014, which had many
+    The keepers of CPAN declined to re-index PDF::Builder 3.014, which had many
       reported problems with its load, so I'll kick out 3.015 earlier than I
       normally would. Hopefully, with a good load, "Testers" will show passed/
       failed/other on the Meta page, and PDF::Builder will show up in the
       reverse dependencies of other products.
+
+*   lib/PDF/Builder/ [ref RT 126274] minor changes by Steve
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm, lib/PDF/Builder/Docs.pm
+      [ref CTS 2] allow User Unit specification for PDF (globally) and
+      page. This permits (with suitable Readers) document sizes in excess of
+      200 inches.
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm, lib/PDF/Builder/Docs.pm
+      [ref CTS 2] clean up and extend documentation on "box" methods. Allow
+      -orient option on "box" methods to name a page's media, but present in 
+      Landscape orientation. Default Media Box of US Letter (8.5in x 11in).
 
     lib/PDF/Builder.pm [ref RT 117184] in open(), if read-in PDF is missing an 
       EOL after the final %%EOF, add one so that material added after isn't 
