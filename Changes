@@ -2,19 +2,7 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
-*****************************************
-    There were problems (on the CPAN.org end) with the 3.014 upload process, 
-      resulting in some anomalies in MetaCPAN. The cpan update process doesn't 
-      seem to work, "Testers" does not show passed/failed/other on the Meta 
-      page, and reverse dependencies (Graphics::TIFF, et al.) are not showing 
-      PDF::Builder as depending on these optional items. See if anything 
-      improves when 3.015 is uploaded. IN THE MEANTIME, YOU PROBABLY CANNOT
-      SUCCESSFULLY INSTALL FROM THE CPAN VERSION! YOU'LL HAVE TO INSTALL OR
-      UPDATE FROM GitHub. I have notified the Keepers of CPAN, asking them
-      to re-index PDF::Builder.
-*****************************************
-
-3.015     2019-05-18 UNRELEASED
+3.015     2019-05-19 
 
     The keepers of CPAN declined to re-index PDF::Builder 3.014, which had many
       reported problems with its load, so I'll kick out 3.015 earlier than I
@@ -22,17 +10,16 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       failed/other on the Meta page, and PDF::Builder will show up in the
       reverse dependencies of other products.
 
-*   lib/PDF/Builder/ [ref RT 126274] minor changes by Steve
+    Perl 5.18 now required minimum level.
 
-    lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm, lib/PDF/Builder/Docs.pm
-      [ref CTS 2] allow User Unit specification for PDF (globally) and
-      page. This permits (with suitable Readers) document sizes in excess of
-      200 inches.
+    lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm-Docs.pm [ref CTS 2] allow 
+      User Unit specification for PDF (globally) and page. This permits (with 
+      suitable Readers) document sizes in excess of 200 inches.
 
-    lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm, lib/PDF/Builder/Docs.pm
-      [ref CTS 2] clean up and extend documentation on "box" methods. Allow
-      -orient option on "box" methods to name a page's media, but present in 
-      Landscape orientation. Default Media Box of US Letter (8.5in x 11in).
+    lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm-Docs.pm [ref CTS 2] clean up 
+      and extend documentation on "box" methods. Allow -orient option on "box" 
+      methods to name a page's media, but present in Landscape orientation. 
+      Default Media Box of US Letter (8.5in x 11in).
 
     lib/PDF/Builder.pm [ref RT 117184] in open(), if read-in PDF is missing an 
       EOL after the final %%EOF, add one so that material added after isn't 
@@ -101,7 +88,7 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       FontFile changes not made here (.data and .cmap files are required,
       no searching of internal cmaps).
 
-    lib/PDF/Builder/Basic/PDF/File.pm, Objind.pm, Pages.pm [ref RT 121911]
+    lib/PDF/Builder/Basic/PDF/File.pm-Objind.pm-Pages.pm [ref RT 121911]
       fixes contributed by Vadim Repin to deal with the failure of adding new 
       pages to an existing document. This apparently had something to do with 
       circular references, improper 'realise' of objects, and other things.
@@ -116,10 +103,9 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       may result in (apparently wrong) unexpected order of output (rendering
       order).
 
-    lib/PDF/Builder/Content.pm, lib/PDF/Builder/Docs.pm, examples/Content.pl
-      further explanation (mostly POD) on text and graphics object
-      interactions, and especially the effect on clipping, particularly of
-      text glyphs.
+    lib/PDF/Builder/Content.pm-Docs.pm, examples/Content.pl further 
+      explanation (mostly POD) on text and graphics object interactions, and 
+      especially the effect on clipping, particularly of text glyphs.
 
     examples/022_truefonts add a flag --full (or -f) to force 65536 characters
       to be output, rather than whatever the count of CIDs is reported in the

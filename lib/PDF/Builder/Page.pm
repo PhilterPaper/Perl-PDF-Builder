@@ -113,6 +113,8 @@ sub userunit {
     PDF::Builder->verCheckOutput(1.6, "set User Unit");
     $self->{' userUnit'} = float($value);  # this is local (page) UU
     $self->{'UserUnit'} = PDFNum(float($value));
+
+    return $self;
 }
 
 sub _set_bbox {
