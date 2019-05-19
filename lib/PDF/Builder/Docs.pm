@@ -535,6 +535,8 @@ Controls viewing preferences for the PDF.
 
 =over
 
+=over
+
 =item -fullscreen
 
 Full-screen mode, with no menu bar, window controls, or any other window visible.
@@ -549,7 +551,11 @@ Document outline visible.
 
 =back
 
+=back
+
 =head3 Page Layout Options
+
+=over
 
 =over
 
@@ -571,7 +577,11 @@ Display the pages in two columns, with oddnumbered pages on the right.
 
 =back
 
+=back
+
 =head3 Viewer Options
+
+=over
 
 =over
 
@@ -624,6 +634,8 @@ Print duplex by default and flip on the short edge of the sheet.
 =item -duplexfliplongedge
 
 Print duplex by default and flip on the long edge of the sheet.
+
+=back
 
 =back
 
@@ -804,6 +816,8 @@ User Units (45 inches), and I<minimum> media size of 72 or 3 User Units.
 
 =head3 User Units
 
+=over
+
 =item $pdf->userunit($number)
 
 The default User Unit in the PDF coordinate system is one point (1/72 inch). You
@@ -849,6 +863,8 @@ Remember to call C<userunit> I<before> calling anything having to do with page
 or box sizes, or coordinates. Especially when setting 'named' box sizes, the 
 methods need to know the current User Unit so that named page sizes (in points)
 may be scaled down to the current User Unit.
+
+=back
 
 =head3 Media Box
 
