@@ -2,6 +2,18 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
+*   Reverse dependencies (e.g., Graphics::TIFF) not showing up, neither are
+      optional items in dependency graph. Try something else, after confirming
+      that optional items SHOULD show up in reverse dependencies (?). "Testers" 
+      does not show pass/fail/na numbers (perhaps it needs more time?).
+
+*   Many changes in PDF::API2 GitHub library. Will look at them after they've
+      had a chance to cool down and stabilize, maybe a month after last change.
+
+3.016     2019-05-26  UNRELEASED
+
+    tools/1_pc.pl, 2_t-tests.pl clean up minor bugs, improve diagnostics.
+
 3.015     2019-05-19 
 
     The keepers of CPAN declined to re-index PDF::Builder 3.014, which had many
