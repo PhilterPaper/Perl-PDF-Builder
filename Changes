@@ -9,8 +9,30 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
 
 *   Many changes in PDF::API2 GitHub library. Will look at them after they've
       had a chance to cool down and stabilize, maybe a month after last change.
+      See list in PDFAPI2.status
 
-3.016     2019-05-26  UNRELEASED
+3.016     2019-05-30  UNRELEASED
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/UniFont.pm, 
+      lib/PDF/Builder/Annotation.pm,
+     Many changes in PDF::API2 for code style and some bug fixes not already
+      in PDF::Builder. Also some Perl Critic cleanup.
+
+    lib/PDF/Builder/Resource/CIDFonts/CMap/*.cmap finish work on [RT 128674]
+      by updating .cmap files to latest. This is difficult because Adobe 
+      provides poor documentation, moved to GitHub a couple years back and
+      did not provide good snapshots of previous releases (to see exactly what
+      changed over time), and provides differing levels of up-to-dateness
+      depending on when someone last updated on GitHub (including older
+      supplements!). It's not clear exactly what Adobe version the existing 
+      (older) PDF::Builder .cmap files correspond to. In some cases, it appears
+      that they were incomplete at the claimed supplement level. It's not 
+      possible to map the cid2code.txt files to PDF::Builder .cmap files in an 
+      automated manner because it's not clear which Unicode is to be used in 
+      the g2u array when multiple Unicode codepoints map to a given CID. There 
+      are some inconsistencies of what CIDs are defined, between the Adobe 
+      documentation, what's in the cid2code.txt files, and what's available in 
+      Unicode. Anyway, this is my best attempt, and corrections are accepted!
 
     tools/1_pc.pl, 2_t-tests.pl clean up minor bugs, improve diagnostics.
 
