@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.013'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
 
 use Compress::Zlib;
 use Encode qw(:all);
@@ -229,7 +229,12 @@ Returns the font's bounding-box.
 =cut
 
 sub fontbbox { 
-    return @{$_[0]->data()->{'fontbbox'}}; 
+    my @bbox = @{$_[0]->data()->{'fontbbox'}}; 
+    # rearrange to LL UR order
+    if ($bbox[0] > $bbox[2]) {
+	@bbox = ($bbox[2], $bbox[3], $bbox[0], $bbox[1]);
+    }
+    return @bbox;
 }
 
 =item $capheight = $font->capheight()

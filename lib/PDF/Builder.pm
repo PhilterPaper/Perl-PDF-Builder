@@ -6,7 +6,7 @@ no warnings qw[ deprecated recursion uninitialized ];
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
 our $VERSION = '3.015'; # VERSION
-my $LAST_UPDATE = '3.015'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
 
 use Carp;
 use Encode qw(:all);
@@ -324,7 +324,7 @@ B<Example:>
 
 =cut
 
-sub open {
+sub open {  ## no critic
     my ($class, $file, %options) = @_;
     croak "File '$file' does not exist" unless -f $file;
     croak "File '$file' is not readable" unless -r $file;
@@ -883,6 +883,8 @@ sub pageLabel {
 
         $nums->add_elements($d);
     }
+
+    return;
 } # end of pageLabel()
 
 =item $pdf->finishobjects(@objects)
@@ -909,6 +911,8 @@ sub finishobjects {
     } else {
         die "invalid method invocation: no file, use 'saveas' instead.";
     }
+
+    return;
 }
 
 sub _proc_pages {
@@ -958,6 +962,7 @@ sub update {
     my $self = shift;
 
     $self->saveas($self->{'pdf'}->{' fname'});
+    return;
 }
 
 =item $pdf->saveas($file)
@@ -993,6 +998,7 @@ sub saveas {
     }
 
     $self->end();
+    return;
 }
 
 =item $pdf->save()
@@ -1024,6 +1030,7 @@ sub save {
     }
 
     $self->end();
+    return;
 }
 
 =item $string = $pdf->stringify()
@@ -1962,10 +1969,10 @@ See also L<PDF::Builder::Resource::Font::BdFont>
 =cut
 
 sub bdfont {
-    my ($self, @opts) = @_;
+    my ($self, $bdf_file, @opts) = @_;
 
     require PDF::Builder::Resource::Font::BdFont;
-    my $obj = PDF::Builder::Resource::Font::BdFont->new($self->{'pdf'}, @opts);
+    my $obj = PDF::Builder::Resource::Font::BdFont->new($self->{'pdf'}, $bdf_file, @opts);
 
     $self->{'pdf'}->out_obj($self->{'pages'});
     # $obj->tounicodemap(); # does not support Unicode!

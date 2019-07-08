@@ -4,19 +4,41 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
 
 *   Reverse dependencies (e.g., Graphics::TIFF) not showing up, neither are
       optional items in dependency graph. Try something else, after confirming
-      that optional items SHOULD show up in reverse dependencies (?). "Testers" 
-      does not show pass/fail/na numbers (perhaps it needs more time?).
+      that optional items SHOULD show up in reverse dependencies (?). 
 
-*   Many changes in PDF::API2 GitHub library. Will look at them after they've
-      had a chance to cool down and stabilize, maybe a month after last change.
-      See list in PDFAPI2.status
+3.016     2019-07-07  UNRELEASED
 
-3.016     2019-05-30  UNRELEASED
+*   TBD [GH 101] additional checks on the cross reference table make optional with a flag. There are some PDFs in the wild with xref tables that do not come close to meeting the PDF spec, but many Readers will accept. PDF::Builder was flagging as fatal errors.
 
-    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/UniFont.pm, 
-      lib/PDF/Builder/Annotation.pm,
-     Many changes in PDF::API2 for code style and some bug fixes not already
-      in PDF::Builder. Also some Perl Critic cleanup.
+*   examples/024_bdffonts, lib/PDF/Builder.pm, 
+      lib/PDF/Builder/Resource/BaseFont.pm
+     BDF (bitmapped fonts) some work that slightly improves. Work in progress.
+
+*   Many changes in PDF::API2 GitHub library per PDF::API2. Still debugging. 
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/UniFont.pm-BaseFont.pm, 
+      lib/PDF/Builder/Basic/PDF/Array.pm-Dict.pm-File.pm-Filter.pm-Literal.pm-
+      Objind.pm-Page.pm-Pages.pm-String.pm-Utils.pm,
+      lib/PDF/Builder/Basic/PDF/Filter/FlateDecode.pm,
+      lib/PDF/Builder/Resource/CIDFont/CJKFont.pm-TrueType.pm, 
+      lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm,
+      lib/PDF/Builder/Lite.pm-Page.pm-Resource.pm, 
+      t/author-critic.t--author-pod-syntax.t
+     per PDF::API2 changes, code style cleanup (including some minor changes
+      to outobjdeep(), such as removing %options), and some bug fixes not 
+      already in PDF::Builder. Also some Perl Critic cleanup and removal of
+      unused routines.
+
+    contrib/pdf-deoptimize.pl--pdf-optimize.pl, lib/PDF/Builder.pm,
+      lib/PDF/Builder/Basic/PDF/Array.pm-Dict.pm-Objind.pm-Page.pm-Pages.pm, 
+      lib/PDF/Builder/Util.pm, INFO/DEPRECATED
+     per PDF::API2 changes, elementsof() changed to elements().
+
+    lib/PDF/Builder/Annotation.pm-Content.pm-Outline.pm-Page.pm-Resource.pm,
+      lib/PDF/Builder/Resource/CIDFont.pm-ColorSpace.pm-ExtGState.pm, 
+      lib/PDF/Builder/Resource/XObject/Form/Hybrid.pm
+     per PDF::API2 changes, outobjdeep() is no longer destructive (content is
+      no longer removed). Some outobjdeep() calls removed, others simplified.
 
     lib/PDF/Builder/Resource/CIDFonts/CMap/*.cmap finish work on [RT 128674]
       by updating .cmap files to latest. This is difficult because Adobe 
