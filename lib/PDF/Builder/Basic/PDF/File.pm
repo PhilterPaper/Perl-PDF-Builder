@@ -15,9 +15,10 @@
 package PDF::Builder::Basic::PDF::File;
 
 use strict;
+no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.015'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -81,8 +82,8 @@ passed in.
 =item update (R)
 
 This indicates that the read file has been opened for update and that at some
-point, C<$p->appendfile()> can be called to update the file with the changes 
-that have been made to the memory representation.
+point, C<< $p->appendfile() >> can be called to update the file with the 
+changes that have been made to the memory representation.
 
 =item maxobj (R)
 
@@ -150,6 +151,7 @@ $ws_char    = '[ \t\r\n\f\0]';
 $delim_char = '[][<>{}()/%]';
 $reg_char   = '[^][<>{}()/% \t\r\n\f\0]';
 $irreg_char = '[][<>{}()/% \t\r\n\f\0]';
+# \015 = x0D = CR or \r, \012 = x0A = LF or \n
 # TBD a line-end character is space CR ' \r', space LF ' \n', or CR LF '\r\n'
 #     have seen working PDFs with just a CR and space CR
 $cr         = '\s*(?:\015|\012|(?:\015\012))';
@@ -182,8 +184,6 @@ use PDF::Builder::Basic::PDF::Pages;
 use PDF::Builder::Basic::PDF::Null;
 use POSIX qw(ceil floor);
 
-no warnings qw[ deprecated recursion uninitialized ];
-
 =head2 PDF::Builder::Basic::PDF::File->new()
 
 Creates a new, empty file object which can act as the host to other PDF objects.
@@ -194,7 +194,6 @@ object is created in readiness for creating a new PDF file.
 
 sub new {
     my ($class, $root) = @_;
-
     my $self = $class->_new();
 
     unless ($root) {
@@ -215,17 +214,18 @@ a complete directory of objects.
 C<$filename> may be a string or an IO object.
 
 C<$update> specifies whether this file is being opened for updating and editing
-(I<TRUE> value), or simply to be read (I<FALSE> value).
+(I<TRUE> value), or simply to be read (I<FALSE> or undefined value).
+
+C<$filename> may be an IO object.
 
 =cut
 
 sub open {
     my ($class, $filename, $update) = @_;
-
     my ($fh, $buffer);
+
     my $comment = ''; # any comment jammed into the PDF header
     my $self = $class->_new();
-
     if (ref $filename) {
         $self->{' INFILE'} = $filename;
         if ($update) {
@@ -234,7 +234,7 @@ sub open {
         }
         $fh = $filename;
     } else {
-        die "File '$filename' does not exist !" unless -f $filename;
+        die "File '$filename' does not exist!" unless -f $filename;
         $fh = IO::File->new(($update ? '+' : '') . "<$filename") || return;
         $self->{' INFILE'} = $fh;
         if ($update) {
@@ -253,8 +253,7 @@ sub open {
     # can't run verCheckInput() yet, as full ' version' not set
     if (defined $2 && length($2) > 0) {
        $comment = $2;  # save for output as comment
-#print STDERR "Warning: PDF header contains extra text '$comment', is ignored.\n";
-       # since we just echo the original header + comment, unles that causes
+       # since we just echo the original header + comment, unless that causes
        # problems in some Readers, we can just leave it be (no call to strip
        # out inline comment and create a separate comment further along).
     }
@@ -285,15 +284,15 @@ sub open {
 
 Releases ALL of the memory used by the PDF document and all of its
 component objects.  After calling this method, do B<NOT> expect to
-have anything left in the C<PDF::Builder::Basic::PDF::File> object (so if
-you need to save, be sure to do it before calling this method).
+have anything left in the C<PDF::Builder::Basic::PDF::File> object 
+(so if you need to save, be sure to do it before calling this method).
 
 B<NOTE>, that it is important that you call this method on any
 C<PDF::Builder::Basic::PDF::File> object when you wish to destroy it and
 free up its memory.  Internally, PDF files have an enormous number of
 cross-references, and this causes circular references within the
-internal data structures.  Calling C<release()> causes a brute-force
-cleanup of the data structures, freeing up all of the memory.  Once
+internal data structures. Calling C<release()> causes a brute-force
+cleanup of the data structures, freeing up all of the memory. Once
 you've called this method, though, don't expect to be able to do
 anything else with the C<PDF::Builder::Basic::PDF::File> object; it'll
 have B<no> internal state whatsoever.
@@ -303,7 +302,7 @@ have B<no> internal state whatsoever.
 # Maintainer's Question: Couldn't this be handled by a DESTROY method
 # instead of requiring an explicit call to release()?
 sub release {
-    my $self = shift;
+    my $self = shift();
 
     return $self unless ref($self);
     my @tofree = values %$self;
@@ -328,6 +327,7 @@ sub release {
             $item = undef;
         }
     }
+
     return;
 } # end of release()
 
@@ -365,13 +365,14 @@ sub append_file {
     }
     $tdict->{'Size'} = $self->{'Size'};
 
-    foreach my $key (grep { $_ !~ m/^\s/ } keys %$self) { 
+    foreach my $key (grep { $_ !~ m/^\s/ } keys %$self) {
         $tdict->{$key} = $self->{$key} unless defined $tdict->{$key};
     }
 
     $fh->seek($self->{' epos'}, 0);
     $self->out_trailer($tdict, $self->{' update'});
     close $self->{' OUTFILE'};
+
     return;
 } # end of append_file()
 
@@ -388,22 +389,22 @@ $fname may be a string or an IO object.
 sub out_file {
     my ($self, $fname) = @_;
 
-    $self->create_file($fname);
-    $self->close_file();
+    $self = $self->create_file($fname);
+    $self = $self->close_file();
+
     return $self;
 }
 
 =head2 $p->create_file($fname)
 
 Creates a new output file (no check is made of an existing open file) of
-the given filename or IO object. Note, make sure that C<$p->{' version'}> is set
-correctly before calling this function.
+the given filename or IO object. Note, make sure that C<< $p->{' version'} >> 
+is set correctly before calling this function.
 
 =cut
 
 sub create_file {
     my ($self, $filename) = @_;
-
     my $fh;
 
     $self->{' fname'} = $filename;
@@ -435,7 +436,7 @@ Closes up the open file for output, by outputting the trailer, etc.
 =cut
 
 sub close_file {
-    my $self = shift;
+    my $self = shift();
 
     my $tdict = PDFDict();
     $tdict->{'Info'} = $self->{'Info'} if defined $self->{'Info'};
@@ -464,7 +465,7 @@ sub close_file {
     return $self;
 } # end of close_file()
 
-=head2 ($value, $str) = $p->readval($str, %options)
+=head2 ($value, $str) = $p->readval($str, %opts)
 
 Reads a PDF value from the current position in the file. If C<$str> is too 
 short, read some more from the current location in the file until the whole 
@@ -477,12 +478,11 @@ been read from the file.
 =cut
 
 sub readval {
-    my ($self, $str, %options) = @_;
-
+    my ($self, $str, %opts) = @_;
     my $fh = $self->{' INFILE'};
     my ($result, $value);
 
-    my $update = defined($options{'update'}) ? $options{'update'} : 1;
+    my $update = defined($opts{'update'}) ? $opts{'update'} : 1;
     $str = update($fh, $str) if $update;
 
     $str =~ s/^$ws_char+//;               # Ignore initial white space
@@ -500,15 +500,15 @@ sub readval {
 
             if      ($str =~ s|^/($reg_char+)||) {
                 my $key = PDF::Builder::Basic::PDF::Name::name_to_string($1, $self);
-                ($value, $str) = $self->readval($str, %options);
+                ($value, $str) = $self->readval($str, %opts);
                 $result->{$key} = $value;
             } elsif ($str =~ s|^/$ws_char+||) {
                 # fixes a broken key problem of acrobat. -- fredo
-                ($value, $str) = $self->readval($str, %options);
+                ($value, $str) = $self->readval($str, %opts);
                 $result->{'null'} = $value;
             } elsif ($str =~ s|^//|/|) {
                 # fixes again a broken key problem of illustrator/enfocus. -- fredo
-                ($value, $str) = $self->readval($str, %options);
+                ($value, $str) = $self->readval($str, %opts);
                 $result->{'null'} = $value;
             } else {
                 die "Invalid dictionary key";
@@ -520,13 +520,13 @@ sub readval {
         $str = update($fh, $str) if $update;
         # streams can't be followed by a lone carriage-return.
         # fredo: yes they can !!! -- use the MacOS, Luke.
-	# TBD isn't this covered by $cr as space CR?
+	    # TBD isn't this covered by $cr as space CR?
         if (($str =~ s/^stream(?:(?:\015\012)|\012|\015)//) and ($result->{'Length'}->val() != 0)) {   # stream
             my $length = $result->{'Length'}->val();
             $result->{' streamsrc'} = $fh;
             $result->{' streamloc'} = $fh->tell() - length($str);
 
-            unless ($options{'nostreams'}) {
+            unless ($opts{'nostreams'}) {
                 if ($length > length($str)) {
                     $value = $str;
                     $length -= length($str);
@@ -544,8 +544,6 @@ sub readval {
 
         if (defined $result->{'Type'} and defined $types{$result->{'Type'}->val()}) {
             bless $result, $types{$result->{'Type'}->val()};
-            $result->{' outto'} = [ $self ];
-            weaken $_ for @{$result->{' outto'}};
         }
         # gdj: FIXME: if any of the ws chars were crs, then the whole
         # string might not have been read.
@@ -563,7 +561,9 @@ sub readval {
         }
         $result->{' parent'} = $self;
         weaken $result->{' parent'};
-##      $result->{' realised'} = 0;
+       #$result->{' realised'} = 0;
+       # removed to address changes being lost when an indirect object
+       #  is realised twice
         # gdj: FIXME: if any of the ws chars were crs, then the whole
         # string might not have been read.
 
@@ -573,7 +573,7 @@ sub readval {
         my $num = $1;
         $value = $2;
         $str =~ s/^([0-9]+)(?:$ws_char|$re_comment)+([0-9]+)(?:$ws_char|$re_comment)+obj//s;
-        ($obj, $str) = $self->readval($str, %options);
+        ($obj, $str) = $self->readval($str, %opts);
         if ($result = $self->test_obj($num, $value)) {
             $result->merge($obj);
         } else {
@@ -606,7 +606,7 @@ sub readval {
             }
 
             # Ignore escaped parentheses
-            if ($str =~ /^(\\[()])/) {
+            if      ($str =~ /^(\\[()])/) {
                 $value .= $1;
                 $str = substr($str, 2);
 
@@ -639,7 +639,7 @@ sub readval {
         } # end while(TRUE) loop
 
         $result = PDF::Builder::Basic::PDF::String->from_pdf($value);
-    # end Literal String check
+        # end Literal String check
 
     } elsif ($str =~ m/^</) {
         # Hex String
@@ -657,7 +657,7 @@ sub readval {
             $str =~ s/^$ws_char+//;               # Ignore initial white space
             $str =~ s/^\%[^\015\012]*$ws_char+//; # Ignore comments
 
-            ($value, $str) = $self->readval($str, %options);
+            ($value, $str) = $self->readval($str, %opts);
             $result->add_elements($value);
             $str = update($fh, $str) if $update;   # str might just be exhausted!
         }
@@ -676,12 +676,12 @@ sub readval {
 
         # If $str only consists of whitespace (or is empty), call update to
         # see if this is the beginning of an indirect object or reference
-        if ($update and ($str =~ /^$re_whitespace*$/ or $str =~ /^$re_whitespace+[0-9]+$re_whitespace*$/s)) {
+        if ($update and ($str =~ /^$re_whitespace*$/s or $str =~ /^$re_whitespace+[0-9]+$re_whitespace*$/s)) {
 	    $str =~ s/^$re_whitespace+/ /s;
 	    $str =~ s/$re_whitespace+$/ /s;
             $str = update($fh, $str);
             if ($str =~ m/^$re_whitespace*([0-9]+)$re_whitespace+(?:R|obj)/s) {
-                return $self->readval("$value $str", %options);
+                return $self->readval("$value $str", %opts);
             }
         }
 
@@ -700,7 +700,7 @@ sub readval {
     return ($result, $str);
 } # end of readval()
 
-=head2 $ref = $p->read_obj($objind, %options)
+=head2 $ref = $p->read_obj($objind, %opts)
 
 Given an indirect object reference, locate it and read the object returning
 the read in object.
@@ -708,22 +708,22 @@ the read in object.
 =cut
 
 sub read_obj {
-    my ($self, $objind, %options) = @_;
+    my ($self, $objind, %opts) = @_;
 
-    my $res = $self->read_objnum($objind->{' objnum'}, $objind->{' objgen'}, %options) || return;
+    my $res = $self->read_objnum($objind->{' objnum'}, $objind->{' objgen'}, %opts) || return;
     $objind->merge($res) unless $objind eq $res;
 
     return $objind;
 }
 
-=head2 $ref = $p->read_objnum($num, $gen, %options)
+=head2 $ref = $p->read_objnum($num, $gen, %opts)
 
 Returns a fully read object of given number and generation in this file
 
 =cut
 
 sub read_objnum {
-    my ($self, $num, $gen, %options) = @_;
+    my ($self, $num, $gen, %opts) = @_;
 
     croak 'Undefined object number in call to read_objnum($num, $gen)' unless defined $num;
     croak 'Undefined object generation in call to read_objnum($num, $gen)' unless defined $gen;
@@ -735,9 +735,9 @@ sub read_objnum {
 
     # Compressed object
     if (ref($object_location)) {
-	my ($object_stream_num, $object_stream_pos) = @{$object_location};
+        my ($object_stream_num, $object_stream_pos) = @{$object_location};
 
-        my $object_stream = $self->read_objnum($object_stream_num, 0, %options);
+        my $object_stream = $self->read_objnum($object_stream_num, 0, %opts);
         die 'Cannot find the compressed object stream' unless $object_stream;
 
         $object_stream->read_stream() if $object_stream->{' nofilt'};
@@ -749,7 +749,7 @@ sub read_objnum {
         unless ($object_stream->{' streamfile'}) {
             $pairs = substr($object_stream->{' stream'}, 0, $object_stream->{'First'}->val());
         } else {
-	    CORE::open($fh, '<', $object_stream->{' streamfile'});
+            CORE::open($fh, '<', $object_stream->{' streamfile'});
             read($fh, $pairs, $object_stream->{'First'}->val());
         }
         my @map = split /\s+/, $pairs;
@@ -759,8 +759,8 @@ sub read_objnum {
         die "Objind $num does not exist at index $index" unless $map[$index] == $num;
         my $start = $map[$index + 1];
 
-        # Unless this is the last object in the stream, its length is determined by the
-        # offset of the next object
+        # Unless this is the last object in the stream, its length is 
+        # determined by the offset of the next object.
         my $last_object_in_stream = $map[-2];
         my $length;
         if ($last_object_in_stream == $num) {
@@ -784,13 +784,13 @@ sub read_objnum {
             close $fh;
         }
 
-        ($object) = $self->readval($stream, %options, update => 0);
+        ($object) = $self->readval($stream, %opts, update => 0);
         return $object;
     }
 
     my $current_location = $self->{' INFILE'}->tell();
     $self->{' INFILE'}->seek($object_location, 0);
-    ($object) = $self->readval('', %options);
+    ($object) = $self->readval('', %opts);
     $self->{' INFILE'}->seek($current_location, 0);
 
     return $object;
@@ -806,7 +806,6 @@ that object into this new object rather than returning a new object.
 
 sub new_obj {
     my ($self, $base) = @_;
-
     my $res;
 
     if (defined $self->{' free'} and scalar @{$self->{' free'}} > 0) {
@@ -871,25 +870,26 @@ sub out_obj {
     # in the hash) (which is super-fast).
     unless (exists $self->{' outlist_cache'}{$obj}) {
         push @{$self->{' outlist'}}, $obj;
-	# weaken $self->{' outlist'}->[-1];
+        # weaken $self->{' outlist'}->[-1];
         $self->{' outlist_cache'}{$obj} = 1;
     }
 
     return $obj;
 }
 
-=head2 $p->free_obj($objind)
+=head2 $p->free_obj($obj)
 
 Marks an object reference for output as being freed.
 
 =cut
 
 sub free_obj {
-    my ($self, $objind) = @_;
+    my ($self, $obj) = @_;
 
-    push @{$self->{' free'}}, $objind;
-    $self->{' objects'}{$objind->uid()}[2] = 1;
-    $self->out_obj($objind);
+    push @{$self->{' free'}}, $obj;
+    $self->{' objects'}{$obj->uid()}[2] = 1;
+    $self->out_obj($obj);
+
     return;
 }
 
@@ -918,7 +918,7 @@ sub remove_obj {
 
 =head2 $p->ship_out()
 
-Ships the given objects (or all objects for output if @objects is empty) to
+Ships the given objects (or all objects for output if C<@objects> is empty) to
 the currently open output file (assuming there is one). Freed objects are not
 shipped, and once an object is shipped it is switched such that this file
 becomes its source and it will not be shipped again unless out_obj is called
@@ -953,7 +953,7 @@ sub ship_out {
         $self->{' locs'}{$objind->uid()} = $fh->tell();
         my ($objnum, $objgen) = @{$self->{' objects'}{$objind->uid()}}[0..1];
         $fh->printf('%d %d obj ', $objnum, $objgen);
-        $objind->outobjdeep($fh, $self, 'objnum' => $objnum, 'objgen' => $objgen);
+        $objind->outobjdeep($fh, $self);
         $fh->print(" endobj\n");
 
         # Note that we've output this obj, not forgetting to update
@@ -970,14 +970,13 @@ sub ship_out {
 =head2 $p->copy($outpdf, \&filter)
 
 Iterates over every object in the file reading the object, calling C<filter> 
-with the object, and outputting the result. if C<filter> is not defined, then 
+with the object, and outputting the result. If C<filter> is not defined, 
 just copies input to output.
 
 =cut
 
 sub copy {
     my ($self, $outpdf, $filter) = @_;
-
     my ($obj, $minl, $mini, $ming);
 
     foreach my $key (grep { not m/^[\s\-]/ } keys %$self) {
@@ -1141,7 +1140,7 @@ sub _unpack_xref_stream {
     return unpack('n', $data)       if $width == 2;
     return unpack('N', "\x00$data") if $width == 3;
     return unpack('N', $data)       if $width == 4;
-    return unpack('Q', $data)       if $width == 8; # added 4/2/2018 PDF 1.5+?
+    return unpack('Q', $data)       if $width == 8; # PDF 1.5+?
 
     die "Invalid column width: $width";
 }
@@ -1149,7 +1148,6 @@ sub _unpack_xref_stream {
 sub readxrtr {
     my ($self, $xpos) = @_;
     # $xpos SHOULD be pointing to "xref" keyword
-
     my ($tdict, $buf, $xmin, $xnum, $xdiff);
 
     my $fh = $self->{' INFILE'};
@@ -1168,163 +1166,164 @@ sub readxrtr {
 
     if ($buf =~ s/^xref$cr//i) {   # remove xrefEOL from buffer
         # Plain XRef tables.
-	#
-	# look to match startobj# count# EOL of first (or only) subsection
-	# supposed to be single ASCII space between numbers, but this is
-	#   more lenient for some writers, allowing 1 or more whitespace
-	my $subsection_count = 0;
-	my $entry_format_error = 0;
-	my $xrefListEmpty = 0;
+        #
+        # look to match startobj# count# EOL of first (or only) subsection
+        # supposed to be single ASCII space between numbers, but this is
+        #   more lenient for some writers, allowing 1 or more whitespace
+        my $subsection_count = 0;
+        my $entry_format_error = 0;
+        my $xrefListEmpty = 0;
 
         while ($buf =~ m/^$ws_char*([0-9]+)$ws_char+([0-9]+)$ws_char*$cr(.*?)$/s) {
             my $old_buf = $buf;
             $xmin = $1;   # starting object number of this subsection
             $xnum = $2;   # number of entries in this subsection 
             $buf  = $3;   # remainder of buffer
-	    $subsection_count++;
-	    # go back and warn if other than single space separating numbers
-            unless ($old_buf =~ /^[0-9]+ [0-9]+$cr/) {
+            $subsection_count++;
+            # go back and warn if other than single space separating numbers
+            unless ($old_buf =~ /^[0-9]+ [0-9]+$cr/) {  #orig
                 # See PDF 1.7 section 7.5.4: Cross-Reference Table
-                print STDERR "Warning: malformed xref: subsection header needs a single ASCII space between the numbers and no extra spaces.\n";
+                print STDERR "Warning: malformed xref: subsection header needs " .
+                      "a single ASCII space between the numbers and no extra spaces.\n"; #orig
             }
             $xdiff = length($buf); # how much remaining in buffer
 
-	    # in case xnum == 0 is permitted (or used and tolerated by readers),
-	    #   skip over entry reads and go to next subsection
-	    if ($xnum < 1) { 
-		print STDERR "Warning: xref subsection has 0 entries. Skipped.\n";
-		    $xrefListEmpty = 1;
-	        next; 
-	    }
+            # in case xnum == 0 is permitted (or used and tolerated by readers),
+            #   skip over entry reads and go to next subsection
+            if ($xnum < 1) { 
+                print STDERR "Warning: xref subsection has 0 entries. Skipped.\n";
+                $xrefListEmpty = 1;
+                next; 
+            }
 
-	    # read chunk of entire subsection list
-	    my $entry_size = 20;
-	    # test read first entry, see if $cr in expected place, adjust size
-	    $fh->read($buf, $entry_size * 1 - $xdiff + 15, $xdiff);
-	    $buf =~ m/^(.*?)$cr/;
-	    $entry_size = length($1) + 2;
-	    if ($entry_size != 20) {
-		print STDERR "Warning: xref entries supposed to be 20 bytes long, are $entry_size.\n";
-	    }
-	    $xdiff = length($buf);
+            # read chunk of entire subsection list
+            my $entry_size = 20;
+            # test read first entry, see if $cr in expected place, adjust size
+            $fh->read($buf, $entry_size * 1 - $xdiff + 15, $xdiff);
+            $buf =~ m/^(.*?)$cr/;
+            $entry_size = length($1) + 2;
+            if ($entry_size != 20) {
+                print STDERR "Warning: xref entries supposed to be 20 bytes long, are $entry_size.\n";
+            }
+            $xdiff = length($buf);
 
-	    # read remaining entries
+            # read remaining entries
             $fh->read($buf, $entry_size * $xnum - $xdiff + 15, $xdiff);
-	    # each entry is two integers and flag. spec says single ASCII space 
-	    #   between each field and certain length for each (10, 5, 1), so 
-	    #   this appears to be more lenient than spec
-	    # is object 0 supposed to be in subsection 1, or is any place OK?
+            # each entry is two integers and flag. spec says single ASCII space 
+            #   between each field and certain length for each (10, 5, 1), so 
+            #   this appears to be more lenient than spec
+            # is object 0 supposed to be in subsection 1, or is any place OK?
             while ($xnum-- > 0 and 
-		   $buf =~ m/^$ws_char*(\d+)$ws_char+(\d+)$ws_char+([nf])$ws_char*$cr/) {
-		# check if format doesn't match spec
+                   $buf =~ m/^$ws_char*(\d+)$ws_char+(\d+)$ws_char+([nf])$ws_char*$cr/) {
+                # check if format doesn't match spec
                 if ($buf =~ m/^\d{10} \d{5} [nf]$cr/ ||
-		    $entry_format_error) {
-		    # format OK or have already reported format problem
-		} else {
-		    print STDERR "Warning: xref entry readable, but doesn't meet PDF spec.\n";
-		    $entry_format_error++;
-		}
+                    $entry_format_error) {
+                    # format OK or have already reported format problem
+                } else {
+                    print STDERR "Warning: xref entry readable, but doesn't meet PDF spec.\n";
+                    $entry_format_error++;
+                }
 
-	        $buf =~ s/^$ws_char*(\d+)$ws_char+(\d+)$ws_char+([nf])$ws_char*$cr//;
-		# $1 = object's starting offset in file (n) or 
-		#      next object in free list (f) [0 if last]
-		# $2 = generation number (n) or 65535 for object 0 (f) or
-		#      next generation number (f)
-		# $3 = flag (n = object in use, f = free)
-		# buf reduced by entry just processed
-		if (exists $xlist->{$xmin}) {
-		    print STDERR "Warning: duplicate object number $xmin in xref table ignored.\n";
-		} else {
+                $buf =~ s/^$ws_char*(\d+)$ws_char+(\d+)$ws_char+([nf])$ws_char*$cr//;
+                # $1 = object's starting offset in file (n) or 
+                #      next object in free list (f) [0 if last]
+                # $2 = generation number (n) or 65535 for object 0 (f) or
+                #      next generation number (f)
+                # $3 = flag (n = object in use, f = free)
+                # buf reduced by entry just processed
+                if (exists $xlist->{$xmin}) {
+                    print STDERR "Warning: duplicate object number $xmin in xref table ignored.\n";
+                } else {
                     $xlist->{$xmin} = [$1, $2, $3];
-		    if ($xmin == 0 && $subsection_count > 1) {
-			print STDERR "Warning: xref object 0 entry not in first subsection.\n";
-		    }
-		}
+                    if ($xmin == 0 && $subsection_count > 1) {
+                        print STDERR "Warning: xref object 0 entry not in first subsection.\n";
+                    }
+                }
                 $xmin++;
             } # traverse one subsection for objects xmin through xmin+xnum-1 
-	    # go back for next subsection (if any)
+            # go back for next subsection (if any)
         } # loop through xref subsections
-	# fall through to here when run out of xref subsections
-	# xlist should have two or more object entries, may not be contiguous
-	
-	# should have an object 0
-	#   at this point, no idea if object 0 was in first subsection (legal?)
-	#   could attempt a fixup if no object 0 found. many fixups are quite
-	#     risky and could end up corrupting the free list.
-	#   there's no guarantee that a proper free list will result, but any
-	#     error should hopefully be caught further on
-	if (!exists $xlist->{'0'} && !$xrefListEmpty) {
-	    # for now, 1 subsection starting with 1, and only object 1 in
-	    #   free list, try to fix up
-	    if ($subsection_count == 1 && exists $xlist->{'1'}) {
-		# apparently a common enough error in PDF writers
-		
-		if ($xlist->{'1'}[0] == 0 &&  # only member of free list
-		    $xlist->{'1'}[1] == 65535 &&
-		    $xlist->{'1'}[2] eq 'f') {
-	            # object 1 appears to be the free list head, so shift down 
-		    #   all objects
-		    print STDERR "Warning: xref appears to be mislabeled starting with 1. Shift down all elements.\n";
+        # fall through to here when run out of xref subsections
+        # xlist should have two or more object entries, may not be contiguous
+
+        # should have an object 0
+        #   at this point, no idea if object 0 was in first subsection (legal?)
+        #   could attempt a fixup if no object 0 found. many fixups are quite
+        #     risky and could end up corrupting the free list.
+        #   there's no guarantee that a proper free list will result, but any
+        #     error should hopefully be caught further on
+        if (!exists $xlist->{'0'} && !$xrefListEmpty) {
+            # for now, 1 subsection starting with 1, and only object 1 in
+            #   free list, try to fix up
+            if ($subsection_count == 1 && exists $xlist->{'1'}) {
+                # apparently a common enough error in PDF writers
+
+                if ($xlist->{'1'}[0] == 0 &&  # only member of free list
+                    $xlist->{'1'}[1] == 65535 &&
+                    $xlist->{'1'}[2] eq 'f') {
+                    # object 1 appears to be the free list head, so shift down 
+                    #   all objects
+                    print STDERR "Warning: xref appears to be mislabeled starting with 1. Shift down all elements.\n";
                     my $next = 1;
-		    while (exists $xlist->{$next}) {
-			$xlist->{$next - 1} = $xlist->{$next};
-			$next++;
-		    }
-		    delete $xlist->{--$next};
+                    while (exists $xlist->{$next}) {
+                        $xlist->{$next - 1} = $xlist->{$next};
+                        $next++;
+                    }
+                    delete $xlist->{--$next};
 
-		} else {
-	            # if object 1 does not appear to be a free list head, 
-		    #   insert a new object 0
-		    print STDERR "Warning: xref appears to be missing object 0. Insert a new one.\n";
-		    $xlist->{'0'} = [0, 65535, 'f'];
-	        }
-	    } else {
-	        die "Malformed cross reference list in PDF file $self->{' fname'} -- no object 0 (free list head)\n";
-	    }
-	} # no object 0 entry
+                } else {
+                    # if object 1 does not appear to be a free list head, 
+                    #   insert a new object 0
+                    print STDERR "Warning: xref appears to be missing object 0. Insert a new one.\n";
+                    $xlist->{'0'} = [0, 65535, 'f'];
+                }
+            } else {
+                die "Malformed cross reference list in PDF file $self->{' fname'} -- no object 0 (free list head)\n";
+            }
+        } # no object 0 entry
 
-	# build/validate the free list (and no active objects have f flag)
-	my @free_list;
-	foreach (sort {$a <=> $b} keys %{ $xlist }) {
-	    # if 'f' flag, is in free list
-	    if      ($xlist->{$_}[2] eq 'f') {
-		if ($xlist->{$_}[1] <= 0) {
-		    print STDERR "Warning: xref free list entry $_ with bad next generation number.\n";
-		} else {
-		    push @free_list, $_; # should be in numeric order (0 first)
-		}
-	    } elsif ($xlist->{$_}[2] eq 'n') {
-		if ($xlist->{$_}[0] <= 0) {
-		    print STDERR "Warning: xref active object $_ entry with bad length ".($xlist->{$_}[1])."\n";
-		}
-		if ($xlist->{$_}[1] < 0) {
-		    print STDERR "Warning: xref active object $_ entry with bad generation number ".($xlist->{$_}[1])."\n";
-		}
-	    } else {
-		print STDERR "Warning: xref entry has flag that is not 'f' or 'n'.\n";
-	    }
-	} # go through xlist and build free_list and check entries
-	# traverse free list and check that "next object" is also in free list
-	my $next_free = 0;  # object 0 should always be in free list
-	if ($xlist->{'0'}[1] != 65535) {
-	    print STDERR "Warning: object 0 next generation is not 65535.\n";
-	}
-	do {
-	    if ($xlist->{$next_free}[2] ne 'f') {
-		print STDERR "Warning: corrupted free object list: next=$next_free is not a free object.\n";
-		$next_free = 0; # force end of free list
-	    } else { 
-		$next_free = $xlist->{$next_free}[0];
-	    }
-	    # remove this entry from free list array
-	    splice(@free_list, index(@free_list, $next_free), 1);
-	} while ($next_free && exists $xlist->{$next_free});
-	if (scalar @free_list) {
-	    print STDERR "Warning: corrupted xref list: object(s) @free_list marked as free, but are not in free chain.\n";
-	}
+        # build/validate the free list (and no active objects have f flag)
+        my @free_list;
+        foreach (sort {$a <=> $b} keys %{ $xlist }) {
+            # if 'f' flag, is in free list
+            if      ($xlist->{$_}[2] eq 'f') {
+                if ($xlist->{$_}[1] <= 0) {
+                    print STDERR "Warning: xref free list entry $_ with bad next generation number.\n";
+                } else {
+                    push @free_list, $_; # should be in numeric order (0 first)
+                }
+            } elsif ($xlist->{$_}[2] eq 'n') {
+                if ($xlist->{$_}[0] <= 0) {
+                    print STDERR "Warning: xref active object $_ entry with bad length ".($xlist->{$_}[1])."\n";
+                }
+                if ($xlist->{$_}[1] < 0) {
+                    print STDERR "Warning: xref active object $_ entry with bad generation number ".($xlist->{$_}[1])."\n";
+                }
+            } else {
+                print STDERR "Warning: xref entry has flag that is not 'f' or 'n'.\n";
+            }
+        } # go through xlist and build free_list and check entries
+        # traverse free list and check that "next object" is also in free list
+        my $next_free = 0;  # object 0 should always be in free list
+        if ($xlist->{'0'}[1] != 65535) {
+            print STDERR "Warning: object 0 next generation is not 65535.\n";
+        }
+        do {
+            if ($xlist->{$next_free}[2] ne 'f') {
+                print STDERR "Warning: corrupted free object list: next=$next_free is not a free object.\n";
+                $next_free = 0; # force end of free list
+            } else { 
+                $next_free = $xlist->{$next_free}[0];
+            }
+            # remove this entry from free list array
+            splice(@free_list, index(@free_list, $next_free), 1);
+        } while ($next_free && exists $xlist->{$next_free});
+        if (scalar @free_list) {
+            print STDERR "Warning: corrupted xref list: object(s) @free_list marked as free, but are not in free chain.\n";
+        }
 
-	# done with cross reference table, so go on to trailer
-        if ($buf !~ /^\s*trailer\b/i) {
+        # done with cross reference table, so go on to trailer
+        if ($buf !~ /^\s*trailer\b/i) {  #orig
             die "Malformed trailer in PDF file $self->{' fname'} at " . ($fh->tell() - length($buf));
         }
 
@@ -1335,10 +1334,10 @@ sub readxrtr {
     } elsif ($buf =~ m/^(\d+)\s+(\d+)\s+obj/i) {
         my ($xref_obj, $xref_gen) = ($1, $2);
 
-        # XRef streams.
+        # XRef streams
         ($tdict, $buf) = $self->readval($buf);
 
-        unless ($tdict->{' stream'}) {
+        unless ($tdict->{' stream'}) {  #orig
             die "Malformed XRefStm at $xref_obj $xref_gen obj in PDF file $self->{' fname'}";
         }
         $tdict->read_stream(1);
@@ -1362,7 +1361,7 @@ sub readxrtr {
 
             for my $i ($start...$last) {
                 # Replaced "for $xmin" because it creates a loop-specific local 
-		# variable, and we need $xmin to be correct for maxobj below.
+                # variable, and we need $xmin to be correct for maxobj below.
                 $xmin = $i;
 
                 my @cols;
@@ -1375,7 +1374,7 @@ sub readxrtr {
                 }
 
                 $cols[0] = 1 unless defined $cols[0];
-                if ($cols[0] > 2) {
+                if ($cols[0] > 2) {  #orig
                     die "Invalid XRefStm entry type ($cols[0]) at $xref_obj $xref_gen obj";
                 }
 
@@ -1388,7 +1387,7 @@ sub readxrtr {
             }
         }
 
-    } else {
+    } else {  #orig
         die "Malformed xref in PDF file $self->{' fname'}";
     }
 
@@ -1401,6 +1400,8 @@ sub readxrtr {
 
     return $tdict;
 } # end of readxrtr()
+
+=head2 $p->out_trailer($tdict, $update)
 
 =head2 $p->out_trailer($tdict)
 
@@ -1474,18 +1475,16 @@ sub out_trailer {
                 if (defined $freelist[$k] && defined $xref && "$freelist[$k]" eq "$xref") {
                     $k++;
 ##                  $fh->print(pack("A10AA5A4",
-                    push @out, pack("A10AA5A4",
+                    push(@out, pack("A10AA5A4",
                                     sprintf("%010d", (defined $freelist[$k] ?
                                                       $self->{' objects'}{$freelist[$k]->uid()}[0] : 0)), " ",
                                     sprintf("%05d", $self->{' objects'}{$xref->uid()}[1] + 1),
-##                                  " f \n"));
-                                    " f \n");
+                                    " f \n"));
                 } else {
 ##                  $fh->print(pack("A10AA5A4", sprintf("%010d", $self->{' locs'}{$xref->uid()}), " ",
-                    push @out, pack("A10AA5A4", sprintf("%010d", $self->{' locs'}{$xref->uid()}), " ",
+                    push(@out, pack("A10AA5A4", sprintf("%010d", $self->{' locs'}{$xref->uid()}), " ",
                             sprintf("%05d", $self->{' objects'}{$xref->uid()}[1]),
-##                          " n \n"));
-                            " n \n");
+                            " n \n"));
                 }
             }
             $first = $i;
@@ -1571,8 +1570,7 @@ Creates a very empty PDF file object (used by new() and open())
 =cut
 
 sub _new {
-    my $class = shift;
-
+    my $class = shift();
     my $self = {};
 
     bless $self, $class;

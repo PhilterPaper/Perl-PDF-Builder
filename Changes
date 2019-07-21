@@ -6,15 +6,17 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       optional items in dependency graph. Try something else, after confirming
       that optional items SHOULD show up in reverse dependencies (?). 
 
-3.016     2019-07-07  UNRELEASED
+3.016     2019-07-20  UNRELEASED
+
+*   [RT 130038-41] may just be documentation issues (need clarification), but
+     need to check if code fixes on some, especially CJKfonts can't embed and
+     can't do synfont against
 
 *   TBD [GH 101] additional checks on the cross reference table make optional with a flag. There are some PDFs in the wild with xref tables that do not come close to meeting the PDF spec, but many Readers will accept. PDF::Builder was flagging as fatal errors.
 
 *   examples/024_bdffonts, lib/PDF/Builder.pm, 
       lib/PDF/Builder/Resource/BaseFont.pm
      BDF (bitmapped fonts) some work that slightly improves. Work in progress.
-
-*   Many changes in PDF::API2 GitHub library per PDF::API2. Still debugging. 
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Resource/UniFont.pm-BaseFont.pm, 
       lib/PDF/Builder/Basic/PDF/Array.pm-Dict.pm-File.pm-Filter.pm-Literal.pm-
@@ -23,7 +25,7 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       lib/PDF/Builder/Resource/CIDFont/CJKFont.pm-TrueType.pm, 
       lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm,
       lib/PDF/Builder/Lite.pm-Page.pm-Resource.pm, 
-      t/author-critic.t--author-pod-syntax.t
+      t/author-critic.t--author-pod-syntax.t--rt126274.t (new), MANIFEST
      per PDF::API2 changes, code style cleanup (including some minor changes
       to outobjdeep(), such as removing %options), and some bug fixes not 
       already in PDF::Builder. Also some Perl Critic cleanup and removal of
@@ -54,7 +56,8 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       the g2u array when multiple Unicode codepoints map to a given CID. There 
       are some inconsistencies of what CIDs are defined, between the Adobe 
       documentation, what's in the cid2code.txt files, and what's available in 
-      Unicode. Anyway, this is my best attempt, and corrections are accepted!
+      Unicode. Suggestions on how to automate cid2code.txt usage would be 
+      appreciated. Anyway, this is my best attempt, and corrections accepted!
 
     tools/1_pc.pl, 2_t-tests.pl clean up minor bugs, improve diagnostics.
 

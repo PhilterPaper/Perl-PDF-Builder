@@ -44,6 +44,7 @@ perl t\rt67767.t
 perl t\rt69503.t
 perl t\rt120397.t
 perl t\rt120450.t
+perl t\rt126274.t
 perl t\string.t
 perl t\text.t
 perl t\tiff.t

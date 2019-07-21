@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Resource::CIDFont::TrueType::FontFile;
@@ -137,7 +137,7 @@ sub glyphNum {
 }
 
 sub outobjdeep {
-    my ($self, $fh, $pdf, %opts) = @_;
+    my ($self, $fh, $pdf) = @_;
 
     my $notdefbefore = 1;
 
@@ -173,7 +173,7 @@ sub outobjdeep {
         #}
     }
 
-    return $self->SUPER::outobjdeep($fh, $pdf, %opts);
+    return $self->SUPER::outobjdeep($fh, $pdf);
 }
 
 =back

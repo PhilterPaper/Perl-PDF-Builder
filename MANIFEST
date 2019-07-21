@@ -226,6 +226,7 @@ t/rt67767.t
 t/rt69503.t
 t/rt120397.t
 t/rt120450.t
+t/rt126274.t
 t/string.t
 t/text.t
 t/tiff.t

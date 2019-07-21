@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 # run all "t" tests
 # roughly equivalent to t-tests.bat
+# must be run from parent of t/
 # author: Phil M Perry
 
 use strict;
@@ -49,11 +50,15 @@ my @test_list = qw(
  rt69503
  rt120397
  rt120450
+ rt126274
  string
  text
  tiff
  viewer-preferences
                   );
+# override full list above, and run just one or two tests
+#@test_list = qw( barcode );
+
 # perl t/<name>.t will run it
 
 my $type;

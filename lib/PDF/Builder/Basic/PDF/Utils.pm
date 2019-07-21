@@ -16,7 +16,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.013'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -172,8 +172,8 @@ sub PDFString {
 	    	return PDFStr($text); 
 		}
     } else {
-	if ($isUTF8) {
-	    utf8::downgrade($text); # force 7 bit ASCII
+        if ($isUTF8) {
+            utf8::downgrade($text); # force 7 bit ASCII
         }
 	return PDFStr($text); 
     }

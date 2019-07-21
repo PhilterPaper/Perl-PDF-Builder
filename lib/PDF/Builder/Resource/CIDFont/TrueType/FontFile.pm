@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.014'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
 
 use Carp;
 use Encode qw(:all);
@@ -717,7 +717,7 @@ sub glyphNum {
 }
 
 sub outobjdeep {
-    my ($self, $fh, $pdf, %opts) = @_;
+    my ($self, $fh, $pdf) = @_;
 
     my $f = $self->font();
 
@@ -745,7 +745,7 @@ sub outobjdeep {
 	}
     }
 
-    return $self->SUPER::outobjdeep($fh, $pdf, %opts);
+    return $self->SUPER::outobjdeep($fh, $pdf);
 }
 
 1;

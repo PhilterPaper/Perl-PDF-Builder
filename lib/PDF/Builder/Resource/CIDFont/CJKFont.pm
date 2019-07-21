@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.014'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
 
 use PDF::Builder::Util;
 use PDF::Builder::Basic::PDF::Utils;
@@ -172,7 +172,7 @@ sub glyphByCId {
 }
 
 sub outobjdeep {
-    my ($self, $fh, $pdf, %opts) = @_;
+    my ($self, $fh, $pdf) = @_;
 
     my $notdefbefore = 1;
 
@@ -214,7 +214,7 @@ sub outobjdeep {
         }
     }
 
-    return $self->SUPER::outobjdeep($fh, $pdf, %opts);
+    return $self->SUPER::outobjdeep($fh, $pdf);
 }
 
 BEGIN {
