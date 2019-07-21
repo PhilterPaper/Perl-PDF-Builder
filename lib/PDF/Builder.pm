@@ -294,8 +294,8 @@ sub new {
 	    }
     }
     if ($options{'-file'}) {
-        $self->{' filed'} = $options{'-file'};
         $self->{'pdf'}->create_file($options{'-file'});
+        $self->{'partial_save'} = 1;
     }
     $self->{'infoMeta'} = [qw(Author CreationDate ModDate Creator Producer Title Subject Keywords)];
 
@@ -474,7 +474,7 @@ sub open_scalar {
     weaken $self->{'pagestack'}->[$_] for (0 .. scalar @{$self->{'pagestack'}});
     $self->{'catalog'} = $self->{'pdf'}->{'Root'};
     weaken $self->{'catalog'};
-    $self->{'reopened'} = 1;
+    $self->{'opened_scalar'} = 1;
     if (exists $options{'-compress'}) {
       $self->{'forcecompress'} = $options{'-compress'};
       # at this point, no validation of given value! none/flate (0/1).
@@ -623,7 +623,7 @@ default pdf-context.
 
 =item pageencaps
 
-enables that Builder will add save/restore commands upon importing/opening
+enables Builder's adding save/restore commands upon importing/opening
 pages to preserve graphics-state for modification.
 
 =item copyannots
@@ -685,9 +685,8 @@ Checks if the previously opened PDF is encrypted.
 =cut
 
 sub isEncrypted {
-	my $self = shift;
-
-	return defined($self->{'pdf'}->{'Encrypt'}) ? 1 : 0;
+    my $self = shift();
+    return defined($self->{'pdf'}->{'Encrypt'}) ? 1 : 0;
 }
 
 =item %infohash = $pdf->info(%infohash)
@@ -702,11 +701,11 @@ of this method.
 sub info {
     my ($self, %opt) = @_;
 
-    if(not defined($self->{'pdf'}->{'Info'})) {
-       $self->{'pdf'}->{'Info'} = PDFDict();
-       $self->{'pdf'}->new_obj($self->{'pdf'}->{'Info'});
+    if (not defined($self->{'pdf'}->{'Info'})) {
+        $self->{'pdf'}->{'Info'} = PDFDict();
+        $self->{'pdf'}->new_obj($self->{'pdf'}->{'Info'});
     } else {
-       $self->{'pdf'}->{'Info'}->realise();
+        $self->{'pdf'}->{'Info'}->realise();
     }
 
     # Maintenance Note: Since we're not shifting at the beginning of
@@ -718,7 +717,7 @@ sub info {
         }
         $self->{'pdf'}->out_obj($self->{'pdf'}->{'Info'});
     }
-    
+
     if (defined $self->{'pdf'}->{'Info'}) {
         %opt = ();
         foreach my $k (@{$self->{'infoMeta'}}) {
@@ -770,11 +769,11 @@ of this method.
 sub xmpMetadata {
     my ($self, $value) = @_;
 
-    if(not defined($self->{'catalog'}->{'Metadata'})) {
-            $self->{'catalog'}->{'Metadata'} = PDFDict();
-            $self->{'catalog'}->{'Metadata'}->{'Type'} = PDFName('Metadata');
-            $self->{'catalog'}->{'Metadata'}->{'Subtype'} = PDFName('XML');
-            $self->{'pdf'}->new_obj($self->{'catalog'}->{'Metadata'});
+    if (not defined($self->{'catalog'}->{'Metadata'})) {
+        $self->{'catalog'}->{'Metadata'} = PDFDict();
+        $self->{'catalog'}->{'Metadata'}->{'Type'} = PDFName('Metadata');
+        $self->{'catalog'}->{'Metadata'}->{'Subtype'} = PDFName('XML');
+        $self->{'pdf'}->new_obj($self->{'catalog'}->{'Metadata'});
     } else {
         $self->{'catalog'}->{'Metadata'}->realise();
         $self->{'catalog'}->{'Metadata'}->{' stream'} = unfilter($self->{'catalog'}->{'Metadata'}->{'Filter'}, $self->{'catalog'}->{'Metadata'}->{' stream'});
@@ -782,7 +781,7 @@ sub xmpMetadata {
         delete $self->{'catalog'}->{'Metadata'}->{'Filter'};
     }
 
-    my $md=$self->{'catalog'}->{'Metadata'};
+    my $md = $self->{'catalog'}->{'Metadata'};
 
     if (defined $value) {
         $md->{' stream'} = $value;
@@ -864,14 +863,14 @@ sub pageLabel {
         $nums->add_elements(PDFNum($index));
 
         my $d = PDFDict();
-	if (defined $opts->{'-style'}) {
+        if (defined $opts->{'-style'}) {
             $d->{'S'} = PDFName($opts->{'-style'} eq 'Roman' ? 'R' :
                                 $opts->{'-style'} eq 'roman' ? 'r' :
                                 $opts->{'-style'} eq 'Alpha' ? 'A' :
                                 $opts->{'-style'} eq 'alpha' ? 'a' : 'D');
-	} else {
-	    $d->{'S'} = PDFName('D');
-	}
+        } else {
+            $d->{'S'} = PDFName('D');
+        }
 
         if (defined $opts->{'-prefix'}) {
             $d->{'P'} = PDFString($opts->{'-prefix'}, 's');
@@ -904,9 +903,9 @@ B<Example:>
 sub finishobjects {
     my ($self, @objs) = @_;
 
-    if ($self->{'reopened'}) {
+    if ($self->{'opened_scalar'}) {
         die "invalid method invocation: no file, use 'saveas' instead.";
-    } elsif ($self->{' filed'}) {
+    } elsif ($self->{'partial_save'}) {
         $self->{'pdf'}->ship_out(@objs);
     } else {
         die "invalid method invocation: no file, use 'saveas' instead.";
@@ -926,7 +925,7 @@ sub _proc_pages {
 
     my @pages;
     $pdf->{' apipagecount'} ||= 0;
-    foreach my $page ($object->{'Kids'}->elementsof()) {
+    foreach my $page ($object->{'Kids'}->elements()) {
         $page->realise();
         if ($page->{'Type'}->val() eq 'Pages') {
             push @pages, _proc_pages($pdf, $page);
@@ -959,8 +958,7 @@ B<Example:>
 =cut
 
 sub update {
-    my $self = shift;
-
+    my $self = shift();
     $self->saveas($self->{'pdf'}->{' fname'});
     return;
 }
@@ -984,14 +982,14 @@ B<Example:>
 sub saveas {
     my ($self, $file) = @_;
 
-    if ($self->{'reopened'}) {
+    if ($self->{'opened_scalar'}) {
         $self->{'pdf'}->append_file();
-	my $fh;
+        my $fh;
         CORE::open($fh, '>', $file) or die "Can't open $file for writing: $!";
         binmode($fh, ':raw');
         print $fh ${$self->{'content_ref'}};
         CORE::close($fh);
-    } elsif ($self->{' filed'}) {
+    } elsif ($self->{'partial_save'}) {
         $self->{'pdf'}->close_file();
     } else {
         $self->{'pdf'}->out_file($file);
@@ -1021,9 +1019,9 @@ B<Example:>
 sub save {
     my ($self) = @_;
 
-    if      ($self->{'reopened'}) {
+    if      ($self->{'opened_scalar'}) {
         die "Invalid method invocation: use 'saveas' instead of 'save'.";
-    } elsif ($self->{' filed'}) {
+    } elsif ($self->{'partial_save'}) {
         $self->{'pdf'}->close_file();
     } else {
         die "Invalid method invocation: use 'saveas' instead of 'save'.";
@@ -1061,14 +1059,16 @@ B<Example:>
 # - Steve S. (see bug RT 81530)
 
 sub stringify {
-    my $self = shift;
+    my $self = shift();
 
     my $str = '';
-    if ((defined $self->{'reopened'}) and ($self->{'reopened'} == 1)) {
+    # is only set to 1 (within open_scalar()), otherwise is undef
+    if ($self->{'opened_scalar'}) { 
         $self->{'pdf'}->append_file();
         $str = ${$self->{'content_ref'}};
     } else {
         my $fh = FileHandle->new();
+        # we should be writing to the STRING $str
         CORE::open($fh, '>', \$str) || die "Can't begin scalar IO";
         $self->{'pdf'}->out_file($fh);
         $fh->close();
@@ -1081,15 +1081,14 @@ sub stringify {
 # there IS a release() method defined and documented in Basic/PDF/File.pm
 # it's not clear whether this release is just an internal (rename to _release)
 sub release {
-    my $self = shift;
+    my $self = shift();
     $self->end();
-
     return;
 }
 
 =item $pdf->end()
 
-Remove the object structure from memory.  PDF::Builder contains circular
+Remove the object structure from memory. PDF::Builder contains circular
 references, so this call is necessary in long-running processes to
 keep from running out of memory.
 
@@ -1100,7 +1099,7 @@ files and not writing them.
 =cut
 
 sub end {
-    my $self = shift;
+    my $self = shift();
     $self->{'pdf'}->release() if defined $self->{'pdf'};
 
     foreach my $key (keys %$self) {
@@ -1141,7 +1140,7 @@ B<Example:>
 =cut
 
 sub page {
-    my $self = shift;
+    my $self = shift();
     my $index = shift() || 0;  # default to new "last" page
     my $page;
 
@@ -1158,16 +1157,16 @@ sub page {
     $self->{'pdf'}->out_obj($self->{'pages'});
     if ($index == 0) {
         push @{$self->{'pagestack'}}, $page;
-	weaken $self->{'pagestack'}->[-1];
+        weaken $self->{'pagestack'}->[-1];
     } elsif ($index < 0) {
         splice @{$self->{'pagestack'}}, $index, 0, $page;
-	weaken $self->{'pagestack'}->[$index];
+        weaken $self->{'pagestack'}->[$index];
     } else {
         splice @{$self->{'pagestack'}}, $index-1, 0, $page;
-	weaken $self->{'pagestack'}->[$index - 1];
+        weaken $self->{'pagestack'}->[$index - 1];
     }
 
- #   $page->{'Resources'}=$self->{'pages'}->{'Resources'};
+    #   $page->{'Resources'}=$self->{'pages'}->{'Resources'};
     return $page;
 } # end of page()
 
@@ -1180,7 +1179,7 @@ document.
 
 B<Example:>
 
-    $pdf = PDF::Builder->open('our/99page.pdf');
+    $pdf  = PDF::Builder->open('our/99page.pdf');
     $page = $pdf->openpage(1);   # returns the first page
     $page = $pdf->openpage(99);  # returns the last page
     $page = $pdf->openpage(-1);  # returns the last page
@@ -1206,8 +1205,8 @@ sub openpage {
         bless $page, 'PDF::Builder::Page';
         $page->{' apipdf'} = $self->{'pdf'};
         $page->{' api'} = $self;
-	weaken $page->{' apipdf'};
-	weaken $page->{' api'};
+        weaken $page->{' apipdf'};
+        weaken $page->{' api'};
         $self->{'pdf'}->out_obj($page);
         if (($rotate = $page->find_prop('Rotate')) and (not defined($page->{' fixed'}) or $page->{' fixed'} < 1)) {
             $rotate = ($rotate->val() + 360) % 360;
@@ -1216,7 +1215,7 @@ sub openpage {
                 $page->{'Rotate'} = PDFNum(0);
                 foreach my $mediatype (qw(MediaBox CropBox BleedBox TrimBox ArtBox)) {
                     if ($media = $page->find_prop($mediatype)) {
-                        $media = [ map { $_->val() } $media->elementsof() ];
+                        $media = [ map { $_->val() } $media->elements() ];
                     } else {
                         $media = [0, 0, 612, 792]; # US Letter default
                         next if $mediatype ne 'MediaBox';
@@ -1248,7 +1247,7 @@ sub openpage {
             if ($self->default('pageencaps')) {
                 $content->{' stream'} .= ' q ';
             }
-            foreach my $k ($uncontent->elementsof()) {
+            foreach my $k ($uncontent->elements()) {
                 $k->realise();
                 $content->{' stream'} .= ' ' . unfilter($k->{'Filter'}, $k->{' stream'}) . ' ';
             }
@@ -1261,7 +1260,7 @@ sub openpage {
 
             ## if we like compress we will do it now to do quicker saves
             if ($self->{'forcecompress'} eq 'flate' || 
-		$self->{'forcecompress'} =~ m/^[1-9]\d*$/) {
+                $self->{'forcecompress'} =~ m/^[1-9]\d*$/) {
                 # $content->compressFlate();
                 $content->{' stream'} = dofilter($content->{'Filter'}, $content->{' stream'});
                 $content->{' nofilt'} = 1;
@@ -1278,7 +1277,6 @@ sub openpage {
     $page->{' api'} = $self;
     weaken $page->{' apipdf'};
     weaken $page->{' api'};
-    $page->{' reopened'} = 1;
 
     return $page;
 } # end of openpage()
@@ -1302,7 +1300,7 @@ sub _walk_obj {
 
     if (ref($source_object) =~ /Array$/) {
         $target_object->{' val'} = [];
-        foreach my $k ($source_object->elementsof()) {
+        foreach my $k ($source_object->elements()) {
             $k->realise() if ref($k) =~ /Objind$/;
             $target_object->add_elements(_walk_obj($object_cache, $source_pdf, $target_pdf, $k));
         }
@@ -1385,10 +1383,10 @@ sub importPageIntoForm {
        #my $box = _walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, $self->{'pdf'}, $s_page->{$k});
         next unless defined $s_page->find_prop($k);
         my $box = _walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, $self->{'pdf'}, $s_page->find_prop($k));
-        $xo->bbox(map { $_->val() } $box->elementsof());
+        $xo->bbox(map { $_->val() } $box->elements());
         last;
     }
-    $xo->bbox(0, 0, 612, 792) unless defined $xo->{'BBox'}; # US Letter default
+    $xo->bbox(0,0, 612,792) unless defined $xo->{'BBox'}; # US Letter default
 
     foreach my $k (qw(Resources)) {
         $s_page->{$k} = $s_page->find_prop($k);
@@ -1419,15 +1417,15 @@ sub importPageIntoForm {
 
         $xo->{' stream'} = '';
         # openpage pages only contain one stream
-        my ($k) = $s_page->{'Contents'}->elementsof();
+        my ($k) = $s_page->{'Contents'}->elements();
         $k->realise();
         if ($k->{' nofilt'}) {
-          # we have a finished stream here
-          # so we unfilter
-          $xo->add('q', unfilter($k->{'Filter'}, $k->{' stream'}), 'Q');
+            # we have a finished stream here
+            # so we unfilter
+            $xo->add('q', unfilter($k->{'Filter'}, $k->{' stream'}), 'Q');
         } else {
-          # stream is an unfinished/unfiltered content
-          # so we just copy it and add the required "qQ"
+            # stream is an unfinished/unfiltered content
+            # so we just copy it and add the required "qQ"
             $xo->add('q', $k->{' stream'}, 'Q');
         }
         $xo->compressFlate() if $self->{'forcecompress'} eq 'flate' ||
@@ -1515,7 +1513,7 @@ sub import_page {
         my $box = _walk_obj({}, $s_pdf->{'pdf'}, $self->{'pdf'}, $prop);
         my $method = lc $k;
 
-        $t_page->$method(map { $_->val() } $box->elementsof());
+        $t_page->$method(map { $_->val() } $box->elements());
     }
 
     $t_page->gfx()->formimage($xo, 0, 0, 1);
@@ -1531,7 +1529,7 @@ sub import_page {
         }
         my @Fields = ();
         my @Annots = ();
-        foreach my $a ($s_page->{'Annots'}->elementsof()) {
+        foreach my $a ($s_page->{'Annots'}->elements()) {
             $a->realise();
             my $t_a = PDFDict();
             $self->{'pdf'}->new_obj($t_a);
@@ -1539,31 +1537,31 @@ sub import_page {
             # key names are copied from PDF Reference 1.4 (Tables)
             my @k = (
                 qw( Type Subtype Contents P Rect NM M F BS Border AP AS C CA T Popup A AA StructParent Rotate
-                ),                                    # Annotations - Common (8.10)
-                qw(Subtype Contents Open Name),       # Text Annotations (8.15)
-                qw(Subtype Contents Dest H PA),       # Link Annotations (8.16)
-                qw(Subtype Contents DA Q),            # Free Text Annotations (8.17)
-                qw(Subtype Contents L BS LE IC),      # Line Annotations (8.18)
-                qw(Subtype Contents BS IC),           # Square and Circle Annotations (8.20)
-                qw(Subtype Contents QuadPoints),      # Markup Annotations (8.21)
-                qw(Subtype Contents Name),            # Rubber Stamp Annotations (8.22)
-                qw(Subtype Contents InkList BS),      # Ink Annotations (8.23)
-                qw(Subtype Contents Parent Open),     # Popup Annotations (8.24)
-                qw(Subtype FS Contents Name),         # File Attachment Annotations (8.25)
-                qw(Subtype Sound Contents Name),      # Sound Annotations (8.26)
-                qw(Subtype Movie Contents A),         # Movie Annotations (8.27)
-                qw(Subtype Contents H MK),            # Widget Annotations (8.28)
-                                                      # Printers Mark Annotations (none)
-                                                      # Trap Network Annotations (none)
+                ),                                  # Annotations - Common (8.10)
+                qw( Subtype Contents Open Name ),   # Text Annotations (8.15)
+                qw( Subtype Contents Dest H PA ),   # Link Annotations (8.16)
+                qw( Subtype Contents DA Q ),        # Free Text Annotations (8.17)
+                qw( Subtype Contents L BS LE IC ),  # Line Annotations (8.18)
+                qw( Subtype Contents BS IC ),       # Square and Circle Annotations (8.20)
+                qw( Subtype Contents QuadPoints ),  # Markup Annotations (8.21)
+                qw( Subtype Contents Name ),        # Rubber Stamp Annotations (8.22)
+                qw( Subtype Contents InkList BS ),  # Ink Annotations (8.23)
+                qw( Subtype Contents Parent Open ), # Popup Annotations (8.24)
+                qw( Subtype FS Contents Name ),     # File Attachment Annotations (8.25)
+                qw( Subtype Sound Contents Name ),  # Sound Annotations (8.26)
+                qw( Subtype Movie Contents A ),     # Movie Annotations (8.27)
+                qw( Subtype Contents H MK ),        # Widget Annotations (8.28)
+                                                    # Printers Mark Annotations (none)
+                                                    # Trap Network Annotations (none)
             );
             push @k, (
                 qw( Subtype FT Parent Kids T TU TM Ff V DV AA
-                ),                                    # Fields - Common (8.49)
-                qw(DR DA Q),                          # Fields containing variable text (8.51)
-                qw(Opt),                              # Checkbox field (8.54)
-                qw(Opt),                              # Radio field (8.55)
-                qw(MaxLen),                           # Text field (8.57)
-                qw(Opt TI I),                         # Choice field (8.59)
+                ),                                  # Fields - Common (8.49)
+                qw( DR DA Q ),                      # Fields containing variable text (8.51)
+                qw( Opt ),                          # Checkbox field (8.54)
+                qw( Opt ),                          # Radio field (8.55)
+                qw( MaxLen ),                       # Text field (8.57)
+                qw( Opt TI I ),                     # Choice field (8.59)
             ) if $AcroForm;
 
             # sorting out dupes
@@ -1599,8 +1597,7 @@ Returns the number of pages in the document.
 =cut
 
 sub pages {
-    my $self = shift;
-
+    my $self = shift();
     return scalar @{$self->{'pagestack'}};
 }
 
@@ -1620,18 +1617,18 @@ sub userunit {
     my ($self, $value) = @_;
 
     if (float($value) <= 0.0) {
-	warn "Invalid User Unit value '$value', set to 1.0";
-	$value = 1.0;
+        warn "Invalid User Unit value '$value', set to 1.0";
+        $value = 1.0;
     }
 
     PDF::Builder->verCheckOutput(1.6, "set User Unit");
     $self->{'pdf'}->{' userUnit'} = float($value);
     $self->{'pages'}->{'UserUnit'} = PDFNum(float($value));
     if (defined $self->{'pages'}->{'MediaBox'}) { # should be default letter
-	if ($value != 1.0) { # divide points by User Unit
+        if ($value != 1.0) { # divide points by User Unit
             my @corners = ( 0, 0, 612/$value, 792/$value );
             $self->{'pages'}->{'MediaBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
-	}
+        }
     }
 
     return $self;
@@ -1657,16 +1654,16 @@ sub _bbox {
 	        }
 	    }
     } else {
-	# name without [-orient] option, or numeric coordinates given
-	@corners = page_size(@corners);
+        # name without [-orient] option, or numeric coordinates given
+        @corners = page_size(@corners);
     }
 
     my $UU = $self->{'pdf'}->{' userUnit'};
     # scale down size if User Unit given (e.g., Letter => 0 0 8.5 11)
     if ($isName && $UU != 1.0) {
-	for (my $i=0; $i<4; $i++) {
-	    $corners[$i] /= $UU;
-	}
+        for (my $i=0; $i<4; $i++) {
+            $corners[$i] /= $UU;
+        }
     }
 
     return (@corners);
@@ -1691,7 +1688,6 @@ See L<PDF::Builder::Docs> "BOX" METHODS/Media Box for more information.
 sub mediabox {
     my ($self, @corners) = @_;
     @corners = $self->_bbox(@corners);
-
     $self->{'pages'}->{'MediaBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
 
     return $self;
@@ -1715,7 +1711,6 @@ See L<PDF::Builder::Docs> "Box" Methods/Crop Box for more information.
 sub cropbox {
     my ($self, @corners) = @_;
     @corners = $self->_bbox(@corners);
-
     $self->{'pages'}->{'CropBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
 
     return $self;
@@ -1739,7 +1734,6 @@ See L<PDF::Builder::Docs> "Box" Methods/Bleed Box for more information.
 sub bleedbox {
     my ($self, @corners) = @_;
     @corners = $self->_bbox(@corners);
-
     $self->{'pages'}->{'BleedBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
 
     return $self;
@@ -1763,7 +1757,6 @@ See L<PDF::Builder::Docs> "Box" Methods/Trim Box for more information.
 sub trimbox {
     my ($self, @corners) = @_;
     @corners = $self->_bbox(@corners);
-
     $self->{'pages'}->{'TrimBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
 
     return $self;
@@ -1787,7 +1780,6 @@ See L<PDF::Builder::Docs> "Box" Methods/Art Box for more information.
 sub artbox {
     my ($self, @corners) = @_;
     @corners = $self->_bbox(@corners);
-
     $self->{'pages'}->{'ArtBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
 
     return $self;
@@ -1810,14 +1802,12 @@ Returns the list of searched directories.
 
 sub addFontDirs {
     my @dirs = @_;
-
     push @FontDirs, @dirs;
-
     return @FontDirs;
 }
 
 sub _findFont {
-    my $font = shift;
+    my $font = shift();
 
     my @fonts = ($font, map { "$_/$font" } @FontDirs);
     shift @fonts while scalar(@fonts) and not -f $fonts[0];
@@ -2084,8 +2074,8 @@ sub image_tiff {
     }
     $obj->{'usesGT'} = PDFNum($rc);  # -1 available but unused
                                      #  0 not available
-			             #  1 available and used
-				     # $tiff->usesLib() to get number
+                                     #  1 available and used
+                                     # $tiff->usesLib() to get number
 
     return $obj;
 }
@@ -2112,7 +2102,7 @@ sub LA_GT {
     my ($rc);
     $rc = eval {
         require Graphics::TIFF;
-	1;
+        1;
     };
     if (!defined $rc) { $rc = 0; }  # else is 1
 
@@ -2154,39 +2144,39 @@ sub image_png {
     my ($rc, $obj);
     $rc = eval {
         require Image::PNG::Libpng;
-	1;
+        1;
     };
     if (!defined $rc) { $rc = 0; }  # else is 1
     if ($rc) {
-	# Image::PNG::Libpng available
-	if (defined $opts{'-nouseIPL'} && $opts{'-nouseIPL'} == 1) {
-	   $rc = -1;  # don't use it
-	}
+        # Image::PNG::Libpng available
+        if (defined $opts{'-nouseIPL'} && $opts{'-nouseIPL'} == 1) {
+            $rc = -1;  # don't use it
+        }
     }
     if ($rc == 1) {
-	# Image::PNG::Libpng (_IPL suffix) available and to be used
+        # Image::PNG::Libpng (_IPL suffix) available and to be used
         require PDF::Builder::Resource::XObject::Image::PNG_IPL;
         $obj = PDF::Builder::Resource::XObject::Image::PNG_IPL->new($self->{'pdf'}, $file, 'Px'.pdfkey(), %opts);
         $self->{'pdf'}->out_obj($self->{'pages'});
     } else {
-	# Image::PNG::Libpng not available, or is but is not to be used
+        # Image::PNG::Libpng not available, or is but is not to be used
         require PDF::Builder::Resource::XObject::Image::PNG;
         $obj = PDF::Builder::Resource::XObject::Image::PNG->new($self->{'pdf'}, $file, 'Px'.pdfkey(), %opts);
         $self->{'pdf'}->out_obj($self->{'pages'});
 
-	if ($rc == 0 && $MSG_COUNT[1]++ == 0) {
-	    # TBD give warning message once, unless silenced (-silent) or
-	    # deliberately not using Image::PNG::Libpng (rc == -1)
-	    if (!defined $opts{'-silent'} || $opts{'-silent'} == 0) {
-	        print STDERR "Your system does not have Image::PNG::Libpng installed, so some\nPNG functions may not run correctly.\n";
-		# even if -silent only once, COUNT still incremented
-	    }
-	}
+        if ($rc == 0 && $MSG_COUNT[1]++ == 0) {
+            # TBD give warning message once, unless silenced (-silent) or
+            # deliberately not using Image::PNG::Libpng (rc == -1)
+            if (!defined $opts{'-silent'} || $opts{'-silent'} == 0) {
+                print STDERR "Your system does not have Image::PNG::Libpng installed, so some\nPNG functions may not run correctly.\n";
+                # even if -silent only once, COUNT still incremented
+            }
+        }
     }
     $obj->{'usesIPL'} = PDFNum($rc);  # -1 available but unused
                                       #  0 not available
-		 	              #  1 available and used
-		        	      # $png->usesLib() to get number
+                                      #  1 available and used
+                                      # $png->usesLib() to get number
     return $obj;
 }
 
@@ -2212,7 +2202,7 @@ sub LA_IPL {
     my ($rc);
     $rc = eval {
         require Image::PNG::Libpng;
-	1;
+        1;
     };
     if (!defined $rc) { $rc = 0; }  # else is 1
 
@@ -2307,6 +2297,7 @@ sub colorspace_web {
 
     require PDF::Builder::Resource::ColorSpace::Indexed::WebColor;
     my $obj = PDF::Builder::Resource::ColorSpace::Indexed::WebColor->new($self->{'pdf'});
+
     $self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
@@ -2481,7 +2472,7 @@ Returns a new form XObject.
 =cut
 
 sub xo_form {
-    my $self = shift;
+    my $self = shift();
 
     my $obj = PDF::Builder::Resource::XObject::Form::Hybrid->new($self->{'pdf'});
     $self->{'pdf'}->out_obj($self->{'pages'});
@@ -2496,7 +2487,7 @@ Returns a new extended graphics state object.
 =cut
 
 sub egstate {
-    my $self = shift;
+    my $self = shift();
 
     my $obj = PDF::Builder::Resource::ExtGState->new($self->{'pdf'}, pdfkey());
     $self->{'pdf'}->out_obj($self->{'pages'});
@@ -2545,17 +2536,17 @@ Returns a new or existing outlines object.
 =cut
 
 sub outlines {
-    my $self = shift;
+    my $self = shift();
 
     require PDF::Builder::Outlines;
     $self->{'pdf'}->{'Root'}->{'Outlines'} ||= PDF::Builder::Outlines->new($self);
 
     my $obj = $self->{'pdf'}->{'Root'}->{'Outlines'};
-    bless $obj, 'PDF::Builder::Outlines';
-    $obj->{' apipdf'} = $self->{'pdf'};
-    $obj->{' api'}    = $self;
-    weaken $obj->{' apipdf'};
-    weaken $obj->{' api'};
+#    bless $obj, 'PDF::Builder::Outlines';
+#    $obj->{' apipdf'} = $self->{'pdf'};
+#    $obj->{' api'}    = $self;
+#    weaken $obj->{' apipdf'};
+#    weaken $obj->{' api'};
 
     $self->{'pdf'}->new_obj($obj) unless $obj->is_obj($self->{'pdf'});
     $self->{'pdf'}->out_obj($obj);
@@ -2576,9 +2567,9 @@ sub named_destination {
 
     $root->{'Names'} ||= PDFDict();
     $root->{'Names'}->{$cat} ||= PDFDict();
-    $root->{'Names'}->{$cat}->{'-vals'} ||= {};
+    $root->{'Names'}->{$cat}->{'-vals'}  ||= {};
     $root->{'Names'}->{$cat}->{'Limits'} ||= PDFArray();
-    $root->{'Names'}->{$cat}->{'Names'} ||= PDFArray();
+    $root->{'Names'}->{$cat}->{'Names'}  ||= PDFArray();
 
     unless (defined $obj) {
         $obj = PDF::Builder::NamedDestination->new($self->{'pdf'});
