@@ -6,7 +6,7 @@ use strict;
 no warnings qw( deprecated recursion uninitialized );
 
 # VERSION
-my $LAST_UPDATE = '3.014'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
 
 use Carp;
 use Compress::Zlib qw();
@@ -91,16 +91,16 @@ sub new {
 
 # internal helper method
 sub outobjdeep {
-    my $self = shift;
+    my $self = shift();
 
     $self->textend();
-    foreach my $k (qw[ api apipdf apiistext apipage font fontset fontsize
-                       charspace hscale wordspace lead rise render matrix
-                       textmatrix textlinematrix fillcolor strokecolor
-                       translate scale skew rotate ]) {
-        $self->{" $k"} = undef;
-        delete($self->{" $k"});
-    }
+#   foreach my $k (qw[ api apipdf apiistext apipage font fontset fontsize
+#                      charspace hscale wordspace lead rise render matrix
+#                      textmatrix textlinematrix fillcolor strokecolor
+#                      translate scale skew rotate ]) {
+#       $self->{" $k"} = undef;
+#       delete($self->{" $k"});
+#   }
     if ($self->{'-docompress'} && $self->{'Filter'}) {
         $self->{' stream'} = Compress::Zlib::compress($self->{' stream'});
         $self->{' nofilt'} = 1;

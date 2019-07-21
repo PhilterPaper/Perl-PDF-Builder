@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.015'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
 
 use POSIX qw(floor);
 use Scalar::Util qw(weaken);
@@ -32,9 +32,9 @@ Returns a page object (called from $pdf->page()).
 
 sub new {
     my ($class, $pdf, $parent, $index) = @_;
-    my ($self) = {};
+    my $self = {};
 
-    $class = ref $class if ref $class;
+    $class = ref($class) if ref($class);
     $self = $class->SUPER::new($pdf, $parent);
     $self->{'Type'} = PDFName('Page');
     $self->proc_set(qw( PDF Text ImageB ImageC ImageI ));
@@ -72,7 +72,7 @@ sub new {
 sub coerce {
     my ($class, $pdf, $page) = @_;
     my $self = $page;
-    bless ($self, $class);
+    bless $self, $class;
     $self->{' apipdf'} = $pdf;
     weaken $self->{' apipdf'};
     return $self;
@@ -164,7 +164,7 @@ sub _get_bbox {
     foreach my $mediatype (@{$box_order}) {
         my $mediaobj = $self->find_prop($mediatype);
         if ($mediaobj) {
-            @media = map { $_->val() } $mediaobj->elementsof();
+            @media = map { $_->val() } $mediaobj->elements();
             last;
         }
     }
@@ -353,7 +353,7 @@ sub fixcontents {
 sub content {
     my ($self, $obj, $dir) = @_;
 
-    if (defined($dir) && $dir) {
+    if (defined($dir) && $dir > 0) {
         $self->precontent($obj);
     } else {
         $self->addcontent($obj);
@@ -489,7 +489,7 @@ Returns a new annotation object.
 sub annotation {
     my $self = shift;
 
-    unless  (exists $self->{'Annots'}) {
+    unless (exists $self->{'Annots'}) {
         $self->{'Annots'} = PDFArray();
         $self->update();
     } elsif (ref($self->{'Annots'}) =~ /Objind/) {
@@ -523,7 +523,7 @@ B<Example:>
     $co->resource('Shading', $shadekey, $shadeobj);
     $co->resource('ColorSpace', $spacekey, $speceobj);
 
-B<Note:> You only have to add the required resources, if
+B<Note:> You only have to add the required resources if
 they are NOT handled by the *font*, *image*, *shade* or *space*
 methods.
 
@@ -532,7 +532,7 @@ methods.
 sub resource {
     my ($self, $type, $key, $obj, $force) = @_;
 
-    my ($dict) = $self->find_prop('Resources');
+    my $dict = $self->find_prop('Resources');
 
     $dict = $dict || $self->{'Resources'} || PDFDict();
 
@@ -564,20 +564,20 @@ sub ship_out {
 
     $pdf->ship_out($self);
     if (defined $self->{'Contents'}) {
-        $pdf->ship_out($self->{'Contents'}->elementsof());
+        $pdf->ship_out($self->{'Contents'}->elements());
     }
     return $self;
 }
 
-sub outobjdeep {
-    my ($self, @opts) = @_;
-
-    foreach my $k (qw/ api apipdf /) {
-        $self->{" $k"} = undef;
-        delete($self->{" $k"});
-    }
-    return $self->SUPER::outobjdeep(@opts);
-}
+#sub outobjdeep {
+#    my ($self, @opts) = @_;
+#
+#    foreach my $k (qw/ api apipdf /) {
+#        $self->{" $k"} = undef;
+#        delete($self->{" $k"});
+#    }
+#    return $self->SUPER::outobjdeep(@opts);
+#}
 
 =back
 

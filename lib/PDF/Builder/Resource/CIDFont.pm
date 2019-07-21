@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.013'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
 
 use Encode qw(:all);
 
@@ -62,7 +62,11 @@ sub glyphByCId {
 }
 
 sub uniByCId { 
-    return $_[0]->data()->{'g2u'}->[$_[1]]; 
+    my ($self, $gid) = @_;
+    my $uni = $self->data()->{'g2u'}->[$gid];
+    # fallback to U+0000 if no match
+    $gid = 0 unless defined $uni;
+    return $gid;
 }
 
 sub cidByUni { 
@@ -308,11 +312,11 @@ sub glyphNum {
     return scalar @{$self->data()->{'wx'}};
 }
 
-sub outobjdeep {
-    my ($self, $fh, $pdf, %opts) = @_;
-
-    return $self->SUPER::outobjdeep($fh, $pdf, %opts);
-}
+#sub outobjdeep {
+#    my ($self, $fh, $pdf, %opts) = @_;
+#
+#    return $self->SUPER::outobjdeep($fh, $pdf, %opts);
+#}
 
 =back
 

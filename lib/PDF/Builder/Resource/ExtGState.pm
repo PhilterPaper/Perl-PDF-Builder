@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Util;
@@ -383,15 +383,15 @@ sub opacity {
     return $self;
 }
 
-sub outobjdeep {
-    my ($self, @opts) = @_;
-
-    foreach my $k (qw/ api apipdf /) {
-        $self->{" $k"} = undef;
-        delete($self->{" $k"});
-    }
-    return $self->SUPER::outobjdeep(@opts);
-}
+#sub outobjdeep {
+#    my ($self, @opts) = @_;
+#
+#    foreach my $k (qw/ api apipdf /) {
+#        $self->{" $k"} = undef;
+#        delete($self->{" $k"});
+#    }
+#    return $self->SUPER::outobjdeep(@opts);
+#}
 
 =back
 
