@@ -148,13 +148,15 @@ sub val {
    # this original code is very confusing. is this a
    # recursive call to this val(), or another? what is
    # supposed to be returned when self->realised is True?
-    $self->{' parent'}->read_obj(@_)->val() 
-       unless $self->{' realised'}; ## no critic
-   #if ($self->{' realised'}) {
-   #    return $self->{' realised'}; return undef?
-   #} else {
-   #    return $self->{' parent'}->read_obj(@_)->val();
-   #}
+   # perlcritic doesn't like this...
+   #$self->{' parent'}->read_obj(@_)->val() 
+   #   unless $self->{' realised'}; ## no critic
+
+    if ($self->{' realised'}) {
+        return $self->{' realised'}; # return undef in any cases?
+    } else {
+        return $self->{' parent'}->read_obj(@_)->val();
+    }
 }
 
 =head2 $r->realise()
@@ -185,13 +187,15 @@ sub outobjdeep {
    # this original code is very confusing. is this a
    # recursive call to this outobjdeep(), or another? what is
    # supposed to be returned when self->realised is True?
-    $self->{' parent'}->read_obj($self)->outobjdeep($fh, $pdf) 
-        unless $self->{' realised'}; ## no critic
-   #if ($self->{' realised'}) {
-   #    return $self->{' realised'};  # return undef?
-   #} else {
-   #    return $self->{' parent'}->read_obj($self)->outobjdeep($fh, $pdf);
-   #}
+   # perlcritic doesn't like the lack of explicit return...
+   #$self->{' parent'}->read_obj($self)->outobjdeep($fh, $pdf) 
+   #    unless $self->{' realised'}; ## no critic
+
+    if ($self->{' realised'}) {
+        return $self->{' realised'};  # return undef in any cases?
+    } else {
+        return $self->{' parent'}->read_obj($self)->outobjdeep($fh, $pdf);
+    }
 }
 
 =head2 $r->outobj($fh, $pdf)

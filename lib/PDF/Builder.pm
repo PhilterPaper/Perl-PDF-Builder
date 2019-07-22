@@ -421,7 +421,16 @@ sub verCheckInput {
 
 =item $pdf = PDF::Builder->open_scalar($pdf_string)
 
-Opens a PDF contained in a string. See C<new()> for options.
+Opens a PDF contained in a string. See C<new()> for other options.
+
+=over
+
+=item -diags => 1
+
+Display warnings when non-conforming PDF structure is found, and fix up
+where possible. See L<PDF::Builder::Basic::PDF::File> for more information.
+
+=back
 
 B<Example:>
 
@@ -459,7 +468,7 @@ sub open_scalar {
     CORE::open($fh, '+<', \$content) or die "Can't begin scalar IO";
 
     # this would replace any existing self->pdf with a new one
-    $self->{'pdf'} = PDF::Builder::Basic::PDF::File->open($fh, 1);
+    $self->{'pdf'} = PDF::Builder::Basic::PDF::File->open($fh, 1, %options);
     $self->{'pdf'}->{'Root'}->realise();
     $self->{'pages'} = $self->{'pdf'}->{'Root'}->{'Pages'}->realise();
     weaken $self->{'pages'};

@@ -277,6 +277,7 @@ do {
 			if (-e "pod2html.stderr") {
 				unlink "pod2html.stderr";
 			}
+			print STDERR "processing $source\n";
 			system("pod2html --podpath=$libtop $source --outfile=$target 2>pod2html.stderr");
 			# always produces pod2html.stderr, hopefully empty
 

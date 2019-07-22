@@ -603,9 +603,10 @@ Return the Unicode character's width.
 
 sub wxByUni {
     my ($self, $uni) = @_;
+    my ($gid, $width);
 
-    my $gid = $self->glyphByUni($uni) if defined $uni;
-    my $width = $self->data()->{'wx'}->{$gid} if defined $gid;
+    $gid = $self->glyphByUni($uni) if defined $uni;
+    $width = $self->data()->{'wx'}->{$gid} if defined $gid;
     $width //= $self->missingwidth();
     $width //= 300;
 

@@ -206,7 +206,7 @@ sub new {
     return $self;
 }
 
-=head2 $p = PDF::Builder::Basic::PDF::File->open($filename, $update)
+=head2 $p = PDF::Builder::Basic::PDF::File->open($filename, $update, %options)
 
 Opens the file and reads all the trailers and cross reference tables to build
 a complete directory of objects.
@@ -216,13 +216,32 @@ C<$filename> may be a string or an IO object.
 C<$update> specifies whether this file is being opened for updating and editing
 (I<TRUE> value), or simply to be read (I<FALSE> or undefined value).
 
-C<$filename> may be an IO object.
+C<%options> may include
+
+=over
+
+=item -diags => 1
+
+If C<-diags> is set to 1, various warning messages will be given if a 
+suspicious PDF structure is found, and some fixup may be attempted. There is
+no guarantee that any fixup will change the PDF to legitimate, or that there 
+won't be other problems found further down the line. If this flag is I<not>
+given, and a structural problem is found, it is fairly likely that errors (and
+even a program B<crash>) may happen further along. If you experience crashes 
+when reading in a PDF file, try running with C<-diags> and see what is reported.
+
+There are many PDF files out "in the wild" which, while failing to conform to
+Adobe's standards, appear to be tolerated by PDF Readers. Thus, Builder will no
+longer fail on them, but merely comment on their existence.
+
+=back
 
 =cut
 
 sub open {
-    my ($class, $filename, $update) = @_;
+    my ($class, $filename, $update, %options) = @_;
     my ($fh, $buffer);
+    $options{'-diags'} = 0 if not defined $options{'-diags'}; # default
 
     my $comment = ''; # any comment jammed into the PDF header
     my $self = $class->_new();
@@ -267,12 +286,14 @@ sub open {
     	last if $buffer =~ m/startxref($cr|\s*)\d+($cr|\s*)\%\%eof.*?/i;
     }
     unless ($buffer =~ m/startxref[^\d]+([0-9]+)($cr|\s*)\%\%eof.*?/i) {
-        die "Malformed PDF file $filename";
+	if ($options{'-diags'} == 1) {
+            warn "Malformed PDF file $filename"; #orig 'die'
+        }
     }
     my $xpos = $1;
     $self->{' xref_position'} = $xpos;
 
-    my $tdict = $self->readxrtr($xpos, $self);
+    my $tdict = $self->readxrtr($xpos, %options);
     foreach my $key (keys %$tdict) {
         $self->{$key} = $tdict->{$key};
     }
@@ -1117,7 +1138,7 @@ sub add_obj {
     return $obj;
 }
 
-=head2 $tdict = $p->readxrtr($xpos)
+=head2 $tdict = $p->readxrtr($xpos, %options)
 
 Recursive function which reads each of the cross-reference and trailer tables
 in turn until there are no more.
@@ -1130,6 +1151,8 @@ anonymous hash of cross reference elements by object number. Each element
 consists of an array of 3 elements corresponding to the three elements read
 in [location, generation number, free or used]. See the PDF specification
 for details.
+
+See C<open> for options allowed.
 
 =cut
 
@@ -1146,7 +1169,7 @@ sub _unpack_xref_stream {
 }
 
 sub readxrtr {
-    my ($self, $xpos) = @_;
+    my ($self, $xpos, %options) = @_;
     # $xpos SHOULD be pointing to "xref" keyword
     my ($tdict, $buf, $xmin, $xnum, $xdiff);
 
@@ -1181,17 +1204,19 @@ sub readxrtr {
             $buf  = $3;   # remainder of buffer
             $subsection_count++;
             # go back and warn if other than single space separating numbers
-            unless ($old_buf =~ /^[0-9]+ [0-9]+$cr/) {  #orig
-                # See PDF 1.7 section 7.5.4: Cross-Reference Table
-                print STDERR "Warning: malformed xref: subsection header needs " .
-                      "a single ASCII space between the numbers and no extra spaces.\n"; #orig
+            unless ($old_buf =~ /^[0-9]+ [0-9]+$cr/) {  #orig 'warn'
+		if ($options{'-diags'} == 1) {
+                    # See PDF 1.7 section 7.5.4: Cross-Reference Table
+                    warn "Malformed xref: subsection header needs a single\n" .
+                         "ASCII space between the numbers and no extra spaces.\n"; #orig
+	        }
             }
             $xdiff = length($buf); # how much remaining in buffer
 
             # in case xnum == 0 is permitted (or used and tolerated by readers),
             #   skip over entry reads and go to next subsection
-            if ($xnum < 1) { 
-                print STDERR "Warning: xref subsection has 0 entries. Skipped.\n";
+            if ($xnum < 1 && $options{'-diags'} == 1) { 
+                warn "Xref subsection has 0 entries. Skipped.\n";
                 $xrefListEmpty = 1;
                 next; 
             }
@@ -1202,8 +1227,8 @@ sub readxrtr {
             $fh->read($buf, $entry_size * 1 - $xdiff + 15, $xdiff);
             $buf =~ m/^(.*?)$cr/;
             $entry_size = length($1) + 2;
-            if ($entry_size != 20) {
-                print STDERR "Warning: xref entries supposed to be 20 bytes long, are $entry_size.\n";
+            if ($entry_size != 20 && $options{'-diags'} == 1) {
+                warn "Xref entries supposed to be 20 bytes long, are $entry_size.\n";
             }
             $xdiff = length($buf);
 
@@ -1220,8 +1245,10 @@ sub readxrtr {
                     $entry_format_error) {
                     # format OK or have already reported format problem
                 } else {
-                    print STDERR "Warning: xref entry readable, but doesn't meet PDF spec.\n";
-                    $entry_format_error++;
+		    if ($options{'-diags'} == 1) {
+                        warn "Xref entry readable, but doesn't meet PDF spec.\n";
+                        $entry_format_error++;
+                    }
                 }
 
                 $buf =~ s/^$ws_char*(\d+)$ws_char+(\d+)$ws_char+([nf])$ws_char*$cr//;
@@ -1231,12 +1258,12 @@ sub readxrtr {
                 #      next generation number (f)
                 # $3 = flag (n = object in use, f = free)
                 # buf reduced by entry just processed
-                if (exists $xlist->{$xmin}) {
-                    print STDERR "Warning: duplicate object number $xmin in xref table ignored.\n";
+                if (exists $xlist->{$xmin} && $options{'-diags'} == 1) {
+                    warn "Duplicate object number $xmin in xref table ignored.\n";
                 } else {
                     $xlist->{$xmin} = [$1, $2, $3];
-                    if ($xmin == 0 && $subsection_count > 1) {
-                        print STDERR "Warning: xref object 0 entry not in first subsection.\n";
+                    if ($xmin == 0 && $subsection_count > 1 && $options{'-diags'} == 1) {
+                        warn "Xref object 0 entry not in first subsection.\n";
                     }
                 }
                 $xmin++;
@@ -1261,24 +1288,31 @@ sub readxrtr {
                 if ($xlist->{'1'}[0] == 0 &&  # only member of free list
                     $xlist->{'1'}[1] == 65535 &&
                     $xlist->{'1'}[2] eq 'f') {
-                    # object 1 appears to be the free list head, so shift down 
-                    #   all objects
-                    print STDERR "Warning: xref appears to be mislabeled starting with 1. Shift down all elements.\n";
-                    my $next = 1;
-                    while (exists $xlist->{$next}) {
-                        $xlist->{$next - 1} = $xlist->{$next};
-                        $next++;
-                    }
-                    delete $xlist->{--$next};
+		    if ($options{'-diags'} == 1) {
+                        # object 1 appears to be the free list head, so shift
+                        #   down all objects
+                        warn "xref appears to be mislabeled starting with 1. Shift down all elements.\n";
+                        my $next = 1;
+                        while (exists $xlist->{$next}) {
+                            $xlist->{$next - 1} = $xlist->{$next};
+                            $next++;
+                        }
+                        delete $xlist->{--$next};
+		    }
 
                 } else {
                     # if object 1 does not appear to be a free list head, 
                     #   insert a new object 0
-                    print STDERR "Warning: xref appears to be missing object 0. Insert a new one.\n";
-                    $xlist->{'0'} = [0, 65535, 'f'];
+		    if ($options{'-diags'} == 1) {
+                        warn "Xref appears to be missing object 0. Insert a new one.\n";
+                        $xlist->{'0'} = [0, 65535, 'f'];
+		    }
                 }
             } else {
-                die "Malformed cross reference list in PDF file $self->{' fname'} -- no object 0 (free list head)\n";
+		if ($options{'-diags'} == 1) {
+                    warn "Malformed cross reference list in PDF file $self->{' fname'} -- no object 0 (free list head)\n";
+                    $xlist->{'0'} = [0, 65535, 'f'];
+		}
             }
         } # no object 0 entry
 
@@ -1287,30 +1321,32 @@ sub readxrtr {
         foreach (sort {$a <=> $b} keys %{ $xlist }) {
             # if 'f' flag, is in free list
             if      ($xlist->{$_}[2] eq 'f') {
-                if ($xlist->{$_}[1] <= 0) {
-                    print STDERR "Warning: xref free list entry $_ with bad next generation number.\n";
+                if ($xlist->{$_}[1] <= 0 && $options{'-diags'} == 1) {
+                    warn "Xref free list entry $_ with bad next generation number.\n";
                 } else {
                     push @free_list, $_; # should be in numeric order (0 first)
                 }
             } elsif ($xlist->{$_}[2] eq 'n') {
-                if ($xlist->{$_}[0] <= 0) {
-                    print STDERR "Warning: xref active object $_ entry with bad length ".($xlist->{$_}[1])."\n";
+                if ($xlist->{$_}[0] <= 0 && $options{'-diags'} == 1) {
+                    warn "Xref active object $_ entry with bad length ".($xlist->{$_}[1])."\n";
                 }
-                if ($xlist->{$_}[1] < 0) {
-                    print STDERR "Warning: xref active object $_ entry with bad generation number ".($xlist->{$_}[1])."\n";
+                if ($xlist->{$_}[1] < 0 && $options{'-diags'} == 1) {
+                    warn "Xref active object $_ entry with bad generation number ".($xlist->{$_}[1])."\n";
                 }
             } else {
-                print STDERR "Warning: xref entry has flag that is not 'f' or 'n'.\n";
+		if ($options{'-diags'} == 1) {
+                    warn "Xref entry has flag that is not 'f' or 'n'.\n";
+	        }
             }
         } # go through xlist and build free_list and check entries
         # traverse free list and check that "next object" is also in free list
         my $next_free = 0;  # object 0 should always be in free list
-        if ($xlist->{'0'}[1] != 65535) {
-            print STDERR "Warning: object 0 next generation is not 65535.\n";
+        if ($xlist->{'0'}[1] != 65535 && $options{'-diags'} == 1) {
+            warn "Object 0 next generation is not 65535.\n";
         }
         do {
-            if ($xlist->{$next_free}[2] ne 'f') {
-                print STDERR "Warning: corrupted free object list: next=$next_free is not a free object.\n";
+            if ($xlist->{$next_free}[2] ne 'f' && $options{'-diags'} == 1) {
+                warn "Corrupted free object list: next=$next_free is not a free object.\n";
                 $next_free = 0; # force end of free list
             } else { 
                 $next_free = $xlist->{$next_free}[0];
@@ -1318,13 +1354,13 @@ sub readxrtr {
             # remove this entry from free list array
             splice(@free_list, index(@free_list, $next_free), 1);
         } while ($next_free && exists $xlist->{$next_free});
-        if (scalar @free_list) {
-            print STDERR "Warning: corrupted xref list: object(s) @free_list marked as free, but are not in free chain.\n";
+        if (scalar @free_list && $options{'-diags'} == 1) {
+            warn "Corrupted xref list: object(s) @free_list marked as free, but are not in free chain.\n";
         }
 
         # done with cross reference table, so go on to trailer
-        if ($buf !~ /^\s*trailer\b/i) {  #orig
-            die "Malformed trailer in PDF file $self->{' fname'} at " . ($fh->tell() - length($buf));
+        if ($buf !~ /^\s*trailer\b/i && $options{'-diags'} == 1) {  #orig 'die'
+            warn "Malformed trailer in PDF file $self->{' fname'} at " . ($fh->tell() - length($buf));
         }
 
         $buf =~ s/^\s*trailer\b//i;
@@ -1337,8 +1373,10 @@ sub readxrtr {
         # XRef streams
         ($tdict, $buf) = $self->readval($buf);
 
-        unless ($tdict->{' stream'}) {  #orig
-            die "Malformed XRefStm at $xref_obj $xref_gen obj in PDF file $self->{' fname'}";
+        unless ($tdict->{' stream'}) {  #orig 'die'
+	    if ($options{'-diags'} == 1) {
+                warn "Malformed XRefStm at $xref_obj $xref_gen obj in PDF file $self->{' fname'}";
+	    }
         }
         $tdict->read_stream(1);
 
@@ -1374,8 +1412,8 @@ sub readxrtr {
                 }
 
                 $cols[0] = 1 unless defined $cols[0];
-                if ($cols[0] > 2) {  #orig
-                    die "Invalid XRefStm entry type ($cols[0]) at $xref_obj $xref_gen obj";
+                if ($cols[0] > 2 && $options{'-diags'} == 1) {  #orig 'die'
+                    warn "Invalid XRefStm entry type ($cols[0]) at $xref_obj $xref_gen obj";
                 }
 
                 next if exists $xlist->{$xmin};
@@ -1387,14 +1425,16 @@ sub readxrtr {
             }
         }
 
-    } else {  #orig
-        die "Malformed xref in PDF file $self->{' fname'}";
+    } else {  #orig 'die'
+	if ($options{'-diags'} == 1) {
+            warn "Malformed xref in PDF file $self->{' fname'}";
+	}
     }
 
     $tdict->{' loc'} = $xpos;
     $tdict->{' xref'} = $xlist;
     $self->{' maxobj'} = $xmin + 1 if $xmin + 1 > $self->{' maxobj'};
-    $tdict->{' prev'} = $self->readxrtr($tdict->{'Prev'}->val())
+    $tdict->{' prev'} = $self->readxrtr($tdict->{'Prev'}->val(), %options)
         if (defined $tdict->{'Prev'} and $tdict->{'Prev'}->val() != 0);
     delete $tdict->{' prev'} unless defined $tdict->{' prev'};
 

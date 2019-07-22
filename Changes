@@ -8,15 +8,25 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
 
 3.016     2019-07-20  UNRELEASED
 
-*   [RT 130038-41] may just be documentation issues (need clarification), but
+*   [RT 130038,40,41] may just be documentation issues (need clarification), but
      need to check if code fixes on some, especially CJKfonts can't embed and
      can't do synfont against
-
-*   TBD [GH 101] additional checks on the cross reference table make optional with a flag. There are some PDFs in the wild with xref tables that do not come close to meeting the PDF spec, but many Readers will accept. PDF::Builder was flagging as fatal errors.
 
 *   examples/024_bdffonts, lib/PDF/Builder.pm, 
       lib/PDF/Builder/Resource/BaseFont.pm
      BDF (bitmapped fonts) some work that slightly improves. Work in progress.
+
+*   [RT 130039] add "get" capability to both global and page bounding box calls,
+      obsoleting the get_* calls for the page.
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Basic/PDF/File.pm 
+      [GH 101] permit out-of-spec PDF structures that were formerly fatal errors.
+      -diags flag to enable reporting of suspicious structures, otherwise silent.
+      There are many PDFs "in the wild" that do not conform to Adobe PDF standards,
+      yet many Readers are happy to accept them.
+
+    docs/buildDoc.pl output module (.pm or .pod) being processed, so user won't 
+      be worried about how long it's taking.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Resource/UniFont.pm-BaseFont.pm, 
       lib/PDF/Builder/Basic/PDF/Array.pm-Dict.pm-File.pm-Filter.pm-Literal.pm-
