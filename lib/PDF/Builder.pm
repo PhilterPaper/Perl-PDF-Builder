@@ -5,7 +5,7 @@ no warnings qw[ deprecated recursion uninitialized ];
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
-our $VERSION = '3.015'; # VERSION
+our $VERSION = '3.016'; # VERSION
 my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
 
 use Carp;
@@ -1676,7 +1676,35 @@ sub _bbox {
     }
 
     return (@corners);
-}
+} # end of _bbox()
+
+# utility to get a bounding box by name
+sub _get_bbox {
+    my ($self, $boxname) = @_;
+
+    # if requested box not set, return next higher box's corners
+    # MediaBox should always at least have a default value
+    if (not defined $self->{'pages'}->{$boxname}) {
+        if      ($boxname eq 'CropBox') {
+	    $boxname = 'MediaBox';
+        } elsif ($boxname eq 'BleedBox' ||
+	         $boxname eq 'TrimBox' ||
+	         $boxname eq 'ArtBox' ) {
+	    if (defined $self->{'pages'}->{'CropBox'}) {
+	        $boxname = 'CropBox';
+	    } else {
+	        $boxname = 'MediaBox';
+	    }
+	} else { 
+            # invalid box name (silent error). just use MediaBox
+	    $boxname = 'MediaBox';
+	}
+    }
+
+    # now $boxname is known to exist
+    return map { $_->val() } $self->{'pages'}->{$boxname}->elements();
+
+} # end of _get_bbox()
 
 =item $pdf->mediabox($name)
 
@@ -1686,20 +1714,25 @@ sub _bbox {
 
 =item $pdf->mediabox($llx,$lly, $urx,$ury)
 
-Sets the global MediaBox, defining the width and height (or by corner
-coordinates, or by standard name) of the output page itself, such as the
-physical paper size. 
+=item ($llx,$lly, $urx,$ury) = $pdf->mediabox()
+
+Sets (or gets) the global MediaBox, defining the width and height (or by 
+corner coordinates, or by standard name) of the output page itself, such as 
+the physical paper size. 
 
 See L<PDF::Builder::Docs> "BOX" METHODS/Media Box for more information.
+The method always returns the current bounds (after any set operation).
 
 =cut
 
 sub mediabox {
     my ($self, @corners) = @_;
-    @corners = $self->_bbox(@corners);
-    $self->{'pages'}->{'MediaBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
+    if (defined $corners[0]) {
+        @corners = $self->_bbox(@corners);
+        $self->{'pages'}->{'MediaBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
+    }
 
-    return $self;
+    return $self->_get_bbox('MediaBox');
 }
 
 =item $pdf->cropbox($name)
@@ -1710,19 +1743,24 @@ sub mediabox {
 
 =item $pdf->cropbox($llx,$lly, $urx,$ury)
 
-Sets the global CropBox. This will define the media size to which the output
-will later be clipped. 
+=item ($llx,$lly, $urx,$ury) = $pdf->cropbox()
+
+Sets (or gets) the global CropBox. This will define the media size to which 
+the output will later be clipped. 
 
 See L<PDF::Builder::Docs> "Box" Methods/Crop Box for more information.
+The method always returns the current bounds (after any set operation).
 
 =cut
 
 sub cropbox {
     my ($self, @corners) = @_;
-    @corners = $self->_bbox(@corners);
-    $self->{'pages'}->{'CropBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
+    if (defined $corners[0]) {
+        @corners = $self->_bbox(@corners);
+        $self->{'pages'}->{'CropBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
+    }
 
-    return $self;
+    return $self->_get_bbox('CropBox');
 }
 
 =item $pdf->bleedbox($name)
@@ -1733,19 +1771,24 @@ sub cropbox {
 
 =item $pdf->bleedbox($llx,$lly, $urx,$ury)
 
-Sets the global BleedBox. This is typically used for hard copy printing where
-you want ink to go to the edge of the cut paper.
+=item ($llx,$lly, $urx,$ury) = $pdf->bleedbox()
+
+Sets (or gets) the global BleedBox. This is typically used for hard copy 
+printing where you want ink to go to the edge of the cut paper.
 
 See L<PDF::Builder::Docs> "Box" Methods/Bleed Box for more information.
+The method always returns the current bounds (after any set operation).
 
 =cut
 
 sub bleedbox {
     my ($self, @corners) = @_;
-    @corners = $self->_bbox(@corners);
-    $self->{'pages'}->{'BleedBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
+    if (defined $corners[0]) {
+        @corners = $self->_bbox(@corners);
+        $self->{'pages'}->{'BleedBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
+    }
 
-    return $self;
+    return $self->_get_bbox('BleedBox');
 }
 
 =item $pdf->trimbox($name)
@@ -1756,19 +1799,24 @@ sub bleedbox {
 
 =item $pdf->trimbox($llx,$lly, $urx,$ury)
 
-Sets the global TrimBox. This is supposed to be the actual dimensions of the 
-finished page (after trimming of the paper). 
+=item ($llx,$lly, $urx,$ury) = $pdf->trimbox()
+
+Sets (or gets) the global TrimBox. This is supposed to be the actual 
+dimensions of the finished page (after trimming of the paper). 
 
 See L<PDF::Builder::Docs> "Box" Methods/Trim Box for more information.
+The method always returns the current bounds (after any set operation).
 
 =cut
 
 sub trimbox {
     my ($self, @corners) = @_;
-    @corners = $self->_bbox(@corners);
-    $self->{'pages'}->{'TrimBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
+    if (defined $corners[0]) {
+        @corners = $self->_bbox(@corners);
+        $self->{'pages'}->{'TrimBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
+    }
 
-    return $self;
+    return $self->_get_bbox('TrimBox');
 }
 
 =item $pdf->artbox($name)
@@ -1779,19 +1827,24 @@ sub trimbox {
 
 =item $pdf->artbox($llx,$lly, $urx,$ury)
 
-Sets the global ArtBox. This is supposed to define "the extent of the page's 
-I<meaningful> content". 
+=item ($llx,$lly, $urx,$ury) = $pdf->artbox()
+
+Sets (or gets) the global ArtBox. This is supposed to define "the extent of 
+the page's I<meaningful> content". 
 
 See L<PDF::Builder::Docs> "Box" Methods/Art Box for more information.
+The method always returns the current bounds (after any set operation).
 
 =cut
 
 sub artbox {
     my ($self, @corners) = @_;
-    @corners = $self->_bbox(@corners);
-    $self->{'pages'}->{'ArtBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
+    if (defined $corners[0]) {
+        @corners = $self->_bbox(@corners);
+        $self->{'pages'}->{'ArtBox'} = PDFArray( map { PDFNum(float($_)) } @corners );
+    }
 
-    return $self;
+    return $self->_get_bbox('ArtBox');
 }
 
 =back

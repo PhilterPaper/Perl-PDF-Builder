@@ -17,6 +17,7 @@ perl t\annotate.t
 perl t\author-critic.t
 perl t\author-pod-syntax.t
 perl t\barcode.t
+perl t\bbox.t
 perl t\circular-references.t
 perl t\cmap.t
 perl t\content.t

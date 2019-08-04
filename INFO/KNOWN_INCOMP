@@ -7,7 +7,12 @@ Bug fixes to PDF::API2 (in PDF::Builder) are not mentioned if they correct
 an error (that produces an error message and/or incorrect output) and do not 
 affect the operation or results of otherwise correct code.
 
-3.016     2019-07-07
+3.016     2019-08-03
+
+   RT #130039 PDF::API2 returns $self on 'set' operation, while PDF::Builder
+     always returns the current (possibly just-set) corners of the box. This
+     permits your using a named page size, while getting back the actual 
+     page bounds without having to make a separate query (get) call.
 
    RT #33497 and RT #117031 fixed differently in PDF::API2 2.034 (June 2019)
      than in PDF::Builder 3.013 (December 2018). In some cases with UTF-8 

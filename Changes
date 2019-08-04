@@ -6,24 +6,29 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       optional items in dependency graph. Try something else, after confirming
       that optional items SHOULD show up in reverse dependencies (?). 
 
-3.016     2019-07-20  UNRELEASED
-
-*   [RT 130038,40,41] may just be documentation issues (need clarification), but
-     need to check if code fixes on some, especially CJKfonts can't embed and
-     can't do synfont against
+3.016     2019-08-03  UNRELEASED
 
 *   examples/024_bdffonts, lib/PDF/Builder.pm, 
       lib/PDF/Builder/Resource/BaseFont.pm
      BDF (bitmapped fonts) some work that slightly improves. Work in progress.
 
-*   [RT 130039] add "get" capability to both global and page bounding box calls,
-      obsoleting the get_* calls for the page.
+*   [RT 130038,40,41] may just be documentation issues (need clarification), but
+     need to check if code fixes on some, especially CJKfonts can't embed and
+     can't do synfont against
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm, lib/PDF/Builder/Docs.pm, 
+      INFO/DEPRECATED, INFO/KNOWN_INCOMP, MANIFEST, t/bbox.t, 
+      tools/2_t-tests.pl, INFO/old/t-tests.bat
+     [RT 130039] add "get" capability to both global and page bounding box 
+      calls, obsoleting the get_* calls for the page. $pdf->mediabox() will
+      return the global media box, $page->mediabox() will return the current
+      page's media box, and so on for bleed, crop, trim, and art boxes.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Basic/PDF/File.pm 
-      [GH 101] permit out-of-spec PDF structures that were formerly fatal errors.
-      -diags flag to enable reporting of suspicious structures, otherwise silent.
-      There are many PDFs "in the wild" that do not conform to Adobe PDF standards,
-      yet many Readers are happy to accept them.
+     [GH 101] permit out-of-spec PDF structures that were formerly fatal 
+      errors. -diags flag to enable reporting of suspicious structures, 
+      otherwise silent. There are many PDFs "in the wild" that do not conform 
+      to Adobe PDF standards, yet many Readers are happy to accept them.
 
     docs/buildDoc.pl output module (.pm or .pod) being processed, so user won't 
       be worried about how long it's taking.

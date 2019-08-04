@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.015'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
 
 # originally part of Builder.pm, it was split out due to its length
 
@@ -878,12 +878,25 @@ may be scaled down to the current User Unit.
 
 =item $pdf->mediabox($llx,$lly, $urx,$ury)
 
+=item ($llx,$lly, $urx,$ury) = $pdf->mediabox()
+
 Sets the global Media Box (or page's Media Box, if C<< $page-> >> instead). 
 This defines the width and height (or by corner
 coordinates, or by standard name) of the output page itself, such as the
 physical paper size. This is normally the largest of the "boxes". If any
 subsidiary box (within it) exceeds the media box, the portion of the material 
-or boxes outside of the media box will be ignored.
+or boxes outside of the Media Box will be ignored. That is, the Media Box is
+the One Box to Rule Them All, and is the overall limit for other boxes (some
+documentation refers to the Media Box as "clipping" other boxes). In
+addition, the Media Box defines the overall I<coordinate system> for text and
+graphics operations.
+
+If no arguments are given, the current Media Box (global or page) coordinates
+are returned instead. The former C<get_mediabox> (page only) function is 
+B<deprecated> and will likely be removed some time in the future. In addition,
+when I<setting> the Media Box, the resulting coordinates are returned. This 
+permits you to specify the page size by a name (alias) and get the dimensions 
+back, all in one call.
 
 Note that many printers can B<not> print all the way to the
 physical edge of the paper, so you should plan to leave some blank margin,
@@ -891,8 +904,8 @@ even outside of any crop marks and bleeds. Printers and on-screen readers are
 free to discard any content found outside the Media Box, and printers may 
 discard some material just inside the Media Box.
 
-A I<global> Media Box is B<required> by the PDF spec; if not given, PDF::Builder
-will set the global Media Box to US Letter size (8.5in x 11in).
+A I<global> Media Box is B<required> by the PDF spec; if not explicitly given, 
+PDF::Builder will set the global Media Box to US Letter size (8.5in x 11in).
 This is the media size that will be used for all pages if you do not specify 
 a C<mediabox> call on a page. That is,
 a global (PDF level) mediabox setting is inherited by each page, or can be 
@@ -903,7 +916,11 @@ If you give a single string name (e.g., 'A4'), you may optionally add an
 orientation to turn the page 90 degrees into Landscape mode: 
 C<< -orient => 'L' >> or C<< -orient => 'l' >>. C<-orient> is the only option
 recognized, and a string beginning with an 'L' or 'l' (for Landscape) is the 
-only value of interest (anything else is treated as Portrait mode).
+only value of interest (anything else is treated as Portrait mode). The I<y>
+axis still runs from 0 at the bottom of the page to what used to be the page
+I<width> (now, I<height>) at the top, and likewise for the I<x> axis: 0 at left 
+to (former) I<height> at the right. That is, the coordinate system is the same 
+as before, except that the height and width are different.
 
 The lower left corner does not I<have> to be 0,0. It can be any values you want,
 including negative values (so long as the resulting media's sides are at least 
@@ -917,26 +934,27 @@ can't make C<y> I<increase> from top to bottom!).
 B<Example:>
 
     $pdf = PDF::Builder->new();
-    $pdf->mediabox('A4');
+    $pdf->mediabox('A4'); # A4 size (595 Pt wide by 842 Pt high)
     ...
     $pdf->saveas('our/new.pdf');
 
     $pdf = PDF::Builder->new();
-    $pdf->mediabox(595, 842);
+    $pdf->mediabox(595, 842); # A4 size, with implicit 0,0 LL corner
     ...
     $pdf->saveas('our/new.pdf');
 
     $pdf = PDF::Builder->new;
-    $pdf->mediabox(0, 0, 595, 842);
+    $pdf->mediabox(0, 0, 595, 842); # A4 size, with explicit 0,0 LL corner
     ...
     $pdf->saveas('our/new.pdf');
 
 See the L<PDF::Builder::Resource::PaperSizes> source code for the full list of
 supported names (aliases) and their dimensions in points. You are free to add
-additional paper sizes, if you wish. See also the C<getPaperSizes> call in
-L<PDF::Builder::Util>. These names (aliases) are also usable in
-other "box" calls, although useful only if the "box" is the same size as the 
-full media (Media Box).
+additional paper sizes to this file, if you wish. You might want to do this if
+you frequently use a standard page size in rotated (Landscape) mode. See also 
+the C<getPaperSizes> call in L<PDF::Builder::Util>. These names (aliases) are 
+also usable in other "box" calls, although useful only if the "box" is the same 
+size as the full media (Media Box), and you don't mind their starting at 0,0.
 
 =back
 
@@ -952,24 +970,55 @@ full media (Media Box).
 
 =item $pdf->cropbox($llx,$lly, $urx,$ury)
 
+=item ($llx,$lly, $urx,$ury) = $pdf->cropbox()
+
 Sets the global Crop Box (or page's Crop Box, if C<< $page-> >> instead). 
 This will define the media size to which the output will 
 later be I<clipped>. Note that this does B<not> itself output any crop marks 
 to guide cutting of the paper! PDF Readers should consider this to be the 
 I<visible> portion of the page, and anything found outside it I<may> be clipped 
 (invisible). By default, it is equal to the Media Box, but may be defined to be 
-smaller, in the coordinates set by the Media Box. A global setting will be 
-inherited by each page, but can be overridden on a per-page basis.
+smaller, in the coordinate system set by the Media Box. A global setting will 
+be inherited by each page, but can be overridden on a per-page basis.
 
-Do not confuse with the C<Trim Box>, which shows where printed paper is expected
-to actually be cut. Some PDF Readers may reduce the visible "paper" background
-to the size of the crop box; others may simply omit any content outside it.
+A Reader or Printer may choose to discard any clipped (invisible) part of the
+page, and show only the area I<within> the Crop Box. For example, if your page
+Media Box is A4 (0,0 to 595,842 Points), and your Crop Box is (100,100 to
+495,742), a reader such as Adobe Acrobat Reader may show you a page 395 by
+642 Points in size (i.e., just the visible area of your page). Other Readers 
+may show you the full media size (Media Box) and a 100 Point wide blank area 
+(in this example) around the visible content.
+
+If no arguments are given, the current Crop Box (global or page) coordinates
+are returned instead. The former C<get_cropbox> (page only) function is 
+B<deprecated> and will likely be removed some time in the future. If a Crop Box
+has not been defined, the Media Box coordinates (which always exist) will be
+returned instead. In addition,
+when I<setting> the Crop Box, the resulting coordinates are returned. This 
+permits you to specify the crop box by a name (alias) and get the dimensions 
+back, all in one call.
+
+Do not confuse the Crop Box with the C<Trim Box>, which shows where printed 
+paper is expected to actually be I<cut>. Some PDF Readers may reduce the 
+visible "paper" background to the size of the crop box; others may simply omit 
+any content outside it. Either way, you would lose any trim or crop marks, 
+printer instructions, color alignment dots, or other content outside the Crop 
+Box. A good use of the Crop Box would be limit printing to the area where a 
+printer I<can> reliably put down ink, and leave white the edge areas where 
+paper-handling mechanisms prevent ink or toner from being applied. This would
+keep you from accidentally putting valuable content in an area where a printer
+will refuse to print.
 
 A global (PDF level) cropbox setting is inherited by each page, or can be 
 overridden by setting cropbox in the page.
 As with C<mediabox>, only one crop box may be set at this (PDF) level.
 As with C<mediabox>, a named media size may have an orientation (l or L) for 
 Landscape mode. 
+Note that the PDF level global Crop Box will be used I<even if> the page gets
+its own Media Box. That is, the page's Crop Box inherits the global Crop Box,
+not the page Media Box, even if the page has its own media size! If you set the
+page's own Media Box, you should consider also explicitly setting the page
+Crop Box (and other boxes).
 
 =back
 
@@ -985,6 +1034,8 @@ Landscape mode.
 
 =item $pdf->bleedbox($llx,$lly, $urx,$ury)
 
+=item ($llx,$lly, $urx,$ury) = $pdf->bleedbox()
+
 Sets the global Bleed Box (or page's Bleed Box, if C<< $page-> >> instead). 
 This is typically used in printing on paper, where you want 
 ink or color (such as thumb tabs) to be printed a bit beyond the final paper 
@@ -996,11 +1047,25 @@ The Bleed Box is where printing could actually extend to; The Trim Box is
 normally within it, where the paper would actually be cut. The default value is 
 equal to the Crop Box, but is often a bit smaller.
 
+If no arguments are given, the current Bleed Box (global or page) coordinates
+are returned instead. The former C<get_bleedbox> (page only) function is 
+B<deprecated> and will likely be removed some time in the future. If a Bleed Box
+has not been defined, the Crop Box coordinates (if defined) will be returned,
+otherwise the Media Box coordinates (which always exist) will be returned. 
+In addition, when I<setting> the Bleed Box, the resulting coordinates are 
+returned. This permits you to specify the bleed box by a name (alias) and get 
+the dimensions back, all in one call.
+
 A global (PDF level) bleedbox setting is inherited by each page, or can be 
 overridden by setting bleedbox in the page.
 As with C<mediabox>, only one bleed box may be set at this (PDF) level.
 As with C<mediabox>, a named media size may have an orientation (l or L) for 
 Landscape mode. 
+Note that the PDF level global Bleed Box will be used I<even if> the page gets
+its own Crop Box. That is, the page's Bleed Box inherits the global Bleed Box,
+not the page Crop Box, even if the page has its own media size! If you set the
+page's own Media Box or Crop Box, you should consider also explicitly setting 
+the page Bleed Box (and other boxes).
 
 =back
 
@@ -1016,6 +1081,8 @@ Landscape mode.
 
 =item $pdf->trimbox($llx,$lly, $urx,$ury)
 
+=item ($llx,$lly, $urx,$ury) = $pdf->trimbox()
+
 Sets the global Trim Box (or page's Trim Box, if C<< $page-> >> instead). 
 This is supposed to be the actual dimensions of the 
 finished page (after trimming of the paper). In some production environments, 
@@ -1023,11 +1090,25 @@ it is useful to have printer's instructions, cut marks, and so on outside of
 the trim box. The default value is equal to Crop Box, but is often a bit 
 smaller than any Bleed Box, to allow the desired "bleed" effect.
 
+If no arguments are given, the current Trim Box (global or page) coordinates
+are returned instead. The former C<get_trimbox> (page only) function is 
+B<deprecated> and will likely be removed some time in the future. If a Trim Box
+has not been defined, the Crop Box coordinates (if defined) will be returned,
+otherwise the Media Box coordinates (which always exist) will be returned. 
+In addition, when I<setting> the Trim Box, the resulting coordinates are 
+returned. This permits you to specify the trim box by a name (alias) and get 
+the dimensions back, all in one call.
+
 A global (PDF level) trimbox setting is inherited by each page, or can be 
 overridden by setting trimbox in the page.
 As with C<mediabox>, only one trim box may be set at this (PDF) level.
 As with C<mediabox>, a named media size may have an orientation (l or L) for 
 Landscape mode. 
+Note that the PDF level global Trim Box will be used I<even if> the page gets
+its own Crop Box. That is, the page's Trim Box inherits the global Trim Box,
+not the page Crop Box, even if the page has its own media size! If you set the
+page's own Media Box or Crop Box, you should consider also explicitly setting 
+the page Trim Box (and other boxes).
 
 =back
 
@@ -1043,6 +1124,8 @@ Landscape mode.
 
 =item $pdf->artbox($llx,$lly, $urx,$ury)
 
+=item ($llx,$lly, $urx,$ury) = $pdf->artbox()
+
 Sets the global Art Box (or page's Art Box, if C<< $page-> >> instead). 
 This is supposed to define "the extent of the page's 
 I<meaningful> content (including [margins])". It might exclude some content, 
@@ -1051,13 +1134,58 @@ typically be outside of the Art Box, as would be page numbers and running
 headers and footers. The default value is equal to the Crop Box, although 
 normally it would be no larger than any Trim Box.
 
+If no arguments are given, the current Art Box (global or page) coordinates
+are returned instead. The former C<get_artbox> (page only) function is 
+B<deprecated> and will likely be removed some time in the future. If an Art Box
+has not been defined, the Crop Box coordinates (if defined) will be returned,
+otherwise the Media Box coordinates (which always exist) will be returned. 
+In addition, when I<setting> the Art Box, the resulting coordinates are 
+returned. This permits you to specify the art box by a name (alias) and get 
+the dimensions back, all in one call.
+
 A global (PDF level) artbox setting is inherited by each page, or can be 
 overridden by setting artbox in the page.
 As with C<mediabox>, only one art box may be set at this (PDF) level.
 As with C<mediabox>, a named media size may have an orientation (l or L) for 
 Landscape mode. 
+Note that the PDF level global Art Box will be used I<even if> the page gets
+its own Crop Box. That is, the page's Art Box inherits the global Art Box,
+not the page Crop Box, even if the page has its own media size! If you set the
+page's own Media Box or Crop Box, you should consider also explicitly setting 
+the page Art Box (and other boxes).
 
 =back
+
+=head3 Box Inheritance
+
+What Media, Crop, Bleed, Trim, and Art Boxes a page gets can be a little
+complicated. Note that usually, only the Media and Crop Boxes will have a 
+clear visual effect. The visual effect of the other boxes (if any) may be
+very subtle.
+
+First, everything is set at the global (PDF) level. The Media Box is always 
+defined, and defaults to US Letter (8.5 inches wide by 11 inches high). The
+global Crop Box inherits the Media Box, unless explicitly defined. The Bleed,
+Trim, and Art Boxes inherit the Crop Box, unless explicitly defined. A global
+box should only be defined once, as the last one defined is the one that will
+be written to the PDF!
+
+Second, a page inherits the global boxes, for its initial settings. You may
+call any of the box set methods (C<cropbox>, C<trimbox>, etc.) to explicitly
+set (override) any box for I<this> page. Note that setting a new Media Box for
+the page does B<not> reset the page's Crop Box -- it still uses whatever it 
+inherited from the global Crop Box. You would need to explicitly set the page's 
+Crop Box if you want a different setting. Likewise, the page's Bleed, Trim, and
+Art Boxes will not be reset by a new page Crop Box -- they will still inherit
+from the global (PDF) settings.
+
+Third, the page Media Box (the one actually used for output pages), clips or
+limits all the other boxes to extend no larger than its size. For example, if
+the Media Box is US Letter, and you set a Crop Box of A4 size, the smaller of
+the two heights (11 inches) would be effective, and the smaller of the two
+widths (8.26 inches, 595 Points) would be effective.
+The I<given> dimensions of a box are returned on query (get), not the 
+I<effective> dimensions clipped by the Media Box.
 
 =head2 FONT METHODS
 
