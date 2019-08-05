@@ -161,6 +161,10 @@ your text is, so that the output routines can tell the PDF reader about it
 reader needs to know what the encoding in use is, so it knows what glyph to 
 associate with each byte (or byte sequence).
 
+Note that some operating systems and Perl flavors are reputed to be strict
+about encoding names. For example, B<latin1> (an alias) may be rejected as 
+invalid, while B<iso-8859-1> (a canonical value) will work.
+
 By the way, it is recommended that you be using I<at least> Perl 5.10 if you
 are going to be using any non-ASCII characters. Perl 5.8 may be a little
 unpredictable in handling such text.
@@ -1327,7 +1331,8 @@ Enables kerning if data is available.
 B<Note:> these T1 (Type1) fonts are I<not> shipped with PDF::Builder, but are 
 expected to be found on the machine with the PDF reader. Most PDF readers do 
 not install T1 fonts, and it is up to the user of the PDF reader to install
-the needed fonts.
+the needed fonts. Unlike TrueType fonts, PS (T1) fonts are not embedded in the 
+PDF, and must be supplied on the Reader end.
 
 See also L<PDF::Builder::Resource::Font::Postscript>.
 
@@ -1380,7 +1385,19 @@ as the glyphs provided on the PDF reader machine may not match what was used on
 the PDF writer machine (the one running PDF::Builder)!> If you know I<for sure> 
 that all PDF readers will be using the same TTF or OTF file you're using with
 PDF::Builder; not embedding the font may be acceptable, in return for a smaller
-PDF file size.
+PDF file size. Note that the Reader needs to know where to find the font file
+-- it can't be in any random place, but typically needs to be listed in a path 
+that the Reader follows. Otherwise, it will be unable to render the text!
+
+Some additional comments on embedding font file(s) into the PDF: besides 
+substantially increasing the size of the PDF (the font is apparently B<not> 
+subsetted>, PDF::Builder does not check the font file for any flags indicating 
+font licensing issues and limitations on use. A font foundry may not permit 
+embedding at all, may permit a subset of the font to be embedded, may permit a 
+full font to be embedded, and may specify what can be done with an embedded 
+font (e.g., may or may not be extracted for further use beyond displaying this 
+one PDF). When you choose to use (and embed) a font, you should be aware of any
+such licensing issues.
 
 =item -debug
 
@@ -1432,6 +1449,20 @@ Changes the encoding of the font from its default.
 
 =back
 
+B<Warning:> Unlike C<ttfont>, the font file is I<not> embedded in the output 
+PDF file. This is
+evidently behavior left over from the early days of CJK fonts, where the 
+C<Cmap> and C<Data> were always external files, rather than internal tables.
+If you need a CJK-using PDF file to embed the font, for portability, you can
+create a PDF using C<cjkfont>, and then use an external utility (e.g.,
+C<pdfcairo>) to embed the font in the PDF. It may also be possible to use 
+C<ttfont> instead, to produce the PDF, provided you can deduce the correct 
+font file name from examining the PDF file (e.g., on my Windows system, the 
+"Ming" font would be C<< $font = $pdf->ttfont("C:/Program Files (x86)/Adobe/Acrobat Reader DC/Resource/CIDFont/AdobeMingStd-Light.otf") >>.
+Of course, the font file used would have to be C<.ttf> or C<.otf>.
+It may act a little differently than C<cjkfont> (due a a different Cmap), but 
+you I<should> be able to embed the font file into the PDF.
+
 See also L<PDF::Builder::Resource::CIDFont::CJKFont>
 
 =head3 Synthetic Fonts
@@ -1476,7 +1507,7 @@ draw outline of character (with a heavier B<line width>) before filling.
 
 =item -space
 
-Additional character spacing in ems (0-1000)
+Additional character spacing in milliems (0-1000)
 
 =item -caps
 

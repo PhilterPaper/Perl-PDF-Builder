@@ -6,18 +6,30 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       optional items in dependency graph. Try something else, after confirming
       that optional items SHOULD show up in reverse dependencies (?). 
 
-3.016     2019-08-04  UNRELEASED
+3.016     2019-08-05  UNRELEASED
 
 *   examples/024_bdffonts, lib/PDF/Builder.pm, 
       lib/PDF/Builder/Resource/BaseFont.pm
      BDF (bitmapped fonts) some work that slightly improves. Work in progress.
 
-*   [RT 130038,40,41] may just be documentation issues (need clarification), but
-     need to check if code fixes on some, especially CJKfonts can't embed and
-     can't do synfont against
+*   [RT 130038] look into improving documentation for doing things like putting
+     an image on the page
 
-    lib/PDF/Resource/BaseFont.pm-CIDFont.pm-UniFont.pm [RT 130074] clarify
-     remaining uses of is_utf8() call that it's utf8::is_utf8().
+*   [RT 130040] may just be documentation issues (need clarification), but
+     need to check if code fixes on some, especially CJKfonts can't do synfont 
+     correctly
+
+    lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm, 
+      lib/PDF/Builder/Docs.pm, examples/022_truefonts
+     [RT 130041] OTF and TTF "CFF" files were getting the font file embedded
+      in them (by ttfont method), even though there was no link to use that
+      large stream, when -noembed=>1. This has been fixed. Also, the 
+      documentation (Docs.pm) has been upgraded to clarify when and how font
+      file embedding is done (especially that it's NOT done for cjkfont). The 
+      TrueType example has had a flag added to specify embedding control.
+
+    lib/PDF/Builder/Resource/BaseFont.pm-CIDFont.pm-UniFont.pm [RT 130074] 
+      clarify remaining uses of is_utf8() call that it's utf8::is_utf8().
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm, lib/PDF/Builder/Docs.pm, 
       INFO/DEPRECATED, INFO/KNOWN_INCOMP, MANIFEST, t/bbox.t, 

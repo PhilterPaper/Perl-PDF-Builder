@@ -723,7 +723,10 @@ sub outobjdeep {
 
     if ($self->iscff()) {
         $f->{'CFF '}->read_dat();
-        $self->{' stream'} = $f->{'CFF '}->{' dat'};
+	# OTF files were always being written into PDF, even if -noembed = 1
+	if ($self->data()->{'noembed'} != 1) {
+            $self->{' stream'} = $f->{'CFF '}->{' dat'};
+	}
     } else {
         if ($self->data()->{'subset'} && !$self->data()->{'nosubset'}) {
             $f->{'glyf'}->read();
