@@ -145,7 +145,7 @@ sub width {
     my ($self, $text) = @_;
 
     if (defined $self->{'encode'}) { # is self->encode guaranteed set?
-        $text = decode($self->{'encode'}, $text) unless is_utf8($text);
+        $text = decode($self->{'encode'}, $text) unless utf8::is_utf8($text);
     }
     my $width = 0;
     my @blocks = ();
@@ -177,7 +177,7 @@ sub text {
     my ($self, $text, $size, $indent) = @_;
 
     if (defined $self->{'encode'}) { # is self->encode guaranteed to be defined?
-        $text = decode($self->{'encode'}, $text) unless is_utf8($text);
+        $text = decode($self->{'encode'}, $text) unless utf8::is_utf8($text);
     }
     croak 'Font size not specified' unless defined $size;
 

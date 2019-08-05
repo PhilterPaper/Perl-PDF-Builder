@@ -679,7 +679,7 @@ is used, either in native or UTF-8 format (check utf8-flag).
 sub width {
     my ($self, $text) = @_;
 
-    $text = $self->strByUtf($text) if is_utf8($text);
+    $text = $self->strByUtf($text) if utf8::is_utf8($text);
 
     my @cache;
     my $width = 0;
@@ -707,7 +707,7 @@ Return (as an array) the widths of the words in $text as if they were at size 1.
 sub width_array {
     my ($self, $text) = @_;
 
-    $text = $self->utfByStr($text) unless is_utf8($text);
+    $text = $self->utfByStr($text) unless utf8::is_utf8($text);
     my @widths = map { $self->width($_) } split(/\s+/, $text);
     return @widths;
 }
@@ -756,7 +756,7 @@ sub textByStr {
     my ($self, $string) = @_;
 
     if (not defined $string) { $string = ''; }
-    $string = $self->strByUtf($string) if is_utf8($string);
+    $string = $self->strByUtf($string) if utf8::is_utf8($string);
     my $text = $string;
     $text =~ s/\\/\\\\/go;
     $text =~ s/([\x00-\x1f])/sprintf('\%03lo',ord($1))/ge;
@@ -776,7 +776,7 @@ sub textByStrKern {
     my ($self, $string) = @_;
 
     return '(' . $self->textByStr($string) . ')' unless $self->{'-dokern'} && ref($self->data()->{'kern'});
-    $string = $self->strByUtf($string) if is_utf8($string);
+    $string = $self->strByUtf($string) if utf8::is_utf8($string);
 
     my $text = ' ';
     my $tBefore = 0;

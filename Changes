@@ -6,7 +6,7 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       optional items in dependency graph. Try something else, after confirming
       that optional items SHOULD show up in reverse dependencies (?). 
 
-3.016     2019-08-03  UNRELEASED
+3.016     2019-08-04  UNRELEASED
 
 *   examples/024_bdffonts, lib/PDF/Builder.pm, 
       lib/PDF/Builder/Resource/BaseFont.pm
@@ -15,6 +15,9 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
 *   [RT 130038,40,41] may just be documentation issues (need clarification), but
      need to check if code fixes on some, especially CJKfonts can't embed and
      can't do synfont against
+
+    lib/PDF/Resource/BaseFont.pm-CIDFont.pm-UniFont.pm [RT 130074] clarify
+     remaining uses of is_utf8() call that it's utf8::is_utf8().
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm, lib/PDF/Builder/Docs.pm, 
       INFO/DEPRECATED, INFO/KNOWN_INCOMP, MANIFEST, t/bbox.t, 
