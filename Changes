@@ -19,6 +19,13 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
      need to check if code fixes on some, especially CJKfonts can't do synfont 
      correctly
 
+    docs/buildDoc.pl, lib/PDF/Builder.pm, lib/PDF/Builder/Content.pm-
+      Docs.pm-Page.pm
+     Improvement to documentation generation utility to handle pod2html
+      upgrade to specify URLs with targets (#name), and update some POD that
+      refers to specific targets on a page. It's possible that if you have an
+      earlier Perl level, this might not work properly.
+
     lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm, 
       lib/PDF/Builder/Docs.pm, examples/022_truefonts
      [RT 130041] OTF and TTF "CFF" files were getting the font file embedded

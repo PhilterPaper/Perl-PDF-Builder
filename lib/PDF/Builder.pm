@@ -83,29 +83,28 @@ PDF::Builder - Facilitates the creation and modification of PDF files
 
 There are four levels of involvement with PDF::Builder. Depending on what you
 want to do, different kinds of installs are recommended.
-See L<PDF::Builder::Docs> section B<Software Development Kit> for suggestions.
+See L<PDF::Builder::Docs/Software Development Kit> for suggestions.
 
 =head2 OPTIONAL LIBRARIES
 
 PDF::Builder can make use of some optional libraries, which are not I<required>
 for a successful installation, but improve speed and capabilities. See 
-L<PDF::Builder::Docs> section B<Optional Libraries> for more information.
+L<PDF::Builder::Docs/Optional Libraries> for more information.
 
 =head2 STRINGS (CHARACTER TEXT)
 
 There are some things you should know about character encoding (for text),
-before you dive in to coding. Please go to L<PDF::Builder::Docs> B<Strings> and have a read.
+before you dive in to coding. Please go to L<PDF::Builder::Docs/Strings (Character Text)> and have a read.
 
 =head2 RENDERING ORDER
 
 Invoking "text" and "graphics" methods can lead to unexpected results (a 
-different ordering of output than intended). See L<PDF::Builder::Docs> 
-B<Rendering Order> for more information.
+different ordering of output than intended). See L<PDF::Builder::Docs/Rendering Order> for more information.
 
 =head2 PDF VERSIONS SUPPORTED
 
 PDF::Builder is mostly PDF 1.4-compliant, but there I<are> complications you
-should be aware of. Please read L<PDF::Builder::Docs> section B<PDF Versions Supported>
+should be aware of. Please read L<PDF::Builder::Docs/PDF Versions Supported>
 for details.
 
 =head2 SUPPORTED PERL VERSIONS
@@ -140,7 +139,7 @@ point.
 =head2 HISTORY
 
 The history of PDF::Builder is a complex and exciting saga... OK, it may be
-mildly interesting. Have a look at L<PDF::Builder::Docs> B<History> section.
+mildly interesting. Have a look at L<PDF::Builder::Docs/History> section.
 
 =head1 AUTHOR
 
@@ -503,7 +502,7 @@ sub open_scalar {
 
 Controls viewing preferences for the PDF, including the B<Page Mode>, 
 B<Page Layout>, B<Viewer>, and B<Initial Page> Options. See 
-L<PDF::Builder::Docs> section B<Preferences> for details on all these 
+L<PDF::Builder::Docs/Preferences - set user display preferences> for details on all these 
 option groups.
 
 =cut
@@ -702,7 +701,7 @@ sub isEncrypted {
 
 Gets/sets the info structure of the document.
 
-See L<PDF::Builder::Docs> B<info Example> section for an example of the use
+See L<PDF::Builder::Docs/info Example> section for an example of the use
 of this method.
 
 =cut
@@ -770,7 +769,7 @@ sub infoMetaAttributes {
 
 Gets/sets the XMP XML data stream.
 
-See L<PDF::Builder::Docs> B<XMP XML example> section for an example of the use
+See L<PDF::Builder::Docs/XMP XML example> section for an example of the use
 of this method.
 
 =cut
@@ -1618,7 +1617,7 @@ Sets the global UserUnit, defining the scale factor to multiply any size or
 coordinate by. For example, C<userunit(72)> results in a User Unit of 72 points,
 or 1 inch.
 
-See L<PDF::Builder::Docs> "BOX" METHODS/User Units for more information.
+See L<PDF::Builder::Docs/User Units> for more information.
 
 =cut
 
@@ -1720,7 +1719,7 @@ Sets (or gets) the global MediaBox, defining the width and height (or by
 corner coordinates, or by standard name) of the output page itself, such as 
 the physical paper size. 
 
-See L<PDF::Builder::Docs> "BOX" METHODS/Media Box for more information.
+See L<PDF::Builder::Docs/Media Box> for more information.
 The method always returns the current bounds (after any set operation).
 
 =cut
@@ -1748,7 +1747,7 @@ sub mediabox {
 Sets (or gets) the global CropBox. This will define the media size to which 
 the output will later be clipped. 
 
-See L<PDF::Builder::Docs> "Box" Methods/Crop Box for more information.
+See L<PDF::Builder::Docs/Crop Box> for more information.
 The method always returns the current bounds (after any set operation).
 
 =cut
@@ -1776,7 +1775,7 @@ sub cropbox {
 Sets (or gets) the global BleedBox. This is typically used for hard copy 
 printing where you want ink to go to the edge of the cut paper.
 
-See L<PDF::Builder::Docs> "Box" Methods/Bleed Box for more information.
+See L<PDF::Builder::Docs/Bleed Box> for more information.
 The method always returns the current bounds (after any set operation).
 
 =cut
@@ -1804,7 +1803,7 @@ sub bleedbox {
 Sets (or gets) the global TrimBox. This is supposed to be the actual 
 dimensions of the finished page (after trimming of the paper). 
 
-See L<PDF::Builder::Docs> "Box" Methods/Trim Box for more information.
+See L<PDF::Builder::Docs/Trim Box> for more information.
 The method always returns the current bounds (after any set operation).
 
 =cut
@@ -1832,7 +1831,7 @@ sub trimbox {
 Sets (or gets) the global ArtBox. This is supposed to define "the extent of 
 the page's I<meaningful> content". 
 
-See L<PDF::Builder::Docs> "Box" Methods/Art Box for more information.
+See L<PDF::Builder::Docs/Art Box> for more information.
 The method always returns the current bounds (after any set operation).
 
 =cut
@@ -1881,8 +1880,7 @@ sub _findFont {
 
 =item $font = $pdf->corefont($fontname)
 
-Returns a new Adobe core font object. For details, see L<PDF::Builder::Docs>
-section B<Core Fonts>.
+Returns a new Adobe core font object. For details, see L<PDF::Builder::Docs/Core Fonts>.
 
 See also L<PDF::Builder::Resource::Font::CoreFont>.
 
@@ -1904,7 +1902,7 @@ sub corefont {
 =item $font = $pdf->psfont($ps_file)
 
 Returns a new Adobe Type1 ("PostScript") font object.
-For details, see L<PDF::Builder::Docs> section B<PS Fonts>.
+For details, see L<PDF::Builder::Docs/PS Fonts>.
 
 See also L<PDF::Builder::Resource::Font::Postscript>.
 
@@ -1932,7 +1930,7 @@ sub psfont {
 =item $font = $pdf->ttfont($ttf_file)
 
 Returns a new TrueType (or OpenType) font object.
-For details, see L<PDF::Builder::Docs> section B<TrueType Fonts>.
+For details, see L<PDF::Builder::Docs/TrueType Fonts>.
 
 =cut
 
@@ -1961,7 +1959,7 @@ sub ttfont {
 
 Returns a new CJK font object. These are TrueType-like fonts for East Asian
 languages (Chinese, Japanese, Korean).
-For details, see L<PDF::Builder::Docs> section B<CJK Fonts>.
+For details, see L<PDF::Builder::Docs/CJK Fonts>.
 
 See also L<PDF::Builder::Resource::CIDFont::CJKFont>
 
@@ -1985,7 +1983,7 @@ sub cjkfont {
 
 Returns a new synthetic font object. These are modifications to a core (or 
 other) font, where the font may be replaced by a Type1 or Type3 PostScript font.
-For details, see L<PDF::Builder::Docs> section B<Synthetic Fonts>.
+For details, see L<PDF::Builder::Docs/Synthetic Fonts>.
 
 See also L<PDF::Builder::Resource::Font::SynFont>
 
@@ -2095,7 +2093,7 @@ sub image_jpeg {
 
 Imports and returns a new TIFF image object. C<$file> may be either a filename 
 or a filehandle.
-For details, see L<PDF::Builder::Docs> section B<TIFF Images>.
+For details, see L<PDF::Builder::Docs/TIFF Images>.
 
 =cut
 
@@ -2196,7 +2194,7 @@ sub image_pnm {
 
 Imports and returns a new PNG image object. C<$file> may be either 
 a filename or a filehandle.
-For details, see L<PDF::Builder::Docs> section B<PNG Images>.
+For details, see L<PDF::Builder::Docs/PNG Images>.
 
 =cut
 

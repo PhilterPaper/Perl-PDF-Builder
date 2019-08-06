@@ -2296,7 +2296,7 @@ C<endpath()> call (B<n>) after the C<clip()> call, to clear the path (unless
 you want to reuse that path, such as to fill and/or stroke it to show the clip 
 path). If you want to clip text glyphs, it gets rather complicated, as a clip
 port cannot be created within a text object (that will have an effect on text). 
-See the object discussion in L<PDF::Builder::Docs> B<Rendering Order>.
+See the object discussion in L<PDF::Builder::Docs/Rendering Order>.
 
  my $grfxC1 = $page->gfx();
  my $textC  = $page->text();

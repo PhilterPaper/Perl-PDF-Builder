@@ -96,7 +96,7 @@ sub update {
 =item $page->userunit($value)
 
 Sets the User Unit for this one page.  
-See L<PDF::Builder::Docs> "BOX" METHODS/User Units for more information.
+See L<PDF::Builder::Docs/User Units> for more information.
 
 =cut
 
@@ -197,7 +197,7 @@ sub _bbox {
 =item ($llx,$lly, $urx,$ury) = $page->mediabox()
 
 Sets or gets the Media Box for this one page.  
-See L<PDF::Builder::Docs> "BOX" METHODS/Media Box for more information.
+See L<PDF::Builder::Docs/Media Box> for more information.
 The method always returns the current bounds (after any set operation).
 
 =cut
@@ -233,7 +233,7 @@ sub get_mediabox {
 =item ($llx,$lly, $urx,$ury) = $page->cropbox()
 
 Sets or gets the Crop Box for this one page.  
-See L<PDF::Builder::Docs> "BOX" METHODS/Crop Box for more information.
+See L<PDF::Builder::Docs/Crop Box> for more information.
 The method always returns the current bounds (after any set operation).
 
 =cut
@@ -268,7 +268,7 @@ sub get_cropbox {
 =item ($llx,$lly, $urx,$ury) = $page->bleedbox()
 
 Sets or gets or gets the Bleed Box for this one page.  
-See L<PDF::Builder::Docs> "BOX" METHODS/Bleed Box for more information.
+See L<PDF::Builder::Docs/Bleed Box> for more information.
 The method always returns the current bounds (after any set operation).
 
 =cut
@@ -303,7 +303,7 @@ sub get_bleedbox {
 =item ($llx,$lly, $urx,$ury) = $page->trimbox()
 
 Sets or gets the Trim Box for this one page.  
-See L<PDF::Builder::Docs> "BOX" METHODS/Trim Box for more information.
+See L<PDF::Builder::Docs/Trim Box> for more information.
 The method always returns the current bounds (after any set operation).
 
 =cut
@@ -338,7 +338,7 @@ sub get_trimbox {
 =item ($llx,$lly, $urx,$ury) = $page->artbox()
 
 Sets or gets the Art Box for this one page.  
-See L<PDF::Builder::Docs> "BOX" METHODS/Art Box for more information.
+See L<PDF::Builder::Docs/Art Box> for more information.
 The method always returns the current bounds (after any set operation).
 
 =cut

@@ -114,8 +114,8 @@ use default (non-UTF-8) Perl strings and use the default output encoding
 in turn, of ISO-8859-1 Latin-1). If your text uses any other characters, you
 will need to be aware of what encoding your text strings are (in the Perl string
 and for declaring output glyph generation).
-See C<corefont>, C<psfont>, and C<ttfont> in L<FONT METHODS> for additional 
-information.
+See L</Core Fonts>, L</PS Fonts> and L</TrueType Fonts> in L</FONT METHODS> 
+for additional information.
 
 =head3 Some Internal Details
 
@@ -1199,7 +1199,7 @@ Core fonts are limited to single byte encodings. You cannot use UTF-8 or other
 multibyte encodings with core fonts. The default encoding for the core fonts is
 WinAnsiEncoding (roughly the CP-1252 superset of ISO-8859-1). See the 
 C<-encode> option below to change this encoding.
-See L<PDF::Builder::Resource::Font> C<automap> method for information on
+See L<PDF::Builder::Resource::Font/font automap> method for information on
 accessing more than 256 glyphs in a font, using planes, I<although there is no
 guarantee that future changes to font files will permit consistent results>.
 
@@ -1279,7 +1279,7 @@ other multibyte encodings with T1 fonts.
 The default encoding for the T1 fonts is
 WinAnsiEncoding (roughly the CP-1252 superset of ISO-8859-1). See the 
 C<-encode> option below to change this encoding.
-See L<PDF::Builder::Resource::Font> C<automap> method for information on
+See L<PDF::Builder::Resource::Font/font automap> method for information on
 accessing more than 256 glyphs in a font, using planes, I<although there is no
 guarantee that future changes to font files will permit consistent results>.
 B<Note:> many Type1 fonts are limited to 256 glyphs, but some are available
