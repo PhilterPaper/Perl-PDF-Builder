@@ -1539,6 +1539,11 @@ See also L<PDF::Builder::Resource::Font::SynFont>
 
 =head2 IMAGE METHODS
 
+This is additional information on enhanced libraries available for TIFF and
+PNG images. See specific information listings for GD, GIF, JPEG, and PNM image
+formats. In addition, see C<examples/Content.pl> for an example of placing an
+image on a page, as well as using in a "Form".
+
 =head3 TIFF Images
 
 Note that the Graphics::TIFF support library does B<not> currently permit a 

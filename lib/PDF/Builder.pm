@@ -2074,6 +2074,9 @@ sub unifont {
 Imports and returns a new JPEG image object. C<$file> may be either a filename 
 or a filehandle.
 
+See L<PDF::Builder::Resource::XObject::Image::JPEG> for additional information
+and C<examples/Content.pl> for some examples of placing an image on a page.
+
 =cut
 
 # =item $jpeg = $pdf->image_jpeg($file, %options)   no current options
@@ -2096,6 +2099,13 @@ sub image_jpeg {
 Imports and returns a new TIFF image object. C<$file> may be either a filename 
 or a filehandle.
 For details, see L<PDF::Builder::Docs/TIFF Images>.
+
+See L<PDF::Builder::Resource::XObject::Image::TIFF> and
+L<PDF::Builder::Resource::XObject::Image::TIFF_GT> for additional information
+and C<examples/Content.pl>
+for some examples of placing an image on a page (JPEG, but the principle is
+the same). There is an optional TIFF library described, that gives more
+capability than the default one.
 
 =cut
 
@@ -2176,6 +2186,10 @@ sub LA_GT {
 Imports and returns a new PNM image object. C<$file> may be either a filename 
 or a filehandle.
 
+See C<examples/Content.pl>
+for some examples of placing an image on a page (JPEG, but the principle is
+the same).
+
 =cut
 
 # =item $pnm = $pdf->image_pnm($file, %options)   no current options
@@ -2197,6 +2211,13 @@ sub image_pnm {
 Imports and returns a new PNG image object. C<$file> may be either 
 a filename or a filehandle.
 For details, see L<PDF::Builder::Docs/PNG Images>.
+
+See L<PDF::Builder::Resource::XObject::Image::PNG> and
+L<PDF::Builder::Resource::XObject::Image::PNG_IPL> for additional information
+and C<examples/Content.pl>
+for some examples of placing an image on a page (JPEG, but the principle is
+the same). There is an optional PNG library (PNG_IPL) described, that gives more
+capability than the default one.
 
 =cut
 
@@ -2276,6 +2297,10 @@ sub LA_IPL {
 Imports and returns a new GIF image object. C<$file> may be either a filename 
 or a filehandle.
 
+See L<PDF::Builder::Resource::XObject::Image::GIF> for additional information
+and C<examples/Content.pl> for some examples of placing an image on a page 
+(JPEG, but the principle is the same).
+
 =cut
 
 # =item $gif = $pdf->image_gif($file, %options)   no current options
@@ -2305,6 +2330,10 @@ Valid %options are:
 Use lossless compression.
 
 =back
+
+See L<PDF::Builder::Resource::XObject::Image::GD> for additional information
+and C<examples/Content.pl> for some examples of placing an image on a page 
+(JPEG, but the principle is the same).
 
 =cut
 

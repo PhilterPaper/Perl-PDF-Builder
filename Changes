@@ -12,8 +12,14 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       lib/PDF/Builder/Resource/BaseFont.pm
      BDF (bitmapped fonts) some work that slightly improves. Work in progress.
 
-*   [RT 130038] look into improving documentation for doing things like putting
-     an image on the page
+    lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm, 
+      lib/PDF/Builder/Resource/Font/Postscript.pm
+    [RT 130038] Improve documentation for putting an image on the page, 
+      pointing to other sources of information. There are undoubtedly many
+      other "how to do" tasks that need upgraded documentation, and we will
+      attend to them over time. In the meantime, be sure to check out the
+      examples/ Perl programs for numerous examples of how to use calls, and
+      even the t-tests in t/ might prove useful as examples.
 
     examples/021_psfonts, lib/PDF/Builder/Docs.com, lib/PDF/Builder.com,
       lib/PDF/Builder/Resource/Font/SynFont.pm
