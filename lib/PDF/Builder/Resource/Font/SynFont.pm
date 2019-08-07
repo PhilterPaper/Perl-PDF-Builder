@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.014'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
 
 use Math::Trig;    # CAUTION: deg2rad(0) = deg2rad(360) = 0!
 use Unicode::UCD 'charinfo';
@@ -27,6 +27,10 @@ PDF::Builder::Resource::Font::SynFont - Module for using synthetic Fonts.
     $cft = $pdf->corefont('Times-Roman');  # ttfont, etc. also works
     $sft = $pdf->synfont($cft, -condense => .75);  # condense by 25%
     #
+
+This works for I<corefonts>, I<PS fonts>, and I<TTF/OTF fonts>; but does not
+work for I<CJK fonts> or I<bitmapped fonts>.
+See also L<PDF::Builder::Docs/Synthetic Fonts>.
 
 =head1 METHODS
 

@@ -1982,7 +1982,9 @@ sub cjkfont {
 =item $font = $pdf->synfont($basefont)
 
 Returns a new synthetic font object. These are modifications to a core (or 
-other) font, where the font may be replaced by a Type1 or Type3 PostScript font.
+PS/T1 or TTF/OTF) font, where the font may be replaced by a Type1 or Type3 
+PostScript font.
+This does not appear to work with CJK fonts (created with C<cjkfont> method).
 For details, see L<PDF::Builder::Docs/Synthetic Fonts>.
 
 See also L<PDF::Builder::Resource::Font::SynFont>

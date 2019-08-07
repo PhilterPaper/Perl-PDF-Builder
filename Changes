@@ -6,7 +6,7 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       optional items in dependency graph. Try something else, after confirming
       that optional items SHOULD show up in reverse dependencies (?). 
 
-3.016     2019-08-05  UNRELEASED
+3.016     2019-08-06  UNRELEASED
 
 *   examples/024_bdffonts, lib/PDF/Builder.pm, 
       lib/PDF/Builder/Resource/BaseFont.pm
@@ -15,9 +15,12 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
 *   [RT 130038] look into improving documentation for doing things like putting
      an image on the page
 
-*   [RT 130040] may just be documentation issues (need clarification), but
-     need to check if code fixes on some, especially CJKfonts can't do synfont 
-     correctly
+    examples/021_psfonts, lib/PDF/Builder/Docs.com, lib/PDF/Builder.com,
+      lib/PDF/Builder/Resource/Font/SynFont.pm
+     [RT 130040] Confirm that the "synfont" method to modify a font does not
+      seem to work with "CJK" fonts (created by the "cjkfont" method), due to
+      internal font file format differences. Also add "Ipsum Lorem" sample 
+      text to 021_psfonts output.
 
     docs/buildDoc.pl, lib/PDF/Builder.pm, lib/PDF/Builder/Content.pm-
       Docs.pm-Page.pm

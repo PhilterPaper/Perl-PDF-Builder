@@ -1528,6 +1528,13 @@ Latin character expansions (e.g., i+j and f+f+l) before small-capping.
 
 =back
 
+Note that I<CJK> fonts (created with the C<cjkfont> method) do B<not> work
+properly with C<synfont>. This is due to a different internal structure of the
+I<CJK> fonts, as compared to I<corefont>, I<ttfont>, and I<psfont> base fonts.
+If you require a synthesized (modified) CJK font, you might try finding the
+TTF or OTF original, use C<ttfont> to create the base font, and running
+C<synfont> against that, in the manner described for embedding L</CJK Fonts>.
+
 See also L<PDF::Builder::Resource::Font::SynFont>
 
 =head2 IMAGE METHODS
