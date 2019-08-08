@@ -30,7 +30,8 @@ Defined Options:
 
     -encode ... specify fonts encoding for non-UTF-8 text.
 
-    -nosubset ... disables subsetting.
+    -nosubset ... disables subsetting. Any value causes the full font to be
+                  embedded, rather than only the glyphs needed.
 
 =cut
 

@@ -1389,15 +1389,31 @@ PDF file size. Note that the Reader needs to know where to find the font file
 -- it can't be in any random place, but typically needs to be listed in a path 
 that the Reader follows. Otherwise, it will be unable to render the text!
 
+The only value for the C<-noembed> flag currently checked for is B<1>, which
+means to I<not> embed the font file in the PDF. Any other value currently
+results in the font file being embedded (by B<default>), although in the future,
+other values might be given significance (such as checking permission bits).
+
 Some additional comments on embedding font file(s) into the PDF: besides 
-substantially increasing the size of the PDF (the font is apparently B<not> 
-subsetted>, PDF::Builder does not check the font file for any flags indicating 
+substantially increasing the size of the PDF (even if the font is subsetted,
+by default), PDF::Builder does not check the font file for any flags indicating 
 font licensing issues and limitations on use. A font foundry may not permit 
 embedding at all, may permit a subset of the font to be embedded, may permit a 
 full font to be embedded, and may specify what can be done with an embedded 
 font (e.g., may or may not be extracted for further use beyond displaying this 
 one PDF). When you choose to use (and embed) a font, you should be aware of any
 such licensing issues.
+
+=item -nosubset
+
+Disables subsetting of a TTF/OTF font, when embedded. By default, only the
+glyphs used by a document are included in the file, and I<not> the entire font.
+This can result in a tremendous savings in PDF file size. If you intend to 
+allow the PDF to be edited by users, not having the entire font glyph set
+available may cause problems, so be aware of that (and consider using 
+C<< -nosubset => 1 >>. Setting this flag to any value results in the entire
+font glyph set being embedded in the file. It might be a good idea to use only
+the value B<1>, in case other values are assigned roles in the future.
 
 =item -debug
 

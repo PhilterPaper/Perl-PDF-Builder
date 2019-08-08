@@ -6,15 +6,18 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       optional items in dependency graph. Try something else, after confirming
       that optional items SHOULD show up in reverse dependencies (?). 
 
-3.016     2019-08-06  UNRELEASED
+3.016     2019-08-08  UNRELEASED
 
 *   examples/024_bdffonts, lib/PDF/Builder.pm, 
       lib/PDF/Builder/Resource/BaseFont.pm
      BDF (bitmapped fonts) some work that slightly improves. Work in progress.
 
+    lib/PDF/Builder/Docs.pm, lib/PDF/Builder/Resource/CIDFont/TrueType.pm
+     Improve documentation of ttfont's -nosubset and -noembed flags.
+     
     lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm, 
       lib/PDF/Builder/Resource/Font/Postscript.pm
-    [RT 130038] Improve documentation for putting an image on the page, 
+     [RT 130038] Improve documentation for putting an image on the page, 
       pointing to other sources of information. There are undoubtedly many
       other "how to do" tasks that need upgraded documentation, and we will
       attend to them over time. In the meantime, be sure to check out the
