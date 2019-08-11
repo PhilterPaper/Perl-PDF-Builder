@@ -1,6 +1,6 @@
 Change log for PDF::API2 version 2.xxx (predecessor to PDF::Builder)
 
-2.035     unreleased
+2.035     2019-08-09
 
     - The bounding box methods (mediabox, cropbox, bleedbox, trimbox, and
       artbox) now return their values when called without arguments.
