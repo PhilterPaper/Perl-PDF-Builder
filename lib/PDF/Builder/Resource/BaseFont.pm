@@ -576,6 +576,9 @@ sub glyphByMap {
 =item $width = $font->wxByGlyph($glyph)
 
 Return the glyph's width.
+This is a value, that when divided by 1000 and multiplied by
+the font size (height in points), gives the advance width to the
+next character's start. Typically, the width will be under 1000.
 
 =cut
 
@@ -598,6 +601,9 @@ sub wxByGlyph {
 =item $width = $font->wxByUni($uni)
 
 Return the Unicode character's width.
+This is a value, that when divided by 1000 and multiplied by
+the font size (height in points), gives the advance width to the
+next character's start. Typically, the width will be under 1000.
 
 =cut
 
@@ -616,6 +622,9 @@ sub wxByUni {
 =item $width = $font->wxByEnc($char)
 
 Return the character's width based on the current encoding.
+This is a value, that when divided by 1000 and multiplied by
+the font size (height in points), gives the advance width to the
+next character's start. Typically, the width will be under 1000.
 
 =cut
 
@@ -652,6 +661,9 @@ sub wxMissingByEnc {
 =item $width = $font->wxByMap($char)
 
 Return the character's width based on the font's default encoding.
+This is a value, that when divided by 1000 and multiplied by
+the font size (height in points), gives the advance width to the
+next character's start. Typically, the width will be under 1000.
 
 =cut
 

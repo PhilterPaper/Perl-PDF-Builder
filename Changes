@@ -6,11 +6,16 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       optional items in dependency graph. Try something else, after confirming
       that optional items SHOULD show up in reverse dependencies (?). 
 
-3.016     2019-08-08  UNRELEASED
+3.016     2019-08-13  UNRELEASED
 
-*   examples/024_bdffonts, lib/PDF/Builder.pm, 
-      lib/PDF/Builder/Resource/BaseFont.pm
-     BDF (bitmapped fonts) some work that slightly improves. Work in progress.
+    examples/024_bdffonts-README-examples.output, lib/PDF/Builder.pm, 
+      lib/PDF/Builder/Resource/BaseFont.pm, 
+      lib/PDF/Builder/Resource/Font/BdFont.pm, tools/3_examples.pl, 
+      INFO/old/examples.bat
+     BDF (bitmapped fonts) now working properly, provided you have a good
+      .bdf file as your starting point. They're ugly enough not to be all
+      that useful, but might be used to decorative effect in chapter titles
+      and major headings (not suitable for body text!).
 
     lib/PDF/Builder/Docs.pm, lib/PDF/Builder/Resource/CIDFont/TrueType.pm
      Improve documentation of ttfont's -nosubset and -noembed flags.

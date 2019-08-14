@@ -15,9 +15,10 @@ my $compress = 'none'; # uncompressed streams
 #my $compress = 'flate'; # compressed stream
 
 my $doDump = 0; # one page per character
-my $doText = 0; # Lorem Ipsum text
+my $doText = 1; # Lorem Ipsum text
 
-my $LoremIpsum=q|Sed ut perspiciatis, unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt, explicabo. Nemo enim ipsam voluptatem, quia voluptas sit, aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem ipsum, quia dolor sit, amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt, ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus, qui blanditiis praesentium voluptatum deleniti atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupiditate non provident, similique sunt in culpa, qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio, cumque nihil impedit, quo minus id, quod maxime placeat, facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet, ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.|;
+my $LoremIpsum=q|Sed ut perspiciatis, unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt, explicabo. Nemo enim ipsam voluptatem, quia voluptas sit, aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem ipsum, quia dolor sit, amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt, ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus, qui blanditiis praesentium voluptatum deleniti atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupiditate non provident, similique sunt in culpa, qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.|;
+#Nam libero tempore, cum soluta nobis est eligendi optio, cumque nihil impedit, quo minus id, quod maxime placeat, facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet, ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.|;
 
 ##push @ARGV, "../../old PDF-APIx/work-PDF-Builder/codec/codec.bdf" if !scalar @ARGV; # TEMP
 die "Require one BDFont file on command line.\n" if !scalar @ARGV;
@@ -31,13 +32,13 @@ my $pdf = PDF::Builder->new(-compress => $compress);
 
 if ($doDump) {
 # loop through characters in font file. ONE PAGE per character!!
+my $font = $pdf->corefont('Helvetica');
 my $fontsize = 10;
 foreach my $char (@{$data->{'char2'}}) {
     my $page = $pdf->page();
     $page->mediabox('A4'); # 595,842
 
     my $txt = $page->text();
-    my $font = $pdf->corefont('Helvetica');
     my $gfx = $page->gfx();  # BDF char is presented as an image
     print "C: $char->{'NAME'} ($char->{'ENCODING'})\n";
     my @bbx = @{$char->{'BBX'}};
@@ -49,8 +50,7 @@ foreach my $char (@{$data->{'char2'}}) {
     my $stream = pack('H*', $char->{'hex'});
     
     my $y = $bbx[1]; # vertical dimension of character (bits)
-    next unless $y;
-    my $x = 8*length($stream)/$y; 
+                     # to be shifted up or down by bbx[3] bits
 
     my $xpos = 100;
     my $ypos = 760;
@@ -61,18 +61,22 @@ foreach my $char (@{$data->{'char2'}}) {
       $txt->font($font, $fontsize);
       $txt->fillcolor('black');
       $txt->text("CHR(".$char->{'ENCODING'}.")");
-##print "$char->{'hex'} bbx=@bbx, len(stream) = ".length($stream).", x/y = $x/$y\n"; # TEMP
     my $cx = $xpos + $bbx[2];
     my $cy = $ypos + $bbx[3];
     $gfx->strokecolor('red'); # draw character start point and baseline
-    $gfx->move($xpos, $ypos+10); 
+                              # (10 high x 15 wide box)
+    $gfx->linewidth(1);
+    $gfx->move($xpos-1, $ypos+10-1); 
     $gfx->vline($ypos);
     $gfx->hline($xpos + 15);
     $gfx->stroke();
     $gfx->strokecolor('black');
+
+    next unless $y;  # empty char has $y = 0
+    my $x = 8*length($stream)/$y; 
     my $img = qq|q $x 0 0 $y $cx $cy cm
 BI
-/Interpolate false/Decode [1 0]/H $y/W $x/BPC 1/CS/G
+/Interpolate false /Decode [1 0] /H $y /W $x /BPC 1 /CS /G
 ID $stream
 EI 
 Q|;
@@ -82,13 +86,17 @@ Q|;
 } # loop through characters in font file that was read in
 } # do we show one character per page?
 
+# show one page of 256 glyphs, in specified coding
 my $sx = 33;  # cell width
 my $sy = 45;  # cell height
 my $fx = 20;  # ascender max
 
 my $f1 = $pdf->corefont('Helvetica');
+my $f2 = $pdf->corefont('Times');
 
-my $font = $pdf->bdfont($ARGV[0]);
+#my $font = $pdf->bdfont($ARGV[0]);  # default block style
+#my $font = $pdf->bdfont($ARGV[0], -style=>'block'); # explicit block style
+my $font = $pdf->bdfont($ARGV[0], -style=>'dot');
 
 my $page = $pdf->page();
 $page->mediabox('A4'); # 595x842
@@ -96,7 +104,7 @@ $page->mediabox('A4'); # 595x842
 my $gfx = $page->gfx();
 
 my $txt = $page->text();
-$txt->strokecolor('#000');
+$txt->strokecolor('#000'); # actually, only filling
 $txt->fillcolor('#000');
 $txt->font($font, $fx);
 
@@ -124,14 +132,9 @@ foreach my $yp (0..15) {
 	my $c  = chr($ci);
         $txt->translate(50+($sx*$x),50+($sy*$y)); # character position
         $txt->text($c); # the character itself, in bitmapped font
-	 # unfortunately, is a solid block for now 
 
-        my $wx = $font->width($c)*$fx;  # character width in ? units
-##if ($ci == 32) { $wx = 300/3; }
-##if ($ci == 33) { $wx = 200/3; }
-##if ($ci == 34) { $wx = 250/3; }
-##if ($ci == 35) { $wx = 350/3; }
-	my $wxs = $wx/$fx*1.5;  # desired on-screen width in pixels
+        my $wx = $font->width($c)*$fx;  # character width in grid units (1000)
+	my $wxs = $wx;  # desired on-screen width in pixels
 
 	# draw lt blue character cell: width of character, full des/asc height
         $gfx->strokecolor('lightblue');
@@ -160,13 +163,7 @@ foreach my $yp (0..15) {
         $txt2->translate(50+($sx*$x)+2,50+($sy*$y)-19);
         $txt2->text($font->glyphByEnc($ci)); # glyph name
         $txt2->translate(50+($sx*$x)+2,50+($sy*$y)-24);
-       #$txt2->text(sprintf('wx=%d',$font->wxByEnc($ci)));  # glyph width
-my $gw = $font->wxByEnc($ci);
-##if ($ci == 32) { $gw = 200; }
-##if ($ci == 33) { $gw = 200; }
-##if ($ci == 34) { $gw = 250; }
-##if ($ci == 35) { $gw = 350; }
-$txt2->text(sprintf('wx=%d',$gw));  # glyph width
+        $txt2->text(sprintf('wx=%d',$font->wxByEnc($ci)));  # glyph width
     } # column loop (x)
 } # row loop (yp/y)
 
@@ -176,8 +173,17 @@ my $textL = $LoremIpsum;
 $page = $pdf->page();
 $page->mediabox('A4');
 $txt = $page->text();
-$txt->transform(-translate => [50, 800]);
 $txt->fillcolor('black');
+
+$txt->transform(-translate => [50, 800]);
+$txt->font($f1, 18);
+$txt->lead(18*1.25);
+$txt->text("Some 18 point Helvetica text");
+$txt->font($f2, 18);
+$txt->lead(18*1.25);
+$txt->text("   Some 18 point Times-Roman text");
+
+$txt->transform(-translate => [50, 800-18*1.25]);
 $txt->font($font, 18);
 $txt->lead(18*1.25);
 my $toprint;
@@ -191,7 +197,6 @@ while ($textL ne '') {
 delete $gfx->{'Filter'};
 delete $txt->{'Filter'};
 delete $txt2->{'Filter'};
-#$pdf->{'pdf'}->{' version'} = 1.4;
 my $myName = basename($ARGV[0]);
 $myName =~ s/\.bdf$//i;  # trim off extension
 $pdf->saveas("$0.$myName.pdf");
