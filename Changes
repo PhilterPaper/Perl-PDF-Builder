@@ -2,11 +2,10 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
-*   Reverse dependencies (e.g., Graphics::TIFF) not showing up, neither are
-      optional items in dependency graph. Try something else, after confirming
-      that optional items SHOULD show up in reverse dependencies (?). 
+3.016     2019-08-15  UNRELEASED
 
-3.016     2019-08-13  UNRELEASED
+    INFO/RoadMap, CONTRIBUTING, MANIFEST, README
+     Add a road map describing where we'd like to take PDF::Builder.
 
     examples/024_bdffonts-README-examples.output, lib/PDF/Builder.pm, 
       lib/PDF/Builder/Resource/BaseFont.pm, 
