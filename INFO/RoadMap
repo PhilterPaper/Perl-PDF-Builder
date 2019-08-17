@@ -1,4 +1,4 @@
-Road Map for Future Development of PDF::Builder                 15 August 2019
+Road Map for Future Development of PDF::Builder                 16 August 2019
 
 In order to encourage others to contribute code and/or algorithms to the
 effort, I am publishing this road map of where I would like the product to go.
@@ -20,7 +20,8 @@ requirements for money/donations (but the result is still free software).
 
 The assignment to section I or II is somewhat arbitrary, and an item could move 
 from one to the other. Some of these items are already listed in bug reports, 
-or as feature requests.
+or as feature requests. There is no particular order to these items (i.e.,
+they are not ranked by priority).
 
 =============================================================================
 I. Items to add to the core product
@@ -42,18 +43,18 @@ B. Unification of font support: including character set and encoding support
    to be built on the fly for a page (like a synthetic font), with translations
    to single bytes for all glyphs. If the resulting font exceeds 256 
    characters, something would have to be done to split the page into two or
-   more sections, each with their own font.
+   more sections, each with their own embedded virtual font.
 
 C. Improved documentation, possibly even a book giving detailed explanations
    and examples, as both a reference and a tutorial. Needless to say, there
    would have to be sufficient interest to warrant the time and expense of
    writing/editing and publishing (in any format) a book to be sold!
 
-D. PDF/A (archival document management, RT 120375): this might be throwing a
-   few flags/overriding flags to force font embedding and no encryption/
-   passwords. There may be other stuff that needs to be done to achieve
-   recognition as a proper archival format (and there are apparently several
-   archival formats).
+D. PDF/A (archival document management, RT 120375): this might be more than
+   throwing a few flags/overriding flags to force font embedding and no 
+   encryption/ passwords. There may be other stuff that needs to be done to 
+   achieve recognition as a proper archival format (and there are apparently 
+   several archival formats).
 
 E. JPEG2000 image file support (CTS 12): I don't know if this is worth it, as
    there seems to be very little use of this, but if someone is interested...
@@ -77,7 +78,7 @@ G. Fix Small Caps (and capitalization in general) for ligatures (CTS 13):
 
 H. Fallback glyphs (CTS 5) when a desired glyph is not found in one font,
    but can be found in another. This is similar to HTML when you give a font
-   family list.
+   family list in CSS.
 
 I. Support for tagged structure (CTS 17 and RT 120375). At least, don't corrupt
    an existing tagged PDF file when extracting pages.
@@ -88,7 +89,7 @@ J. Adding comment fields to any object (and possibly standalone comments as
 
 K. Text method to move to arbitrary points: relative or absolute movement
    horizontally and vertically (a range of units), including tab support 
-   (including \t and \v embedded in text).
+   (including \t and \v embedded in text), and maybe \n while we're at it.
 
 =============================================================================
 II. Items to add to a separate area

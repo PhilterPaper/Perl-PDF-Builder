@@ -2,7 +2,9 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
-3.016     2019-08-15  UNRELEASED
+3.017     2019-08-16  UNRELEASED
+
+3.016     2019-08-16
 
     INFO/RoadMap, CONTRIBUTING, MANIFEST, README
      Add a road map describing where we'd like to take PDF::Builder.
