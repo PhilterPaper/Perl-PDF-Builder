@@ -6,7 +6,7 @@ no warnings qw[ deprecated recursion uninitialized ];
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
 our $VERSION = '3.016'; # VERSION
-my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
 
 use Carp;
 use Encode qw(:all);
@@ -78,6 +78,10 @@ PDF::Builder - Facilitates the creation and modification of PDF files
     $pdf->saveas('/path/to/new.pdf');
 
 =head1 SOME SPECIAL NOTES
+
+See the file README (in downloadable package and on CPAN) for a summary of 
+prerequisites and tools needed to install PDF::Builder, both mandatory and 
+optional.
 
 =head2 SOFTWARE DEVELOPMENT KIT
 

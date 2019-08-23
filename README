@@ -17,6 +17,32 @@ fails to install -- PDF::Builder is still quite usable. Read about it in
 PDF::Builder::Docs. Conversely, if you need to use one or more, and they were
 not automatically installed, you will need to manually initiate an install.
 
+REQUIREMENTS ======================================================
+
+Perl 5.18 or higher (it will probably run on somewhat earlier versions, but 
+  the CPAN installer may refuse to install it).
+
+Libraries used, available from CPAN --
+
+ Compress::Zlib (should be automatically installed)
+ Font::TTF (should be automatically installed)
+ Test::Exception (should be automatically installed, needed only for 
+   installation tests)
+ Test::Memory::Cycle (should be automatically installed, needed only for 
+   installation tests)
+ Graphics::TIFF (may be automatically installed, but is not mandatory. 
+   Recommended if using TIFF image functions)
+ Image::PNG::Libpng (may be automatically installed, but is not mandatory.
+   Recommended for enhanced PNG image functions)
+
+Other than an installer for standard CPAN packages (such as 'cpan' on
+Strawberry Perl for Windows), no other tools or manually-installed prereqs
+are needed (worst case, you can unpack the .tar.gz file and copy files into
+place yourself!). Currently there are no compiles and links done during the
+install process, only copying of .pm Perl module files.
+
+===================================================================
+
 This software is Copyright (c) 2017-2019 by Phil M. Perry.
 Previous copyrights are held by others (Steve Simms, Alfred Reibenschuh, 
 et al.).
@@ -27,7 +53,8 @@ This is free software, licensed under:
 
 See INFO/RoadMap file for the PDF::Builder road map.
 See CONTRIBUTING file for how to contribute to the project.
-See INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues.
+See INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues
+  (preferred), or the author's website.
 See INFO/DEPRECATED file for information on deprecated features.
 See INFO/KNOWN_INCOMP file for known incompatibilities with PDF::API2.
 See INFO/Changes* files for older change logs.
