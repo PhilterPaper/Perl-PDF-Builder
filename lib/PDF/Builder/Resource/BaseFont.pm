@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
 
 use Compress::Zlib;
 use Encode qw(:all);
@@ -117,7 +117,11 @@ sub tounicodemap {
                 $stream .= qq|endbfrange\n|;
                 $stream .= qq|$i beginbfrange\n|;
             }
-            $stream .= sprintf(qq|<%04x> <%04x> <%04x>\n|, $j, $j, $self->uniByCId($j));
+            # Default to 0000 if uniByCId returns undef in order to match
+            # previous behavior minus an uninitialized value warning.  It's
+            # worth looking into what should be happening here, since this may
+            # not be the correct behavior.
+            $stream .= sprintf(qq|<%04x> <%04x> <%04x>\n|, $j, $j, ($self->uniByCId($j) // 0));
         }
         $stream .= "endbfrange\n";
     } else {
