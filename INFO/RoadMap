@@ -40,21 +40,23 @@ A. Proper TTF/OTF support (RT 113700), especially ligature replacement and
    uses Pango, hopefully the other stuff will come along for free. We'll see.
    For Western (simple) scripts, automatic ligature support would be wonderful,
    but we need to be able to suppress selected ligatures (e.g., 'ff' in the
-   word 'shelfful'). Support for swashes and alternate glyph choices would be
-   very nice to have. For complex scripts like Arabic family and southern/
-   southeastern Asian families, proper support (Pango?) is vital.
+   English word 'shelfful'). Support for swashes and alternate glyph choices 
+   would be very nice to have (embedded markup language?). For complex scripts 
+   like Arabic family and southern/southeastern Asian families, proper support 
+   (Pango?) is vital.
 
 B. Unification of font support: including character set and encoding support
    improvements [see CTS 16 and CTS 23] to make more commonality between using 
    UTF-8 and single byte encodings, across all the font types (core, TrueType, 
-   Type 1, etc.). One problem with core fonts is that only the Latin-1 glyph
-   set has widths defined, and only single byte encodings are possible (similar
-   for Type 1/PS fonts). To support UTF-8 for core and PS, the font might have
-   to be built on the fly for a page (like a synthetic font), with translations
-   to single bytes for all glyphs. If the resulting font exceeds 256 
-   characters, something would have to be done to split the page into two or
-   more sections, each with their own embedded virtual font. Glyph widths
-   would have to be available for all characters.
+   Type1/PS, etc.). One problem with core fonts is, even though most core fonts 
+   are already TrueType, that only the Latin-1 glyph set has widths defined, 
+   and only single byte encodings are possible (similar for Type1/PS fonts). To 
+   support UTF-8 for core and PS, the font might have to be built on the fly 
+   for a page (like a synthetic font), with translations to single bytes for 
+   all glyphs. If the resulting font exceeds 256 characters, something would 
+   have to be done to split the page internally into two or more sections, 
+   each with their own embedded virtual font. Glyph widths would have to be 
+   available for all characters.
 
 C. Improved documentation, possibly even a book giving detailed explanations
    and examples, as both a reference and a tutorial. Needless to say, there
@@ -73,13 +75,18 @@ E. JPEG2000 image file support (CTS 12): I don't know if this is worth it, as
 
 F. Fix Bar Code generation (CTS 1): there seems to be something quite wrong
    with the current bar code generation, so it's possible that no one is using
-   it in real documents yet. I suspect that the use of XForms (relocatable
-   text and graphics) for the bar image is not scaling nicely, and may have to 
-   be replaced by drawn graphics primitives (text and graphics drawn in their
-   final place). Many other 1D and 2D bar codes (including QR) would be good,
-   but perhaps the bar codes should go into a separate module, due to their
-   potentially large code size. Even the existing 5 or so formats could be 
-   moved out, as presumably no one is using them yet.
+   it in real documents yet. It's also possible that I'm not writing my test
+   cases properly -- does anyone know if they work? I suspect that the use of 
+   XForms (relocatable text and graphics) for the bar image is not scaling 
+   nicely, and may have to be replaced by drawn graphics primitives (text and 
+   graphics drawn in their final place). Many other 1D and 2D bar codes 
+   (including QR) would be good, but perhaps the bar codes should go into a 
+   separate module, due to their potentially large code size and use of "new"
+   Perl modules. Even the existing 5 or so formats could be moved out, as 
+   presumably no one is using them yet (if they are, in fact, broken). This is 
+   in section I, as bar codes are already implemented in the base, but it's 
+   possible that bar codes could be removed and reimplemented in section II as 
+   a separate library or module.
 
 G. Fix Small Caps (and capitalization in general) for ligatures (CTS 13):
    some ligatures given in Unicode or single byte encodings don't get properly
@@ -88,7 +95,9 @@ G. Fix Small Caps (and capitalization in general) for ligatures (CTS 13):
    uppercase version doesn't exist in the font, or use GSUB processing to 
    recreate a ligature from the capital letters). As Perl doesn't seem to handle
    capitalizing ligatures properly, a "capitals" function would need to be 
-   offered, as well as improvements to the Small Caps in "synfonts".
+   offered, as well as improvements to the Small Caps in "synfonts". Various
+   non-Latin single characters (e.g., Greek terminal/nonterminal sigma, German
+   eszett, long s) also may need proper handling for capitalization.
 
 H. Fallback glyphs (CTS 5) when a desired glyph is not found in one font,
    but can be found in another. This is similar to HTML when you give a font
@@ -105,16 +114,21 @@ K. Text method to move to arbitrary points: relative or absolute movement
    horizontally and vertically (a range of units), including tab support 
    (including \t and \v embedded in text), and maybe \n while we're at it.
 
-   Note that tabs bring up some issues. First, a tab by character count (e.g.,
-   to the next n8-th column) is useful only for monospaced fonts, and no 
-   changes in font size in the line. Thus, tab stops would be more useful when
-   defined by some absolute dimension. Second, tabbing is usually done to get
-   text columns (sub columns), which involves a lot of manual setup and 
-   twiddling of text. Consider using a TABLE within the column or page to get
-   text organized into the desired format (see "tbl" addition).
+   Note that tabs bring up some issues. First, a tab by character count (the
+   traditional way, e.g., to the next n8-th column) is useful only for 
+   monospaced fonts, and no changes in font size in the line. Thus, tab stops 
+   would be more useful when defined by some absolute dimension (e.g., inches 
+   or ems) of column position. Second, tabbing is usually done to get text 
+   columns (sub columns), which involves a lot of manual setup and twiddling of 
+   text. Consider using a TABLE within the column or page to get text organized 
+   into the desired format (see "tbl" addition in section II).
+
+L. Determine what it is about "CJK" fonts (.ttf and .otf) that makes them
+   incompatible with synfont [RT 130040] and embedding [RT 130041], and fix if 
+   possible. Are separate CJK fonts even necessary these days?
 
 =============================================================================
-II. Items to add to a separate area
+II. Items to add to a separate area (new module or sub-module)
 
 These are things that not everyone will require, and so should be split out 
 into possibly a separate module (dependent on PDF::Builder). Some of these
@@ -133,16 +147,22 @@ B. Virtual pages: this would be related to item (A) (paragraph shaping), where
    other rearrangements across columns and pages, where the starting location
    of a line of text is in the buffer, and it can be updated when moving the
    line around. Even individual words might be tagged (location and hyphenation
-   points) so that lines could be broken at will.
+   points) so that lines could be broken at will. Even a limited amount of
+   virtuality (virtual line output) could be useful for resetting a baseline
+   to accommodate a change in font size -- this might involve tagging a word or
+   block of words of the same height.
 
 C. General text flowing capability, to fill irregularly shaped columns (such
-   as with intruding inserts or margin notes) in a balanced manner. This would
-   also include flowing text around images, tables, or other inserts to avoid
+   as with intruding inserts or margin notes) in a balanced manner, including
+   spanning headings across all columns, where appropriate. This would also
+   include flowing text around images, tables, or other inserts to avoid
    leaving large empty sections of pages (e.g., have a large table that floats
    to the next page, with text after it that could easily come before it on
    the original page). Something to handle cross references would be handy 
    here, to output "see table X above" or "below", "on the previous page"/"on 
    the next page", "on page X", etc. in a prescribed and consistent manner.
+   Note that it might be good to notify the user during processing that such a 
+   move has been done, so that it can be inspected.
 
 D. Font Families: per CTS 22, make it easier to deal with switching fonts
    and variations within a font (bold, italic, size, color, underline, small
@@ -154,17 +174,18 @@ D. Font Families: per CTS 22, make it easier to deal with switching fonts
    least with font-specification markup.
 
 E. Continuing (D), eventually much of HTML and other common markups (headings, 
-   quotes, entities, tables, lists, etc.) supported. One goal would be to
+   quotes, HTML entities, tables, lists, etc.) supported. One goal would be to
    eventually support enough of each markup to have a separate converter 
    product (HTMLtoPDF, troffToPDF, etc.), but support for full Javascript and
    CSS (for HTML pages) will be a bear! Some level of macros (predefined
-   strings) would be useful.
+   strings) would be useful. Non-HTML might be converted to HTML or Pango
+   format first.
 
 F. Support for SVG graphics (drawing), support for troff's eqn, pic, and tbl
    markup languages to make it easier to do anything other than plain text.
    LaTeX equation and table handling would be good to have, too, to avoid 
-   having to rewrite marked up text. Also a full graphing functions library 
-   (line, bar, scatter plots etc. in 2D and 3D).
+   having to rewrite marked up text. Also provide a full graphing functions 
+   library (stacked/unstacked line, bar, scatter plots etc. in 2D and 3D).
 
 G. Prepress production markup: convenience functions to place a watermark or
    draft notice on all (or selected) pages, crop marks (based on trimbox),
