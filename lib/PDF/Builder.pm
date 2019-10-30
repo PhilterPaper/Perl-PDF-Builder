@@ -1220,7 +1220,8 @@ sub openpage {
         weaken $page->{' apipdf'};
         weaken $page->{' api'};
         $self->{'pdf'}->out_obj($page);
-        if (($rotate = $page->find_prop('Rotate')) and (not defined($page->{' fixed'}) or $page->{' fixed'} < 1)) {
+        if ((not defined($page->{' fixed'}) or $page->{' fixed'} < 1) and 
+            ($rotate = $page->find_prop('Rotate')) ) {
             $rotate = ($rotate->val() + 360) % 360;
 
             if ($rotate != 0 and not $self->default('nounrotate')) {
