@@ -2,14 +2,22 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
-3.017     2019-10-29  UNRELEASED
+3.017     2019-11-09  UNRELEASED
+
+    Makefile.PL, lib/PDF/Builder/Docs.pm, README
+      Remove "optional" libraries from attempt to install. It was not clear
+      whether they would actually be installed or how users would react to
+      failures to install them. Most of all, there was no information passed
+      to owners of these optional libraries that their efforts were bearing
+      fruit!
 
     lib/PDF/Builder/Resource/Font/Corefont-Postscript-SynFont-BdFont.pm
       Check -encode for (invalid) multibyte encodings such as UTF*. There are
       probably more encoding names to be added later (East Asian alphabets,
       in particular). Bitmapped distribution fonts (BdFont) doesn't appear to
       support -encode, so remove it from the POD. TrueType fonts (alone)
-      I<do> support multibyte encodings (as do CJK).
+      I<do> support multibyte encodings (as do CJK). Ref PDF::API2 PR 20
+      https://github.com/ssimms/pdfapi2/pull/20.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm restrict rotate() method
       to multiple of 90 degrees. Also swap 'Rotate' property test order so

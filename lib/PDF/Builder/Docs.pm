@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
 
 # originally part of Builder.pm, it was split out due to its length
 
@@ -76,12 +76,9 @@ will give you improved speed, the ability to use 16 bit samples, and the
 ability to read interlaced PNG files. See resolved bug report RT 124349, as well
 as C<image_png>, for more information.
 
-Note that the installation process I<may> attempt to install these libraries
-automatically. If it does, and fails, PDF::Builder will still be operable (just
-some advanced features may be missing). If any of these libraries are installed
-but you do not plan to use them, feel free to remove them to free up space. On
-the other hand, if they are not automatically installed and you wish to use
-them, you will have to manually initiate the installation of such modules.
+Note that the installation process will B<not> attempt to install these 
+libraries automatically. If you wish to use them, you will have to manually 
+initiate the installation of such modules (e.g., with "cpan install").
 
 =head2 Strings (Character Text)
 

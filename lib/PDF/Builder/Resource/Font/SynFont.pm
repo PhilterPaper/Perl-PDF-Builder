@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
 
 use Math::Trig;    # CAUTION: deg2rad(0) = deg2rad(360) = 0!
 use Unicode::UCD 'charinfo';

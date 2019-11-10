@@ -1132,9 +1132,11 @@ sub end {
 
 =item $page = $pdf->page($page_number)
 
-Returns a new page object.  By default, the page is added to the end
-of the document.  If you include an existing page number, the new page
-will be inserted in that position, pushing existing pages back.
+Returns a I<new> page object.  By default, the page is added to the end
+of the document.  If you give an existing page number, the new page
+will be inserted in that position, pushing existing pages back by 1 (e.g., 
+C<page(5)> would insert an empty page 5, with the old page 5 now page 6,
+etc.
 
 If $page_number is -1, the new page is inserted as the second-last page;
 if $page_number is 0, the new page is inserted as the last page.
@@ -1185,6 +1187,8 @@ sub page {
 =item $page = $pdf->openpage($page_number)
 
 Returns the L<PDF::Builder::Page> object of page $page_number.
+This is similar to C<< $page = $pdf->page() >>, except that C<$page> is 
+I<not> a new, empty page; but contains the contents of that existing page.
 
 If $page_number is 0 or -1, it will return the last page in the
 document.
@@ -1342,7 +1346,8 @@ sub _walk_obj {
 
 =item $xoform = $pdf->importPageIntoForm($source_pdf, $source_page_number)
 
-Returns a Form XObject created by extracting the specified page from $source_pdf.
+Returns a Form XObject created by extracting the specified page from 
+$source_pdf.
 
 This is useful if you want to transpose the imported page somewhat
 differently onto a page (e.g. two-up, four-up, etc.).
@@ -1448,13 +1453,21 @@ sub importPageIntoForm {
     return $xo;
 } # end of importPageIntoForm()
 
+=item $page = $pdf->import_page($source_pdf)
+
+=item $page = $pdf->import_page($source_pdf, $source_page_number)
+
 =item $page = $pdf->import_page($source_pdf, $source_page_number, $target_page_number)
 
 Imports a page from $source_pdf and adds it to the specified position
 in $pdf.
 
-If C<$source_page_number> or C<$target_page_number> is 0 (the default) or -1, 
-the last page in the document is used.
+If the C<$source_page_number> is omitted, 0, or -1; the last page of the 
+source is imported.
+If the C<$target_page_number> is omitted, 0, or -1; the imported page will be
+placed as the new last page of the target (C<$pdf>).
+Otherwise, as with the C<page()> method, the page will be inserted before an 
+existing page of that number.
 
 B<Note:> If you pass a page I<object> instead of a page I<number> for
 C<$target_page_number>, the contents of the page will be B<merged> into the
@@ -1514,7 +1527,7 @@ sub import_page {
     $self->{'apiimportcache'}->{$s_pdf} = $self->{'apiimportcache'}->{$s_pdf} || {};
 
     # we now import into a form to keep
-    # all that nasty resources from polluting
+    # all those nasty resources from polluting
     # our very own resource naming space.
     my $xo = $self->importPageIntoForm($s_pdf, $s_page);
 

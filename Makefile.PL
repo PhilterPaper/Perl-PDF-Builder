@@ -96,10 +96,10 @@ my %WriteMakefileArgs =
     #   user can remove any optional installed library if they don't need it
     #     and want to reclaim the space
     #   update t/00-all-usable.t to exclude modules using these libraries!
-    recommends => {
-        'Graphics::TIFF' => 0,     # TIFF image processing
-        'Image::PNG::Libpng' => 0, # advanced/fast PNG image processing
-    },
+##  recommends => {
+##      'Graphics::TIFF' => 0,     # TIFF image processing
+##      'Image::PNG::Libpng' => 0, # advanced/fast PNG image processing
+##  },
 
   },
 
