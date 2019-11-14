@@ -2,7 +2,45 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
-3.017     2019-11-09  UNRELEASED
+3.017     2019-11-14  UNRELEASED
+
+    INFO/DEPRECATED, t/content.t, lib/PDF/Builder/Content.pm, 
+      lib/PDF/Builder/Resource/ExtGState.pm
+     Remove deprecated method meterlimit() (use correct spelling miterlimit).
+    INFO/DEPRECATED, t/content.t, lib/PDF/Builder/Content.pm 
+     Remove deprecated method hspace() (use corrected name hscale).
+    INFO/DEPRECATED, lib/PDF/Builder/Content.pm 
+     Remove deprecated dash pattern options -full and -clear (replaced by
+      -pattern option).
+    INFO/DEPRECATED, t/deprecations.t, lib/PDF/Builder/NamedDestination.pm,
+      lib/PDF/Builder/Resource.pm
+     Remove deprecated method new_api() (use new instead).
+    INFO/DEPRECATED, t/papersizes.t, lib/PDF/Builder/Resource/PaperSizes.pm
+     Remove deprecated non-standard paper sizes 4a, 2a, 4b, 2b 
+      (use 4a0, 2a0, 4b0, 2b0 standard sizes instead).
+    INFO/DEPRECATED, lib/PDF/Builder/Resource/XObject/Form/BarCode/code3of9.pm
+     Remove deprecated method encode_3of9_string_w_chk() (use 
+      encode_3of9_string(*, 1) instead).
+    INFO/DEPRECATED, lib/PDF/Builder/Resource/XObject/Form/BarCode/code3of9.pm
+     Remove deprecated method encode_3of9_w_chk() (use 
+      encode_3of9(*, 1, 0) instead).
+    INFO/DEPRECATED, lib/PDF/Builder/Resource/XObject/Form/BarCode/code3of9.pm
+     Remove deprecated method encode_3of9_ext() (use 
+      encode_3of9(*, 0, 1) instead).
+    INFO/DEPRECATED, lib/PDF/Builder/Resource/XObject/Form/BarCode/code3of9.pm
+     Remove deprecated method encode_3of9_ext_w_chk() (use 
+      encode_3of9(*, 1, 1) instead).
+    INFO/DEPRECATED, lib/PDF/Builder/Resource/XObject/Image.pm
+     Rename deprecated methods imask() to mask() and 
+      bpc() to bits_per_component().
+    INFO/DEPRECATED, lib/PDF/Builder.pm
+     Rename deprecated methods openScalar() to open_scalar() and 
+      importpage() to import_page().
+    INFO/DEPRECATED, lib/PDF/Builder/Annotation.pm
+     Rename deprecated method pdfile() to pdf_file().
+
+    lib/PDF/Builder/Resource/XObject/Image/JPEG.pm 
+      check for uninitialized var per API2 2.037
 
     Makefile.PL, lib/PDF/Builder/Docs.pm, README
       Remove "optional" libraries from attempt to install. It was not clear

@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Util;
@@ -234,11 +234,7 @@ sub miterlimit {
     return $self;
 }
 
-# Deprecated: miterlimit was originally named incorrectly
-sub meterlimit { 
-    warn "Use miterlimit instead of meterlimit";
-    return miterlimit(@_); 
-}
+# Note: miterlimit was originally named incorrectly as meterlimit, renamed
 
 =item $egs->dash(@dash)
 

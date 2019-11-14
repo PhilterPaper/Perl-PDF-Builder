@@ -446,16 +446,10 @@ B<Example:>
     ...
     $pdf->saveas('our/new.pdf');
 
-B<Note:> Old name C<openScalar> is B<deprecated!> Convert your code to
-use C<open_scalar> instead.
 
 =cut
 
-# Deprecated (renamed)
-sub openScalar { 
-    warn "Use open_scalar instead of openScalar";
-    return open_scalar(@_); 
-} ## no critic
+# Note: openScalar() renamed to open_scalar()
 
 sub open_scalar {
     my ($class, $content, %options) = @_;
@@ -1485,16 +1479,9 @@ B<Example:>
 
 B<Note:> You can only import a page from an existing PDF file.
 
-B<Note:> Old name C<importpage> is B<deprecated!> Convert your code to
-use C<import_page> instead.
-
 =cut
 
-# Deprecated (renamed)
-sub importpage { 
-    warn "Use import_page instead of importpage";
-    return import_page(@_); 
-} ## no critic
+# importpage() renamed to import_page()
 
 sub import_page {
     my ($self, $s_pdf, $s_idx, $t_idx) = @_;
