@@ -2,13 +2,18 @@
 This archive contains the distribution PDF::Builder.
 See Changes file for the version.
 
-  Facilitates the creation and modification of PDF files
+  A Perl library to facilitate the creation and modification of PDF files
 
 The installable Perl package may be obtained from https://www.cpan.org, 
 as PDF::Builder. If you install this product, only the run-time modules will
 be installed. Download the full .tar.gz file and unpack it (hint: on Windows,
 7-Zip File Manager is an excellent tool) to get utilities, test buckets, 
 example usage, etc.
+
+Alternatively, you can obtain the full source files from
+https://github.com/PhilterPaper/Perl-PDF-Builder, where the ticket list (bugs,
+enhancement requests, etc.) is also kept. Unlike the CPAN version, this will
+have to be manually installed (copy files).
 
 Note that there are several "optional" libraries (Perl modules) used to extend
 and improve PDF::Builder. The installation process will not attempt to install 
@@ -18,21 +23,20 @@ whether or not you want to manually install any of them.
 
 REQUIREMENTS ======================================================
 
-Perl 5.18 or higher (it will probably run on somewhat earlier versions, but 
+Perl 5.18 or higher (it will likely run on somewhat earlier versions, but 
   the CPAN installer may refuse to install it).
 
 Libraries used, available from CPAN --
 
- Compress::Zlib (should be automatically installed)
- Font::TTF (should be automatically installed)
- Test::Exception (should be automatically installed, needed only for 
-   installation tests)
- Test::Memory::Cycle (should be automatically installed, needed only for 
-   installation tests)
+ REQUIRED, should be automatically installed...
+  Compress::Zlib
+  Font::TTF
+  Test::Exception (needed only for installation tests)
+  Test::Memory::Cycle (needed only for installation tests)
 
- Graphics::TIFF (is not mandatory, recommended if using TIFF image functions)
- Image::PNG::Libpng (is not mandatory, recommended for enhanced PNG image 
-   function processing)
+ OPTIONAL, install manually if wanted...
+  Graphics::TIFF (recommended if using TIFF image functions)
+  Image::PNG::Libpng (recommended for enhanced PNG image function processing)
 
 Other than an installer for standard CPAN packages (such as 'cpan' on
 Strawberry Perl for Windows), no other tools or manually-installed prereqs
