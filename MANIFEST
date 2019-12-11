@@ -60,6 +60,7 @@ examples/BarCode.pl
 examples/Bspline.pl
 examples/Content.pl
 examples/ContentText.pl
+examples/Rotated.pl
 examples/examples.output
 examples/README
 examples/Windows/027_winfont

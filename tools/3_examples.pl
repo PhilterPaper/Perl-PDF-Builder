@@ -98,6 +98,9 @@ my (@example_list, @example_results);
   push @example_list, "ContentText.pl";
   push @example_results, "create examples/ContentText.pdf, showing multiple pages demonstrating the\n capabilities of the Content/Text.pm library advanced text methods.\n";
 
+  push @example_list, "Rotated.pl";
+  push @example_results, "create examples/Rotated.pdf, showing a way of embedding rotated pages\n within a document of unrotated pages.\n";
+
   # require provision of a core font in %args
   push @example_list, "ShowFont.pl";
   push @example_results, "create examples/ShowFont.<type>.<font name>.pdf, showing multiple pages\n demonstrating the display of various encodings.\n";

@@ -297,4 +297,7 @@ ContentText.pl
             camelCase, punctuation, letter runs, slashes
             same, but outdented to force splits at different points
 
+Rotated.pl  pp 1 and 4 portrait mode Lorem Ipsum text
+            pp 2 and 3 landscape mode two column Lorem Ipsum text
+
 ShowFont.pl   run without command line arguments to get help

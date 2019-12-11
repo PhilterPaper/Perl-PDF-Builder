@@ -39,6 +39,7 @@ perl examples\BarCode.pl
 perl examples\Bspline.pl
 perl examples\Content.pl
 perl examples\ContentText.pl
+perl examples\Rotated.pl
 perl examples\ShowFont.pl Helvetica
 echo off
 echo === do not erase files if you are going to run "contrib.bat"
