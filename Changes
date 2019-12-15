@@ -2,7 +2,7 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
-3.017     2019-12-11  UNRELEASED
+3.017     2019-12-15  UNRELEASED
 
     examples/Rotated.pl, examples/README, examples/examples.output,
       examples/ContentText.pl, MANIFEST, tools/3_examples.pl, 
@@ -11,6 +11,7 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
 
     CONTRIBUTING, README minor updates
 
+    INFO/KNOWN_INCOMP general statement about large batch of removals
     INFO/DEPRECATED, t/content.t, lib/PDF/Builder/Content.pm, 
       lib/PDF/Builder/Resource/ExtGState.pm
      Remove deprecated method meterlimit() (use correct spelling miterlimit).
@@ -61,7 +62,7 @@ See also INFO/Changes_2018 for earlier version 3 release logs.
       probably more encoding names to be added later (East Asian alphabets,
       in particular). Bitmapped distribution fonts (BdFont) doesn't appear to
       support -encode, so remove it from the POD. TrueType fonts (alone)
-      I<do> support multibyte encodings (as do CJK). Ref PDF::API2 PR 20
+      /do/ support multibyte encodings (as do CJK). Ref PDF::API2 PR 20
       https://github.com/ssimms/pdfapi2/pull/20.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm restrict rotate() method

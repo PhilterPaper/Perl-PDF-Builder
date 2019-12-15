@@ -4,7 +4,7 @@ although some are interfaces that have been removed. Rather than keeping the
 old names around forever, they will be sunset and removed in due time. Please 
 periodically check this list and make sure you have plans to change or remove 
 these deprecated usages before they disappear from PDF::Builder. Initially,
-the deprecated items may only be commented out (so they can be restored by a
+the deprecated items MAY only be commented out (so they can be restored by a
 user in an emergency), but eventually they WILL be removed.
 
 In order of scheduled removal date:
