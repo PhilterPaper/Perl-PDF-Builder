@@ -12,7 +12,9 @@ my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
 
 use PDF::Builder;
 
-my $filename = 'Rotated';
+my $PDFname = $0;
+   $PDFname =~ s/\..*$//;  # remove extension
+   $PDFname .= '.pdf';     # add new extension
 my $pgsize = 'letter';  # A4, universal also good choices
 
 my $marginTop = 72;  # points
@@ -196,4 +198,4 @@ $text->translate(($width+$margins{'L'}-$margins{'R'})/2,
 $text->text_center('-- 4 --');
 
 # ========================
-$pdf->saveas($filename.'.pdf');
+$pdf->saveas($PDFname);

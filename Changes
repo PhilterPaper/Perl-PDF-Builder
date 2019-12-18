@@ -2,7 +2,9 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
-3.017     2019-12-15  UNRELEASED
+3.017     2019-12-16  UNRELEASED
+
+    examples/Rotated.pl, examples/ShowFont.pl minor cleanup
 
     examples/Rotated.pl, examples/README, examples/examples.output,
       examples/ContentText.pl, MANIFEST, tools/3_examples.pl, 

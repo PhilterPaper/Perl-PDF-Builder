@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
 
 use PDF::Builder;
 use Encode;
@@ -190,7 +190,8 @@ if ($T1metrics ne '') { print "T1 metrics file: $T1metrics\n"; }
 # for UTF-8, $from to $to, with max 256 entries per page (xxx00 through xxxFF)
 
 foreach my $encode (@encode_list) {
-    # xxx0 through xxxF across 
+    # xxx0 through xxxF across 30 wide
+    my $x_offset = 10;
     my @x_list = ( 95, 125, 155, 185, 215, 245, 275, 305, 
 	          335, 365, 395, 425, 455, 485, 515, 545);
     # xx0x through xxFx down
@@ -306,10 +307,10 @@ foreach my $encode (@encode_list) {
 	        if ($type eq 'corefont' && 
 		    $planes[$plane]->wxMissingByEnc($c_val)) {
 	            $grfx->fillcolor(1.0, 0.7, 0.7); # for missing width
-		    $grfx->move($x_list[$col], $y_list[15-$row]-2);
-		    $grfx->line($x_list[$col], $y_list[15-$row]+18);
-		    $grfx->line($x_list[$col]+20, $y_list[15-$row]+18);
-		    $grfx->line($x_list[$col]+20, $y_list[15-$row]-2);
+		    $grfx->move($x_list[$col]+$x_offset, $y_list[15-$row]-2);
+		    $grfx->line($x_list[$col]+$x_offset, $y_list[15-$row]+18);
+		    $grfx->line($x_list[$col]+$x_offset+20, $y_list[15-$row]+18);
+		    $grfx->line($x_list[$col]+$x_offset+20, $y_list[15-$row]-2);
 		    $grfx->close();
 		    $grfx->fill();
 	            $grfx->fillcolor('black');
