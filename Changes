@@ -2,7 +2,12 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
-3.017     2019-12-16  UNRELEASED
+3.017     2019-12-29  UNRELEASED
+
+    lib/PDF/Builder/Basic/PDF/File-Pages.pm [RT 131147] fix problem with
+      Null object bubbling up and forcing an improper method invocation. Fix
+      used (by Vadim Repin) is in File.pm, while a narrower scope (and 
+      presumably a bit safer) fix (by Klaus Ethgen) is on standby in Pages.pm.
 
     examples/Rotated.pl, examples/ShowFont.pl minor cleanup
 
