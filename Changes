@@ -2,7 +2,14 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2018 for earlier version 3 release logs.
 
-3.017     2019-12-29  UNRELEASED
+3.017     2019-12-31 
+
+    examples/RMtutorial.pl, examples/Boxes.pl, examples/README,
+      examples/examples.output, MANIFEST, tools/3_examples.pl,
+      INFO/old/examples.bat
+     Rich Measham's tutorial on using PDF::API2, adapted for PDF::Builder. 
+      Also a demonstration of the interaction of PDF boxes (media, crop,
+      bleed, trim, art).
 
     lib/PDF/Builder/Basic/PDF/File-Pages.pm [RT 131147] fix problem with
       Null object bubbling up and forcing an improper method invocation. Fix

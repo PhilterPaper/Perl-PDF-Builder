@@ -36,9 +36,11 @@ perl examples\050_pagelabels
 perl examples\055_outlines
 perl examples\060_transparency
 perl examples\BarCode.pl
+perl examples\Boxes.pl
 perl examples\Bspline.pl
 perl examples\Content.pl
 perl examples\ContentText.pl
+perl examples\RMtutorial.pl
 perl examples\Rotated.pl
 perl examples\ShowFont.pl Helvetica
 echo off
