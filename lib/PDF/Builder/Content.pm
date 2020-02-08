@@ -6,7 +6,7 @@ use strict;
 no warnings qw( deprecated recursion uninitialized );
 
 # VERSION
-my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.018'; # manually update whenever code is changed
 
 use Carp;
 use Compress::Zlib qw();
@@ -2709,6 +2709,11 @@ If C<$spacing> is given, the current setting is replaced by that value and
 C<$self> is B<returned> (to permit chaining).
 If C<$spacing> is not given, the current setting is B<returned>.
 
+B<CAUTION:> be careful about using C<charspace> if you are using a connected
+font. This might include Arabic, Devanagari, Latin cursive handwriting, and so 
+on. You don't want to leave gaps between characters, or cause overlaps. For 
+such fonts and typefaces, set the C<charspace> spacing to 0.
+
 =cut
 
 sub _charspace {
@@ -3554,6 +3559,35 @@ You may want to use C<textstart()> and C<textend()> calls instead, and even
 then, there are many side effects either way. It is generally not useful 
 to suspend text mode with ET/textend and BT/textstart, but it is possible, 
 if you I<really> need to do it.
+
+Another, useful, case is when your input PDF is from the B<Chrome browser> 
+printing a page to PDF with
+headers and/or footers. In some versions, this leaves the PDF page with a
+strange scaling (such as the page height in points divided by 3300) and the 
+Y-axis flipped so 0 is at the top. This causes problems when trying to add
+additional text or graphics in a new text or graphics record, where text is 
+flipped (mirrored) upsidedown and at the wrong end of the page. If this 
+happens, you might be able to cure it by adding
+
+    $scale = .23999999; # example, 792/3300, examine PDF or experiment!
+     ...
+    if ($scale != 1) {
+        my @pageDim = $page->mediabox();     # e.g., 0 0 612 792
+        my $size_page = $pageDim[3]/$scale;  # 3300 = 792/.23999999
+        my $invScale = 1.0/$scale;           # 4.16666684
+        $text->add("$invScale 0 0 -$invScale 0 $size_page cm");
+    }
+
+as the first output to the C<$text> stream. Unfortunately, it is difficult to
+predict exactly what C<$scale> should be, as it may be 3300 units per page, or
+a fixed amount. You may need to examine an uncompressed PDF file stream to 
+see what is being used. It I<might> be possible to get the input (original) 
+PDF into a string and look for a certain pattern of "cm" output
+
+    .2399999 0 0 -.23999999 0 792 cm
+
+or similar, which is not within a save/restore (q/Q). If the stream is 
+already compressed, this might not be possible.
 
 =cut
 

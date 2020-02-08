@@ -2,7 +2,21 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.018     2020-01-01  UNRELEASED
+3.018     2020-02-08  UNRELEASED
+
+    lib/PDF/Builder/Content.pm  Add example of using add() function to
+      cancel Chrome browser scaling and Y-axis flip before new content is
+      added to an existing PDF.
+
+    lib/PDF/Builder/Content.pm, lib/PDF/Builder/Content/Text.pm
+      Remind users not to use charspace() when working with a connected (script)
+      font such as Arabic, Devanagari, cursive handwriting, etc. Add -nocs
+      option to text line fill (justified) routines to not use any charspace()
+      values when expanding or shrinking text content to fit.
+
+    lib/PDF/Builder/Basic/PDF/File.pm. The earlier fix for corrupted xref table
+      only ran under diagnostics. Now only the warning message is under the
+      diagnostics flag (-diags), and the fixup attempt is always run.
 
     INFO/Changes_2019, Changes, MANIFEST, lib/PDF/Builder.pm, README,
      Makefile.PL, INFO/KNOWN_INCOMP
