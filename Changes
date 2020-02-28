@@ -2,7 +2,13 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.018     2020-02-08  UNRELEASED
+3.018     2020-02-28  UNRELEASED
+
+    INFO/RoadMap  Update some items. Mention other packages PDF::Table,
+      Text::Layout, and HarfBuzz::Shaper that may be useful.
+
+    lib/PDF/Builder/Resource/CIDFont.pm  For TTF (ttfont) fix improper 
+      ToUnicode cmap so that a PDF may be searched (was broken in 3.016).
 
     lib/PDF/Builder/Content.pm  Add example of using add() function to
       cancel Chrome browser scaling and Y-axis flip before new content is
