@@ -6,7 +6,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.018'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
 
 use File::Basename;
 
@@ -114,13 +114,6 @@ character positioning. There is no guarantee that a given font file includes
 all the desired glyphs, nor that the widths will be absolutely the same, even
 in different releases of the same font.
 
-Furthermore, the original [typeface].pm files' glyph width listings included
-B<only characters appearing in Latin-1 (ISO-8859-1)>; all other characters are
-likely to get narrow "missing glyph" widths, leading to overlap of characters, 
-even if the glyph I<is> found and printable! Most of the [typeface].pm files' 
-glyph widths have been updated to include all the glyphs found in that font, 
-but it is still possible for some glyphs to be missing if you use a different 
-font file.  
 =cut
 
 sub _look_for_font {

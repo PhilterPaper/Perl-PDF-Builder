@@ -64,6 +64,8 @@ foreach my $fn (@ARGV) {
     # warning: apparently not all fonts have fontbbox
     my @fbbx = $font->fontbbox();
     print $FH "# fontbbox = (@fbbx)\n";
+    my $missingwidth = $font->missingwidth();
+   #print $FH "# missingwidth = $missingwidth\n";
     # TBD other settings from $font to be added later
 
     # CId list is simply 0..number of glyphs in font-1

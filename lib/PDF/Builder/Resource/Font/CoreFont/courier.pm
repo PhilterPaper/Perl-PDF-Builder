@@ -23,6 +23,8 @@ sub data { return {
     'isfixedpitch' => '1',
     'italicangle' => '0',
     'missingwidth' => '600',
+   #'stdhw' => '**',
+   #'stdvw' => '**',
     'underlineposition' => '-100',
     'underlinethickness' => '50',
     'xheight' => '426',

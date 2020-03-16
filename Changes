@@ -2,7 +2,7 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.018     2020-03-04  UNRELEASED
+3.018     2020-03-15  UNRELEASED
 
     examples/021_synfonts, examples/examples.output, examples/README
      The synthetic font example only showed for regular BankGothic font.
@@ -11,6 +11,7 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
       weight (no bold) and the italic is questionable.
 
     tools/TTFdump.pl, MANIFEST, lib/PDF/Builder/Resource/Font/CoreFont.pm,
+      lib/PDF/Builder/Resource/BaseFont.pm, examples/022_truefonts,
       lib/PDF/Builder/Resource/Font/CoreFont/courier*.pm-
       helvetica*.pm-times*.pm-georgia*.pm-trebuchet*.pm-verdana*.pm
      Add full set of glyph widths to core font metrics files [RT 57248].
@@ -20,7 +21,8 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
       that can be dropped into a [typeface].pm file. Only glyph widths table
       was changed (no other metrics). Arial was used for Helvetica metrics,
       BankGothic could not be found (not sure what's being substituted for
-      it), and various symbology fonts were not changed.
+      it), and various symbology fonts were not changed. Courier "missing
+      width" updated to reflect the character used to indicate a missing glyph.
 
     INFO/RoadMap  Update some items. Mention other packages PDF::Table,
       Text::Layout, and HarfBuzz::Shaper that may be useful.

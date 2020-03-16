@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.018'; # manually update whenever code is changed
 
 use Compress::Zlib;
 use Encode qw(:all);
@@ -290,7 +290,9 @@ sub avgwidth {
 
     my $aw = $self->data()->{'avgwidth'};
     $aw ||= ((
-		    # numbers are character-frequency weighting counts
+	# numbers are character-frequency weighting counts
+	# presumably for English text... ? it may be a little off for
+	# other languages
         $self->wxByGlyph('a')*64  +
         $self->wxByGlyph('b')*14  +
         $self->wxByGlyph('c')*27  +
