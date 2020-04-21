@@ -2,7 +2,26 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.018     2020-03-15  UNRELEASED
+3.018     2020-04-20  UNRELEASED
+
+    lib/PDF/Builder/Content/Hyphenate_basic.pm, lib/PDF/Builder/Content.pm-
+      Docs.pm, lib/PDF/Builder/Resource/BaseFont.pm, examples/HarfBuzz.pl, 
+      examples/resources/HarfBuzz_example.pdf, examples/examples.output, 
+      examples/README, tools/3_examples.pl, INFO/old/examples.bat, 
+      Makefile.PL, README, MANIFEST
+     Implement support for use of HarfBuzz::Shaper (to shape chunks of text).
+      [RT 113700] This is an optional installation (manually done). 
+      examples/HarfBuzz.pl will not run if you do not have HarfBuzz::Shaper 
+      installed.  HarfBuzz_example.pdf is provided in examples/resources/ in 
+      case you can't (yet) run HarfBuzz.pl. It demonstrates the use of 
+      HarfBuzz::Shaper for a variety of Western (ligatures and kerning), 
+      Middle Eastern (script and RTL), and South and Southeast Asian scripts.
+
+    lib/PDF/Builder/Content.pm  Add 'none' option to text underline and
+      strikethrough options. This was added to permit the option (underline or
+      strikethrough) to be given in the code, but allow a 'none' value in 
+      those cases where drawing an underline or strikethrough is not desired.
+      This is still the default.
 
     examples/021_synfonts, examples/examples.output, examples/README
      The synthetic font example only showed for regular BankGothic font.

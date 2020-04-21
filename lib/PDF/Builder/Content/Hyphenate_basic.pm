@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.014'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.018'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -205,7 +205,7 @@ sub splitWord {
 	    }
 	    # $width should already count the trailing space in the existing
 	    # line, or full width if empty
-	    $len = $self->advancewidth("$trial$h");
+	    $len = $self->advancewidth("$trial$h", %opts);
 	    if ($len > $width) { next; }
 
 	    # any letter doubling needed?

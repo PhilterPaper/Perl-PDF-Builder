@@ -99,6 +99,9 @@ my %WriteMakefileArgs =
 ##  recommends => {
 ##      'Graphics::TIFF' => 0,     # TIFF image processing
 ##      'Image::PNG::Libpng' => 0, # advanced/fast PNG image processing
+##      'HarfBuzz::Shaper' => 0,   # text shaping for Latin script ligatures
+##                                 #  and kerning, and for many complex scripts
+##                                 #  both LTR and RTL directions.
 ##  },
 
   },
