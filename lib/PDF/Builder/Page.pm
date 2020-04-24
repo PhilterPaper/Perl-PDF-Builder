@@ -373,6 +373,10 @@ the left of the screen.
 
 (This allows you to auto-rotate to landscape without changing the mediabox!)
 
+Do not confuse this C<rotate()> call with the I<graphics context> rotation 
+(Content.pm) C<rotate()>, which permits any angle, is of opposite direction, 
+and does not shift the origin!
+
 =cut
 
 sub rotate {

@@ -160,6 +160,16 @@ Rotates the coordinate system counter-clockwise (anti-clockwise) around the
 current origin. Use a negative argument to rotate clockwise. Note that 360 
 degrees will be treated as 0 degrees.
 
+B<Note:> Unless you have already moved (translated) the origin, it is, and will
+remain, at the lower left corner of the visible sheet. It will I<not>
+automatically shift to another corner. For example, a rotation of +90 degrees
+(counter-clockwise) will leave the entire visible sheet in negative Y territory (0 at the left edge, -original_width at the right edge), while X remains in
+positive territory (0 at bottom, +original_height at the top edge).
+
+This C<rotate()> call permits any angle. Do not confuse it with the I<page>
+rotation C<rotate> call, which only permits increments of 90 degrees (with
+opposite sign!), but I<does> shift the origin to another corner of the sheet.
+
 =cut
 
 sub _rotate {
@@ -3572,6 +3582,15 @@ B<E>nd is analogous to using C<text_right()>.
 Set to 1, it prints out positioning and glyph CID information (to STDOUT) for
 each glyph in the chunk. The default is 0 (no information dump).
 
+=item -minKern => amount (default 1)
+
+If the amount of kerning (font character width I<differs from> glyph ax value) 
+is I<larger> than this many character grid units, use the unaltered ax for the
+width (C<textHS()> will output a kern amount in the TJ operation). Otherwise,
+ignore kerning and use ax of the actual character width. The intent is to avoid
+bloating the PDF code with unnecessary tiny kerning adjustments in the TJ 
+operation.
+
 =back
 
 =item %opts
@@ -3641,6 +3660,7 @@ sub textHS {
     if (defined $settings->{'language'}) { 
 	$language = $settings->{'language'}; 
     }
+    my $minKern = $settings->{'minKern'} || 1; # greater than 1 don't omit kern
 
     my $dokern = 1; # why did they take away smartmatch???
     foreach my $feature (@{ $settings->{'features'} }) { 
@@ -3659,7 +3679,7 @@ sub textHS {
     }
     # TBD consider -indent option   (at Beginning of line)
 
-    my $chunkLength = $self->advancewidthHS($HSarray, $settings, %opts);
+    my $chunkLength = $self->advancewidthHS($HSarray, $settings, %opts, -doKern=>$dokern,-minKern=>$minKern);
     my $kernPts = 0; # amount of kerning (left adjust) this glyph
     my $prevKernPts = 0; # amount previous glyph (THIS TJ operator)
     my @currentOffset = (0, 0);
@@ -3706,15 +3726,24 @@ sub textHS {
 	# kerning for any LTR or RTL script? not just Latin script?
         if ($dokern) { 
 	    # kerning, etc. cw != ax, but ignore tiny differences
+	    # cw = width font (and Reader) thinks character is
             $cw = $font->wxByCId($g)/1000*$fontsize;
 	    # if kerning ( ax < cw ), set kern amount as difference.
-	    # let's just bite the bullet and accept some very small differences
-	    # in order to keep internal positioning = Reader's positioning
-	   #if ($dump && $cw != $ax) {
-           #    print "cw exceeds ax by ".sprintf("%.2f", $cw-$ax)."\n";
-	   #}
-	    # kerning to NEXT glyph (used on next loop)
+	    # very small amounts ignore by setting ax = cw 
+	    # (> minKern? use the kerning, else ax = cw)
+	    # Shaper may expand spacing, too!
 	    $kernPts = $cw - $ax;  # sometimes < 0 !
+	    if ($kernPts != 0) {
+		    if (int(abs($kernPts*1000/$fontsize)+0.5) <= $minKern) {
+		        # small amount, cancel kerning
+		        $kernPts = 0;
+		        $ax = $cw;
+		    }
+	    }
+	    if ($dump && $cw != $ax) {
+            print "cw exceeds ax by ".sprintf("%.2f", $cw-$ax)."\n";
+	    }
+	    # kerning to NEXT glyph (used on next loop)
 	    # this is why we use axs and axr instead of changing ax, so it
 	    # won't think a huge amount of kerning is requested!
 	}
@@ -3738,15 +3767,15 @@ sub textHS {
 	}
 
 	if ($dump) { # ...continued
-            print "advance x/y $ax/$ay ";  # modified ax
-            print "char width $cw ";
+        print "advance x/y $ax/$ay ";  # modified ax
+        print "char width $cw ";
 	    if ($ay != 0 || $dx != 0 || $dy != 0) {
 	        print "! "; # flag that adjustments needed
 	    }
 	    if ($kernPts != 0) {
 	        print "!! "; # flag that kerning is apparently done
 	    }
-            print "\n";
+        print "\n";
 	}
 
 	# dy not 0? end everything and output Td and do a Tj
@@ -3764,15 +3793,12 @@ sub textHS {
 	    # text matrix should be there, too
 	    # Reader is still back at Tm/Td plus any glyphs so far
             @currentPos = ($currentPos[0]+$currentOffset[0]+$xadj, 
- 	                   $currentPos[1]+$currentOffset[1]+$yadj); 
+ 	                       $currentPos[1]+$currentOffset[1]+$yadj); 
  	    $self->translate(@currentPos);
 
 	    $self->add("<$gCID> Tj");
 	    # add glyph to subset list
 	    $font->fontfile()->subsetByCId($g);
-	   #$currentOffset[0] += $ax + $dx;
-	   #$currentOffset[1] += $ay + $dy;  # for LTR/RTL ay probably always 0
- 	   #$self->matrix_update($ax + $dx, $ay + $dy);
 
 	    @currentOffset = (0, 0);
 	    # restore positions to base line for next character
@@ -3788,28 +3814,28 @@ sub textHS {
  	    $self->matrix_update($ax + $dx, $ay);
 	}
 
-	$prevKernPts = $kernPts;
+	$prevKernPts = $kernPts; # for next glyph's adjustment
 	$kernPts = 0;
     } # end of chunk by individual glyphs
     $self->_endCID();
 
     # if LTR, need to move to right end, if RTL, need to return to left end.
     if ($dir eq 'L') {
-	if      ($align eq 'B') {
-	    $mult = 1;
-	} elsif ($align eq 'C') {
-	    $mult = .5;
-	} else { # align E
-	    $mult = 0;
-	}
+	    if      ($align eq 'B') {
+	        $mult = 1;
+	    } elsif ($align eq 'C') {
+	        $mult = .5;
+	    } else { # align E
+	        $mult = 0;
+	    }
     } else { # dir R
-	if      ($align eq 'B') {
-	    $mult = -1;
-	} elsif ($align eq 'C') {
-	    $mult = -.5;
-	} else { # align E
-	    $mult = 0;
-	}
+	    if      ($align eq 'B') {
+	        $mult = -1;
+	    } elsif ($align eq 'C') {
+	        $mult = -.5;
+	    } else { # align E
+	        $mult = 0;
+	    }
     }
     $self->translate($startPos[0]+$chunkLength*$mult, $startPos[1]);
 
@@ -3845,6 +3871,7 @@ sub _endCID {
     my ($self) = @_;
     if (!$self->{' openglyphlist'}) { return; }
     $self->addNS(">] TJ ");
+    # TBD look into detecting empty list already, avoid <> in TJ
     $self->{' openglyphlist'} = 0;
     return;
 }
@@ -3863,15 +3890,19 @@ sub _outputCID {
 	$self->{' openglyphlist'} = 1;
     }
 
-    if ($dx-$kern == 0) { 
-	# no adjustment, just add to existing output
-	$self->addNS($glyph); # <> still open
+    if ($dx == $kern) { 
+	    # no adjustment, just add to existing output
+	    $self->addNS($glyph); # <> still open
     } else {
-	$dx -= $kern;
-	# adjust right by dx after closing glyph string
-	# dx/fontsize*1000 is units to move left, round to 1 decimal place
-	$dx *= (-1000/$self->{' fontsize'});
-	$self->addNS("> ".sprintf("%.2f", $dx)." <$glyph");
+	    $kern -= $dx;
+	    # adjust right by dx after closing glyph string
+	    # dx>0 is move char RIGHT, kern>0 is move char LEFT, both in points
+	    # kern/fontsize*1000 is units to move left, round to 1 decimal place
+	    # >0 means move left (in TJ operation) that many char grid units
+	    $kern *= (1000/$self->{' fontsize'});
+	    # output correction (char grid units) and this glyph in new <> string
+	    $self->addNS(sprintf("> %.1f <%s", $kern, $glyph));
+	    # TBD look into detecting empty list already, avoid <> in TJ
     }
     return;
 }
@@ -3881,6 +3912,8 @@ sub _outputCID {
 =item $width = $content->advancewidthHS($HSarray, $settings)
 
 Returns text chunk width (in points) for Shaper-defined glyph array.
+B<Note:> You must define the font and font size I<before> calling 
+C<advancewidthHS()>.
 
 =over
 
@@ -3896,9 +3929,28 @@ Currently none are used, and direction is assumed to be LTR or RTL.
 
 =item %opts
 
-Options. Currently there are none implemented. Unlike C<advancewidth()>, you
+Options. Unlike C<advancewidth()>, you
 cannot override the font, font size, etc. used by HarfBuzz::Shaper to calculate
 the glyph list.
+
+=over
+
+=item -doKern => flag (default 1)
+
+If 1, cancel minor kerns per C<-minKern> setting. This flag should be 0 (false)
+if B<-kern> was passed to HarfBuzz::Shaper (do not kern text).
+This is treated as 0 if an ax override setting is given.
+
+=item -minKern => amount (default 1)
+
+If the amount of kerning (font character width I<differs from> glyph ax value) 
+is I<larger> than this many character grid units, use the unaltered ax for the
+width (C<textHS()> will output a kern amount in the TJ operation). Otherwise,
+ignore kerning and use ax of the actual character width. The intent is to avoid
+bloating the PDF code with unnecessary tiny kerning adjustments in the TJ 
+operation.
+
+=back
 
 =back
 
@@ -3909,29 +3961,65 @@ Returns total width in points.
 sub advancewidthHS {
     my ($self, $HSarray, $settings, %opts) = @_;
 
+    # check if font and font size set
+    if ($self->{' fontset'} == 0) {
+        unless (defined($self->{' font'}) and $self->{' fontsize'}) {
+            croak q{Can't add text without first setting a font and font size};
+        }
+        $self->font($self->{' font'}, $self->{' fontsize'});
+        $self->{' fontset'} = 1;
+    }
+
+    my $doKern  = $opts{'-doKern'}  || 1; # flag
+    my $minKern = $opts{'-minKern'} || 1; # character grid units (about 1/1000 em)
+
     my $width = 0;
     my $ax = 0;
+    my $cw = 0;
     # simply go through the array and add up all the 'ax' values.
     # if 'axs' defined, use that instead of 'ax'
     # if 'axsp' defined, use that percentage of 'ax'
     # if 'axr' defined, reduce 'ax' by that amount (increase if <0)
     # if 'axrp' defined, reduce 'ax' by that percentage (increase if <0)
     #  otherwise use 'ax' value unchanged
+    #
+    # as in textHS(), ignore kerning (small difference between cw and ax)
+    # however, if user defined an override of ax, assume they want any
+    # resulting kerning! only look at -minKern (default 1 char grid unit)
+    # if original ax is used.
+    #
     # TBD vertical text 'ay' values?
     foreach my $glyph (@$HSarray) {
         $ax = $glyph->{'ax'};
 
-		if      (defined $glyph->{'axs'}) {
-	    	$width += $glyph->{'axs'};
-		} elsif (defined $glyph->{'axsp'}) {
-	    	$width += $glyph->{'axsp'}/100 * $ax;
-		} elsif (defined $glyph->{'axr'}) {
-	    	$width += ($ax - $glyph->{'axr'});
-		} elsif (defined $glyph->{'axrp'}) {
-	    	$width += $ax * (1 - $glyph->{'axrp'}/100);
-		} else {
-	    	$width += $ax;
-		}
+	    if      (defined $glyph->{'axs'}) {
+	        $width += $glyph->{'axs'};
+	    } elsif (defined $glyph->{'axsp'}) {
+	        $width += $glyph->{'axsp'}/100 * $ax;
+	    } elsif (defined $glyph->{'axr'}) {
+	        $width += ($ax - $glyph->{'axr'});
+	    } elsif (defined $glyph->{'axrp'}) {
+	        $width += $ax * (1 - $glyph->{'axrp'}/100);
+	    } else {
+	        if ($doKern) {
+	            # kerning, etc. cw != ax, but ignore tiny differences
+	            my $fontsize = $self->{' fontsize'};
+	            # cw = width font (and Reader) thinks character is (points)
+	            $cw = $self->{' font'}->wxByCId($glyph->{'g'})/1000*$fontsize;
+	            # if kerning ( ax < cw ), set kern amount as difference.
+	            # very small amounts ignore by setting ax = cw 
+	            # (> minKern? use the kerning, else ax = cw)
+	            # textHS() should be making the same adjustment as here
+	            my $kernPts = $cw - $ax;  # sometimes < 0 !
+	            if ($kernPts > 0) {
+		            if (int(abs($kernPts*1000/$fontsize)+0.5) <= $minKern) {
+		                # small amount, cancel kerning
+		                $ax = $cw;
+		            }
+	            }
+	        }
+	        $width += $ax;
+	    }
     }
 
     return $width;
