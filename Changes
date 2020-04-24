@@ -2,7 +2,7 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.018     2020-04-23  UNRELEASED
+3.018     2020-04-24  UNRELEASED
 
     lib/PDF/Builder/Content.pm-Page.pm
      [RT 132403] clarify documentation on the two different rotate() methods.

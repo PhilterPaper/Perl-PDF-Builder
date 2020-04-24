@@ -3679,7 +3679,8 @@ sub textHS {
     }
     # TBD consider -indent option   (at Beginning of line)
 
-    my $chunkLength = $self->advancewidthHS($HSarray, $settings, %opts, -doKern=>$dokern,-minKern=>$minKern);
+    my $chunkLength = $self->advancewidthHS($HSarray, $settings, 
+	              %opts, -doKern=>$dokern, -minKern=>$minKern);
     my $kernPts = 0; # amount of kerning (left adjust) this glyph
     my $prevKernPts = 0; # amount previous glyph (THIS TJ operator)
     my @currentOffset = (0, 0);
@@ -3734,8 +3735,8 @@ sub textHS {
 	    # Shaper may expand spacing, too!
 	    $kernPts = $cw - $ax;  # sometimes < 0 !
 	    if ($kernPts != 0) {
-		    if (int(abs($kernPts*1000/$fontsize)+0.5) <= $minKern) {
-		        # small amount, cancel kerning
+	        if (int(abs($kernPts*1000/$fontsize)+0.5) <= $minKern) {
+	            # small amount, cancel kerning
 		        $kernPts = 0;
 		        $ax = $cw;
 		    }
@@ -3789,12 +3790,14 @@ sub textHS {
 	    # consider ignoring any kern request, if vertically adjusting dy
 	    my $xadj = $dx - $prevKernPts;
 	    my $yadj = $dy;
-            # currentOffset should be at beginning of glyph before dx/dy
+        # currentOffset should be at beginning of glyph before dx/dy
 	    # text matrix should be there, too
 	    # Reader is still back at Tm/Td plus any glyphs so far
-            @currentPos = ($currentPos[0]+$currentOffset[0]+$xadj, 
- 	                       $currentPos[1]+$currentOffset[1]+$yadj); 
- 	    $self->translate(@currentPos);
+        @currentPos = ($currentPos[0]+$currentOffset[0]+$xadj, 
+ 	                   $currentPos[1]+$currentOffset[1]+$yadj); 
+#       $self->translate(@currentPos);
+ 	    $self->distance($currentOffset[0]+$xadj,
+	                    $currentOffset[1]+$yadj);
 
 	    $self->add("<$gCID> Tj");
 	    # add glyph to subset list
@@ -3804,7 +3807,8 @@ sub textHS {
 	    # restore positions to base line for next character
 		@currentPos = ($currentPos[0]+$prevKernPts-$dx+$ax, 
  		               $currentPos[1]-$dy+$ay); 
- 	    $self->translate(@currentPos);
+#	    $self->translate(@currentPos);
+ 	    $self->distance($prevKernPts-$dx+$ax, -$dy+$ay);
 
 	} else {
 	    # otherwise simply add glyph to TJ array, with possible x adj

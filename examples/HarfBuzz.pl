@@ -1,5 +1,18 @@
+#!/usr/bin/perl
+# demonstrate some usage of HarfBuzz::Shaper and related text calls
+# outputs HarfBuzz.pdf
+# author: Phil M Perry
+
 use strict;
 use warnings;
+
+# VERSION
+my $LAST_UPDATE = '3.018'; # manually update whenever code is changed
+
+my $PDFname = $0;
+   $PDFname =~ s/\..*$//;  # remove extension such as .pl
+   $PDFname .= '.pdf';     # add new extension pdf
+
 use PDF::Builder;
 
 # do NOT attempt to run unless HarfBuzz::Shaper is installed
@@ -15,7 +28,6 @@ if ($rc == 0) {
     exit;
 }
 
-my $fname = 'HarfBuzz';
 my $dokern = 1; # ttfont defaults -dokern to 0, Shaper to 1
 my $doliga = 1; # built-in ligatures
 
@@ -143,7 +155,7 @@ my %samples = (
    # Some Khmer text (a Cambodian script). I don't think the first "word" means
    # anything, but the second may be something like "a dog".
    'Khmer' => { 'title' => "Khmer", 
-	        'fontFile' => '/Users/Phil/Desktop/PDF Builder tickets/khmer/KhmerOS_.ttf',
+	        'fontFile' => '/Users/Phil/Desktop/PDF Builder tickets/D.O.N.E/khmer/KhmerOS_.ttf',
 		'dir' => 'L',
 		'script' => 'Khmr',
 		# KA COENG KA and "dog" CHA COENG KA AE 
@@ -351,7 +363,7 @@ for my $i (0 .. 3) {
 }
 
 ######
-$pdf->saveas($fname.'.pdf');
+$pdf->saveas($PDFname);
 
 ###################################################################
 
