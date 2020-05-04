@@ -2,7 +2,12 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.019     2020-04-25  UNRELREASED
+3.019     2020-05-04  UNRELEASED
+
+    INFO/CONVERSION, MANIFEST, README add conversion info for going from
+      PDF::API2 to PDF::Builder.
+
+    INFO/RoadMap minor updates
 
 3.018     2020-04-24 
 

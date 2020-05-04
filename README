@@ -65,6 +65,7 @@ See INFO/KNOWN_INCOMP file for known incompatibilities with PDF::API2.
 See INFO/Changes* files for older change logs.
 See INFO/PATENTS file for information on patents.
 See INFO/LICENSE file for the license.
+See INFO/CONVERSION file for how to convert from PDF::API2 to PDF::Builder
 
 INFO/old/ also has some build and test tool files that are not currently used.
 
