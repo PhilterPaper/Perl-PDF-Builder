@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '2.029'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.019'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -16,9 +16,9 @@ sub data { return {
     'fontname' => 'Symbol',
     'type' => 'Type1',
     'apiname' => 'Sym',
-    'ascender' => '600',
-    'capheight' => '600',
-    'descender' => '-200',
+    'ascender' => '600',                         # not defined in Adobe metrics
+    'capheight' => '600',                        # not defined in Adobe metrics
+    'descender' => '-200',                       # not defined in Adobe metrics
     'iscore' => '1',
     'isfixedpitch' => '0',
     'issymbol' => '1',
@@ -27,7 +27,7 @@ sub data { return {
     'stdvw' => '85',
     'underlineposition' => '-100',
     'underlinethickness' => '50',
-    'xheight' => '450',
+    'xheight' => '450',                          # not defined in Adobe metrics
     'firstchar' => '32',
     'lastchar' => '255',
     'char' => [ # DEF. ENCODING GLYPH TABLE

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.018'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.019'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -1116,6 +1116,7 @@ sub data { return {
         'commaabovecmb'       => 600,
         'commaaboverightcmb'       => 600,
         'commaarmenian'       => 600,
+        'commaaccent'       => 600,
         'commareversedabovecmb'       => 600,
         'commaturnedabovecmb'       => 600,
         'commaturnedmod'       => 600,
@@ -1677,6 +1678,7 @@ sub data { return {
         'section'       => 600,
         'segoltahebrew'       => 600,
         'seharmenian'       => 600,
+        'semicolon'       => 600,
         'seven'       => 600,
         'seveneighths'       => 600,
         'shaarmenian'       => 600,
