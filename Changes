@@ -2,7 +2,13 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.019     2020-05-16  UNRELEASED
+3.019     2020-05-28  UNRELEASED
+
+    lib/PDF/Builder/Resource/XObject/Image/PNG-PNG_IPL.pm ref PR #25 for 
+      PDF::API2. Apparently there can be some cases where the deletion of some
+      streams may cause errors in the vec() calls. This may be dependent on
+      the Perl version, use of nonstandard flags (such as -e), or other unusual
+      usage.
 
     lib/PDF/Builder/Resource/Font/CoreFont/courier-courierbold-courieroblique-
       courierboldoblique-helvetica-helveticabold-helveticaoblique-
