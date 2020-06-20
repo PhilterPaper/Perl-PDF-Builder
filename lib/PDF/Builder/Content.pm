@@ -6,7 +6,7 @@ use strict;
 no warnings qw( deprecated recursion uninitialized );
 
 # VERSION
-my $LAST_UPDATE = '3.018'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.019'; # manually update whenever code is changed
 
 use Carp;
 use Compress::Zlib qw();
@@ -2605,12 +2605,14 @@ sub shade {
 
 =item $content->image($image_object, $x,$y)
 
+=item $content->image($image_object)
+
     # Example
     my $image_object = $pdf->image_jpeg($my_image_file);
     $content->image($image_object, 100, 200);
 
 Places an image on the page in the specified location (specifies the lower 
-left corner of the image).
+left corner of the image). The default location is C<[0,0]>.
 
 If coordinate transformations have been made (see I<Coordinate
 Transformations> above), the position and scale will be relative to the
@@ -2626,6 +2628,9 @@ shown at 600dpi (i.e., one inch square), set the width and height to 72.
 
 sub image {
     my ($self, $img, $x,$y, $w,$h) = @_;
+
+    if (!defined $y) { $y = 0; }
+    if (!defined $x) { $x = 0; }
 
     if (defined $img->{'Metadata'}) {
         $self->_metaStart('PPAM:PlacedImage', $img->{'Metadata'});
@@ -2657,13 +2662,15 @@ sub image {
 
 =item $content->formimage($form_object, $x,$y)
 
+=item $content->formimage($form_object)
+
 Places an XObject on the page in the specified location (giving the lower
 left corner of the image) and scale (applied to the image's native height
 and width). If no scale is given, use 1 for both X and Y. If one scale is 
 given, use for both X and Y.  If two scales given, they are for (separately) 
 X and Y. In general, you should not greatly distort an image by using greatly 
 different scaling factors in X and Y, although it is now possible for when 
-that effect is desirable.
+that effect is desirable. The C<$x,$y> default is C<[0,0]>.
 
 B<Note> that while this method is named form I<image>, it is also used for the 
 pseudoimages created by the barcode routines. Images are naturally dimensionless
@@ -2679,6 +2686,10 @@ height (in pixels) in the call to C<formimage>.
 
 sub formimage {
     my ($self, $img, $x,$y, $sx,$sy) = @_;
+
+    if (!defined $y) { $y = 0; }
+    if (!defined $x) { $x = 0; }
+
     # if one scale given, use for both
     # if no scale given, use 1 for both
     if (!defined $sx) { $sx = 1; }

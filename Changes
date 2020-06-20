@@ -2,7 +2,12 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.019     2020-05-28  UNRELEASED
+3.019     2020-06-19  UNRELEASED
+
+    lib/PDF/Builder/Content.pm, lib/PDF/Builder/Resource/XObject/Image/PNM.pm
+     image() and form_image() calls default x,y to 0,0, so can call without
+      lower left corner x,y. PNM processing [RT 132844] fix routine forgetting 
+      where it is in the PNM file and failing to read part of it.
 
     lib/PDF/Builder/Resource/XObject/Image/PNG-PNG_IPL.pm ref PR #25 for 
       PDF::API2. Apparently there can be some cases where the deletion of some
