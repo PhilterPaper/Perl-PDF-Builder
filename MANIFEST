@@ -57,6 +57,7 @@ examples/031_color_hsv
 examples/032_separation
 examples/040_annotation
 examples/041_annot_fileattach
+examples/042_links
 examples/050_pagelabels
 examples/055_outlines
 examples/060_transparency

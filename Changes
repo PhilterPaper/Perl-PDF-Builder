@@ -2,7 +2,11 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.019     2020-06-19  UNRELEASED
+3.019     2020-06-20  UNRELEASED
+
+    examples/042_links, examples/README, examples/examples_output, 
+      tools/3_examples.pl, lib/PDF/Builder/Annotation.pm, MANIFEST
+     Improved documentation of annotation-based links: PDF links and targets.
 
     lib/PDF/Builder/Content.pm, lib/PDF/Builder/Resource/XObject/Image/PNM.pm
      image() and form_image() calls default x,y to 0,0, so can call without
