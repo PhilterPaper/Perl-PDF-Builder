@@ -2,7 +2,11 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.019     2020-06-20  UNRELEASED
+3.019     2020-07-03  UNRELEASED
+
+    .perl-version, Makefile.PL, README
+     New minimum Perl version 5.20, which is already 6 years old, so we don't
+      waste a lot of time chasing down bugs due to ancient Perl versions.
 
     examples/042_links, examples/README, examples/examples_output, 
       tools/3_examples.pl, lib/PDF/Builder/Annotation.pm, MANIFEST

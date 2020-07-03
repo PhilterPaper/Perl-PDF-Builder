@@ -23,7 +23,7 @@ whether or not you want to manually install any of them.
 
 REQUIREMENTS ======================================================
 
-Perl 5.18 or higher. It will likely run on somewhat earlier versions, but 
+Perl 5.20 or higher. It will likely run on somewhat earlier versions, but 
   the CPAN installer may refuse to install it. The reason this version was
   chosen was so that LTS (Long Term Support) versions of Perl going back about
   6 years are officially supported (by PDF::Builder), and older versions are 
