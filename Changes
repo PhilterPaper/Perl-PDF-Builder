@@ -2,11 +2,23 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.019     2020-07-03  UNRELEASED
+3.019     2020-07-15  UNRELEASED
+
+    lib/PDF/Builder/Content.pm, examples/HarfBuzz.pl, 
+      examples/resources/HarfBuzz_example.pdf
+     Support TTB (top to bottom) and BTT (bottom to top) vertical text in 
+      textHS(), now that HarfBuzz::Shaper supports these modes. Requires 
+      HarfBuzz::Shaper 0.23 or higher for TTB and BTT support, 0.21 for just 
+      LTR and RTL support. The "example" PDF is provided in case you don't
+      yet have HarfBuzz::Shaper installed, and want to see what it does. TTB is
+      recommended for both normally RTL (bidirectional) and LTR languages. 
+      Vertical writing is most often used with East Asian languages.
 
     .perl-version, Makefile.PL, README
      New minimum Perl version 5.20, which is already 6 years old, so we don't
       waste a lot of time chasing down bugs due to ancient Perl versions.
+      PDF::Builder will likely work with older Perl versions, but your installer
+      (e.g., cpan or cpanm) might refuse to install it.
 
     examples/042_links, examples/README, examples/examples_output, 
       tools/3_examples.pl, lib/PDF/Builder/Annotation.pm, MANIFEST

@@ -3523,8 +3523,9 @@ sub _metaEnd {
 Takes an array of hashes produced by HarfBuzz::Shaper and outputs them to the
 PDF output file. HarfBuzz outputs glyph CIDs and positioning information. 
 It may rearrange and swap characters (glyphs), and the result may bear no
-resemblence to the original Unicode point list. examples/HarfBuzz.pl shows a
-number of examples with Latin and non-Latin text. 
+resemblence to the original Unicode point list. You should see 
+examples/HarfBuzz.pl, which shows a number of examples with Latin and non-Latin 
+text, as well as vertical writing. 
 examples/resources/HarfBuzz_example.pdf is available in case you want to see 
 some examples and don't yet have HarfBuzz::Shaper installed.
 
@@ -3565,20 +3566,32 @@ HarfBuzz::Shaper (with C<$hb-E<gt>add_features()>, etc.) when you run it
 
 =item language => 'language_code'
 
-This item is optional and currently unused. It is the standard code for the
+This item is optional and currently does not appear to have any effect with
+HarfBuzz::Shaper. It is the standard code for the
 language to be used, such as 'en' or 'en_US'. You might need to define this for
 HarfBuzz::Shaper, in case that system can't surmise the language rules to be 
 used.
 
 =item dir => 'flag'
 
-Tell C<textHS()> whether this text is to be written in a LTR manner (B<L>, the 
-B<default>) or RTL manner (B<R>). Top-to-bottom (TTB/B<T>) and Bottom-to-top 
-(BTT/B<B>) directions are not yet implemented. From the script used (Unicode 
-points), HarfBuzz::Shaper can usually figure out what direction to write text 
-in, which is fortunate, as there is currently no way to override this 
-determination! Also, HarfBuzz::Shaper does not share its information with 
-PDF::Builder.
+Tell C<textHS()> whether this text is to be written in a Left-To-Right manner 
+(B<L>, the B<default>), Right-To-Left (B<R>), Top-To-Bottom (B<T>), or 
+Bottom-To-Top (B<B>). From the script used (Unicode points), HarfBuzz::Shaper 
+can usually figure out what direction to write text in. Also, HarfBuzz::Shaper 
+does not share its information with PDF::Builder -- you need to separately 
+specify the direction, unless you want to accept the default LTR direction. You 
+I<can> use HarfBuzz::Shaper's C<get_direction()> call (in addition to 
+C<get_language()> and C<get_script()>) to see what HarfBuzz thinks is the 
+correct text direction. 
+
+By the way, if the direction is RTL, HarfBuzz will reverse the text and return 
+an array with the last character first (to be written LTR). Likewise, for BTT, 
+HarfBuzz will reverse the text and return a string to be written from the top 
+down. Languages which are normally written horizontally are usually set 
+vertically with direction TTB. If setting text vertically, ligatures and 
+kerning, as well as character connectivity for cursive scripts, are 
+automatically turned off, so don't let the direction default to LTR or RTL in 
+the Shaper call, and then try to fix it up in C<textHS()>.
 
 =item align => 'flag'
 
@@ -3586,7 +3599,8 @@ Given the current output location, align the
 text at the B<B>eginning of the line (left for LTR, right for RTL), B<C>entered
 at the location, or at the B<E>nd of the line (right for LTR, left for RTL).
 The default is B<B>. B<C>entered is analogous to using C<text_center()>, and
-B<E>nd is analogous to using C<text_right()>.
+B<E>nd is analogous to using C<text_right()>. Similar alignments are done for
+TTB and BTT.
 
 =item dump => flag
 
@@ -3629,7 +3643,8 @@ if not given in an array with their instructions.
 
 Text is sent I<separately> to HarfBuzz::Shaper in 'chunks' ('segments') of a 
 single script (alphabet), a
-single direction (LTR or RTL), a single font file, and a single font size. A 
+single direction (LTR, RTL, TTB, or BTT), a single font file, 
+and a single font size. A 
 chunk may consist of a large amount of text, but at present, C<textHS()> can 
 only output a single line. For long lines that need to be split into 
 column-width lines, the best way may be to take the array of hashes returned by
@@ -3672,6 +3687,7 @@ sub textHS {
 	$language = $settings->{'language'}; 
     }
     my $minKern = $settings->{'minKern'} || 1; # greater than 1 don't omit kern
+    my (@ulxy1, @ulxy2);
 
     my $dokern = 1; # why did they take away smartmatch???
     foreach my $feature (@{ $settings->{'features'} }) { 
@@ -3679,6 +3695,7 @@ sub textHS {
         $dokern = 0;
 	last;
     }
+    if ($dir eq 'T' || $dir eq 'B') { $dokern = 0; }
 
     # check if font and font size set
     if ($self->{' fontset'} == 0) {
@@ -3690,20 +3707,24 @@ sub textHS {
     }
     # TBD consider -indent option   (at Beginning of line)
 
+    # Horiz width, Vert height
     my $chunkLength = $self->advancewidthHS($HSarray, $settings, 
 	              %opts, -doKern=>$dokern, -minKern=>$minKern);
     my $kernPts = 0; # amount of kerning (left adjust) this glyph
     my $prevKernPts = 0; # amount previous glyph (THIS TJ operator)
+
+    # Ltr: lower left of next character box
+    # Rtl: lower right of next character box
+    # Ttb: center top of next character box
+    # Btt: center bottom of next character box
     my @currentOffset = (0, 0);
     my @currentPos = $self->textpos();
     my @startPos = @currentPos;
 
-    # TBD deal with TTB and BTT directions (vertical text)
-    #     assuming LTR/RTL all ay = 0
     my $mult;
     # need to first back up (to left) to write chunk
-    # LTR B and RTL E write (LTR) at current position anyway
-    if ($dir eq 'L') {
+    # LTR/TTB B and RTL/BTT E write (LTR/TTB) at current position anyway
+    if ($dir eq 'L' || $dir eq 'T') {
 	if      ($align eq 'B') {
 	    $mult = 0;
 	} elsif ($align eq 'C') {
@@ -3711,7 +3732,7 @@ sub textHS {
 	} else { # align E
 	    $mult = -1;
 	}
-    } else { # dir R
+    } else { # dir R or B
 	if      ($align eq 'B') {
 	    $mult = -1;
 	} elsif ($align eq 'C') {
@@ -3720,11 +3741,18 @@ sub textHS {
 	    $mult = 0;
 	}
     }
-    $self->translate($currentPos[0]+$chunkLength*$mult, $currentPos[1]);
-    # now can just write chunk LTR
+    if ($mult != 0) {
+        if ($dir eq 'L' || $dir eq 'R') {
+            $self->translate($currentPos[0]+$chunkLength*$mult, $currentPos[1]);
+            # now can just write chunk LTR
+        } else {
+            $self->translate($currentPos[0], $currentPos[1]-$chunkLength*$mult);
+            # now can just write chunk TTB
+	}
+    }
 
     # start of any underline or strikethru
-    my @ulxy1 = (0, $self->textpos());
+    @ulxy1 = (0, $self->textpos());
 
     foreach my $glyph (@$HSarray) { # loop through all glyphs in chunk
 	my $ax = $glyph->{'ax'}; # output as LTR, +ax = advance to right
@@ -3748,9 +3776,9 @@ sub textHS {
 	    if ($kernPts != 0) {
 	        if (int(abs($kernPts*1000/$fontsize)+0.5) <= $minKern) {
 	            # small amount, cancel kerning
-		        $kernPts = 0;
-		        $ax = $cw;
-		    }
+		    $kernPts = 0;
+		    $ax = $cw;
+		}
 	    }
 	    if ($dump && $cw != $ax) {
             print "cw exceeds ax by ".sprintf("%.2f", $cw-$ax)."\n";
@@ -3779,15 +3807,15 @@ sub textHS {
 	}
 
 	if ($dump) { # ...continued
-        print "advance x/y $ax/$ay ";  # modified ax
-        print "char width $cw ";
-	    if ($ay != 0 || $dx != 0 || $dy != 0) {
-	        print "! "; # flag that adjustments needed
-	    }
-	    if ($kernPts != 0) {
-	        print "!! "; # flag that kerning is apparently done
-	    }
-        print "\n";
+            print "advance x/y $ax/$ay ";  # modified ax
+            print "char width $cw ";
+	        if ($ay != 0 || $dx != 0 || $dy != 0) {
+	            print "! "; # flag that adjustments needed
+	        }
+	        if ($kernPts != 0) {
+	            print "!! "; # flag that kerning is apparently done
+	        }
+            print "\n";
 	}
 
 	# dy not 0? end everything and output Td and do a Tj
@@ -3801,12 +3829,12 @@ sub textHS {
 	    # consider ignoring any kern request, if vertically adjusting dy
 	    my $xadj = $dx - $prevKernPts;
 	    my $yadj = $dy;
-        # currentOffset should be at beginning of glyph before dx/dy
+            # currentOffset should be at beginning of glyph before dx/dy
 	    # text matrix should be there, too
 	    # Reader is still back at Tm/Td plus any glyphs so far
-        @currentPos = ($currentPos[0]+$currentOffset[0]+$xadj, 
+            @currentPos = ($currentPos[0]+$currentOffset[0]+$xadj, 
  	                   $currentPos[1]+$currentOffset[1]+$yadj); 
-#       $self->translate(@currentPos);
+#           $self->translate(@currentPos);
  	    $self->distance($currentOffset[0]+$xadj,
 	                    $currentOffset[1]+$yadj);
 
@@ -3835,30 +3863,40 @@ sub textHS {
     $self->_endCID();
 
     # if LTR, need to move to right end, if RTL, need to return to left end.
-    if ($dir eq 'L') {
-	    if      ($align eq 'B') {
-	        $mult = 1;
-	    } elsif ($align eq 'C') {
-	        $mult = .5;
-	    } else { # align E
-	        $mult = 0;
-	    }
-    } else { # dir R
-	    if      ($align eq 'B') {
-	        $mult = -1;
-	    } elsif ($align eq 'C') {
-	        $mult = -.5;
-	    } else { # align E
-	        $mult = 0;
-	    }
+    # if TTB, need to move to the bottom, if BTT, need to return to top
+    if ($dir eq 'L' || $dir eq 'T') {
+	if      ($align eq 'B') {
+	    $mult = 1;
+	} elsif ($align eq 'C') {
+	    $mult = .5;
+	} else { # align E
+	    $mult = 0;
+	}
+    } else { # dir R or B
+	    $mult = -1;
+	if      ($align eq 'B') {
+	} elsif ($align eq 'C') {
+	    $mult = -.5;
+	} else { # align E
+	    $mult = 0;
+	}
     }
-    $self->translate($startPos[0]+$chunkLength*$mult, $startPos[1]);
+    if ($dir eq 'L' || $dir eq 'R') {
+        $self->translate($startPos[0]+$chunkLength*$mult, $startPos[1]);
+    } else {
+        $self->translate($startPos[0], $startPos[1]-$chunkLength*$mult);
+    }
 
-    my @ulxy2 = (0, $ulxy1[1]+$chunkLength, $ulxy1[2]);
+    if ($dir eq 'L' || $dir eq 'R') {
+        @ulxy2 = (0, $ulxy1[1]+$chunkLength, $ulxy1[2]);
+    } else {
+        @ulxy2 = (0, $ulxy1[1], $ulxy1[2]-$chunkLength);
+    }
 
     # need to swap ulxy1 and ulxy2? draw UL or ST L to R. direction of 'up'
-    # depends on LTR, so doesn't work if draw RTL.
-    if ($ulxy1[1] > $ulxy2[1]) {
+    # depends on LTR, so doesn't work if draw RTL. ditto for TTB/BTT.
+    if (($dir eq 'L' || $dir eq 'R') && $ulxy1[1] > $ulxy2[1] ||
+        ($dir eq 'T' || $dir eq 'B') && $ulxy1[2] < $ulxy2[2]) {
         my $t; 
         $t = $ulxy1[1]; $ulxy1[1]=$ulxy2[1]; $ulxy2[1]=$t;
         $t = $ulxy1[2]; $ulxy1[2]=$ulxy2[2]; $ulxy2[2]=$t;
@@ -3940,7 +3978,14 @@ See C<textHS()> for details.
 =item $settings
 
 the hash reference of settings. See C<textHS()> for details.
-Currently none are used, and direction is assumed to be LTR or RTL.
+
+=over
+
+=item dir => 'L' etc.
+
+the direction of the text, to know which "advance" value to sum up.
+
+=back
 
 =item %opts
 
@@ -3987,6 +4032,10 @@ sub advancewidthHS {
 
     my $doKern  = $opts{'-doKern'}  || 1; # flag
     my $minKern = $opts{'-minKern'} || 1; # character grid units (about 1/1000 em)
+    my $dir = $settings->{'dir'};
+    if ($dir eq 'T' || $dir eq 'B') { # vertical text
+	$doKern = 0;
+    }
 
     my $width = 0;
     my $ax = 0;
@@ -3997,47 +4046,50 @@ sub advancewidthHS {
     # if 'axr' defined, reduce 'ax' by that amount (increase if <0)
     # if 'axrp' defined, reduce 'ax' by that percentage (increase if <0)
     #  otherwise use 'ax' value unchanged
+    # if vertical text, use ay instead
     #
     # as in textHS(), ignore kerning (small difference between cw and ax)
     # however, if user defined an override of ax, assume they want any
     # resulting kerning! only look at -minKern (default 1 char grid unit)
     # if original ax is used.
-    #
-    # TBD vertical text 'ay' values?
+    
     foreach my $glyph (@$HSarray) {
         $ax = $glyph->{'ax'};
+	if ($dir eq 'T' || $dir eq 'B') {
+	    $ax = $glyph->{'ay'} * -1;
+	}
 
-	    if      (defined $glyph->{'axs'}) {
-	        $width += $glyph->{'axs'};
-	    } elsif (defined $glyph->{'axsp'}) {
-	        $width += $glyph->{'axsp'}/100 * $ax;
-	    } elsif (defined $glyph->{'axr'}) {
-	        $width += ($ax - $glyph->{'axr'});
-	    } elsif (defined $glyph->{'axrp'}) {
-	        $width += $ax * (1 - $glyph->{'axrp'}/100);
-	    } else {
-	        if ($doKern) {
-	            # kerning, etc. cw != ax, but ignore tiny differences
-	            my $fontsize = $self->{' fontsize'};
-	            # cw = width font (and Reader) thinks character is (points)
-	            $cw = $self->{' font'}->wxByCId($glyph->{'g'})/1000*$fontsize;
-	            # if kerning ( ax < cw ), set kern amount as difference.
-	            # very small amounts ignore by setting ax = cw 
-	            # (> minKern? use the kerning, else ax = cw)
-	            # textHS() should be making the same adjustment as here
-	            my $kernPts = $cw - $ax;  # sometimes < 0 !
-	            if ($kernPts > 0) {
-		            if (int(abs($kernPts*1000/$fontsize)+0.5) <= $minKern) {
-		                # small amount, cancel kerning
-		                $ax = $cw;
-		            }
+	if      (defined $glyph->{'axs'}) {
+	    $width += $glyph->{'axs'};
+	} elsif (defined $glyph->{'axsp'}) {
+	    $width += $glyph->{'axsp'}/100 * $ax;
+	} elsif (defined $glyph->{'axr'}) {
+	    $width += ($ax - $glyph->{'axr'});
+	} elsif (defined $glyph->{'axrp'}) {
+	    $width += $ax * (1 - $glyph->{'axrp'}/100);
+	} else {
+	    if ($doKern) {
+	        # kerning, etc. cw != ax, but ignore tiny differences
+	        my $fontsize = $self->{' fontsize'};
+	        # cw = width font (and Reader) thinks character is (points)
+	        $cw = $self->{' font'}->wxByCId($glyph->{'g'})/1000*$fontsize;
+	        # if kerning ( ax < cw ), set kern amount as difference.
+	        # very small amounts ignore by setting ax = cw 
+	        # (> minKern? use the kerning, else ax = cw)
+	        # textHS() should be making the same adjustment as here
+	        my $kernPts = $cw - $ax;  # sometimes < 0 !
+	        if ($kernPts > 0) {
+	            if (int(abs($kernPts*1000/$fontsize)+0.5) <= $minKern) {
+	                # small amount, cancel kerning
+	                $ax = $cw;
 	            }
 	        }
-	        $width += $ax;
 	    }
+	    $width += $ax;
+	}
     }
 
-    return $width;
+    return $width; # height >0 for TTB and BTT
 }
 
 =back
