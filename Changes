@@ -2,7 +2,12 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.019     2020-07-15  UNRELEASED
+3.019     2020-07-16  UNRELEASED
+
+    lib/PDF/Builder/Content/Text.pm  Per [CTS 31], expand documentation of
+      textlabel() call to emphasize that it is a standalone call, and doesn't
+      play nicely with other text-output calls (such as not leaving a current
+      position for the next write). It is intended for one-off labels, etc.
 
     lib/PDF/Builder/Content.pm, examples/HarfBuzz.pl, 
       examples/resources/HarfBuzz_example.pdf
@@ -27,13 +32,14 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
     lib/PDF/Builder/Content.pm, lib/PDF/Builder/Resource/XObject/Image/PNM.pm
      image() and form_image() calls default x,y to 0,0, so can call without
       lower left corner x,y. PNM processing [RT 132844] fix routine forgetting 
-      where it is in the PNM file and failing to read part of it.
+      where it is in the PNM file and failing to read part of it. Note that
+      132844 is still open, as PNM handling has not yet been thoroughly checked.
 
     lib/PDF/Builder/Resource/XObject/Image/PNG-PNG_IPL.pm ref PR #25 for 
-      PDF::API2. Apparently there can be some cases where the deletion of some
-      streams may cause errors in the vec() calls. This may be dependent on
-      the Perl version, use of nonstandard flags (such as -e), or other unusual
-      usage.
+      PDF::API2. Some have reported that apparently there can be some cases 
+      where the deletion of some streams may cause errors in the vec() calls. 
+      This may be dependent on the Perl version, use of nonstandard flags 
+      (such as -e), or other unusual usage.
 
     lib/PDF/Builder/Resource/Font/CoreFont/courier-courierbold-courieroblique-
       courierboldoblique-helvetica-helveticabold-helveticaoblique-
