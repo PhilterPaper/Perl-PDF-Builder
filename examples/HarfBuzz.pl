@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 ##########################
-# CAUTION: cannot merge until new HarfBuzz::Shaper released
-#          ditto for Content.pm changes
+# NOTE: appears to bring in the entire Ming font (Chinese), rather than a
+#       subset. sorry about that! ref RT 130041
 # Note to maintainer: don't forget to refresh HarfBuzz_example.pdf
 ##########################
 # demonstrate some usage of HarfBuzz::Shaper and related text calls
@@ -60,6 +60,8 @@ my $arabicFont = '/Program Files (x86)/Adobe/Acrobat Reader DC/Resource/Font/Ado
 # to be.
 
 my $pdf = PDF::Builder->new(-compress => 'none');
+#my $pdf = PDF::Builder->new();
+
 $pdf->mediabox('universal');  # narrower and shorter of US letter and A4, so
                               # it should be printable on either paper
 my $labelFont = $pdf->corefont('Helvetica');
