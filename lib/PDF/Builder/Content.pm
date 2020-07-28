@@ -3549,9 +3549,10 @@ needs in order to function. They include:
 This is the standard 4 letter code (e.g., 'Latn') for the script (alphabet and
 writing system) you're using. Currently, only Latn (Western writing systems)
 do kerning, and 'Latn' is the default. HarfBuzz::Shaper will usually be able to 
-figure out from the Unicode points used what the script is, which is fortunate 
-because there is currently no call to override its guess! However, PDF::Builder 
-and HarfBuzz::Shaper do not talk to each other about the script being used.
+figure out from the Unicode points used what the script is, and you might be 
+able to use the C<set_script()> call to override its guess. However, 
+PDF::Builder and HarfBuzz::Shaper do not talk to each other about the script 
+being used.
 
 =item features => array_of_features
 
@@ -3566,8 +3567,8 @@ HarfBuzz::Shaper (with C<$hb-E<gt>add_features()>, etc.) when you run it
 
 =item language => 'language_code'
 
-This item is optional and currently does not appear to have any effect with
-HarfBuzz::Shaper. It is the standard code for the
+This item is optional and currently does not appear to have any substantial
+effect with HarfBuzz::Shaper. It is the standard code for the
 language to be used, such as 'en' or 'en_US'. You might need to define this for
 HarfBuzz::Shaper, in case that system can't surmise the language rules to be 
 used.
@@ -3582,7 +3583,8 @@ does not share its information with PDF::Builder -- you need to separately
 specify the direction, unless you want to accept the default LTR direction. You 
 I<can> use HarfBuzz::Shaper's C<get_direction()> call (in addition to 
 C<get_language()> and C<get_script()>) to see what HarfBuzz thinks is the 
-correct text direction. 
+correct text direction. C<set_direction()> may be used to override Shaper's
+guess as to the direction.
 
 By the way, if the direction is RTL, HarfBuzz will reverse the text and return 
 an array with the last character first (to be written LTR). Likewise, for BTT, 
@@ -3965,6 +3967,8 @@ sub _outputCID {
 =item $width = $content->advancewidthHS($HSarray, $settings)
 
 Returns text chunk width (in points) for Shaper-defined glyph array.
+This is the horizontal width for LTR and RTL direction, and the vertical
+height for TTB and BTT direction.
 B<Note:> You must define the font and font size I<before> calling 
 C<advancewidthHS()>.
 
