@@ -388,10 +388,12 @@ $y = 750;
    # some random Chinese characters. most interested in what direction is
    # the default, and what is settable
    'TTBChinese' => { 'title' => 'TTBChinese',
-   	        'fontFile' => '/Program Files (x86)/Adobe/Acrobat Reader DC/Resource/CIDFont/AdobeMingStd-Light.otf',
+#   	        'fontFile' => '/Program Files (x86)/Adobe/Acrobat Reader DC/Resource/CIDFont/AdobeMingStd-Light.otf',
+   	        'fontFile' => '/Program Files (x86)/Adobe/Acrobat Reader DC/Resource/CIDFont/AdobeGothicStd-Light.otf',
  	  	'dir' => 'T',  
  	  	'script' => 'Chin',
- 	  	'text' => ["\x{5A40}\x{5A41}\x{5A42}\x{5A43}", " PDF::Builder ", "\x{5A44}\x{5A45}"] },
+# 	  	'text' => ["\x{5A40}\x{5A41}\x{5A42}\x{5A43}", " PDF::Builder ", "\x{5A44}\x{5A45}"] },
+ 	  	'text' => ["\x{58D8}\x{5A41}\x{5C62}\x{6A13}", " PDF::Builder ", "\x{6DDA}\x{6F0F}"] },
 
    # Languages which are normally RTL don't seem to behave with TTB.
    # I would expect them to be reversed, but they aren't. Maybe the direction

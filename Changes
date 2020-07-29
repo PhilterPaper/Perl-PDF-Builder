@@ -2,13 +2,16 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.020     2020-07-28   UNRELEASED
+3.020     2020-07-29   UNRELEASED
 
-    examples/HarfBuzz.pl  Note that the entire AdobeMingStd-Light.otf font
-      (ttfont call) appears to be embedded, rather than just the subset. This
-      resulted in 3.019 being about 8MB larger than 3.018's version! It may
-      be related to bug [RT 130041]. Use caution when embedding CJK fonts, even
+    examples/HarfBuzz.pl, examples/resources/HarfBuzz_example.pdf
+     In the updated 3.019 example, note that the entire AdobeMingStd-Light.otf 
+      font (ttfont call) appears to be embedded, rather than just the subset. 
+      This resulted in 3.019 being about 8MB larger than 3.018's version! It may
+      be related to bug [RT 130041]. Use caution when embedding CJK fonts, even 
       when not using the cjkfont call, as at least some apparently don't subset.
+      I replaced the font with AdobeGothicStd-Light.otf, which appears to embed 
+      just a subset of the font, greatly reducing the size of the PDF file.
 
 3.019     2020-07-27   
 
