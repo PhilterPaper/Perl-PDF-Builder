@@ -2,7 +2,23 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.020     2020-07-29   UNRELEASED
+3.020     2020-08-11   UNRELEASED
+
+    lib/PDF/Builder/Resource/PaperSizes.pm
+     Fix a couple missized entries (B7 and jr-Legal), added a bunch more
+      sizes (mostly archaic American and British sizes): dbill, statement 
+      (= student), half-letter (= student), old-paper, b-plus 
+      (B+/Super-B/A3+/super-A3), arch-a, arch-b, arch-c, arch-d, arch-e, 
+      arch-e1, pott, post, large-post, crown, large-crown, demy, small-demy, 
+      medium, royal, small-royal, super-royal, imperial, a7, a8, a9, a10.
+
+      Note that some "standard" sizes, such as broadsheet and foolscap, seem
+      to have a different size specification depending on where you look. You
+      should check that the size used matches your actual paper supply, and to
+      either update PaperSizes.pm to match, or specify the MediaBox in points
+      instead of by name. This is probably a good idea with any unusual,
+      large, archaic, or special-order paper... you want to check what its
+      actual size is before going through a lot of expensive failed printing!
 
     examples/HarfBuzz.pl, examples/resources/HarfBuzz_example.pdf
      In the updated 3.019 example, note that the entire AdobeMingStd-Light.otf 
@@ -38,7 +54,8 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
 
     examples/042_links, examples/README, examples/examples_output, 
       tools/3_examples.pl, lib/PDF/Builder/Annotation.pm, MANIFEST
-     Improved documentation of annotation-based links: PDF links and targets.
+     Per [CTS 29], improved documentation of annotation-based links: PDF links 
+      and targets.
 
     lib/PDF/Builder/Content.pm, lib/PDF/Builder/Resource/XObject/Image/PNM.pm
      image() and form_image() calls default x,y to 0,0, so can call without

@@ -130,7 +130,7 @@ K. Text method to move to arbitrary points: relative or absolute movement
    traditional way, e.g., to the next n8-th column) is useful only for 
    monospaced fonts, and no changes in font size in the line. Thus, tab stops 
    would be more useful when defined by some absolute dimension (e.g., inches 
-   or ems) of column position. Second, tabbing is usually done to get text 
+   or mms) of column position. Second, tabbing is usually done to get text
    columns (sub columns), which involves a lot of manual setup and twiddling of 
    text. Consider using a TABLE within the column or page to get text organized 
    into the desired format (see "tbl" addition in section II).
@@ -142,7 +142,9 @@ K. Text method to move to arbitrary points: relative or absolute movement
 
 L. Determine what it is about "CJK" fonts (.ttf and .otf) that makes them
    incompatible with synfont [RT 130040] and embedding [RT 130041], and fix if 
-   possible. Are separate CJK fonts even necessary these days?
+   possible. Are separate CJK fonts even necessary these days? Also note that
+   many CJK fonts refuse to "subset" when embedded (the entire font gets
+   embedded, even if you only use a handful of glyphs!).
 
 M. Add decorative rectangular box effects around sections of text. With or
    without border (allow rounded corners) and background color, drop shadows
@@ -235,6 +237,34 @@ G. Prepress production markup: convenience functions to place a watermark or
 
    Page background color or pattern should extend to the full size of the page
    and not end when content ends part way down the page. Remind users that 
-   most printers will not print all the way to the edge.
+   most printers will not print all the way to the edge. See Boxes.pl example.
+
+H. Incorporate PDF::Table into PDF::Builder::Table. Simplify it somewhat (e.g.,
+   instead of separate line-width and color settings, use a list: w (width in
+   points with default color and solid line), or [w, color, optional-dash-
+   pattern]. Use it for borders and rules, and possibly frames. A "frame" would
+   be the enclosure for the table, and would be either a line spec or a width
+   and pattern (3D raised, 3D sunken, sunken table, raised table, floating
+   table with shadow, etc.). A "rule" would be horizontal and vertical
+   divider lines, and a "border" would be cell dividers ([w, color, margin-to-
+   cell edge, optional-dash-pattern]). Other simplifications and consolidations
+   of settings as justified (do not have to maintain absolute compatibility
+   with existing PDF::Table). Tables continued to the next page would not get
+   a full frame at the bottom/top, but a heavy dashed line (if breaking in
+   middle of a cell) or heavy solid line (if breaking at a row boundary). It
+   might be good not to automatically create a next page and start outputting
+   the rest of the table, but hold the contents and alert the programmer that
+   at least one more call is needed to finish.
+
+   Currently, PDF::Table basically equalizes column widths as much as it can,
+   but consider a starting point of relative and/or absolute column widths,
+   like many other table implementations.
+
+   Within a cell, ideally it would be treated as a mini-page, with all the 
+   normal PDF construction capabilities including paragraph shaping, flow into
+   column(s), images, etc. This would be better than the "text_block" used in
+   PDF::Table (more uniform coding and treatment), although some ideas from
+   text_block might find a home. However, such complex treatment (a table 
+   could embed a table) requires virtual pages to permit a lot of rearrangement.
 
 =============================================================================
