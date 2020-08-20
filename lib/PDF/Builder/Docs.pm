@@ -507,7 +507,7 @@ to PDF::Builder, to reduce the chance of confusion due to parallel development.
 Perry's intent is to keep all internal methods as upwardly compatible with
 PDF::API2 as possible, although it is likely that there will be some drift
 (incompatibilities) over time. At least initially, any program written based on 
-PDF::API2 should be convertable to PDF::Builder simply by changing "API2" 
+PDF::API2 should be convertible to PDF::Builder simply by changing "API2" 
 anywhere it occurs to "Builder". See the INFO/KNOWN_INCOMP known 
 incompatibilities file for further information.
 

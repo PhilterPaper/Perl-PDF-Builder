@@ -744,7 +744,7 @@ B<Example:>
 B<Note:> if you need to change any text treatment I<within> a paragraph 
 (B<bold> or I<italicized> text, for instance), this can not handle it. Only 
 plain text (all the same font, size, etc.) can be typeset with C<paragraph()>.
-Also, there is currently very limited line splitting (hypenation) to better 
+Also, there is currently very limited line splitting (hyphenation) to better 
 fit to a given width, and nothing is done for "widows and orphans".
 
 =back

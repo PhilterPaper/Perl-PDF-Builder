@@ -3523,7 +3523,7 @@ sub _metaEnd {
 Takes an array of hashes produced by HarfBuzz::Shaper and outputs them to the
 PDF output file. HarfBuzz outputs glyph CIDs and positioning information. 
 It may rearrange and swap characters (glyphs), and the result may bear no
-resemblence to the original Unicode point list. You should see 
+resemblance to the original Unicode point list. You should see 
 examples/HarfBuzz.pl, which shows a number of examples with Latin and non-Latin 
 text, as well as vertical writing. 
 examples/resources/HarfBuzz_example.pdf is available in case you want to see 
