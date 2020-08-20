@@ -2,7 +2,15 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.020     2020-08-11   UNRELEASED
+3.020     2020-08-20   UNRELEASED
+
+    README  add instructions for installing on pre-5.020 Perls, which may be
+      adaptable to other OS's and Perls. Note that there's no guarantee that
+      PDF::Builder will actually RUN on older Perls! (But you're welcome to
+      try.)
+
+    lib/PDF/Builder/Docs-Content.pm, lib/PDF/Builder/Content/Text.pm
+     Fix spelling errors/typos, per report by 'carygravel'.
 
     lib/PDF/Builder/Resource/PaperSizes.pm
      Fix a couple missized entries (B7 and jr-Legal), added a bunch more
