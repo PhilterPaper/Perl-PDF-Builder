@@ -58,10 +58,11 @@ Libraries used, available from CPAN --
   Test::Exception (needed only for installation tests)
   Test::Memory::Cycle (needed only for installation tests)
 
- OPTIONAL, install manually if wanted...
-  Graphics::TIFF (recommended if using TIFF image functions)
-  Image::PNG::Libpng (recommended for enhanced PNG image function processing)
-  HarfBuzz::Shaper (recommended for Latin script ligatures and kerning, as
+ OPTIONAL, install manually if wanted AND they failed to install 
+  automatically...
+   Graphics::TIFF (recommended if using TIFF image functions)
+   Image::PNG::Libpng (recommended for enhanced PNG image function processing)
+   HarfBuzz::Shaper (recommended for Latin script ligatures and kerning, as
                     well as for any complex script such as Arabic, Indic
                     scripts, or Khmer)
 

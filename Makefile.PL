@@ -96,13 +96,13 @@ my %WriteMakefileArgs =
     #   user can remove any optional installed library if they don't need it
     #     and want to reclaim the space
     #   update t/00-all-usable.t to exclude modules using these libraries!
-##  recommends => {
-##      'Graphics::TIFF' => 0,       # TIFF image processing
-##      'Image::PNG::Libpng' => 0,   # advanced/fast PNG image processing
-##      'HarfBuzz::Shaper' => 1.7.7, # text shaping for Latin script ligatures
-##                                   #  and kerning, and for many complex 
-##                                   #  scripts both LTR and RTL directions.
-##  },
+    recommends => {
+        'Graphics::TIFF' => 6,        # TIFF image processing
+        'Image::PNG::Libpng' => 0.47, # advanced/fast PNG image processing
+        'HarfBuzz::Shaper' => 0.23,   # text shaping for Latin script ligatures
+                                      #  and kerning, and for many complex 
+                                      #  scripts both LTR and RTL directions.
+    },
 
   },
 
@@ -117,5 +117,14 @@ my %WriteMakefileArgs =
 #if ( $^O eq 'MacOS' ) {
 #	$WriteMakefileArgs{PREREQ_PM}{'MacPerl'} = '0';
 #}
+
+print <<END;
+===========================================================================
+The installation process will attempt to install or update several OPTIONAL
+prerequisite packages. If one or more should fail to install, Don't Panic
+-- you will still be able to run PDF::Builder, but may not be able to use 
+some advanced features. See the README file for more information.
+===========================================================================
+END
 
 WriteMakefile(%WriteMakefileArgs);

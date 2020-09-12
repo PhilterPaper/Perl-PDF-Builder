@@ -2,7 +2,13 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.020     2020-08-20   UNRELEASED
+3.020     2020-09-11   UNRELEASED
+
+* Makefile specifies PNG library 0.47, not released yet!
+    lib/PDF/Builder/Docs.pm, Makefile.PL, README, t/00-all-usable.t
+     PDF::Builder will (again) attempt to install or upgrade OPTIONAL 
+      libraries (see README). Includes a warning in Makefile.PL not to be
+      unduly alarmed if an optional install should fail.
 
     README  add instructions for installing on pre-5.020 Perls, which may be
       adaptable to other OS's and Perls. Note that there's no guarantee that

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.018'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.020'; # manually update whenever code is changed
 
 # originally part of Builder.pm, it was split out due to its length
 
@@ -76,9 +76,18 @@ will give you improved speed, the ability to use 16 bit samples, and the
 ability to read interlaced PNG files. See resolved bug report RT 124349, as well
 as C<image_png>, for more information.
 
-Note that the installation process will B<not> attempt to install these 
-libraries automatically. If you wish to use them, you will have to manually 
-initiate the installation of such modules (e.g., with "cpan install").
+B<*> HarfBuzz::Shaper -- This library enables PDF::Builder to handle complex
+scripts (Arabic, Devanagari, etc.) as well as non-LTR writing systems. It is
+also useful for Latin and other simple scripts, for ligatures and improved
+kerning. HarfBuzz::Shaper is based on a set of HarfBuzz libraries, which it
+will attempt to build if they are not found. See C<textHS> for more 
+information.
+
+Note that the installation process B<will> attempt to install these 
+libraries automatically. If you don't wish to use one or more of them, you are
+free to uninstall the optional librarie(s). If one or more failed to install,
+no need to panic -- you simply won't be able to use some advanced features,
+unless you are able to manually install the modules (e.g., with "cpan install").
 
 =head2 Strings (Character Text)
 
