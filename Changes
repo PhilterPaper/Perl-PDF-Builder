@@ -2,9 +2,17 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.020     2020-09-11   UNRELEASED
+3.020     2020-09-18   UNRELEASED
 
-* Makefile specifies PNG library 0.47, not released yet!
+    lib/PDF/Builder/Resource/XObject/Image/PNG_IPL.pm
+     Make use of the new 'split_alpha' call in new release 0.47 of 
+      Image::PNG::Libpng (this version specified as minimum, for optional
+      library installation). This brings the speed for RGB and Gray scale
+      with Alpha channels up to reasonable levels, as the 'vec' call is no
+      longer called (4 or 8 times per pixel). Note that in contrast to
+      PDF::API2, both 8 and 16bps samples are supported, and Gray scale is
+      supported, at high speed; not just 8bps RGBA.
+
     lib/PDF/Builder/Docs.pm, Makefile.PL, README, t/00-all-usable.t
      PDF::Builder will (again) attempt to install or upgrade OPTIONAL 
       libraries (see README). Includes a warning in Makefile.PL not to be
