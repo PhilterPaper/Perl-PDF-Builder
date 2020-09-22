@@ -2,7 +2,12 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.020     2020-09-18   UNRELEASED
+3.020     2020-09-22   UNRELEASED
+    
+    lib/PDF/Builder/Resource/XObject/Image/PNM.pm
+     Bitmapped (1 bit per pixel) PNM/PBM grayscale was not being handled 
+      correctly if the row length (width) was not a multiple of 8. Not enough 
+      data was copied over to the PDF. Continuation of RT 132844.
 
     lib/PDF/Builder/Resource/XObject/Image/PNG_IPL.pm
      Make use of the new 'split_alpha' call in new release 0.47 of 

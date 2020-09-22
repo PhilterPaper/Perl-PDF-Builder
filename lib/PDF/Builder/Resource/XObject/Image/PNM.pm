@@ -10,7 +10,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.019'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.020'; # manually update whenever code is changed
 
 use IO::File;
 use PDF::Builder::Util;
@@ -121,7 +121,7 @@ sub read_pnm {
     my $pdf = shift;
     my $file = shift;
 
-    my ($buf, $t, $s, $line);
+    my ($rc, $buf, $t, $s, $line);
     my ($w,$h, $bpc, $cs, $img, @img) = (0,0, '', '', '');
     my $inf;
     if (ref($file)) {
@@ -134,7 +134,8 @@ sub read_pnm {
     my $info = readppmheader($inf);
     if      ($info->{'type'} == 4) {
         $bpc = 1;
-        read($inf, $self->{' stream'}, ($info->{'width'}*$info->{'height'}/8));
+        my $bytes = int(($info->{'width'}+7)/8) * $info->{'height'};
+        $rc = read($inf, $self->{' stream'}, $bytes);
         $cs = 'DeviceGray';
         $self->{'Decode'} = PDFArray(PDFNum(1), PDFNum(0));
     } elsif ($info->{'type'} == 5) {
@@ -142,7 +143,8 @@ sub read_pnm {
         if ($info->{'max'} == 255) {
             $s = 0;
         } else {
-            $s = 255/$info->{'max'};
+            $s = 255/$info->{'max'};  # TBD can max ever be 0? (bad file) 
+                                      # TBD is $s supposed to be integer value?
         }
         $bpc = 8;
         if ($s > 0) {
