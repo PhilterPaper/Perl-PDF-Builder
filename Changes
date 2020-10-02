@@ -2,7 +2,8 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.020     2020-09-30   UNRELEASED
+3.020     2020-10-02   UNRELEASED
+* test build to make sure makefile changes work OK before upload to CPAN
     
     lib/PDF/Builder/Resource/XObject/Image/PNM.pm
      Bi-level (1 bit per pixel) PNM/PBM image was not being handled 
@@ -25,7 +26,9 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
     lib/PDF/Builder/Docs.pm, Makefile.PL, README, t/00-all-usable.t
      PDF::Builder will (again) attempt to install or upgrade OPTIONAL 
       libraries (see README). Includes a warning in Makefile.PL not to be
-      unduly alarmed if an optional install should fail.
+      unduly alarmed if an optional install should fail. The user is given
+      a choice of selecting none/all/specific optional libraries when 
+      running Makefile.PL (default "all").
 
     README  add instructions for installing on pre-5.020 Perls, which may be
       adaptable to other OS's and Perls. Note that there's no guarantee that
