@@ -273,4 +273,21 @@ H. Incorporate PDF::Table into PDF::Builder::Table. Simplify it somewhat (e.g.,
    text_block might find a home. However, such complex treatment (a table 
    could embed a table) requires virtual pages to permit a lot of rearrangement.
 
+I. Consider Optional Content Groups (Layers), per 32000-2008 section 8.11.
+   This permits drawings to be shown by layer, or a watermark/copyright layer
+   to show only on printing.
+
+J. Per wkHTMLtoPDF issue 4846, at least some phone cameras output "portrait"
+   mode photos in landscape mode (rotated), with an "orientation" tag. JPEG
+   (at least) image handling may need a rotation flag in the call, and/or 
+   pay attention to the Exif orientation flag. Confirmed that
+   Builder JPEG support does NOT respect the orientation flag.
+   https://www.google.com/search?client=firefox-b-1-d&q=jpeg+orientation+metadata
+   Unfortunately, there are a number of ways to specify the orientation flag
+   including XML '<exif:Orientation>Top-left</exif::Orientation>' and buried
+   somewhere in the Exif or JFIF header of the file. It might be best to ask
+   the image what its orientation is, and leave translation and rotation of
+   the placed image to user code, rather than trying to flip the contents of
+   the image file directly. See writeup in Docs.pm.
+
 =============================================================================

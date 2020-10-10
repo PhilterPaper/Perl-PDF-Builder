@@ -2,9 +2,16 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.020     2020-10-02   UNRELEASED
+3.020     2020-10-10   UNRELEASED
 * test build to make sure makefile changes work OK before upload to CPAN
     
+    INFO/RoadMap, lib/PDF/Builder/Docs.pm  add discussion on why images
+      (especially JPEG) are sometimes rotated and/or flipped, and what can be
+      done about it.
+
+    t/fonts-synfont.t, t/fonts-ttf.t fix a couple paths to DejaVu fonts on
+      certain Linux boxes. From 'gregoa' at Debian Perl Group.
+
     lib/PDF/Builder/Resource/XObject/Image/PNM.pm
      Bi-level (1 bit per pixel) PNM/PBM image was not being handled 
       correctly if the row length (width) was not a multiple of 8. Not enough 

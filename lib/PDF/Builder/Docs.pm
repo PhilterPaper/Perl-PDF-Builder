@@ -1626,6 +1626,68 @@ PNG images. See specific information listings for GD, GIF, JPEG, and PNM image
 formats. In addition, see C<examples/Content.pl> for an example of placing an
 image on a page, as well as using in a "Form".
 
+=head3 Why is my image flipped or rotated?
+
+Something not uncommonly seen when using JPEG photos in a PDF is that the 
+images will be rotated and/or mirrored (flipped). This may happen when using
+TIFF images too. What happens is that the camera stores an image just as it
+comes off the CCD sensor, regardless of the camera orientation, and does not
+rotate it to the correct orientation! It I<does> store a separate 
+"orientation" flag to suggest how the image might be corrected, but not all
+image processing obeys this flag (PDF::Builder does B<not>.). For example, if
+you take a "portrait" (tall) photo of a tree, and then use it in a PDF, the
+tree may appear to have been cut down! (appears in landscape mode)
+
+I have found some code that should allow the C<image_jpeg> or C<image> routine
+to auto-rotate to (supposedly) the correct orientation, by looking for the Exif
+metadata "Orientation" tag in the file. However, three problems arise: 1) if a
+photo has been edited, and rotated or flipped in the process, there is no
+guarantee that the Orientation tag is still correct; 2) more than one 
+Orientation tag may exist (e.g., binary APP1/Exif header I<and> XML data), and 
+may not agree with each other -- which to use? 3) the code would need to 
+uncompress the raster data, swap and/or transpose rows and/or columns, and 
+recompress the raster data for inclusion into the PDF (very costly processing). 
+In any case, the user would need to be able to override any auto-rotate 
+function.
+
+For the time being, PDF::Builder will simply leave it up to the user of the
+library to take care of rotating and/or flipping an incorrect image. It is
+possible that we will add some sort of query or warning that the image appears
+to I<not> be "normally" oriented (Orientation value 1 or "Top-left"), according to the Orientation flag. You can consider either (re-)saving the photo in an
+editor such as PhotoShop or GIMP, or using PDF::Builder code similar to the
+following:
+
+    my $img = $pdf->image_jpeg("AliceLake.jpeg");
+    # raw size WxH 4032x3024, scaled down to 504x378
+    # intent is to center on US Letter sized page (LL at 54,207)
+    # Orientation flag 3 (rotated 180 degrees). if naively displayed (just
+    #   $gfx->image call), it will be upside down
+
+    $gfx->save();
+    
+    # method 1: translate, then rotate
+    #$gfx->translate(2*54+504,2*207+378);  # to new origin (media UR corner)
+    #$gfx->rotate(180);                    # rotate around new origin
+    #$gfx->image($img, 54,207, 4032/8,3024/8); # image's UR corner, not LL
+
+    # method 2: rotate, then translate
+    $gfx->rotate(180);                     # rotate around current origin
+    $gfx->translate(-504, -378);           # translate in rotated coordinates
+    $gfx->image($img, -54,-207, 4032/8,3024/8); # image's UR corner, not LL
+
+    $gfx->restore();
+
+If your image is also mirrored (flipped about an axis), simple rotation will
+not suffice. You I<might> be able to do something with a reversal of the
+coordinate system (see L<PDF::Builder::Content/Advanced Methods>). If not, you
+will need to save a mirrored copy in a photo editor. 
+Incidentally, do not confuse this issue with the coordinate flipping performed 
+by some Chrome browsers when printing a page to PDF.
+
+Note that TIFF images may have the same rotation/mirroring problems as JPEG,
+which is not surprising, as the Exif format was lifted from TIFF for use in
+JPEG. The cure will be similar to JPEG's.
+
 =head3 TIFF Images
 
 Note that the Graphics::TIFF support library does B<not> currently permit a 
