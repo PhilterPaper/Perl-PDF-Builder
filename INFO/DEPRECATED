@@ -39,6 +39,12 @@ get_*box()      methods in Page.pm
    The get routines are now obsolete, and may be removed on or after 
    August, 2021.
 
+PDFStr()        method in Basic/PDF/Utils.pm
+   Use PDFString() instead. May be removed on or after October, 2022.
+
+PDFUtf()        method in Basic/PDF/Utils.pm
+   Use PDFString() instead. May be removed on or after October, 2022.
+
 *** If I have missed any deprecated interfaces, please let me know! ***
 
 ======= Deprecated items that already have been removed ======================
