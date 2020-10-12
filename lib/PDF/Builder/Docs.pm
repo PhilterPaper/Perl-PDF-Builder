@@ -1635,52 +1635,59 @@ comes off the CCD sensor, regardless of the camera orientation, and does not
 rotate it to the correct orientation! It I<does> store a separate 
 "orientation" flag to suggest how the image might be corrected, but not all
 image processing obeys this flag (PDF::Builder does B<not>.). For example, if
-you take a "portrait" (tall) photo of a tree, and then use it in a PDF, the
-tree may appear to have been cut down! (appears in landscape mode)
+you take a "portrait" (tall) photo of a tree (with the phone held vertically), 
+and then use it in a PDF, the tree may appear to have been cut down! (appears 
+in landscape mode)
 
 I have found some code that should allow the C<image_jpeg> or C<image> routine
 to auto-rotate to (supposedly) the correct orientation, by looking for the Exif
-metadata "Orientation" tag in the file. However, three problems arise: 1) if a
-photo has been edited, and rotated or flipped in the process, there is no
-guarantee that the Orientation tag is still correct; 2) more than one 
-Orientation tag may exist (e.g., binary APP1/Exif header I<and> XML data), and 
-may not agree with each other -- which to use? 3) the code would need to 
-uncompress the raster data, swap and/or transpose rows and/or columns, and 
-recompress the raster data for inclusion into the PDF (very costly processing). 
-In any case, the user would need to be able to override any auto-rotate 
-function.
+metadata "Orientation" tag in the file. However, three problems arise: 
+B<1)> if a photo has been edited, and rotated or flipped in the process, there is no guarantee that the Orientation tag has been corrected. 
+B<2)> more than one Orientation tag may exist (e.g., in the binary APP1/Exif header, I<and> in XML data), and they may not agree with each other -- which should be used? 
+B<3)> the code would need to uncompress the raster data, swap and/or transpose rows and/or columns, and recompress the raster data for inclusion into the PDF. This is costly and error-prone.
+In any case, the user would need to be able to override any auto-rotate function.
 
 For the time being, PDF::Builder will simply leave it up to the user of the
-library to take care of rotating and/or flipping an incorrect image. It is
-possible that we will add some sort of query or warning that the image appears
-to I<not> be "normally" oriented (Orientation value 1 or "Top-left"), according to the Orientation flag. You can consider either (re-)saving the photo in an
-editor such as PhotoShop or GIMP, or using PDF::Builder code similar to the
-following:
+library to take care of rotating and/or flipping an image which displays 
+incorrectly. It is possible that we will consider adding some sort of query or warning that the image appears to I<not> be "normally" oriented (Orientation value 1 or "Top-left"), according to the Orientation flag. You can consider either (re-)saving the photo in an editor such as PhotoShop or GIMP, or using PDF::Builder code similar to the following (for images rotated 180 degrees):
 
+    $pW = 612; $pH = 792;  # page dimensions (US Letter)
     my $img = $pdf->image_jpeg("AliceLake.jpeg");
     # raw size WxH 4032x3024, scaled down to 504x378
+    $sW = 4032/8; $sH = 3024/8;
     # intent is to center on US Letter sized page (LL at 54,207)
-    # Orientation flag 3 (rotated 180 degrees). if naively displayed (just
-    #   $gfx->image call), it will be upside down
+    # Orientation flag on this image is 3 (rotated 180 degrees). 
+    # if naively displayed (just $gfx->image call), it will be upside down
 
     $gfx->save();
     
-    # method 1: translate, then rotate
-    #$gfx->translate(2*54+504,2*207+378);  # to new origin (media UR corner)
+    ## method 0: simple display, is rotated 180 degrees!
+    #$gfx->image($img, ($pW-$sW)/2,($pH-$sH)/2, $sW,$sH);
+
+    ## method 1: translate, then rotate
+    #$gfx->translate($pW,$pH);             # to new origin (media UR corner)
     #$gfx->rotate(180);                    # rotate around new origin
-    #$gfx->image($img, 54,207, 4032/8,3024/8); # image's UR corner, not LL
+    #$gfx->image($img, ($pW-$sW)/2,($pH-$sH)/2, $sW,$sH); 
+                                           # image's UR corner, not LL
 
     # method 2: rotate, then translate
     $gfx->rotate(180);                     # rotate around current origin
-    $gfx->translate(-504, -378);           # translate in rotated coordinates
-    $gfx->image($img, -54,-207, 4032/8,3024/8); # image's UR corner, not LL
+    $gfx->translate(-$sW,-$sH);            # translate in rotated coordinates
+    $gfx->image($img, -($pW-$sW)/2,-($pH-$sH)/2, $sW,$sH); 
+                                           # image's UR corner, not LL
+
+    ## method 3: flip (mirror) twice
+    #$scale = 1;  # not rescaling here
+    #$size_page = $pH/$scale;
+    #$invScale = 1.0/$scale;
+    #$gfx->add("-$invScale 0 0 -$invScale 0 $size_page cm");
+    #$gfx->image($img, -($pW-$sW)/2-$sW,($pH-$sH)/2, $sW,$sH);
 
     $gfx->restore();
 
 If your image is also mirrored (flipped about an axis), simple rotation will
-not suffice. You I<might> be able to do something with a reversal of the
-coordinate system (see L<PDF::Builder::Content/Advanced Methods>). If not, you
-will need to save a mirrored copy in a photo editor. 
+not suffice. You could do something with a reversal of the coordinate system, as in "method 3" above (see L<PDF::Builder::Content/Advanced Methods>). To mirror only left/right, the second C<$invScale> would be positive; to mirror only top/bottom, the first would be positive. If all else fails, you could save a mirrored copy in a photo editor. 
+90 or 270 degree rotations will require a C<rotate> call, possibly with "cm" usage to reverse mirroring.
 Incidentally, do not confuse this issue with the coordinate flipping performed 
 by some Chrome browsers when printing a page to PDF.
 
@@ -1784,7 +1791,7 @@ provided.
 
 =back
 
-=head2 Using Shaper
+=head2 USING SHAPER (HarfBuzz::Shaper library)
 
     # if HarfBuzz::Shaper is not installed, either bail out, or try to
     # use regular TTF calls instead
