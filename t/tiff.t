@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 use warnings;
 use strict;
+use English qw' -no_match_vars ';
 
 use Test::More tests => 11;
 
@@ -99,7 +100,7 @@ is($example, $expected, 'alpha');
 # tiffcp and convert not available on all systems.  1 test skipped
 
 SKIP: {
-    skip "Files created with tiffcp -c g3 previously produced the message 'Chunked CCITT G4 TIFF not supported'", 1;
+    skip "Files created with tiffcp -c g3 previously produced the message 'Chunked CCITT G4 TIFF not supported'", unless $OSNAME eq 'linux' and system('convert > /dev/null 2>&1') and system('tiffcp > /dev/null 2>&1');
 system(sprintf "convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s", $width, $height, $tiff);
 system("tiffcp -c g3 $tiff tmp.tif && mv tmp.tif $tiff");
 $pdf = PDF::Builder->new(-file => $pdfout);
@@ -111,7 +112,7 @@ $gfx->image($img, 0, 0, $width, $height);
 $pdf->save();
 $pdf->end();
 
-my $example = `convert $pdfout -depth 1 -resize 1x1 txt:-`;
+my $example = `convert $pdfout -depth 1 -colorspace gray -alpha off -resize 1x1 txt:-`;
 my $expected = `convert $tiff -depth 1 -resize 1x1 txt:-`;
 
 is($example, $expected, 'G3 (not converted to flate)');
@@ -121,7 +122,7 @@ is($example, $expected, 'G3 (not converted to flate)');
 # tiffcp and convert not available on all systems.  1 test skipped
 
 SKIP: {
-    skip "convert and tiffcp utilities not available on all systems", 1;
+    skip "convert and tiffcp utilities not available on all systems", unless $OSNAME eq 'linux' and system('convert > /dev/null 2>&1') and system('tiffcp > /dev/null 2>&1');
 system(sprintf"convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s", $width, $height, $tiff);
 system("tiffcp -c lzw $tiff tmp.tif && mv tmp.tif $tiff");
 $pdf = PDF::Builder->new(-file => $pdfout);
