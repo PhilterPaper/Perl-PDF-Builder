@@ -2,7 +2,7 @@
 use warnings;
 use strict;
 use English qw' -no_match_vars ';
-
+use IPC::Cmd qw(can_run);
 use Test::More tests => 11;
 
 use PDF::Builder;
@@ -12,11 +12,13 @@ use PDF::Builder;
 # usable, otherwise they will display just TIFF. you can use this information
 # if you are not sure about the status of Graphics::TIFF.
 
-my $pdf = PDF::Builder->new('-compress' => 'none');
+my $pdf = PDF::Builder->new('-compress' => 'none'); # common $pdf all tests
+my $has_GT; # global flag for all tests that need to know if Graphics::TIFF
 
 # -silent shuts off one-time warning for rest of run
 my $tiff = $pdf->image_tiff('t/resources/1x1.tif', -silent => 1);
 if ($tiff->usesLib() == 1) {
+    $has_GT = 1;
     isa_ok($tiff, 'PDF::Builder::Resource::XObject::Image::TIFF_GT',
         q{$pdf->image_tiff(filename)});
 } else {
@@ -71,15 +73,14 @@ eval { $pdf->image_tiff('t/resources/this.file.does.not.exist') };
 ok($@, q{Fail fast if the requested file doesn't exist});
 
 ##############################################################
-# tiff2pdf and convert not available on all systems.  1 test skipped
-
+# common data for remaining tests
 my $width = 568;
 my $height = 1000;
 $tiff = 'test.tif';
 my $pdfout = 'test.pdf';
 
 SKIP: {
-    skip "tiff2pdf doesn't deal with the alpha layer properly either, in this case", 1;
+    skip "This is still buggy, and we don't currently have an alternative tool which deals with the alpha layer properly", 1;
 system(sprintf"convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' %s", $width, $height, $tiff);
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page();
@@ -97,10 +98,10 @@ is($example, $expected, 'alpha');
 }
 
 ##############################################################
-# tiffcp and convert not available on all systems.  1 test skipped
+# tiffcp, convert and Graphics::TIFF not available on all systems.
 
 SKIP: {
-    skip "Files created with tiffcp -c g3 previously produced the message 'Chunked CCITT G4 TIFF not supported'", unless $OSNAME eq 'linux' and system('convert > /dev/null 2>&1') and system('tiffcp > /dev/null 2>&1');
+    skip "PDF::Builder cannot handle G3/4 compressed TIFFs without Graphics::TIFF", 1 unless $OSNAME eq 'linux' and can_run('convert') and can_run('tiffcp') and $has_GT;
 system(sprintf "convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s", $width, $height, $tiff);
 system("tiffcp -c g3 $tiff tmp.tif && mv tmp.tif $tiff");
 $pdf = PDF::Builder->new(-file => $pdfout);
@@ -119,10 +120,10 @@ is($example, $expected, 'G3 (not converted to flate)');
 }
 
 ##############################################################
-# tiffcp and convert not available on all systems.  1 test skipped
+# tiffcp and convert not available on all systems.
 
 SKIP: {
-    skip "convert and tiffcp utilities not available on all systems", unless $OSNAME eq 'linux' and system('convert > /dev/null 2>&1') and system('tiffcp > /dev/null 2>&1');
+    skip "convert and tiffcp utilities not available on all systems", 1 unless $OSNAME eq 'linux' and can_run('convert') and can_run('tiffcp');
 system(sprintf"convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s", $width, $height, $tiff);
 system("tiffcp -c lzw $tiff tmp.tif && mv tmp.tif $tiff");
 $pdf = PDF::Builder->new(-file => $pdfout);
