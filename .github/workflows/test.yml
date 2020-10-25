@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: sudo apt install fonts-dejavu-core libfont-ttf-perl libgd-perl libgraphics-tiff-perl libio-compress-perl libtest-exception-perl libtest-memory-cycle-perl
+      - run: sudo apt install fonts-dejavu-core libfont-ttf-perl libgd-perl libio-compress-perl libtest-exception-perl libtest-memory-cycle-perl
       - run: perl Makefile.PL
       - run: make test
   lint:
