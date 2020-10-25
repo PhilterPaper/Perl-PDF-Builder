@@ -13,7 +13,7 @@ use PDF::Builder;
 # if you are not sure about the status of Graphics::TIFF.
 
 my $pdf = PDF::Builder->new('-compress' => 'none'); # common $pdf all tests
-my $has_GT; # global flag for all tests that need to know if Graphics::TIFF
+my $has_GT = 0; # global flag for all tests that need to know if Graphics::TIFF
 
 # -silent shuts off one-time warning for rest of run
 my $tiff = $pdf->image_tiff('t/resources/1x1.tif', -silent => 1);
@@ -22,7 +22,6 @@ if ($tiff->usesLib() == 1) {
     isa_ok($tiff, 'PDF::Builder::Resource::XObject::Image::TIFF_GT',
         q{$pdf->image_tiff(filename)});
 } else {
-    $has_GT = 0;
     isa_ok($tiff, 'PDF::Builder::Resource::XObject::Image::TIFF',
         q{$pdf->image_tiff(filename)});
 }
@@ -129,12 +128,10 @@ is($example, $expected, 'alpha');
 #  from PDF::Builder's TIFF processing library.
 
 SKIP: {
-    skip "Non-Linux system, or no 'convert' or no 'tiffcp'", !(
-      $OSNAME eq 'linux'
+    skip "Non-Linux system, or no 'convert' or no 'tiffcp'", 1 unless
+      $has_GT and $OSNAME eq 'linux'
          and can_run('convert')
-         and can_run('tiffcp')
-    );
-    skip "Graphics::TIFF is not available", !$has_GT;
+         and can_run('tiffcp');
 # ----------
 system(sprintf "convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s", $width, $height, $tiff);
 system("tiffcp -c g3 $tiff tmp.tif && mv tmp.tif $tiff");
@@ -161,11 +158,10 @@ is($example, $expected, 'G3 (not converted to flate)');
 # Graphics::TIFF not needed for this test
 
 SKIP: {
-    skip "Non-Linux system, or no 'convert' or no 'tiffcp'", !(
+    skip "Non-Linux system, or no 'convert' or no 'tiffcp'", 1 unless
       $OSNAME eq 'linux'
          and can_run('convert')
-         and can_run('tiffcp')
-    );
+         and can_run('tiffcp');
 # ----------
 system(sprintf"convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s", $width, $height, $tiff);
 system("tiffcp -c lzw $tiff tmp.tif && mv tmp.tif $tiff");
