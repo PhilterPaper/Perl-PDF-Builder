@@ -3,7 +3,7 @@ use warnings;
 use strict;
 use English qw' -no_match_vars ';
 use IPC::Cmd qw(can_run);
-use Test::More tests => 11;
+use Test::More tests => 12;
 
 use PDF::Builder;
 
@@ -181,6 +181,23 @@ my $expected = `convert $tiff -depth 1 -resize 1x1 txt:-`;
 # ----------
 
 is($example, $expected, 'lzw (converted to flate)');
+}
+
+SKIP: {
+    skip "Non-Linux system, or no 'convert'", 1 unless
+      $OSNAME eq 'linux'
+         and can_run('convert')
+         and can_run('tiffcp');
+system("convert rose: -type palette -depth 2 colormap.png && convert colormap.png $tiff && rm colormap.png");
+$pdf = PDF::Builder->new(-file => $pdfout);
+my $page = $pdf->page;
+$page->mediabox( $width, $height );
+$gfx = $page->gfx();
+my $img = $pdf->image_tiff($tiff);
+$gfx->image( $img, 0, 0, $width, $height );
+$pdf->save();
+$pdf->end();
+pass 'successfully read TIFF with colormap';
 }
 
 ##############################################################

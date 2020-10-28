@@ -20,7 +20,7 @@ my $version = '3.019';          # PDFbuild.pl updates from 'version' file
 my @choice_list = ( # use array to guarantee order
 	# 'a' and 'n' are reserved, do not use as key [0]
 	# [1] is actual library name [2] is minimum version [3] description
-  ["t", "Graphics::TIFF", 6, "TIFF image support"],
+  ["t", "Graphics::TIFF", 7, "TIFF image support"],
         # improved TIFF image processing
   ["p", "Image::PNG::Libpng", 0.47, "PNG image support"],
         # advanced/fast PNG image processing

@@ -16,7 +16,7 @@ use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Resource::XObject::Image::TIFF::File_GT;
 use PDF::Builder::Util;
 use Scalar::Util qw(weaken);
-use Graphics::TIFF ':all';  # have already confirmed that this exists
+use Graphics::TIFF 7 ':all';  # have already confirmed that this exists
 
 =head1 NAME
 
@@ -188,16 +188,12 @@ sub read_tiff {
         $pdf->new_obj($dict);
         $self->colorspace(PDFArray(PDFName($tif->{'colorSpace'}), PDFName('DeviceRGB'), PDFNum(255), $dict));
         $dict->{'Filter'} = PDFArray(PDFName('FlateDecode'));
-        $tif->{'fh'}->seek($tif->{'colorMapOffset'}, 0);
-        my $colormap;
-        my $straight;
-        $tif->{'fh'}->read($colormap, $tif->{'colorMapLength'});
+        my ($red, $green, $blue) = @{$tif->{'colorMap'}};
         $dict->{' stream'} = '';
-        $straight .= pack('C', ($_/256)) for unpack($tif->{'short'} . '*', $colormap);
-        foreach my $c (0 .. (($tif->{'colorMapSamples'}/3)-1)) {
-            $dict->{' stream'} .= substr($straight, $c, 1);
-            $dict->{' stream'} .= substr($straight, $c + ($tif->{'colorMapSamples'}/3), 1);
-            $dict->{' stream'} .= substr($straight, $c + ($tif->{'colorMapSamples'}/3)*2, 1);
+        for my $i (0 .. $#{$red}) {
+            $dict->{' stream'} .= pack('C', ($red->[$i]/256));
+            $dict->{' stream'} .= pack('C', ($green->[$i]/256));
+            $dict->{' stream'} .= pack('C', ($blue->[$i]/256));
         }
     } else {
         $self->colorspace($tif->{'colorSpace'});

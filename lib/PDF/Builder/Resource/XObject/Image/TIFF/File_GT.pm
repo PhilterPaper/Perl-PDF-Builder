@@ -7,7 +7,7 @@ use warnings;
 my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
 
 use IO::File;
-use Graphics::TIFF ':all';  # already confirmed to be installed
+use Graphics::TIFF 7 ':all';  # already confirmed to be installed
 
 =head1 NAME
 
@@ -150,9 +150,7 @@ sub readTags {
     # TIFFTAG_CELLWIDTH dithering or halftoning matrix cell width
     # TIFFTAG_CELLLENGTH dithering or halftoning matrix cell height
     # palette RGB table definition
-    $self->{'colorMapOffset'} = $self->{'object'}->GetField(TIFFTAG_COLORMAP);
-    $self->{'colorMapSamples'} = $#{$self->{'colorMapOffset'}}+1;
-    $self->{'colorMapLength'} = $self->{'colorMapSamples'}*2; # shorts!
+    $self->{'colorMap'} = [ $self->{'object'}->GetField(TIFFTAG_COLORMAP) ];
     # TIFFTAG_GRAYRESPONSEUNIT describe integer->float mapping
     # TIFFTAG_GRAYRESPONSECURVE optical density of Gray curve at each point
 
