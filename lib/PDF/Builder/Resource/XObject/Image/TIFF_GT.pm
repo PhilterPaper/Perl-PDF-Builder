@@ -8,7 +8,7 @@ use warnings;
 no warnings 'uninitialized';
 
 # VERSION
-my $LAST_UPDATE = '3.011'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.020'; # manually update whenever code is changed
 
 use Compress::Zlib;
 

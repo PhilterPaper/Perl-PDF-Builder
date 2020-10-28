@@ -183,11 +183,15 @@ my $expected = `convert $tiff -depth 1 -resize 1x1 txt:-`;
 is($example, $expected, 'lzw (converted to flate)');
 }
 
+##############################################################
+# convert not available on all systems.
+# Graphics::TIFF needed for this test
+
 SKIP: {
     skip "Non-Linux system, or no 'convert'", 1 unless
-      $OSNAME eq 'linux'
-         and can_run('convert')
-         and can_run('tiffcp');
+      $has_GT and $OSNAME eq 'linux'
+         and can_run('convert');
+# .png file is temporary file (output, input, erased)
 system("convert rose: -type palette -depth 2 colormap.png && convert colormap.png $tiff && rm colormap.png");
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page;

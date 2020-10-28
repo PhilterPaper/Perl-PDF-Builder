@@ -6,7 +6,7 @@ no warnings qw[ deprecated recursion uninitialized ];
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
 our $VERSION = '3.019'; # VERSION
-my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.020'; # manually update whenever code is changed
 
 use Carp;
 use Encode qw(:all);
@@ -1452,6 +1452,8 @@ sub importPageIntoForm {
 =item $page = $pdf->import_page($source_pdf, $source_page_number)
 
 =item $page = $pdf->import_page($source_pdf, $source_page_number, $target_page_number)
+
+=item $page = $pdf->import_page($source_pdf, $source_page_number, $target_page_object)
 
 Imports a page from $source_pdf and adds it to the specified position
 in $pdf.

@@ -2,15 +2,23 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.020     2020-10-23   UNRELEASED
+3.020     2020-10-28   UNRELEASED
 * test build to make sure makefile changes work OK before upload to CPAN
 * cleanup: rm various t/tiff.t versions
 
-*   docs/buildDoc.pl   Add NAVIGATION LINKS section to go Up to parent(s), 
-      sideways to Siblings, and Down to children. This enables you to get from 
-      any place in the docs to any place else without (usually) having to go
-      all the way back up to index.html.
+*   docs/buildDoc.pl, lib/PDF/Builder/Basic/PDF.pm   
+      Add NAVIGATION LINKS section to go Up to parent(s), sideways to 
+      Siblings, and Down to children. This enables you to get from any place 
+      in the docs to any place else without (usually) having to go all the way 
+      back up to index.html. PDF.pm added just for a place to put links (no
+      code).
     
+    lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm,
+      lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm, Makefile.PL, 
+      t/tiff.t, lib/PDF/Builder.pm
+     Fix problem with reading colormap from TIFF (GH 133), by 'carygravel'.
+      Note that this requires upgrade of Graphics::TIFF from 6 to 7.
+
     t/tiff.t  upgrade so tests 10 and 11 are no longer always skipped. This 
       works only on a Linux system (definitely not on Windows), and makes use
       of ImageMagick and Linux utilities 'convert' and 'tiffcp'. Graphics::TIFF
