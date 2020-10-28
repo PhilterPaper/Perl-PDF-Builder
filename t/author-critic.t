@@ -1,14 +1,17 @@
-#!/usr/bin/perl
 use strict;
 use warnings;
+use File::Spec;
+use Test::More;
 
-
-BEGIN {
-  unless ($ENV{'AUTHOR_TESTING'}) {
-    print qq{1..0 # SKIP these tests are for testing by the author\n};
-    exit
-  }
+if ( not $ENV{TEST_AUTHOR} ) {
+    plan( skip_all =>
+          'Author test.  Set $ENV{TEST_AUTHOR} to a true value to run.' );
 }
 
-use Test::Perl::Critic (-profile => "perlcritic.rc") x!! -e "perlcritic.rc";
-all_critic_ok();
+if ( not eval { require Test::Perl::Critic; } ) {
+    plan( skip_all => 'Test::Perl::Critic required to criticise code' );
+}
+
+Test::Perl::Critic->import(
+    -profile => File::Spec->catfile( 't', 'perlcriticrc' ) );
+all_critic_ok( 'contrib', 'examples', 'lib', 'tools' );
