@@ -28,6 +28,8 @@ my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
 # output <source name> OK is always ignored
 my @ignore_list = (
   # should not ignore any level 5 warnings
+     "Use IO::Interactive::is_interactive",
+                              # not a core module!
   # common level 4 warnings to ignore
      "Code before warnings",  # due to use of "no warnings" pragma 
      "Warnings disabled at",  # due to use of "no warnings" pragma

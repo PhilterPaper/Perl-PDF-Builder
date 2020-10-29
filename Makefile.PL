@@ -49,7 +49,7 @@ my @choice_list = ( # use array to guarantee order
 # arbitrary choices (not just y and n). NOT checked: that default is
 # among choices, and default is lowercase!
 # for the original Y/n, choices 'yn' max 1 default 'y' or 'n'
-$| = 1;
+local $| = 1;
 
 my $make_choice = sub {
     my ($msg, $choices, $max, $default) = @_;
@@ -58,7 +58,7 @@ my $make_choice = sub {
     # the prompt() function can be emulated for older versions of ExtUtils::MakeMaker.
     while ( -t STDIN && (-t STDOUT || !(-f STDOUT || -c STDOUT))) {
 	print "$msg ";
-	my $choice = <STDIN>;
+	my $choice = <>;
 	$choice =~ s/\s//g;  # strip off whitespace
 	if (length($choice) > $max) { next; } # too many entries?
 	$choice ||= $default;

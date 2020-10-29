@@ -13,6 +13,11 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
       back up to index.html. PDF.pm added just for a place to put links (no
       code).
     
+    Makefile.PL, t/author-critic.t, tools/1_pc.pl
+     Update to fix some perlcritic warnings, enable author-critic (not useful,
+      as tools/1_pc.pl does a better job of it). Suggested by 'carygravel',
+      but PR 135 rejected, as 1_pc is a superset of author-critic function.
+
     lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm,
       lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm, Makefile.PL, 
       t/tiff.t, lib/PDF/Builder.pm
