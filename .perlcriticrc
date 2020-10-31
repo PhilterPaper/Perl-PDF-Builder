@@ -1,4 +1,4 @@
-severity = 4
+severity = 5
 
 [Perl::Critic::Policy::BuiltinFunctions::ProhibitStringyEval]
 allow_includes = 1
