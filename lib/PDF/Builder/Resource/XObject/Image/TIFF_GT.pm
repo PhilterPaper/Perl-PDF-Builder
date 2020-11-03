@@ -186,7 +186,7 @@ sub read_tiff {
     if ($tif->{'colorSpace'} eq 'Indexed') {
         my $dict = PDFDict();
         $pdf->new_obj($dict);
-        $self->colorspace(PDFArray(PDFName($tif->{'colorSpace'}), PDFName('DeviceRGB'), PDFNum(255), $dict));
+        $self->colorspace(PDFArray(PDFName($tif->{'colorSpace'}), PDFName('DeviceRGB'), PDFNum(2**$tif->{'bitsPerSample'}-1), $dict));
         $dict->{'Filter'} = PDFArray(PDFName('FlateDecode'));
         my ($red, $green, $blue) = @{$tif->{'colorMap'}};
         $dict->{' stream'} = '';
