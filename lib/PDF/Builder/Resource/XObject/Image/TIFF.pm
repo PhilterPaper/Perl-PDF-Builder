@@ -252,7 +252,7 @@ sub read_tiff {
     if ($tif->{'colorSpace'} eq 'Indexed') {
         my $dict = PDFDict();
         $pdf->new_obj($dict);
-        $self->colorspace(PDFArray(PDFName($tif->{'colorSpace'}), PDFName('DeviceRGB'), PDFNum(255), $dict));
+        $self->colorspace(PDFArray(PDFName($tif->{'colorSpace'}), PDFName('DeviceRGB'), PDFNum(2**$tif->{'bitsPerSample'}-1), $dict));
         $dict->{'Filter'} = PDFArray(PDFName('FlateDecode'));
         $tif->{'fh'}->seek($tif->{'colorMapOffset'}, 0);
         my $colormap;
