@@ -2120,12 +2120,12 @@ sub image_tiff {
     my ($self, $file, %opts) = @_;
 
     my ($rc, $obj);
-    $rc = $self->LA_GT();
-    if ($rc) {
-	# Graphics::TIFF available
-	if (defined $opts{'-nouseGT'} && $opts{'-nouseGT'} == 1) {
-	   $rc = -1;  # don't use it
-	}
+    if (defined $opts{'-nouseGT'} && $opts{'-nouseGT'} == 1) {
+	# Graphics::TIFF disabled
+	$rc = -1;  # don't use it
+    } else {
+	# Graphics::TIFF to be detected
+	$rc = $self->LA_GT();
     }
     if ($rc == 1) {
 	# Graphics::TIFF (_GT suffix) available and to be used
@@ -2228,12 +2228,12 @@ sub image_png {
     my ($self, $file, %opts) = @_;
 
     my ($rc, $obj);
-    $rc = $self->LA_IPL();
-    if ($rc) {
-        # Image::PNG::Libpng available
-        if (defined $opts{'-nouseIPL'} && $opts{'-nouseIPL'} == 1) {
-            $rc = -1;  # don't use it
-        }
+    if (defined $opts{'-nouseIPL'} && $opts{'-nouseIPL'} == 1) {
+        # Image::PNG::Libpng disabled
+	$rc = -1;  # don't use it
+    } else {
+        # Image::PNG::Libpng to be detected
+	$rc = $self->LA_IPL();
     }
     if ($rc == 1) {
         # Image::PNG::Libpng (_IPL suffix) available and to be used
