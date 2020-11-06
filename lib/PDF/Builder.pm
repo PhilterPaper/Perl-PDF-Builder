@@ -171,17 +171,21 @@ This is free software, licensed under:
 The GNU Lesser General Public License (LGPL) Version 2.1, February 1999
 
   (The master copy of this license lives on the GNU website.)
+  (A copy is provided in the INFO/LICENSE file for your convenience.)
 
-Copyright (C) 1991, 1999 Free Software Foundation, Inc. 59
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
-I<Please see the> INFO/LICENSE I<file in the distribution root for full
-details.>
+This section of Builder.pm is intended only as a very brief summary 
+of the license; please consider INFO/LICENSE to be the controlling version, 
+if there is any conflict or ambiguity between the two.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU Lesser General Public License, as published by the Free
 Software Foundation, either version 2.1 of the License, or (at your option) any
-later version.
+later version of this license.
+
+NOTE: there are several files in this distribution which were incorporated from
+outside sources and carry different licenses. If a file states that it is under 
+a license different than LGPL 2.1, that license and its terms will apply to 
+that file, and not LGPL 2.1.
 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A

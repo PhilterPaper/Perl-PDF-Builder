@@ -2,9 +2,8 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.020     2020-10-28   UNRELEASED
+3.020     2020-11/06   UNRELEASED
 * test build to make sure makefile changes work OK before upload to CPAN
-* cleanup: rm various t/tiff.t versions
 
 *   docs/buildDoc.pl, lib/PDF/Builder/Basic/PDF.pm   
       Add NAVIGATION LINKS section to go Up to parent(s), sideways to 
@@ -13,15 +12,23 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
       back up to index.html. PDF.pm added just for a place to put links (no
       code).
     
+    lib/PDF/Builder.pm, README, INFO/LICENSE
+     Make license-related text more consistent, and attempt to clarify the 
+      relationship between the LGPL 2.1 master license and the various other 
+      licenses that some files are under, as well as the ability to 
+      redistribute under a higher version of LGPL.
+
     Makefile.PL, t/author-critic.t, tools/1_pc.pl
      Update to fix some perlcritic warnings, enable author-critic (not useful,
       as tools/1_pc.pl does a better job of it). Suggested by 'carygravel',
-      but PR 135 rejected, as 1_pc is a superset of author-critic function.
+      but [PR 135] rejected, as 1_pc is a superset of author-critic function.
+      Can't change .perlcriticrc SEVERITY from 5 to 4, as the GitHub Actions
+      CI testing appears to be using it, leading to a lot of errors.
 
-    lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm,
+    lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm, t/tiff.t, 
       lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm, Makefile.PL, 
-      t/tiff.t, lib/PDF/Builder.pm
-     Fix problem with reading colormap from TIFF (GH 133), by 'carygravel'.
+      lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/TIFF.pm,
+     Fix problem with reading colormap from TIFF [GH 133], by 'carygravel'.
       Note that this requires upgrade of Graphics::TIFF from 6 to 7.
 
     t/tiff.t  upgrade so tests 10 and 11 are no longer always skipped. This 

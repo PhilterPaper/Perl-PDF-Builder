@@ -13,13 +13,15 @@ example usage, etc.
 Alternatively, you can obtain the full source files from
 https://github.com/PhilterPaper/Perl-PDF-Builder, where the ticket list (bugs,
 enhancement requests, etc.) is also kept. Unlike the installable CPAN version, 
-this will have to be manually installed (copy files).
+this will have to be manually installed (copy files; there are no XS compiles
+at this time).
 
 Note that there are several "optional" libraries (Perl modules) used to extend
 and improve PDF::Builder. The installation process will not attempt to install 
-them if not present -- you need to do this manually (if you want to use them). 
-Read about the list of optional libraries in PDF::Builder::Docs, and decide 
-whether or not you want to manually install any of them.
+them if not present -- you need to do this manually (if you want to use them),
+or at least, give the go-ahead during the installation process to try
+installing them. Read about the list of optional libraries in 
+PDF::Builder::Docs, and decide whether or not you want to install any of them.
 
 REQUIREMENTS ======================================================
 
@@ -59,7 +61,7 @@ Libraries used, available from CPAN --
   Test::Memory::Cycle (needed only for installation tests)
 
  OPTIONAL, install manually if wanted AND they failed to install 
-  automatically...
+  automatically when requested...
    Graphics::TIFF (recommended if using TIFF image functions)
    Image::PNG::Libpng (recommended for enhanced PNG image function processing)
    HarfBuzz::Shaper (recommended for Latin script ligatures and kerning, as
@@ -82,6 +84,11 @@ This is free software, licensed under:
 
   The GNU Lesser General Public License, Version 2.1, February 1999
 
+EXCEPT for some files which are explicitly under other licenses. You are
+permitted (at your option) to redistribute and/or modify this software (those
+portions under LGPL) at an LGPL version greater than 2.1. See INFO/LICENSE for 
+more information on the licenses and warranty statement. 
+
 See INFO/RoadMap file for the PDF::Builder road map.
 See CONTRIBUTING file for how to contribute to the project.
 See INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues
@@ -90,7 +97,6 @@ See INFO/DEPRECATED file for information on deprecated features.
 See INFO/KNOWN_INCOMP file for known incompatibilities with PDF::API2.
 See INFO/Changes* files for older change logs.
 See INFO/PATENTS file for information on patents.
-See INFO/LICENSE file for the license.
 See INFO/CONVERSION file for how to convert from PDF::API2 to PDF::Builder
 
 INFO/old/ also has some build and test tool files that are not currently used.
