@@ -2147,7 +2147,7 @@ sub image_tiff {
         $self->{'pdf'}->out_obj($self->{'pages'});
 
 	if ($rc == 0 && $MSG_COUNT[0]++ == 0) {
-	    # TBD give warning message once, unless silenced (-silent) or
+	    # give warning message once, unless silenced (-silent) or
 	    # deliberately not using Graphics::TIFF (rc == -1)
 	    if (!defined $opts{'-silent'} || $opts{'-silent'} == 0) {
 	        print STDERR "Your system does not have Graphics::TIFF installed, so some\nTIFF functions may not run correctly.\n";

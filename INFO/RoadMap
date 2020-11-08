@@ -1,4 +1,4 @@
-Road Map for Future Development of PDF::Builder              13 September 2020
+Road Map for Future Development of PDF::Builder              08 November 2020
 
 In order to encourage others to contribute code and/or algorithms to the
 effort, I am publishing this road map of where I would like the product to go.
@@ -150,7 +150,8 @@ M. Add decorative rectangular box effects around sections of text. With or
    without border (allow rounded corners) and background color, drop shadows
    (3D effect), etc. The box is drawn at given dimensions and location, and
    the text written over it in the usual manner. Content clipping might also
-   be supported.
+   be supported. See PDF::Table for drawing rules (and borders) for ideas, as
+   well as block background colors (gfx_bg object before text object).
 
 N. Extend HarfBuzz::Shaper use (see A.) to flow paragraphs and sections (fill)
    to match capability of existing text-fill calls. Architect so as to extend
@@ -162,7 +163,16 @@ N. Extend HarfBuzz::Shaper use (see A.) to flow paragraphs and sections (fill)
    to various text-handling routines (including length, justifying and aligning
    text, filling lines, paragraph, section, textlabel, etc.).
 
-O. Support for PNM and related graphics images. See RT 132844.
+O. ## DONE ## release 3.020
+   Support for PNM and related graphics images. See RT 132844.
+
+P. Look into using TeX::Hyphen or Text::Hyphen to split words properly. The
+   latter supports 3 languages besides English. Both use TeX (Knuth-Liang)
+   algorithms. Eventually need means to override built-in hyphenation (e.g.,
+   force 're-cord' or 'rec-ord', per context), similar to ligature control. 
+   Use any place where a string is flowed into multiple lines, and eventually 
+   for complete paragraph shaping. Retain camelCase and punctuation/numeric 
+   splitting as fallback for non-words.
 
 =============================================================================
 II. Items to add to a separate area (new module or sub-module)
@@ -177,6 +187,7 @@ A. Hyphenation and paragraph shaping: including CTS 20 (Hyphenation) and CTS 24
    paragraph shaping algorithms to flow text into a space in a visually 
    pleasing manner, while obeying widows and orphans constraints (as well as
    not orphaning headings). Pango may help here with line and word splitting.
+   ** Look into item P in section I **
 
 B. Virtual pages: this would be related to item (A) (paragraph shaping), where
    PDF code would not be immediately written to an output page, but would be
@@ -188,6 +199,12 @@ B. Virtual pages: this would be related to item (A) (paragraph shaping), where
    virtuality (virtual line output) could be useful for resetting a baseline
    to accommodate a change in font size -- this might involve tagging a word or
    block of words of the same height.
+
+   PDF::Table product (or table functionality within Builder) could make use
+   of virtual printing to "print" to a mini-page within a cell (fixed width,
+   min/max height). If it doesn't fit on the page, decide where to split row
+   to avoid widows and orphans. Also knowing cell height and row height, can
+   vertically align a cell's contents.
 
 C. General text flowing capability, to fill irregularly shaped columns (such
    as with intruding inserts or margin notes) in a balanced manner, including
@@ -264,7 +281,9 @@ H. Incorporate PDF::Table into PDF::Builder::Table. Simplify it somewhat (e.g.,
 
    Currently, PDF::Table basically equalizes column widths as much as it can,
    but consider a starting point of relative and/or absolute column widths,
-   like many other table implementations.
+   like many other table implementations. Some columns absolute widths, and
+   remaining space divided up even among *'s (with a column N*), subject to
+   minimum and maximum widths.
 
    Within a cell, ideally it would be treated as a mini-page, with all the 
    normal PDF construction capabilities including paragraph shaping, flow into
@@ -277,7 +296,8 @@ I. Consider Optional Content Groups (Layers), per 32000-2008 section 8.11.
    This permits drawings to be shown by layer, or a watermark/copyright layer
    to show only on printing.
 
-J. Per wkHTMLtoPDF issue 4846, at least some phone cameras output "portrait"
+J. ## DONE ## release 3.020  (documentation improved)
+   Per wkHTMLtoPDF issue 4846, at least some phone cameras output "portrait"
    mode photos in landscape mode (rotated), with an "orientation" tag. JPEG
    (at least) image handling may need a rotation flag in the call, and/or 
    pay attention to the Exif orientation flag. Confirmed that
@@ -289,5 +309,17 @@ J. Per wkHTMLtoPDF issue 4846, at least some phone cameras output "portrait"
    the image what its orientation is, and leave translation and rotation of
    the placed image to user code, rather than trying to flip the contents of
    the image file directly. See writeup in Docs.pm.
+
+K. A means to update PDF content already written to the $pdf data structure, 
+   but not yet written to file. This could involve moving a text write (one
+   or more translates) to somewhere else on the page, or even moving from one
+   page to another. More general editing of material already "written" out,
+   such as changing a font size or a color -- would need a way to find the
+   desired content to be modified. Ability to erase content or move it from
+   page to page (e.g., started a table and then found it wouldn't fit on one
+   page -- move it to the top of the next page to allow display on a single
+   page). If virtual pages, design with all this in mind, so easy to update
+   content before being "written" out. If nothing is written to the PDF file
+   until the end (save or saveas), this might even supersede virtual pages.
 
 =============================================================================
