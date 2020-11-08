@@ -188,6 +188,10 @@ A. Hyphenation and paragraph shaping: including CTS 20 (Hyphenation) and CTS 24
    pleasing manner, while obeying widows and orphans constraints (as well as
    not orphaning headings). Pango may help here with line and word splitting.
    ** Look into item P in section I **
+   Text::KnuthPlass might be usable for general paragraph setup (allows non-
+   rectangular paragaph), uses Text::Hyphen internally, don't know yet if it 
+   does the full Knuth-Plass "rivers of white" and "too many hyphens in a row" 
+   bit. Interaction with Text::Layout stuff (font, size, changes)?
 
 B. Virtual pages: this would be related to item (A) (paragraph shaping), where
    PDF code would not be immediately written to an output page, but would be
