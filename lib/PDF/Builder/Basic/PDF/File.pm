@@ -18,7 +18,7 @@ use strict;
 no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.018'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.020'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -1168,11 +1168,14 @@ See C<open> for options allowed.
 sub _unpack_xref_stream {
     my ($self, $width, $data) = @_;
 
+    # in all cases, "Network" (Big-Endian) byte order assumed
     return unpack('C', $data)       if $width == 1;
     return unpack('n', $data)       if $width == 2;
     return unpack('N', "\x00$data") if $width == 3;
     return unpack('N', $data)       if $width == 4;
-    return unpack('Q', $data)       if $width == 8; # PDF 1.5+?
+    return unpack('Q>', $data)      if $width == 8; 
+         # Q needs Big-Endian flag (>) specified, else uses native chip order
+         # also requires 64-bit platform (chip and Perl), else fatal error
 
     die "Invalid column width: $width";
 }
@@ -1385,6 +1388,7 @@ sub readxrtr {
     } elsif ($buf =~ m/^(\d+)\s+(\d+)\s+obj/i) {
         my ($xref_obj, $xref_gen) = ($1, $2);
 
+	PDF::Builder->verCheckOutput(1.5, "importing cross-reference stream");
         # XRef streams
         ($tdict, $buf) = $self->readval($buf);
 
