@@ -2124,11 +2124,7 @@ sub image_tiff {
     my ($self, $file, %opts) = @_;
 
     my ($rc, $obj);
-    $rc = eval {
-        require Graphics::TIFF;
-	1;
-    };
-    if (!defined $rc) { $rc = 0; }  # else is 1
+    $rc = $self->LA_GT();
     if ($rc) {
 	# Graphics::TIFF available
 	if (defined $opts{'-nouseGT'} && $opts{'-nouseGT'} == 1) {
@@ -2236,11 +2232,7 @@ sub image_png {
     my ($self, $file, %opts) = @_;
 
     my ($rc, $obj);
-    $rc = eval {
-        require Image::PNG::Libpng;
-        1;
-    };
-    if (!defined $rc) { $rc = 0; }  # else is 1
+    $rc = $self->LA_IPL();
     if ($rc) {
         # Image::PNG::Libpng available
         if (defined $opts{'-nouseIPL'} && $opts{'-nouseIPL'} == 1) {
@@ -2259,7 +2251,7 @@ sub image_png {
         $self->{'pdf'}->out_obj($self->{'pages'});
 
         if ($rc == 0 && $MSG_COUNT[1]++ == 0) {
-            # TBD give warning message once, unless silenced (-silent) or
+            # give warning message once, unless silenced (-silent) or
             # deliberately not using Image::PNG::Libpng (rc == -1)
             if (!defined $opts{'-silent'} || $opts{'-silent'} == 0) {
                 print STDERR "Your system does not have Image::PNG::Libpng installed, so some\nPNG functions may not run correctly.\n";
