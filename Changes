@@ -5,10 +5,9 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
 3.020     2020-11-16  UNRELEASED
 * test build to make sure makefile changes work OK before upload to CPAN
 
-*   lib/PDF/Builder/Outline.pm, lib/PDF/Builder/Basic/PDF/Objind.pm
+    lib/PDF/Builder/Outline.pm, lib/PDF/Builder/Basic/PDF/Objind.pm
      Per [RT 131657, Vadim Repin's fix] add weaken statements to eliminate
       "Deep Recursion" error messages.
-     ## need to test, then put in master library and GitHub
 
     lib/PDF/Builder/Matrix.pm
      Per latest changes to PDF::API2, some code cleanup in Matrix.pm (no

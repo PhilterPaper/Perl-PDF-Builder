@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.020'; # manually update whenever code is changed
 
 use Carp qw(croak);
 use PDF::Builder::Basic::PDF::Utils;
@@ -34,6 +34,8 @@ sub new {
     $self->{'Prev'}   = $prev   if defined $prev;
     $self->{' api'}   = $api;
     weaken $self->{' api'};
+    weaken $self->{'Parent'} if defined $parent;
+    weaken $self->{'Prev'} if defined $prev;
 
     return $self;
 }
@@ -42,6 +44,7 @@ sub new {
 sub parent {
     my $self = shift();
     $self->{'Parent'} = shift() if defined $_[0];
+    weaken $self->{'Parent'};
     return $self->{'Parent'};
 }
 
@@ -49,6 +52,7 @@ sub parent {
 sub prev {
     my $self = shift();
     $self->{'Prev'} = shift() if defined $_[0];
+    weaken $self->{'Prev'};
     return $self->{'Prev'};
 }
 
@@ -56,6 +60,7 @@ sub prev {
 sub next {
     my $self = shift();
     $self->{'Next'} = shift() if defined $_[0];
+    weaken $self->{'Next'};
     return $self->{'Next'};
 }
 
@@ -65,6 +70,7 @@ sub first {
 
     $self->{'First'} = $self->{' children'}->[0] 
         if defined $self->{' children'} and defined $self->{' children'}->[0];
+    weaken $self->{'First'};
     return $self->{'First'};
 }
 
@@ -74,6 +80,7 @@ sub last {
 
     $self->{'Last'} = $self->{' children'}->[-1] 
         if defined $self->{' children'} and defined $self->{' children'}->[-1];
+    weaken $self->{'Last'};
     return $self->{'Last'};
 }
 
