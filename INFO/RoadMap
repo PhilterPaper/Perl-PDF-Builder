@@ -330,4 +330,13 @@ K. A means to update PDF content already written to the $pdf data structure,
    content before being "written" out. If nothing is written to the PDF file
    until the end (save or saveas), this might even supersede virtual pages.
 
+L. (See B and H items above) Consider a $page->subpage(x, y, w, h, opts) to
+   subclass a page into a restricted area (not necessarily rectangular, or
+   bounded in height). Things like columns and table cells could then be
+   treated as normal pages (inherit text and graphics contexts?) and anything
+   could be put into them. May want to wait until have virtual write 
+   capability rather than writing to file right away, for fitting table cells
+   into a page, and balancing columns. Once in, build-in PDF::Table capability
+   as PDF::Builder::Table, and can have arbitrary content in a table cell.
+
 =============================================================================

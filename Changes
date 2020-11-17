@@ -2,8 +2,18 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.020     2020-11-11  UNRELEASED
+3.020     2020-11-16  UNRELEASED
 * test build to make sure makefile changes work OK before upload to CPAN
+
+*   lib/PDF/Builder/Outline.pm, lib/PDF/Builder/Basic/PDF/Objind.pm
+     Per [RT 131657, Vadim Repin's fix] add weaken statements to eliminate
+      "Deep Recursion" error messages.
+     ## need to test, then put in master library and GitHub
+
+    lib/PDF/Builder/Matrix.pm
+     Per latest changes to PDF::API2, some code cleanup in Matrix.pm (no
+      functional change except for adding some diagnostic carps). Have not
+      yet removed non-LGPL license statement at top of file! 
 
     lib/PDF/Builder.pm  
      Per [PR 139, by ppisar], replace some hard-coded checks for 
@@ -39,7 +49,7 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
      Make license-related text more consistent, and attempt to clarify the 
       relationship between the LGPL 2.1 master license and the various other 
       licenses that some files are under, as well as the ability to 
-      redistribute under a higher version of LGPL. ref [CTS35]
+      redistribute under a higher version of LGPL. ref [CTS 35]
 
     Makefile.PL, t/author-critic.t, tools/1_pc.pl
      Update to fix some perlcritic warnings, enable author-critic (not useful,
