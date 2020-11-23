@@ -531,6 +531,41 @@ which make the object unusable for further operations. You will likely receive
 an error message about B<can't call method new_obj on an undefined value> if
 you try to keep using a PDF object.
 
+=head2 IntegrityCheck 
+
+The PDF::Builder methods that open an existing PDF file, pass it by the
+integrity checker method, C<$self-E<gt>IntegrityCheck(level, content)>. This method
+servers two purposes: 1) to find any C</Version> settings that override the
+PDF version found in the PDF heading, and 2) perform some basic validations on
+the contents of the PDF.
+
+The C<level> parameter accepts the following values:
+
+=over
+
+=item 0 = Do not output any diagnostic messages; just return any version override.
+
+=item 1 = Output error-level (serious) diagnostic messages, as well as returning any version override.
+
+Errors include, in no place was the /Root object specified, or if it was, the indicated object was not found. An object claims another object as its child (/Kids list), but another object has already claimed that child. An object claims a child, but that child does not list a Parent, or the child lists a different Parent.
+
+=item 2 = Output error- (serious) and warning- (less serious) level diagnostic messages, as well as returning any version override. B<This is the default.>
+
+=item 3 = Output error- (serious), warning- (less serious), and note- (informational) level diagnostic messages, as well as returning any version override.
+
+Notes include, in no place was the (optional) /Info object specified, or if it was, the indicated object was not found. An object was referenced, but no entry for it was found among the objects. (This may be OK if the object is on the free list, as the reference will then be ignored.) An object is defined, but it appears that no other object is referencing it.
+
+=item 4 = Output error-, warning-, and note-level diagnostic messages, as well as returning any version override. Also dump the diagnostic data structure.
+
+=item 5 = Output error-, warning-, and note-level diagnostic messages, as well as returning any version override. Also dump the diagnostic data structure and the C<$self> data structure (generally useful only if you have already read in the PDF file).
+
+=back
+
+The version is a string (e.g., '1.5') if found, otherwise C<undef> (undefined value) is returned.
+
+For controlling the "automatic" call to IntegrityCheck (via opens), the level 
+may be given with the option (flag) C<-diaglevel =E<gt> I<n>>, where C<n> is between 0 and 5.
+
 =head2 Preferences - set user display preferences
 
 =over

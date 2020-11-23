@@ -3,13 +3,8 @@
 #   PDF::Builder::Matrix
 #   Original Copyright 1995-96 Ulrich Pfeifer.
 #   modified by Alfred Reibenschuh <areibens@cpan.org> for PDF::API2
-#
-#   This library is free software; you can redistribute it
-#   and/or modify it under the same terms as Perl itself.
-#
-#   NOTE: PDF::API2 has completely removed this license statement. I'm
-#   not ready to do that yet, until the whole non-LGPL license issue is
-#   straightened out!
+#   rewritten by Steve Simms <steve@deefs.net> and licensed under the same 
+#      terms as the rest of PDF::API2
 #
 #=======================================================================
 package PDF::Builder::Matrix;

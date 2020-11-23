@@ -2,8 +2,27 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.020     2020-11-16  UNRELEASED
+3.020     2020-11-22  UNRELEASED
 * test build to make sure makefile changes work OK before upload to CPAN
+
+    lib/PDF/Builder/Basic/PDF/File.pm
+     Extend cross-reference stream handling (read-in PDFs) to cover field
+      widths of 5, 6, or 7 bytes (40-, 48-, or 56-bit integers). Special case
+      of 8 byte (64-bit integer) where top 32 bits are all 0, is treated as
+      32-bit integer to avoid requiring a 64-bit Perl build just for unpacking
+      this field.
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm
+     Per [RT 130722, RT 133131, et al.] get any /Version override (in /Catalog)
+      and update the read-in PDF version (beyond 1.4, even if the PDF header
+      still claims 1.4). This minimizes extraneous warnings about having to
+      bump up the PDF version from what is claimed in the header.
+
+      Cross-check parent/kids links, report orphaned objects, report objects
+      referenced but not defined, report missing Info and Root objects, etc.
+      The input PDF file or string is not changed, but at least it can give
+      you an idea of why an error occurs, or the resulting PDF does not work
+      correctly.
 
     lib/PDF/Builder/Outline.pm, lib/PDF/Builder/Basic/PDF/Objind.pm
      Per [RT 131657, Vadim Repin's fix] add weaken statements to eliminate
@@ -11,8 +30,7 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
 
     lib/PDF/Builder/Matrix.pm
      Per latest changes to PDF::API2, some code cleanup in Matrix.pm (no
-      functional change except for adding some diagnostic carps). Have not
-      yet removed non-LGPL license statement at top of file! 
+      functional change except for adding some diagnostic carps). 
 
     lib/PDF/Builder.pm  
      Per [PR 139, by ppisar], replace some hard-coded checks for 

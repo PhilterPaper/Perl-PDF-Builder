@@ -1168,16 +1168,38 @@ See C<open> for options allowed.
 sub _unpack_xref_stream {
     my ($self, $width, $data) = @_;
 
+    # handle some oddball cases
+    if      ($width == 3) {
+	$data = "\x00$data";
+	$width = 4;
+    } elsif ($width == 5) {
+	$data = "\x00\x00\x00$data";
+	$width = 8;
+    } elsif ($width == 6) {
+	$data = "\x00\x00$data";
+	$width = 8;
+    } elsif ($width == 7) {
+	$data = "\x00$data";
+	$width = 8;
+    }
     # in all cases, "Network" (Big-Endian) byte order assumed
-    return unpack('C', $data)       if $width == 1;
-    return unpack('n', $data)       if $width == 2;
-    return unpack('N', "\x00$data") if $width == 3;
-    return unpack('N', $data)       if $width == 4;
-    return unpack('Q>', $data)      if $width == 8; 
-         # Q needs Big-Endian flag (>) specified, else uses native chip order
-         # also requires 64-bit platform (chip and Perl), else fatal error
+    return unpack('C', $data)  if $width == 1;
+    return unpack('n', $data)  if $width == 2;
+    return unpack('N', $data)  if $width == 4;
+    if ($width == 8) {
+	if (substr($data, 0, 4) eq "\x00\x00\x00\x00") {
+	    # can treat as 32 bit unsigned int
+            return unpack('N', substr($data, 4, 4));
+	} else {
+            # requires 64-bit platform (chip and Perl), else fatal error
+	    # it may blow up and produce a smoking crater if 32-bit Perl!
+            # also note that Q needs Big-Endian flag (>) specified, else 
+	    #   it will use the native chip order (Big- or Little- Endian)
+            return unpack('Q>', $data);
+	}
+    }
 
-    die "Invalid column width: $width";
+    die "Unsupported field width: $width. 1-8 supported.";
 }
 
 sub readxrtr {
