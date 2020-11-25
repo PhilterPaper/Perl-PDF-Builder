@@ -6,7 +6,7 @@ use strict;
 no warnings qw( deprecated recursion uninitialized );
 
 # VERSION
-my $LAST_UPDATE = '3.019'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.020'; # manually update whenever code is changed
 
 use Carp;
 use Compress::Zlib qw();
@@ -1271,14 +1271,8 @@ point or coordinate is left over at the end, it is discarded (as usual practice
 for excess data to a routine). There is no check for duplicate points or other 
 degeneracies.
 
-The former name of B<spline> has been deprecated and will be removed.
-
 =cut
 
-sub spline {
-    warn "Use qbspline instead of spline";
-    return  qbspline(@_); 
-}
 sub qbspline {
     my ($self) = shift;
 

@@ -298,17 +298,7 @@ Defines the destination of the outline as a PDF-file with filepath
 C<$pdffile>, on page C<$pagenum> (default 0), and position C<%position> 
 (same as dest()).
 
-The old name, I<pdfile>, is still available but is B<deprecated> and will be
-removed at some time in the future.
-
 =cut
-
-# to be removed no earlier than October, 2020
-sub pdfile {
-    my ($self, $file, $page_number, %position) = @_;
-    warn "use pdf_file() method instead of pdfile()";
-    return $self->pdf_file($file, $page_number, %position);
-}
 
 sub pdf_file {
     my ($self, $file, $page_number, %position) = @_;

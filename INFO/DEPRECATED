@@ -9,16 +9,6 @@ user in an emergency), but eventually they WILL be removed.
 
 In order of scheduled removal date:
 
-spline          method in Content.pm
-   This functionality was renamed to qbspline() [quadratic Bezier spline].
-   Simply rename any call to "spline" to "qbspline". spline is scheduled to
-   be removed on or after June, 2020.
-
-pdfile          method in Outline.pm, NamedDestination.pm
-   This functionality was renamed to pdf_file(). Simply rename any call to
-   "pdfile" to "pdf_file". pdfile is scheduled to be removed on or after
-   October, 2020.
-
 -slant          option in Synfont.pm
    This option was renamed to -condense, as it is the factor to condense
    (multiply width by < 1) or expand (multiply width by > 1) text characters. 
@@ -139,4 +129,14 @@ pdfile          method in Annotation.pm
    This functionality was renamed to pdf_file(). Simply rename any call to
    "pdfile" to "pdf_file". pdfile is scheduled to be removed on or after
    November, 2019. [Removed November, 2019]
+
+spline          method in Content.pm
+   This functionality was renamed to qbspline() [quadratic Bezier spline].
+   Simply rename any call to "spline" to "qbspline". spline is scheduled to
+   be removed on or after June, 2020. [Removed November, 2020]
+
+pdfile          method in Outline.pm, NamedDestination.pm
+   This functionality was renamed to pdf_file(). Simply rename any call to
+   "pdfile" to "pdf_file". pdfile is scheduled to be removed on or after
+   October, 2020. [Removed November, 2020]
 

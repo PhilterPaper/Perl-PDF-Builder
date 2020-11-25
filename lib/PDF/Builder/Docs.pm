@@ -553,7 +553,7 @@ Errors include, in no place was the /Root object specified, or if it was, the in
 
 =item 3 = Output error- (serious), warning- (less serious), and note- (informational) level diagnostic messages, as well as returning any version override.
 
-Notes include, in no place was the (optional) /Info object specified, or if it was, the indicated object was not found. An object was referenced, but no entry for it was found among the objects. (This may be OK if the object is on the free list, as the reference will then be ignored.) An object is defined, but it appears that no other object is referencing it.
+Notes include, in no place was the (optional) /Info object specified, or if it was, the indicated object was not found. An object was referenced, but no entry for it was found among the objects. (This may be OK if the object is not defined, or is on the free list, as the reference will then be ignored.) An object is defined, but it appears that no other object is referencing it.
 
 =item 4 = Output error-, warning-, and note-level diagnostic messages, as well as returning any version override. Also dump the diagnostic data structure.
 

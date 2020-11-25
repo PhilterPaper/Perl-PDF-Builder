@@ -2,8 +2,11 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.020     2020-11-23  UNRELEASED
-* test build to make sure makefile changes work OK before upload to CPAN
+3.020     2020-11-24  UNRELEASED
+
+    lib/PDF/Builder/Content-Outline-NamedDestination.pm, INFO/DEPRECATED
+     Rename previously deprecated names "spline" (to "qbspline") and "pdfile"
+     (to "pdf_file").
 
     examples/042_links
      Add some examples showing non-default positioning (fit) on 
@@ -91,8 +94,8 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
       is needed for test 10, and test 9 (alpha layer) is still skipped. Thanks
       to GitHub user 'carygravel' for the upgrade.
 
-    INFO/DEPRECATED   add a couple of long-deprecated items that were missing
-      from this file.
+    INFO/DEPRECATED   add a couple long-deprecated items ("PDFStr" and 
+      "PDFUtf") that were missing from this file.
 
     INFO/RoadMap, lib/PDF/Builder/Docs.pm  add discussion on why images
       (especially JPEG) are sometimes rotated and/or flipped, and what can be
