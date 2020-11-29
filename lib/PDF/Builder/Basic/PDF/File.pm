@@ -1187,6 +1187,13 @@ sub _unpack_xref_stream {
     return unpack('n', $data)  if $width == 2;
     return unpack('N', $data)  if $width == 4;
     if ($width == 8) {
+	# Some ways other packages handle this, without Perl-64, according
+	# to Vadim Repin. Possibly they end up converting the value to
+	# "double" behind the scenes if on a 32-bit platform?
+	# PDF::Tiny  return hex unpack('H16', $data);
+	# CAM::PDF   my @b = unpack('C*', $data); 
+	#            my $i=0; ($i <<= 8) += shift @b while @b; return $i;
+	
 	if (substr($data, 0, 4) eq "\x00\x00\x00\x00") {
 	    # can treat as 32 bit unsigned int
             return unpack('N', substr($data, 4, 4));
