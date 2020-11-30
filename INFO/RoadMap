@@ -202,6 +202,14 @@ A. Hyphenation and paragraph shaping: including CTS 20 (Hyphenation) and CTS 24
    does the full Knuth-Plass "rivers of white" and "too many hyphens in a row" 
    bit. Interaction with Text::Layout stuff (font, size, changes)?
 
+   I've gotten Text::Hyphen and Text::KnuthPlass working, and tests suggest 
+   that they (mostly) work great. Unfortunately, KP doesn't build on all 
+   systems (a simple fix), so I may have to forcibly take it over if the owner 
+   doesn't respond reasonably soon, or just take it into the product. Hyphen 
+   could use some improvements for multilanguage support, also waiting for a 
+   response. Some sort of "virtual printing (see 'B') would be necessary, as 
+   dealing with widows and orphans would be much easier that way.
+
 B. Virtual pages: this would be related to item (A) (paragraph shaping), where
    PDF code would not be immediately written to an output page, but would be
    buffered, and output only later. This permits easier paragraph shaping and

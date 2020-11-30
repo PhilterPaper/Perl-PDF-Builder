@@ -1,5 +1,9 @@
 Change log for PDF::API2 version 2.xxx (predecessor to PDF::Builder)
 
+2.038     2020-08-31
+
+    - Use libpng.a PNG processing to speed up (already in PDF::Builder)
+
 2.037     2020-02-05
 
     - Allow PDF 2.0 files to be opened. [already in PDF::Builder]
