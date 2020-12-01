@@ -2,7 +2,12 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.021     2020-11-30  UNRELEASED
+3.021     2020-12-01  UNRELEASED
+
+    t/00-all-usable.t, Makefile.PL, lib/PDF/Builder.pm,
+      lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm
+     Make both t-tests and runtime a bit more robust if an optional library
+      (Graphics::TIFF and/or Image::PNG::Libpng) is installed, but back-level.
 
 3.020     2020-11-29
 

@@ -16,7 +16,8 @@ use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Resource::XObject::Image::TIFF::File_GT;
 use PDF::Builder::Util;
 use Scalar::Util qw(weaken);
-use Graphics::TIFF 7 ':all';  # have already confirmed that this exists
+#use Graphics::TIFF 7 ':all';  # have already confirmed that this exists
+use Graphics::TIFF ':all';  # have already confirmed that this version exists
 
 =head1 NAME
 

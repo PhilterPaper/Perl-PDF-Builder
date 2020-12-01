@@ -42,6 +42,11 @@ foreach my $file (@files) {
     	};
     	if (!defined $rc) { $rc = 0; }  # else is 1
     	if ($rc) {
+                if ($Graphics::TIFF::VERSION < 7) { 
+			# installed, but back-level... skip
+			push @opt_modules, $file; 
+			next; 
+		}
 		# fall through to use test
 	} else {
 		push @opt_modules, $file;
@@ -57,6 +62,11 @@ foreach my $file (@files) {
     	};
     	if (!defined $rc) { $rc = 0; }  # else is 1
     	if ($rc) {
+                if ($Image::PNG::Libpng::VERSION < 0.47) { 
+			# installed, but back-level... skip
+			push @opt_modules, $file; 
+			next; 
+		}
 		# fall through to use test
 	} else {
 		push @opt_modules, $file;

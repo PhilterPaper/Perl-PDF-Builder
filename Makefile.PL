@@ -21,9 +21,11 @@ my @choice_list = ( # use array to guarantee order
 	# 'a' and 'n' are reserved, do not use as key [0]
 	# [1] is actual library name [2] is minimum version [3] description
   ["t", "Graphics::TIFF", 7, "TIFF image support"],
-        # improved TIFF image processing
+        # improved TIFF image processing. DON'T FORGET TO UPDATE VERSION in
+	#   t/00-all-usable.t, lib/PDF/Builder.pm
   ["p", "Image::PNG::Libpng", 0.47, "PNG image support"],
-        # advanced/fast PNG image processing
+        # advanced/fast PNG image processing. DON'T FORGET TO UPDATE VERSION in
+	#   t/00-all-usable.t, lib/PDF/Builder.pm
   ["h", "HarfBuzz::Shaper", 0.23, "complex script support"],
         # text shaping for Latin script ligatures and kerning, and for 
 	# many complex scripts both LTR and RTL directions.

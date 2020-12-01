@@ -2241,6 +2241,10 @@ sub LA_GT {
         1;
     };
     if (!defined $rc) { $rc = 0; }  # else is 1
+    if ($rc) {
+	# installed, but not up to date?
+	if ($Graphics::TIFF::VERSION < 7) { $rc = 0; }
+    }
 
     return $rc;
 }
@@ -2348,6 +2352,10 @@ sub LA_IPL {
         1;
     };
     if (!defined $rc) { $rc = 0; }  # else is 1
+    if ($rc) {
+	# installed, but not up to date?
+	if ($Image::PNG::Libpng::VERSION < 0.47) { $rc = 0; }
+    }
 
     return $rc;
 }
