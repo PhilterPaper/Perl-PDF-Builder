@@ -15,10 +15,11 @@
 package PDF::Builder::Basic::PDF::File;
 
 use strict;
-no warnings qw[ deprecated recursion uninitialized ];
+use warnings;
+#no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.020'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
 
 =head1 NAME
 

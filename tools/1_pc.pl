@@ -31,8 +31,10 @@ my @ignore_list = (
      "Use IO::Interactive::is_interactive",
                               # not a core module!
   # common level 4 warnings to ignore
-     "Code before warnings",  # due to use of "no warnings" pragma 
-     "Warnings disabled at",  # due to use of "no warnings" pragma
+# removed 'no warnings' in 3.021. remove next line 3.022 or later
+#    "Code before warnings",  # due to use of "no warnings" pragma 
+# removed 'no warnings' in 3.021. remove next line 3.022 or later
+#    "Warnings disabled at",  # due to use of "no warnings" pragma
      "Close filehandles as soon as possible", 
                               # it thinks there is no "close" on an open 
 			      # filehandle, due to either too many lines for 
@@ -43,7 +45,7 @@ my @ignore_list = (
      "Subroutine name is a homonym for builtin function", 
                               # e.g., we define "open" when there is already a 
 			      # system (CORE::) open (ambiguous unless CORE:: 
-			      # added)
+			      # added)      TBD remove
      "Symbols are exported by default", 
                               # it doesn't like something about our use of 
 			      # @EXPORT and @EXPORT_OK

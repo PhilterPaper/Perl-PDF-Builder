@@ -1,12 +1,13 @@
 package PDF::Builder;
 
 use strict;
-no warnings qw[ deprecated recursion uninitialized ];
+#no warnings qw[ deprecated recursion uninitialized ];
+use warnings;
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
 our $VERSION = '3.020'; # VERSION
-my $LAST_UPDATE = '3.020'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
 
 use Carp;
 use Encode qw(:all);
@@ -306,17 +307,17 @@ sub new {
     $self->preferences(%options);
     if (defined $options{'-outver'}) {
         if ($options{'-outver'} >= 1.4) {
-	        $self->{'pdf'}->{' version'} = $outVer = $options{'-outver'};
-	    } else {
-	        print STDERR "Invalid -outver given, or less than 1.4. Ignored.\n";
-	    }
+	    $self->{'pdf'}->{' version'} = $outVer = $options{'-outver'};
+	} else {
+	    print STDERR "Invalid -outver given, or less than 1.4. Ignored.\n";
+	}
     }
     if (defined $options{'-msgver'}) {
-	    if ($options{'-msgver'} == 0 || $options{'-msgver'} == 1) {
+	if ($options{'-msgver'} == 0 || $options{'-msgver'} == 1) {
             $msgVer = $options{'-msgver'};
-	    } else {
-	        print STDERR "Invalid -msgver given, not 0 or 1. Ignored.\n";
-	    }
+	} else {
+	    print STDERR "Invalid -msgver given, not 0 or 1. Ignored.\n";
+	}
     }
     if ($options{'-file'}) {
         $self->{'pdf'}->create_file($options{'-file'});

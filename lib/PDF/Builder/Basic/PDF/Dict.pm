@@ -15,10 +15,11 @@ package PDF::Builder::Basic::PDF::Dict;
 use base 'PDF::Builder::Basic::PDF::Objind';
 
 use strict;
-no warnings qw[ deprecated recursion uninitialized ];
+use warnings;
+#no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
 
 our $mincache = 16 * 1024 * 1024;
 

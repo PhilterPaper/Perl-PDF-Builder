@@ -3,10 +3,11 @@ package PDF::Builder::Resource::ColorSpace::DeviceN;
 use base 'PDF::Builder::Resource::ColorSpace';
 
 use strict;
-no warnings qw[ deprecated recursion uninitialized ];
+use warnings;
+#no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Util;
@@ -22,6 +23,8 @@ CMYK. Inherits from L<PDF::Builder::Resource::ColorSpace>
 sub new {
     my ($class, $pdf, $key, @opts) = @_;
 
+    # this is a bit odd, but the only use of ->new() has two values, $clrs
+    #  and $sampled, in the argument list
     my ($clrs, $sampled) = @opts;
 
     $sampled = 2;

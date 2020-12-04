@@ -1,10 +1,13 @@
 package PDF::Builder::Lite;
 
 use strict;
-no warnings qw[ deprecated recursion uninitialized ];
+use warnings;
+#no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
+# NOTE that this sub-package has not been tested and is not well documented!
+#      It is possible that it will be deprecated and removed.
 
 BEGIN {
 

@@ -2,7 +2,29 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.021     2020-12-01  UNRELEASED
+3.021     2020-12-04  UNRELEASED
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Content-Lite-NamedDestination-UniWrap-
+      Util.pm, lib/PDF/Builder/Basic/PDF/Dict-File-Literal.pm,
+      lib/PDF/Builder/Basic/PDF/Filter/LZWDecode.pm, 
+      lib/PDF/Builder/Resource/CIDFont-ColorSpace-ExtGState-Font.pm,
+      lib/PDF/Builder/Resource/CIDFont/CJKFont-TrueType.pm,
+      lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm,
+      lib/PDF/Builder/Resource/ColorSpace/DeviceN-Indexed-Separation.pm,
+      lib/PDF/Builder/Resource/ColorSpace/Indexed/ACTFile-Hue-WebColor.pm,
+      lib/PDF/Builder/Resource/Font/BDFont-CoreFont-Postscript-SynFont.pm,
+      lib/PDF/Builder/Resource/XObject/Image/GD-GIF-PNM-TIFF-TIFF_GT.pm,
+      examples/Windows/Win32.pm, examples/Content-ContentText.pl,
+      examples/021_synfonts-023_cjkfonts-025_unifonts, 
+      tools/1_pc.pl, tools/3_examples.pl, t/deprecations.t
+     Change any "no warnings" directive to "use warnings", and fix any
+      resulting issues. This makes perlcritic and CPAN kwalitee a bit happier.
+
+      For now, just commented out "no warnings". If no reports of problems,
+      will physically remove commented-out lines in 3.022 or later. If you 
+      encounter Perl warnings from specific routines, you can uncomment the
+      "no warnings" and comment out "use warnings", to get past the warnings,
+      but please also file a bug report!
 
     t/00-all-usable.t, Makefile.PL, lib/PDF/Builder.pm,
       lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm

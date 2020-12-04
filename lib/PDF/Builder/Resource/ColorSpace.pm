@@ -3,10 +3,11 @@ package PDF::Builder::Resource::ColorSpace;
 use base 'PDF::Builder::Basic::PDF::Array';
 
 use strict;
-no warnings qw[ deprecated recursion uninitialized ];
+use warnings;
+#no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Util;

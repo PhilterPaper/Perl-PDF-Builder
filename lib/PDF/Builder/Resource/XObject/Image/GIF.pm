@@ -3,10 +3,11 @@ package PDF::Builder::Resource::XObject::Image::GIF;
 use base 'PDF::Builder::Resource::XObject::Image';
 
 use strict;
-no warnings qw[ deprecated recursion uninitialized ];
+use warnings;
+#no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.013'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
 
 use IO::File;
 use PDF::Builder::Util;

@@ -3,10 +3,11 @@ package PDF::Builder::Resource::Font::CoreFont;
 use base 'PDF::Builder::Resource::Font';
 
 use strict;
-no warnings qw[ deprecated recursion uninitialized ];
+use warnings;
+#no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
 
 use File::Basename;
 
