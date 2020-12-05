@@ -4,6 +4,9 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
 
 3.021     2020-12-04  UNRELEASED
 
+    README.md (added), README (removed), MANIFEST
+     Replace the plain text README with a markdown-formatted README.md
+
     lib/PDF/Builder.pm, lib/PDF/Builder/Content-Lite-NamedDestination-UniWrap-
       Util.pm, lib/PDF/Builder/Basic/PDF/Dict-File-Literal.pm,
       lib/PDF/Builder/Basic/PDF/Filter/LZWDecode.pm, 
