@@ -24,8 +24,8 @@ PDF::Builder::Resource::Font::Postscript - support routines for using PostScript
 sub new {
     my ($class, $pdf, $psfile, %opts) = @_;
 
-    my ($self,$encoding);
-    my (@w,$data);
+    my ($self);
+    my ($data);
     $opts{'-encode'} ||= 'asis';  # provide default encoding
 
     if (defined $opts{'-afmfile'}) {

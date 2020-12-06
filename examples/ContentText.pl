@@ -66,9 +66,9 @@ my ($unused, $cell_height, $j, $cont);
 
 my $pdf = PDF::Builder->new();
 my ($page, $grfx, $text); # objects for page, graphics, text
-my (@base, @styles, @points, $i, $lw, $angle, @npts);
+my (@base, @points, $i, $lw);
 #$pdf->{'forcecompress'} = 0;  # don't compress, so we can see what's happening
-my (@cellLoc, @cellSize, $font, $width, $d1, $d2, $d3, $d4);
+my (@cellLoc, @cellSize, $font, $width);
 my @axisOffset = (5, 5); # clear the edge of the cell
 
 my $pageNo = 0;

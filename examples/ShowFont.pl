@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
 
 use PDF::Builder;
 use Encode;
@@ -48,7 +48,7 @@ my $to = 0x3FF;  # default end value for UTF-8 (-r)
 my $extra = "ShowFont";
 my $T1metrics = '';  # no default
 
-my ($f, $i,$j, $font, $page, $text, $grfx);
+my ($f, $i,$j, $page, $text, $grfx);
 my $pdf = PDF::Builder->new(-compress => 'none');
 my $title_font = $pdf->corefont('Helvetica');
 my $grid_font = $pdf->corefont('Helvetica-Bold');

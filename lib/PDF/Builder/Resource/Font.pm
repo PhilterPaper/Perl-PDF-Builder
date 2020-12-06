@@ -25,8 +25,6 @@ sub encodeByData {
 
     my $data = $self->data();
 
-    my ($firstChar, $lastChar);
-
     if ($self->issymbol() || ($encoding||'') eq 'asis') {
         $encoding = undef;
     }

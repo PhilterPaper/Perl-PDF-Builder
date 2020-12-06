@@ -34,7 +34,7 @@ use warnings;
 use strict;
 
 # VERSION
-my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
 
 use Math::Trig;
 use List::Util qw(min max);
@@ -56,8 +56,8 @@ my $compress = 'none';
 
 my $pdf = PDF::Builder->new(-compress => $compress);
 my ($page, $grfx, $text); # objects for page, graphics, text
-my (@base, @styles, @points, $i, $lw, $angle, @npts);
-my (@cellLoc, @cellSize, $font, $width, $d1, $d2, $d3, $d4);
+my (@points, $i);
+my ($font);
 my @axisOffset = (5, 5); # clear the edge of the cell
 
 my $db = 4;  # debug level

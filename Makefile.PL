@@ -174,7 +174,7 @@ if (scalar @choice_list > 0) {  # in case all disabled!
 # $c should have one or more of a,n (contradictory!) t,p,h
 
 if ($c !~ m/n/) { # remind user that librarie(s) to be installed/updated
-print <<END;
+print <<'END';
 ===========================================================================
 The installation process will attempt to install or update several OPTIONAL
 prerequisite packages. If one or more should fail to install, Don't Panic

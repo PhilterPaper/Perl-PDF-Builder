@@ -161,7 +161,7 @@ sub handle_ccitt {
 	    for my $j ( 0 .. length($self->{' stream'}) ) {
 	        # swapping j-th byte of stream
 		$oldByte = ord(substr($self->{' stream'}, $j, 1));
-		if ($oldByte eq 0 || $oldByte eq 255) { next; }
+		if ($oldByte == 0 || $oldByte == 255) { next; }
 		$newByte = 0;
 		if ($oldByte & 0x01) { $newByte |= 0x80; }
 		if ($oldByte & 0x02) { $newByte |= 0x40; }

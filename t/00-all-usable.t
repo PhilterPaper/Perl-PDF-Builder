@@ -82,7 +82,7 @@ TODO: {
     local $TODO = q{skipped due to optional library not installed};
 
     foreach my $file (@opt_modules) {
-	    ok($file);
+	    ok(1, $file);
     }
 }
 

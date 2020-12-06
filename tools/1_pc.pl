@@ -72,6 +72,10 @@ my @ignore_list = (
      '"warn" used instead of "carp"',  # 
      'Regular expression without "/x" flag',  # 
      "Backtick operator used",  # 
+     "high complexity score",  #
+     "Cascading if-elsif chain",  #
+     "Hard tabs used at",  #
+     '"local" variable not initialized',  #
 	          );
 
 # Note that level 4 includes any level 5 errors, etc.

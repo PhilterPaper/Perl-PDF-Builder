@@ -1269,8 +1269,9 @@ sub readxrtr {
             my $entry_size = 20;
             # test read first entry, see if $cr in expected place, adjust size
             $fh->read($buf, $entry_size * 1 - $xdiff + 15, $xdiff);
-            $buf =~ m/^(.*?)$cr/;
-            $entry_size = length($1) + 2;
+            if ($buf =~ m/^(.*?)$cr/) {
+                $entry_size = length($1) + 2;
+	    }
             if ($entry_size != 20 && $options{'-diags'} == 1) {
                 warn "Xref entries supposed to be 20 bytes long, are $entry_size.\n";
             }

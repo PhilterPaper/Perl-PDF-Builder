@@ -81,7 +81,7 @@ my %fonts = (
 'KozGo-Italic + Georgia-Italic' => $u3
 );
 
-my ($pdf, $page, $gfx, $text, $y, $line);
+my ($page, $gfx, $text, $y, $line);
 
 foreach my $fontname (keys %fonts) {
     $y = 800; # title line this page

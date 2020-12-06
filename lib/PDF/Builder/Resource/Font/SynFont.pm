@@ -91,7 +91,7 @@ sub new
 {
     my ($class, $pdf, $font, @opts) = @_;
 
-    my ($self, $data);
+    my ($self);
     my %opts = @opts;
     my $first = 1;
     my $last = 255;

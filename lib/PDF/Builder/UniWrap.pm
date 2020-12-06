@@ -32,7 +32,6 @@ our $DEBUG = 0;
 our $columns = 75;
 
 my %classified;
-my $procedural_self;
 my $txt;
 
 use constant PROHIBITED => 0;  ## no critic
