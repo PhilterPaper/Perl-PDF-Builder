@@ -1,8 +1,8 @@
 package PDF::Builder;
 
 use strict;
-#no warnings qw[ deprecated recursion uninitialized ];
 use warnings;
+#no warnings qw[ deprecated recursion uninitialized ];
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
@@ -313,11 +313,11 @@ sub new {
 	}
     }
     if (defined $options{'-msgver'}) {
-	if ($options{'-msgver'} == 0 || $options{'-msgver'} == 1) {
+        if ($options{'-msgver'} == 0 || $options{'-msgver'} == 1) {
             $msgVer = $options{'-msgver'};
-	} else {
-	    print STDERR "Invalid -msgver given, not 0 or 1. Ignored.\n";
-	}
+        } else {
+            print STDERR "Invalid -msgver given, not 0 or 1. Ignored.\n";
+        }
     }
     if ($options{'-file'}) {
         $self->{'pdf'}->create_file($options{'-file'});
@@ -547,7 +547,7 @@ sub open_scalar {
     if (exists $options{'-diaglevel'}) {
       $self->{'diaglevel'} = $options{'-diaglevel'};
       if ($self->{'diaglevel'} < 0 || $self->{'diaglevel'} > 5) {
-	$self->{'diaglevel'} = 2;
+        $self->{'diaglevel'} = 2;
       }
     } else {
       $self->{'diaglevel'} = 2;

@@ -4,6 +4,9 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
 
 3.021     2020-12-04  UNRELEASED
 
+    lib/PDF/Builder/Basic/PDF/File.pm
+     Change grep from expression format to { }, per PDF::API2 change.
+
     README.md (added), README (removed), MANIFEST
      Replace the plain text README with a markdown-formatted README.md
 
