@@ -9,6 +9,9 @@ use warnings;
 our $VERSION = '3.020'; # VERSION
 my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
 
+my $GrTFversion = 7;     # minimum version of Graphics::TIFF
+my $LpngVersion = 0.47;  # minimum version of Image::PNG::Libpng
+
 use Carp;
 use Encode qw(:all);
 use FileHandle;
@@ -2244,7 +2247,7 @@ sub LA_GT {
     if (!defined $rc) { $rc = 0; }  # else is 1
     if ($rc) {
 	# installed, but not up to date?
-	if ($Graphics::TIFF::VERSION < 7) { $rc = 0; }
+	if ($Graphics::TIFF::VERSION < $GrTFversion) { $rc = 0; }
     }
 
     return $rc;
@@ -2355,7 +2358,7 @@ sub LA_IPL {
     if (!defined $rc) { $rc = 0; }  # else is 1
     if ($rc) {
 	# installed, but not up to date?
-	if ($Image::PNG::Libpng::VERSION < 0.47) { $rc = 0; }
+	if ($Image::PNG::Libpng::VERSION < $LpngVersion) { $rc = 0; }
     }
 
     return $rc;

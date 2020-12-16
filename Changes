@@ -2,7 +2,10 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.021     2020-12-04  UNRELEASED
+3.021     2020-12-16  UNRELEASED
+
+    lib/PDF/Builder.pm, t/00-all-usable.t
+     Consolidate "optional" library versions to make update easier.
 
     lib/PDF/Builder/Basic/PDF/File.pm
      Change grep from expression format to { }, per PDF::API2 change.

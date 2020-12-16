@@ -3,8 +3,10 @@ use warnings;
 use strict;
 
 use Test::More;
-
 use File::Find;
+
+my $GrTFversion = 7;     # minimum version of Graphics::TIFF
+my $LpngVersion = 0.47;  # minimum version of Image::PNG::Libpng
 
 # Test all of the modules to make sure that a simple "use Module"
 # won't result in a crash.
@@ -42,7 +44,7 @@ foreach my $file (@files) {
     	};
     	if (!defined $rc) { $rc = 0; }  # else is 1
     	if ($rc) {
-                if ($Graphics::TIFF::VERSION < 7) { 
+                if ($Graphics::TIFF::VERSION < $GrTFversion) { 
 			# installed, but back-level... skip
 			push @opt_modules, $file; 
 			next; 
@@ -62,7 +64,7 @@ foreach my $file (@files) {
     	};
     	if (!defined $rc) { $rc = 0; }  # else is 1
     	if ($rc) {
-                if ($Image::PNG::Libpng::VERSION < 0.47) { 
+                if ($Image::PNG::Libpng::VERSION < $LpngVersion) { 
 			# installed, but back-level... skip
 			push @opt_modules, $file; 
 			next; 
