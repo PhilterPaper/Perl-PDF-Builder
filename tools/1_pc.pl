@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
 
 # command line:
 # -5  run perlcritic -5 .  (should be clean)
@@ -71,11 +71,22 @@ my @ignore_list = (
      '"die" used instead of "croak"',  # 
      '"warn" used instead of "carp"',  # 
      'Regular expression without "/x" flag',  # 
-     "Backtick operator used",  # 
+     "Backtick operator used",  # what's the problem?
      "high complexity score",  #
      "Cascading if-elsif chain",  #
-     "Hard tabs used at",  #
-     '"local" variable not initialized',  #
+     "Hard tabs used at",  # consider updating (ViM editor [ ] likes to 
+                           #replace spaces with tabs)
+     '"local" variable not initialized',  # variable set in next line -- 
+                                          # no problem
+     "Reused variable name in lexical scope",  # what's the problem?
+     'in condition for an "unless"',  
+              # doesn't like inequality tests in "unless" for some reason
+              # perhaps it's confusing in this "negative" test?
+     "Unrestricted '## no critic' annotation",  
+              # need documentation [ ] on how to restrict policies
+     "Ambiguously named variable",  
+              # bitches about last, left, right as "ambiguous". sigh.
+    # Return value of eval not tested, can't depend on $@.  should fix [ ]
 	          );
 
 # Note that level 4 includes any level 5 errors, etc.

@@ -4,6 +4,11 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
 
 3.021     2020-12-16  UNRELEASED
 
+    tools/1_pc.pl, lib/PDF/Builder/Resource/Glyphs.pm, 
+      t/gif-png-pnm-rt120397-tiff.t
+     Clean up a few things Perl Critic doesn't like, and exclude a few more
+      frivolous things (exclusion list).
+
     lib/PDF/Builder.pm, t/00-all-usable.t
      Consolidate "optional" library versions to make update easier.
 
