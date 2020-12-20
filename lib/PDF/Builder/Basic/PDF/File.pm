@@ -470,7 +470,7 @@ sub close_file {
     $tdict->{'Size'} = $self->{'Size'} || PDFNum(1);
     $tdict->{'Prev'} = PDFNum($self->{' loc'}) if $self->{' loc'};
     if ($self->{' update'}) {
-        foreach my $key (grep { $_ !~ m/^[\s\-]/ } keys %$self) { ## no critic
+        foreach my $key (grep { $_ !~ m/^[\s\-]/ } keys %$self) {
             $tdict->{$key} = $self->{$key} unless defined $tdict->{$key};
         }
 

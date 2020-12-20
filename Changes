@@ -2,7 +2,11 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.021     2020-12-16  UNRELEASED
+3.021     2020-12-20  UNRELEASED
+
+    lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm
+     Making progress on TIFF with alpha channel display [CTS 33]. Currently 
+      discarding alpha layer, and don't do anything about clip mask.
 
     tools/1_pc.pl, lib/PDF/Builder/Resource/Glyphs.pm, 
       t/gif-png-pnm-rt120397-tiff.t
