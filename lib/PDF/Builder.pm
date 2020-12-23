@@ -10,7 +10,7 @@ our $VERSION = '3.020'; # VERSION
 my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
 
 my $GrTFversion = 7;     # minimum version of Graphics::TIFF
-my $LpngVersion = 0.47;  # minimum version of Image::PNG::Libpng
+my $LpngVersion = 0.56;  # minimum version of Image::PNG::Libpng
 
 use Carp;
 use Encode qw(:all);

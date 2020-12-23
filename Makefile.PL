@@ -23,7 +23,7 @@ my @choice_list = ( # use array to guarantee order
   ["t", "Graphics::TIFF", 7, "TIFF image support"],
         # improved TIFF image processing. DON'T FORGET TO UPDATE VERSION in
 	#   t/00-all-usable.t, lib/PDF/Builder.pm
-  ["p", "Image::PNG::Libpng", 0.47, "PNG image support"],
+  ["p", "Image::PNG::Libpng", 0.56, "PNG image support"],
         # advanced/fast PNG image processing. DON'T FORGET TO UPDATE VERSION in
 	#   t/00-all-usable.t, lib/PDF/Builder.pm
   ["h", "HarfBuzz::Shaper", 0.23, "complex script support"],

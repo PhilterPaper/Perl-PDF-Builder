@@ -2,7 +2,14 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.021     2020-12-20  UNRELEASED
+3.021     2020-12-23  UNRELEASED
+
+    Makefile.PL, lib/PDF/Builder.pm, t/00-all-usable.t
+     New minimum version for Image::PNG::Libpng is now 0.56. There was a change
+      introduced in 0.53 that broke PDF::Builder, but has now been fixed. As
+      far as we know, versions 0.47 through 0.52 should still work, if you 
+      happen to have that installed, but for automated install/upgrade, the 
+      new minimum is now 0.56.
 
     lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm
      Making progress on TIFF with alpha channel display [CTS 33]. Currently 
@@ -11,7 +18,7 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
     tools/1_pc.pl, lib/PDF/Builder/Resource/Glyphs.pm, 
       t/gif-png-pnm-rt120397-tiff.t
      Clean up a few things Perl Critic doesn't like, and exclude a few more
-      frivolous things (exclusion list).
+      frivolous things (in the exclusion list).
 
     lib/PDF/Builder.pm, t/00-all-usable.t
      Consolidate "optional" library versions to make update easier.
