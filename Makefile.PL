@@ -79,7 +79,7 @@ my %WriteMakefileArgs =
 # ABSTRACT_FROM	 => $master,
  ABSTRACT       => "Facilitates the creation and modification of PDF files",
 
- AUTHOR		=> 'Phil Perry <phil4597@catskilltech.com>',
+ AUTHOR		=> 'Phil Perry',
  LICENSE	=> "lgpl",
  MIN_PERL_VERSION	=> $PERL_version,
  INSTALLDIRS	=> "site",
@@ -120,7 +120,7 @@ my %WriteMakefileArgs =
 
     resources => {
 
-      homepage => "https://www.catskilltech.com",
+      homepage => "https://metacpan.org/pod/PDF::Builder",
 
       repository => {
           type => 'git',
@@ -130,7 +130,6 @@ my %WriteMakefileArgs =
 
       bugtracker => {
 	  web => 'https://github.com/PhilterPaper/Perl-PDF-Builder/issues',
-	  mailto => 'support2854 [at] catskilltech.com',
       },
 
     },

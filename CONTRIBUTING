@@ -7,16 +7,9 @@ not good to spend a lot of time working on something that no one is interested
 in!
 
 You can contribute to the discussion by posting bug reports, feature requests, 
-observations, etc. to either the GitHub issues area, https://github.com/
+observations, etc. to the GitHub issues area, https://github.com/
 PhilterPaper/Perl-PDF-Builder/issues?q=is%3Aissue+sort%3Aupdated-desc (please 
-tag new threads accordingly ["Labels"]) or to the Forum on catskilltech.com, 
-https:://www.catskilltech.com/forum/index.html#c5 (please place a new topic in 
-the appropriate area ["board"]). We will cross-post from one to the other as 
-necessary. If you don't have an account on either system, and want to 
-occasionally post something, there is a Contact form on the Forum where you can 
-send in something for us to post. Please do not abuse this system -- if you are 
-regularly posting via the Contact form, please take a minute to register on 
-one or both systems. We do not use CPAN's "RT" bug tracking system.
+tag new threads accordingly, using ["Labels"]).
 
 Please also read INFO/RoadMap to get an idea of where we would like for 
 PDF::Builder to be heading, and may give you an idea of where you could

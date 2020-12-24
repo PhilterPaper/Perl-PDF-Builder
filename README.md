@@ -7,9 +7,10 @@ See **Changes** file for the version.
 
 ## Obtaining the Package
 
-The installable Perl package may be obtained from "https://www.cpan.org", as
-PDF::Builder. If you install this product, only the run-time modules will be
-installed. Download the full `.tar.gz` file and unpack it (hint: on Windows,
+The installable Perl package may be obtained from
+"https://metacpan.org/pod/PDF::Builder", or via a CPAN installer package. If
+you install this product, only the run-time modules will be installed. Download
+the full `.tar.gz` file and unpack it (hint: on Windows,
 **7-Zip File Manager** is an excellent tool) to get utilities, test buckets,
 example usage, etc.
 
