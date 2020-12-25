@@ -160,11 +160,13 @@ PDF::Builder is currently being maintained by Phil M. Perry.
 
 =head2 SUPPORT
 
-Full source is on https://github.com/PhilterPaper/Perl-PDF-Builder
+The full source is on https://github.com/PhilterPaper/Perl-PDF-Builder.
 
-Bug reports are on https://github.com/PhilterPaper/Perl-PDF-Builder/issues?q=is%3Aissue+sort%3Aupdated-desc (with "bug" label), feature requests have an "enhancement" label, and general discussions (architecture, roadmap, etc.) have a "general discussion" label. Please do not use the RT.cpan system to report issues, as it is not regularly monitored.
+The release distribution is on CPAN: https://metacpan.org/pod/PDF::Builder.
 
-Release distribution is on CPAN: https://metacpan.org/pod/PDF::Builder
+Bug reports are on https://github.com/PhilterPaper/Perl-PDF-Builder/issues?q=is%3Aissue+sort%3Aupdated-desc (with "bug" label), feature requests have an "enhancement" label, and general discussions (architecture, roadmap, etc.) have a "general discussion" label.
+
+Do B<not> under I<any> circumstances open a PR (Pull Request) to report a bug. It is a waste of both your and our time and effort. Open a regular ticket (issue), and attach a Perl (.pl) program illustrating the problem, if possible. If you believe that you have a program patch, and offer to share it as a PR, we may give the go-ahead. Unsolicited PRs may be closed without further action.
 
 =head1 LICENSE
 

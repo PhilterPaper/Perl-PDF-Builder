@@ -17,3 +17,5 @@ pod2htmd.tmp
 /latest_release
 /Changes_new
 /comp.list
+# quick test files
+*-short
