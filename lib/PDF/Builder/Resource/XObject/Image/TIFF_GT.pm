@@ -68,7 +68,9 @@ the best!
 If there are invalid tags or field values within a tag, the Graphics::TIFF
 library will attempt to pop-up a warning dialog, rather than just ignoring 
 invalid things. If we can find a switch to disable this behavior, we will
-look into adding it as an option.
+look into adding it as an option. According to Graphic::TIFF's owner 
+(ticket RT 133955), this is coming directly from libtiff (as write to STDERR), 
+so he can't do anything about it!
 
 =cut
 
