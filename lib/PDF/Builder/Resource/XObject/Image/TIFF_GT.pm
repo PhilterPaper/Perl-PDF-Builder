@@ -52,6 +52,24 @@ Ignore any alpha layer (transparency) and make the image fully opaque.
 
 =back
 
+TIFF support (when using Graphics::TIFF) is for C<PhotometricInterpretation>
+values of 0 (bilevel/gray, white is 0), 1 (bilevel/gray, black is 0), 2 (RGB),
+and 3 (Palette color). It currently does I<not> support 4 (transparency mask),
+5 (separated CMYK), 6 (YCbCr), 8 (CIELab), or higher. There is limited support 
+for an Alpha (transparency) channel (due to extremely limited test cases). 
+Some tags are not supported, and a PlanarConfiguration of 2 is unknown until 
+we get some test cases.
+
+Some applications seem to take odd liberties with TIFF tags, such as adding a
+SamplePerPixel without specifying ExtraSamples type. In such cases, we treat
+one extra sample (not otherwise defined) as an Alpha channel, and hope for 
+the best!
+
+If there are invalid tags or field values within a tag, the Graphics::TIFF
+library will attempt to pop-up a warning dialog, rather than just ignoring 
+invalid things. If we can find a switch to disable this behavior, we will
+look into adding it as an option.
+
 =cut
 
 sub new {
@@ -74,6 +92,35 @@ sub new {
 
     # set up dict stream for any Alpha channel to be split out from $buffer
     my $dict = PDFDict();
+
+    # let's try to clarify various strange tag combinations
+    # one extra SamplesPerPixel (2/4) and no ExtraSamples (or is 0)?
+    #   treat as an Alpha channel with ExtraSamples 2 (unassociated alpha)
+    if ($tif->{'colorSpace'} eq 'DeviceGray' && 
+	$tif->{'SamplesPerPixel'} == 2 &&
+        (!defined $tif->{'ExtraSamples'} || $tif->{'ExtraSamples'} == 0)) {
+        # let's assume it's realy SPP 1 with ExtraSamples UNASSOC_ALPHA
+        $tif->{'SamplesPerPixel'} = 1;
+	$tif->{'ExtraSamples'} = EXTRASAMPLE_UNASSALPHA;  # 2
+	#print "  changed SPP 2 to 1, ES 0 to 2, to treat as GA\n";
+    }
+    if ($tif->{'colorSpace'} eq 'DeviceRGB' && 
+	$tif->{'SamplesPerPixel'} == 4 &&
+        (!defined $tif->{'ExtraSamples'} || $tif->{'ExtraSamples'} == 0)) {
+        # let's assume it's realy SPP 3 with ExtraSamples UNASSOC_ALPHA
+        $tif->{'SamplesPerPixel'} = 3;
+	$tif->{'ExtraSamples'} = EXTRASAMPLE_UNASSALPHA;  # 2
+	#print "  changed SPP 4 to 3, ES 0 to 2, to treat as RGBA\n";
+    }
+    # otherwise ExtraSamples is in order, but have "extra" sample
+    if ($tif->{'colorSpace'} eq 'DeviceGray' && 
+	$tif->{'SamplesPerPixel'} == 2) {
+        $tif->{'SamplesPerPixel'} = 1;
+    }
+    if ($tif->{'colorSpace'} eq 'DeviceRGB' && 
+	$tif->{'SamplesPerPixel'} == 4) {
+        $tif->{'SamplesPerPixel'} = 3;
+    }
 
     $self->read_tiff($pdf, $tif, %opts);
 
@@ -127,16 +174,15 @@ sub handle_generic {
     # handle any Alpha channel/layer
     my $h = $tif->{'imageHeight'};  # in pixels
     my $w = $tif->{'imageWidth'};
-#print STDERR "image size $w x $h pixels\n";
     $dict->{'Columns'} = PDFNum($w);
     my $samples = 1; # fallback
 
-    # code common to associated and unassociated alpha
-    if (defined $tif->{'ExtraSamples'} &&
-	($tif->{'ExtraSamples'} == EXTRASAMPLE_ASSOCALPHA ||
-	 $tif->{'ExtraSamples'} == EXTRASAMPLE_UNASSALPHA)) {
-#print STDERR "This file has Alpha layer\n";
-    }
+#    # code common to associated and unassociated alpha
+#    if (defined $tif->{'ExtraSamples'} &&
+#	($tif->{'ExtraSamples'} == EXTRASAMPLE_ASSOCALPHA ||
+#	 $tif->{'ExtraSamples'} == EXTRASAMPLE_UNASSALPHA)) {
+##print STDERR "This file has Alpha layer\n";
+#    }
 
     if      (defined $tif->{'ExtraSamples'} &&
 	     $tif->{'ExtraSamples'} == EXTRASAMPLE_ASSOCALPHA) {
@@ -227,6 +273,7 @@ sub split_alpha {
     my $outbuf = '';
     my $alpha = '';
 
+## debug
 #my @slice; # TEMP
 #if ($count == 999*1056) {
 # # French text pag1.tif
@@ -238,6 +285,7 @@ sub split_alpha {
 # @slice = (-1, -1);
 #}
  
+## debug
 ## upon entry, what is raw input row? # TEMP
 #if ($slice[0]>-1 && $bps==16){
 # print "bps==16 raw input slice: ";
@@ -326,6 +374,7 @@ sub split_alpha {
         }
     } # end of fractional byte (bits) handling
 
+## debug
 ## upon exit, what is output data row? # TEMP
 #if ($slice[0]>-1 && $bps==16){
 # print "bps==16 output data slice: ";
@@ -623,6 +672,7 @@ sub read_tiff {
         $self->{'Decode'} = PDFArray(PDFNum(1), PDFNum(0));
     }
 
+## debug  dump $tif
 #foreach (sort keys %$tif) {
 # if (defined $tif->{$_}) {
 #  print "\$tif->{'$_'} = '$tif->{$_}'\n";

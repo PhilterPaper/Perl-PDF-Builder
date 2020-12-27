@@ -2,7 +2,7 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2019 for earlier version 3 release logs.
 
-3.021     2020-12-25  UNRELEASED
+3.021     2020-12-26  UNRELEASED
 
     Makefile.PL, CONTRIBUTING, INFO/SUPPORT, INFO/old/dist.ini.old, README.md
      Some cleanup of email addresses and obsolete support venues.
@@ -17,7 +17,8 @@ See also INFO/Changes_2019 for earlier version 3 release logs.
     lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm
      Added some support for TIFF with alpha channel display [CTS 33, with some
       help from 'carygravel']. Limited testing due to lack of sample .tif 
-      files, and currently not doing anything about clip mask type.
+      files, and currently not doing anything about transparency mask type or
+      any higher-numbered PhotometricInterpretation types.
 
     tools/1_pc.pl, lib/PDF/Builder/Resource/Glyphs.pm, 
       t/gif-png-pnm-rt120397-tiff.t

@@ -2197,12 +2197,12 @@ sub image_tiff {
     if ($rc == 1) {
 	# Graphics::TIFF (_GT suffix) available and to be used
         require PDF::Builder::Resource::XObject::Image::TIFF_GT;
-        $obj = PDF::Builder::Resource::XObject::Image::TIFF_GT->new($self->{'pdf'}, $file);
+        $obj = PDF::Builder::Resource::XObject::Image::TIFF_GT->new($self->{'pdf'}, $file, 'Ix'.pdfkey(), %opts);
         $self->{'pdf'}->out_obj($self->{'pages'});
     } else {
 	# Graphics::TIFF not available, or is but is not to be used
         require PDF::Builder::Resource::XObject::Image::TIFF;
-        $obj = PDF::Builder::Resource::XObject::Image::TIFF->new($self->{'pdf'}, $file);
+        $obj = PDF::Builder::Resource::XObject::Image::TIFF->new($self->{'pdf'}, $file, 'Ix'.pdfkey(), %opts);
         $self->{'pdf'}->out_obj($self->{'pages'});
 
 	if ($rc == 0 && $MSG_COUNT[0]++ == 0) {
