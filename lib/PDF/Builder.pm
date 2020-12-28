@@ -6,7 +6,7 @@ use warnings;
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
-our $VERSION = '3.020'; # VERSION
+our $VERSION = '3.021'; # VERSION
 my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
 
 my $GrTFversion = 7;     # minimum version of Graphics::TIFF
