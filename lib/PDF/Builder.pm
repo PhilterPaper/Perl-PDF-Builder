@@ -170,7 +170,7 @@ Do B<not> under I<any> circumstances open a PR (Pull Request) to report a bug. I
 
 =head1 LICENSE
 
-This software is Copyright (c) 2017-2020 by Phil M. Perry.
+This software is Copyright (c) 2017-2021 by Phil M. Perry.
 
 This is free software, licensed under:
 
