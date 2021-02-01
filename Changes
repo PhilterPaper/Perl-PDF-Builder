@@ -2,7 +2,15 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.022     2021-01-01
+3.022     2021-02-01
+
+    INFO/LICENSE, README.md, lib/PDF/Builder/Basic/PDF/Array-Bool-Dict-
+      File-Filter-Name-Null-Number-Objind-Page-Pages-String-Utils.pm
+     Update file headers on code originally written by Martin Hosken to
+      reflect that he has granted permission to use the MIT license instead
+      of the Perl Artistic License on his code. This change was made so
+      that Red Hat could have licensing compatible with LGPL for releasing
+      PDF::Builder as part of Fedora.
 
     INFO/Changes_2020, Changes, MANIFEST, lib/PDF/Builder.pm, README.md,
       INFO/LICENSE

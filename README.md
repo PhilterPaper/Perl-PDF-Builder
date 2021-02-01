@@ -98,10 +98,11 @@ This is free software, licensed under:
 
 `The GNU Lesser General Public License, Version 2.1, February 1999`
 
-EXCEPT for some files which are explicitly under other licenses. You are
-permitted (at your option) to redistribute and/or modify this software (those
-portions under LGPL) at an LGPL version greater than 2.1. See INFO/LICENSE for
-more information on the licenses and warranty statement.
+EXCEPT for some files which are explicitly under other, compatible, licenses 
+(the Perl License and the MIT License). You are permitted (at your option) to 
+redistribute and/or modify this software (those portions under LGPL) at an 
+LGPL version greater than 2.1. See INFO/LICENSE for more information on the 
+licenses and warranty statement.
 
 ## See Also
 
