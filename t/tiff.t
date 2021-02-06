@@ -3,6 +3,7 @@ use warnings;
 use strict;
 use English qw( -no_match_vars );
 use IPC::Cmd qw(can_run);
+use File::Spec;
 use Test::More tests => 12;
 
 use PDF::Builder;
@@ -128,13 +129,17 @@ is($example, $expected, 'alpha');
 # Graphics::TIFF needed or you get message "Chunked CCITT G4 TIFF not supported"
 #  from PDF::Builder's TIFF processing library.
 
+my $convert = 'convert';
+if ($OSNAME eq 'MSWin32') {
+    $convert = File::Spec->catfile($ENV{PROGRAMFILES}, 'convert');
+}
+
 SKIP: {
     skip "Non-Linux system, or no 'convert' or no 'tiffcp'", 1 unless
-      $has_GT and $OSNAME eq 'linux'
-         and can_run('convert')
+      $has_GT and can_run($convert)
          and can_run('tiffcp');
 # ----------
-system(sprintf "convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s", $width, $height, $tiff);
+system(sprintf "$convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s", $width, $height, $tiff);
 system("tiffcp -c g3 $tiff tmp.tif && mv tmp.tif $tiff");
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
@@ -147,8 +152,8 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-my $example = `convert $pdfout -depth 1 -colorspace gray -alpha off -resize 1x1 txt:-`;
-my $expected = `convert $tiff -depth 1 -resize 1x1 txt:-`;
+my $example = `$convert $pdfout -depth 1 -colorspace gray -alpha off -resize 1x1 txt:-`;
+my $expected = `$convert $tiff -depth 1 -resize 1x1 txt:-`;
 # ----------
 
 is($example, $expected, 'G3 (not converted to flate)');
@@ -160,11 +165,10 @@ is($example, $expected, 'G3 (not converted to flate)');
 
 SKIP: {
     skip "Non-Linux system, or no 'convert' or no 'tiffcp'", 1 unless
-      $OSNAME eq 'linux'
-         and can_run('convert')
+         can_run($convert)
          and can_run('tiffcp');
 # ----------
-system(sprintf"convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s", $width, $height, $tiff);
+system(sprintf"$convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s", $width, $height, $tiff);
 system("tiffcp -c lzw $tiff tmp.tif && mv tmp.tif $tiff");
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
@@ -177,8 +181,8 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-my $example = `convert $pdfout -depth 1 -colorspace gray -alpha off -resize 1x1 txt:-`;
-my $expected = `convert $tiff -depth 1 -resize 1x1 txt:-`;
+my $example = `$convert $pdfout -depth 1 -colorspace gray -alpha off -resize 1x1 txt:-`;
+my $expected = `$convert $tiff -depth 1 -resize 1x1 txt:-`;
 # ----------
 
 is($example, $expected, 'lzw (converted to flate)');
