@@ -129,15 +129,18 @@ is($example, $expected, 'alpha');
 # Graphics::TIFF needed or you get message "Chunked CCITT G4 TIFF not supported"
 #  from PDF::Builder's TIFF processing library.
 
-my $convert = 'convert';
-if ($OSNAME eq 'MSWin32') {
-    $convert = File::Spec->catfile($ENV{PROGRAMFILES}, 'convert');
+my $convert = 'magick convert';
+if (not can_run($convert)) {
+    if ($OSNAME eq 'linux') {
+        $convert = 'convert'
+    }
+    elsif ($OSNAME eq 'MSWin32') {
+        $convert = File::Spec->catfile($ENV{PROGRAMFILES}, 'ImageMagick', 'convert');
+    }
 }
-
 SKIP: {
     skip "Non-Linux system, or no 'convert' or no 'tiffcp'", 1 unless
-      $has_GT and can_run($convert)
-         and can_run('tiffcp');
+      $has_GT and can_run($convert) and can_run('tiffcp');
 # ----------
 system(sprintf "$convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s", $width, $height, $tiff);
 system("tiffcp -c g3 $tiff tmp.tif && mv tmp.tif $tiff");
