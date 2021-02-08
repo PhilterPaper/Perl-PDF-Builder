@@ -3400,7 +3400,7 @@ sub _text_strikethru {
    # fonts define an underline position and thickness, but not strikethrough
    # ideally would be just under 1ex
    #my $strikethruposition = (-$self->{' font'}->strikethruposition()*$self->{' fontsize'}/1000||1);
-    my $strikethruposition = 4*($self->{'fontsize'}/1000||1);  # >0 is up
+    my $strikethruposition = 5*(($self->{' fontsize'}||20)/20);  # >0 is up
    # let's borrow the underline thickness for strikethrough purposes
     my $strikethruthickness = ($self->{' font'}->underlinethickness()*$self->{' fontsize'}/1000||1);
     my $pos = 1;

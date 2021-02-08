@@ -2,7 +2,9 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.022     2021-02-01
+3.022     2021-02-08
+
+    lib/PDF/Builder/Content.pm  improve -strikethru placement
 
     INFO/LICENSE, README.md, lib/PDF/Builder/Basic/PDF/Array-Bool-Dict-
       File-Filter-Name-Null-Number-Objind-Page-Pages-String-Utils.pm
