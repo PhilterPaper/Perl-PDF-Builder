@@ -118,8 +118,8 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-my $example = `convert $pdfout -depth 1 -resize 1x1 txt:-`;
-my $expected = `convert $tiff -depth 1 -resize 1x1 txt:-`;
+my $example = `$convert $pdfout -depth 1 -resize 1x1 txt:-`;
+my $expected = `$convert $tiff -depth 1 -resize 1x1 txt:-`;
 # ----------
 
 is($example, $expected, 'alpha');
@@ -186,7 +186,7 @@ is($example, $expected, 'lzw (converted to flate)');
 SKIP: {
     skip "Non-Linux system, or no 'convert'", 1 unless
       $has_GT and $OSNAME eq 'linux'
-         and can_run('convert');
+         and can_run($convert);
 # .png file is temporary file (output, input, erased)
 system("$convert rose: -type palette -depth 2 colormap.png");
 system("$convert colormap.png $tiff");
