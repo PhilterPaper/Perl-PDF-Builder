@@ -2,7 +2,7 @@
 use warnings;
 use strict;
 use English qw( -no_match_vars );
-use IPC::Cmd qw(can_run);
+use IPC::Cmd qw(can_run run);
 use File::Spec;
 use Test::More tests => 12;
 
@@ -90,6 +90,15 @@ my $pdfout = 'test.pdf';
 # convert not available on all systems. PDF::Builder itself
 # doesn't seem to work well with this, so skip for time being.
 
+my $convert = 'magick';
+if (not can_run($convert)) {
+    if ($OSNAME eq 'linux') {
+        $convert = 'convert'
+    }
+    elsif ($OSNAME eq 'MSWin32') {
+        $convert = File::Spec->catfile($ENV{PROGRAMFILES}, 'ImageMagick', 'convert');
+    }
+}
 SKIP: {
     skip "Further work is needed on PDF::Builder and the test process to handle the alpha layer properly.", 1;
 #    skip "Non-Linux system, or no 'convert' utility", !(
@@ -97,7 +106,7 @@ SKIP: {
 #        and can_run('convert')
 #    );
 # ----------
-system(sprintf"convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' %s", $width, $height, $tiff);
+run( command => [$convert, qw(-depth 1 -gravity center -pointsize 78 -size), $width.'x'.$height, 'caption:Lorem ipsum etc etc', $tiff], verbose => 0 );
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page();
@@ -121,20 +130,11 @@ is($example, $expected, 'alpha');
 # Graphics::TIFF needed or you get message "Chunked CCITT G4 TIFF not supported"
 #  from PDF::Builder's TIFF processing library.
 
-my $convert = 'magick';
-if (not can_run($convert)) {
-    if ($OSNAME eq 'linux') {
-        $convert = 'convert'
-    }
-    elsif ($OSNAME eq 'MSWin32') {
-        $convert = File::Spec->catfile($ENV{PROGRAMFILES}, 'ImageMagick', 'convert');
-    }
-}
 SKIP: {
     skip "no 'convert'", 1 unless $has_GT and can_run($convert);
 # ----------
 if ($convert !~ /convert/) { $convert .= ' convert' }
-system(sprintf "$convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off -compress Group4 %s", $width, $height, $tiff);
+run( command => [$convert, qw(-depth 1 -gravity center -pointsize 78 -size), $width.'x'.$height, 'caption:Lorem ipsum etc etc', qw(-background white -alpha off -compress Group4), $tiff], verbose => 0 );
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page();
@@ -160,7 +160,7 @@ is($example, $expected, 'G4 (not converted to flate)');
 SKIP: {
     skip "no 'convert'", 1 unless can_run($convert);
 # ----------
-system(sprintf"$convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off -compress lzw %s", $width, $height, $tiff);
+run( command => [$convert, qw(-depth 1 -gravity center -pointsize 78 -size), $width.'x'.$height, 'caption:Lorem ipsum etc etc', qw(-background white -alpha off -compress lzw), $tiff], verbose => 0 );
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page;
