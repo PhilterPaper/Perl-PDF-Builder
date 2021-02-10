@@ -76,22 +76,14 @@ ok($@, q{Fail fast if the requested file doesn't exist});
 
 ##############################################################
 # common data for remaining tests
-my $width = 568;
-my $height = 1000;
+my $width = 1000;
+my $height = 100;
 $tiff = 'test.tif';
 my $pdfout = 'test.pdf';
 
-# WARNING: do not attempt to run the following 3 tests on a
-# Windows system. Windows has a 'convert' utility to convert
-# a filesystem from FAT32 to NTFS, and you don't want to
-# accidentally run that one! The test ($OSNAME) is for 'linux'
-# but testing for 'not windows' might do just as well. Even
-# better might be to see if 'convert' and 'tiffcp' are the
-# right utilties, if found. Otherwise, the OS is irrelevant.
-#
-# NOTE: following 3 tests use Linux/TIFF utilities convert
-# and tiffcp. They may require software installation on 
-# your Linux system, and will be skipped if the necessary
+# NOTE: following 3 tests use the utilities imagemagick
+# They may require software installation on
+# your system, and will be skipped if the necessary
 # software is not found.
 
 ##############################################################
@@ -125,7 +117,7 @@ is($example, $expected, 'alpha');
 }
 
 ##############################################################
-# tiffcp, convert and Graphics::TIFF not available on all systems.
+# convert and Graphics::TIFF not available on all systems.
 # Graphics::TIFF needed or you get message "Chunked CCITT G4 TIFF not supported"
 #  from PDF::Builder's TIFF processing library.
 
@@ -139,12 +131,10 @@ if (not can_run($convert)) {
     }
 }
 SKIP: {
-    skip "Non-Linux system, or no 'convert' or no 'tiffcp'", 1 unless
-      $has_GT and can_run($convert) and can_run('tiffcp');
+    skip "no 'convert'", 1 unless $has_GT and can_run($convert);
 # ----------
 if ($convert !~ /convert/) { $convert .= ' convert' }
-system(sprintf "$convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s", $width, $height, $tiff);
-system("tiffcp -c g3 $tiff tmp.tif && mv tmp.tif $tiff");
+system(sprintf "$convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off -compress Group4 %s", $width, $height, $tiff);
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page();
@@ -160,20 +150,17 @@ my $example = `$convert $pdfout -depth 1 -colorspace gray -alpha off -resize 1x1
 my $expected = `$convert $tiff -depth 1 -resize 1x1 txt:-`;
 # ----------
 
-is($example, $expected, 'G3 (not converted to flate)');
+is($example, $expected, 'G4 (not converted to flate)');
 }
 
 ##############################################################
-# tiffcp and convert not available on all systems.
+# convert not available on all systems.
 # Graphics::TIFF not needed for this test
 
 SKIP: {
-    skip "Non-Linux system, or no 'convert' or no 'tiffcp'", 1 unless
-         can_run($convert)
-         and can_run('tiffcp');
+    skip "no 'convert'", 1 unless can_run($convert);
 # ----------
-system(sprintf"$convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s", $width, $height, $tiff);
-system("tiffcp -c lzw $tiff tmp.tif && mv tmp.tif $tiff");
+system(sprintf"$convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s -compress LZW", $width, $height, $tiff);
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page;
