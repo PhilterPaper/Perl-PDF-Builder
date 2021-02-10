@@ -160,7 +160,7 @@ is($example, $expected, 'G4 (not converted to flate)');
 SKIP: {
     skip "no 'convert'", 1 unless can_run($convert);
 # ----------
-system(sprintf"$convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off -compress LZW %s", $width, $height, $tiff);
+system(sprintf"$convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off -compress lzw %s", $width, $height, $tiff);
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page;
@@ -188,7 +188,8 @@ SKIP: {
       $has_GT and $OSNAME eq 'linux'
          and can_run('convert');
 # .png file is temporary file (output, input, erased)
-system("convert rose: -type palette -depth 2 colormap.png && convert colormap.png $tiff && rm colormap.png");
+system("$convert rose: -type palette -depth 2 colormap.png");
+system("$convert colormap.png $tiff");
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page;
 $page->mediabox( $width, $height );
@@ -203,7 +204,7 @@ pass 'successfully read TIFF with colormap';
 ##############################################################
 # cleanup. all tests involving these files skipped?
 
-unlink $pdfout, $tiff;
+unlink $pdfout, $tiff, 'colormap.png';
 
 ##############################################################
 
