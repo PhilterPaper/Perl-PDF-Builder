@@ -160,7 +160,7 @@ is($example, $expected, 'G4 (not converted to flate)');
 SKIP: {
     skip "no 'convert'", 1 unless can_run($convert);
 # ----------
-system(sprintf"$convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s -compress LZW", $width, $height, $tiff);
+system(sprintf"$convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off -compress LZW %s", $width, $height, $tiff);
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page;
