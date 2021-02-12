@@ -2,7 +2,12 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.022     2021-02-08
+3.022     2021-02-11
+
+    lib/PDF/Builder/Annotation.pm, examples/040_annotation, 
+      examples/041_annot_fileattach
+     Add "-opacity" option to control the opacity (opaqueness) of the icon,
+      where the default of 1.0 is fully opaque, and 0.0 is fully transparent.
 
     lib/PDF/Builder/Content.pm  improve -strikethru placement
 

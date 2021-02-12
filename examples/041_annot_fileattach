@@ -86,6 +86,7 @@ $ant4->file_attachment($base."pod2htmd.temp",
 	               -rect=>[260,60, 360,160], 
 	               -icon=>'Graph', 
 		       -color=>[1, 1, 0, .5], # dark blue icon (CMYK)
+		       -opacity=>0.35,        # mostly translucent
 	               -border=>[10,10, 10]
 	              );
 

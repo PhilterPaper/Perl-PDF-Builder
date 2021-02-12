@@ -63,10 +63,40 @@ $ant = $page->annotation();
 $ant->text('This is an initially closed note', 
 	   -color=>[ 0.3 ],  # dark gray icon fill
 	   -text=>'Closed for the day!',  # extra note on rollover
+	   -opacity=> 0.75, # a little translucency
 	   -border=>[10,10, 10],  # prominent border
 	   # -icon   use default (Note)
 	   -rect=>[210,110, 310,210]);
 
+# ------------------
+if (0) {
+# some text on a new page to illustrate some more annotations
+$page = $pdf->page();
+$page->mediabox(595,842); # A4 paper
+
+# just some random text near the top of the page
+my $LoremIpsum = 
+"Sed ut perspiciatis, unde omnis iste natus error sit ".
+"voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, ".
+"quae ab illo inventore veritatis et quasi architecto beatae vitae dicta ".
+"sunt, explicabo. Nemo enim ipsam voluptatem, quia voluptas sit, aspernatur ".
+"aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione ".
+"dolor sit, voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem ".
+"ipsum, quia amet, consectetur, adipisci velit, sed quia non numquam eius ".
+"modi tempora incidunt, ut labore et dolore magnam aliquam quaerat ".
+"voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam ".
+"corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur?";
+
+$gfx = $page->gfx();
+$text = $page->text();
+$text->font($f2, 20);
+$text->lead(20*1.35);
+$text->translate(75, 700);  # upper left corner of 250-wide paragraph
+my ($spill, $unused) = 
+    $text->paragraph($LoremIpsum, 250,600, 0, -spillover=>1); 
+}
+
+# ------------------
 $pdf->saveas("$0.pdf");
 $pdf->end();
 

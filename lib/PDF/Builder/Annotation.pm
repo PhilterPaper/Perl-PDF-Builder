@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.019'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.022'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 
@@ -198,6 +198,12 @@ Any I<AP> dictionary entry will override the -icon setting.
 
 A I<reference> to an icon may be passed instead of a name.
 
+=item -opacity => 0.75
+
+Define the opacity (non-transparency, opaqueness) of the icon. This value
+ranges from 0.0 (transparent) to 1.0 (fully opaque), and applies to both
+the outline and the fill color. The default is 1.0.
+
 =back
 
 =cut
@@ -215,7 +221,12 @@ sub text {
     $self->open($options{'-open'}) if defined $options{'-open'};
     $self->Color(@{$options{'-color'}}) if defined $options{'-color'};
     # popup label (title)
+    # have seen /T as (xFEFF UTF-16 chars)
     $self->{'T'} = PDFString($options{'-text'}, 'p') if exists $options{'-text'};
+    # icon opacity?
+    if (defined $options{'-opacity'}) {
+        $self->{'CA'} = PDFNum($options{'-opacity'});
+    }
 
     # Icon Name will be ignored if there is an AP.
     my $icon;  # perlcritic doesn't want 2 lines combined
@@ -313,6 +324,12 @@ Any I<AP> dictionary entry will override the -icon setting.
 
 A I<reference> to an icon may be passed instead of a name.
 
+=item -opacity => 0.75
+
+Define the opacity (non-transparency, opaqueness) of the icon. This value
+ranges from 0.0 (transparent) to 1.0 (fully opaque), and applies to both
+the outline and the fill color. The default is 1.0.
+
 =item -notrimpath => 1
 
 If given, show the entire path and file name on mouse rollover, rather than
@@ -339,6 +356,10 @@ sub file_attachment {
     $self->rect(@{$options{'-rect'}}) if defined $options{'-rect'};
     # descriptive text on mouse rollover
     $self->{'T'} = PDFString($options{'-text'}, 'p') if exists $options{'-text'};
+    # icon opacity?
+    if (defined $options{'-opacity'}) {
+        $self->{'CA'} = PDFNum($options{'-opacity'});
+    }
 
     $self->{'Subtype'} = PDFName('FileAttachment');
 
