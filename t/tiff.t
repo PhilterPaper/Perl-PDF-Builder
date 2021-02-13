@@ -76,37 +76,32 @@ ok($@, q{Fail fast if the requested file doesn't exist});
 
 ##############################################################
 # common data for remaining tests
-my $width = 1000;
-my $height = 100;
+my $width = 70;
+my $height = 46;
 $tiff = 'test.tif';
 my $pdfout = 'test.pdf';
 
-# NOTE: following 3 tests use the utilities imagemagick
-# They may require software installation on
-# your system, and will be skipped if the necessary
-# software is not found.
+# NOTE: following 4 tests use 'convert' tool from ImageMagick.
+# They may require software installation on your system, and 
+# will be skipped if the necessary software is not found.
+
+my $convert;
+if (can_run("magick")) {
+    $convert = "magick convert";
+}
+elsif ($OSNAME ne 'MSWin32' and can_run("convert")) {
+    $convert = "convert";
+}
 
 ##############################################################
 # convert not available on all systems. PDF::Builder itself
 # doesn't seem to work well with this, so skip for time being.
 
-my $convert = 'magick';
-if (not can_run($convert)) {
-    if ($OSNAME eq 'linux') {
-        $convert = 'convert'
-    }
-    elsif ($OSNAME eq 'MSWin32') {
-        $convert = File::Spec->catfile($ENV{PROGRAMFILES}, 'ImageMagick', 'convert');
-    }
-}
 SKIP: {
     skip "Further work is needed on PDF::Builder and the test process to handle the alpha layer properly.", 1;
-#    skip "Non-Linux system, or no 'convert' utility", !(
-#      $OSNAME eq 'linux'
-#        and can_run('convert')
-#    );
-# ----------
-run( command => [$convert, qw(-depth 1 -gravity center -pointsize 78 -size), $width.'x'.$height, 'caption:Lorem ipsum etc etc', $tiff], verbose => 0 );
+    skip "No 'convert' utility available.", 1 unless defined $convert;
+
+system("$convert rose: -depth 1 -alpha on $tiff");
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page();
@@ -131,10 +126,10 @@ is($example, $expected, 'alpha');
 #  from PDF::Builder's TIFF processing library.
 
 SKIP: {
-    skip "no 'convert'", 1 unless $has_GT and can_run($convert);
-# ----------
-if ($convert !~ /convert/) { $convert .= ' convert' }
-run( command => [$convert, qw(-depth 1 -gravity center -pointsize 78 -size), $width.'x'.$height, 'caption:Lorem ipsum etc etc', qw(-background white -alpha off -compress Group4), $tiff], verbose => 0 );
+    skip "No 'convert' utility available, or no Graphics::TIFF.", 1 unless
+        defined $convert and $has_GT;
+
+system("$convert rose: -depth 1 -compress Group4 $tiff");
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page();
@@ -158,9 +153,9 @@ is($example, $expected, 'G4 (not converted to flate)');
 # Graphics::TIFF not needed for this test
 
 SKIP: {
-    skip "no 'convert'", 1 unless can_run($convert);
-# ----------
-run( command => [$convert, qw(-depth 1 -gravity center -pointsize 78 -size), $width.'x'.$height, 'caption:Lorem ipsum etc etc', qw(-background white -alpha off -compress lzw), $tiff], verbose => 0 );
+    skip "No 'convert' utility available.", 1 unless defined $convert;
+
+system("$convert rose: -threshold 50% -depth 1 -compress lzw $tiff");
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page;
@@ -172,7 +167,7 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-my $example = `$convert $pdfout -depth 1 -colorspace gray -alpha off -resize 1x1 txt:-`;
+my $example = `$convert $pdfout -depth 1 -alpha off -resize 1x1 txt:-`;
 my $expected = `$convert $tiff -depth 1 -resize 1x1 txt:-`;
 # ----------
 
@@ -184,9 +179,9 @@ is($example, $expected, 'lzw (converted to flate)');
 # Graphics::TIFF needed for this test
 
 SKIP: {
-    skip "Non-Linux system, or no 'convert'", 1 unless
-      $has_GT and $OSNAME eq 'linux'
-         and can_run($convert);
+    skip "No 'convert' utility available, or no Graphics::TIFF.", 1 unless
+        defined $convert and $has_GT;
+
 # .png file is temporary file (output, input, erased)
 system("$convert rose: -type palette -depth 2 colormap.png");
 system("$convert colormap.png $tiff");
@@ -206,6 +201,3 @@ pass 'successfully read TIFF with colormap';
 
 unlink $pdfout, $tiff, 'colormap.png';
 
-##############################################################
-
-1;
