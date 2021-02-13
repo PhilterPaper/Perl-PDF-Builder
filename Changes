@@ -2,12 +2,17 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.022     2021-02-11
+3.022     2021-02-12
 
     lib/PDF/Builder/Annotation.pm, examples/040_annotation, 
       examples/041_annot_fileattach
      Add "-opacity" option to control the opacity (opaqueness) of the icon,
       where the default of 1.0 is fully opaque, and 0.0 is fully transparent.
+      Add "markup" method to implement "highlighted" text annotations, per
+      [GitHub #142]. These include "Highlight" (in the manner of a highlighter
+      marker), "Squiggly" (squiggly underline), "Underline", and "StrikeOut".
+      These behave like a "text" annotation, but instead of an icon, the
+      document text is highlighted.
 
     lib/PDF/Builder/Content.pm  improve -strikethru placement
 
