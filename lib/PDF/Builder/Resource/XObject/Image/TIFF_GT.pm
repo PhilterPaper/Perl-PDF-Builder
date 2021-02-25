@@ -165,10 +165,10 @@ sub handle_generic {
     $dict->{'BitsPerComponent'} = PDFNum($tif->{'bitsPerSample'});
     $dict->{'Colors'} = PDFNum($tif->{'colorSpace'} eq 'DeviceGray'?1 :3);
 
-   ## uncompressed needs to be flipped
-   #if (!defined $tif->{'filter'}) {
-   #    $self->{'Decode'} = PDFArray(PDFNum(1), PDFNum(0));
-   #}
+    # uncompressed bilevel needs to be flipped
+    if (!defined $tif->{'filter'} && $tif->{'bitsPerSample'} == 1) {
+        $self->{'Decode'} = PDFArray(PDFNum(1), PDFNum(0));
+    }
     $stripcount = $tif->{'object'}->NumberOfStrips();
     $buffer = '';
     for my $i (0 .. $stripcount - 1) {

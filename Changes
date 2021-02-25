@@ -10,8 +10,8 @@ See also INFO/Changes_2020 for earlier version 3 release logs.
       lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm
      Some improvements to deal with inverted colors (black/white) on certain
       TIFF images. Now G3 and G4 (CCITT Fax) get flipped to the correct
-      colors. There are still some TIFF cases which are not fully properly
-      dealt with; we are still working on them.
+      colors, as does uncompressed bilevel. There are still some TIFF cases 
+      which are not fully properly dealt with; we are still working on them.
      
     lib/PDF/Builder/Annotation.pm, examples/040_annotation, 
       examples/041_annot_fileattach
