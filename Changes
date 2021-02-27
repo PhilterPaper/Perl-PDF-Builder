@@ -2,9 +2,12 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.022     2021-02-24
+3.022     2021-02-27
 
 *   comment out SVG mention in Builder.pm, Page.pm & POD until finished
+
+    lib/PDF/Builder/Resource/XObject/Image/TIFF.pm
+     Corrected some bilevel color inverts.
 
     lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm,
       lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm
