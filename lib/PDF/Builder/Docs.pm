@@ -1608,11 +1608,6 @@ Valid %options are:
 Character width condense/expand factor (0.1-0.9 = condense, 1 = normal/default, 
 1.1+ = expand). It is the multiplier to apply to the width of each character.
 
-=item -slant
-
-B<DEPRECATED>. It is the old name for C<-condense>, and will eventually be
-removed. Use C<-condense> instead.
-
 =item -oblique
 
 Italic angle (+/- degrees, default 0), sets B<skew> of character box.
