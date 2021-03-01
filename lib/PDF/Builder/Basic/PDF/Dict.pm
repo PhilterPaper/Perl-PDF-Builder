@@ -184,7 +184,7 @@ sub outobjdeep {
     }
 
     if      (defined $self->{' stream'}) {
-        $fh->print(" stream\n");
+        $fh->print("\nstream\n");
         $loc = $fh->tell();
         my $stream = $self->{' stream'};
         unless ($self->{' nofilt'}) {
@@ -199,7 +199,7 @@ sub outobjdeep {
         open(my $dictfh, "<", $self->{' streamfile'}) || die "Unable to open $self->{' streamfile'}";
         binmode($dictfh, ':raw');
 
-        $fh->print(" stream\n");
+        $fh->print("\nstream\n");
         $loc = $fh->tell();
         my $stream;
         while (read($dictfh, $stream, 4096)) {

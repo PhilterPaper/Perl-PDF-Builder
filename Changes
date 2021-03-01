@@ -2,9 +2,20 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.022     2021-02-28
+3.022     2021-03-01
 
 *   comment out SVG mention in Builder.pm, Page.pm & POD until finished
+
+    lib/PDF/Builder/Annotation.pm, lib/PDF/Builder/Basic/PDF/Dict-File.pm, 
+      lib/PDF/Builder/Resource/Font/SynFont.pm, examples/041_annot_fileattach,
+      examples/060_transparency, examples/resources/sample_55.pdf, 
+      examples/resources/HarfBuzz_example.pdf
+     Output 'endobj' starting its own line. Some PDF validators raise a
+      stink if endobj continues a line with other commands on it. 
+      While we're at it, put 'stream' starting its own line, too.
+      Fix two examples that failed to validate. There is a third failure, but
+      it appears to be an issue with PDF/A disallowed content (embedded files),
+      not a bug in PDF production here.
 
     lib/PDF/Builder/Resource/Font/SynFont.pm, INFO/DEPRECATED, 
       examples/025_unifonts, lib/PDF/Builder/Docs.pm

@@ -311,7 +311,7 @@ sub new
         }
 
 	# finale... all modifications to font have been done
-        $char->{' stream'} .= " Tj\nET\n";
+        $char->{' stream'} .= " Tj\nET ";
         push @widths, $wth;
         $self->data()->{'wx'}->{$font->glyphByEnc($w)} = $wth;
         $pdf->new_obj($char);

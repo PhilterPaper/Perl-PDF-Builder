@@ -448,6 +448,13 @@ A text label for the popup (on mouseover) that contains the file name.
 
 =back
 
+Note that while PDF permits different specifications (paths) to DOS/Windows,
+Mac, and Unix (including Linux) versions of a file, and different format copies 
+to be embedded, at this time PDF::Builder only permits a single file (format of
+your choice) to be embedded. If there is user demand for multiple file formats
+to be referenced and/or embedded, we could look into providing this, I<although
+separate OS version paths B<may> be considered obsolescent!>.
+
 =cut
 
 # TBD it is possible to specify different files for DOS, Mac, Unix
@@ -508,7 +515,7 @@ sub file_attachment {
     # The File Specification.
     $self->{'FS'} = PDFDict();
     $self->{'FS'}->{'F'} = PDFString($file, 'f');
-    $self->{'FS'}->{'Type'} = PDFName('F');
+    $self->{'FS'}->{'Type'} = PDFName('Filespec');
     $self->{'FS'}->{'EF'} = PDFDict($file);
     $self->{'FS'}->{'EF'}->{'F'} = PDFDict($file);
     $self->{' apipdf'}->new_obj($self->{'FS'}->{'EF'}->{'F'});

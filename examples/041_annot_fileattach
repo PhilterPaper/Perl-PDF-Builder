@@ -1,6 +1,13 @@
 #!/usr/bin/perl
 
 # demonstrate file attachment annotations. 
+#
+# Note that some PDF/A-oriented PDF validation tools (such as PDF Tools Online)
+# object to embedded (attached) files in Archival PDFs, as the fear is that
+# this can lead to external file dependencies. It also objects to something 
+# about a missing Subtype in samples 5 and 6, which may or may not be PDF/A-
+# related, but I haven't yet been able to find anything that appears to be
+# missing a Subtype entry.
 
 use strict;
 use warnings;

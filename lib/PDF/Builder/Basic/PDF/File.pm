@@ -988,7 +988,7 @@ sub ship_out {
         my ($objnum, $objgen) = @{$self->{' objects'}{$objind->uid()}}[0..1];
         $fh->printf('%d %d obj ', $objnum, $objgen);
         $objind->outobjdeep($fh, $self);
-        $fh->print(" endobj\n");
+        $fh->print("\nendobj\n");
 
         # Note that we've output this obj, not forgetting to update
         # the cache of what's printed.
