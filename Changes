@@ -2,9 +2,11 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.022     2021-03-01
+3.022     2021-03-02
 
 *   comment out SVG mention in Builder.pm, Page.pm & POD until finished
+
+    t/text.t  per PDF::API2 add two tests for charspace and wordspace override
 
     lib/PDF/Builder/Annotation.pm, lib/PDF/Builder/Basic/PDF/Dict-File.pm, 
       lib/PDF/Builder/Resource/Font/SynFont.pm, examples/041_annot_fileattach,
