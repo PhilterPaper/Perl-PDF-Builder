@@ -6,7 +6,18 @@ See also INFO/Changes_2020 for earlier version 3 release logs.
 
 *   comment out SVG mention in Builder.pm, Page.pm & POD until finished
 
-    t/text.t  per PDF::API2 add two tests for charspace and wordspace override
+    lib/PDF/Builder/Content-Lite.pm, INFO/DEPRECATED, t/content.t
+     Per PDF::API2, deprecated lead() and replace by leading(). Lite's
+      textlead() deprecated and replaced by textleading().
+
+    t/text.t
+     Per PDF::API2 add two tests for charspace and wordspace override, and
+     18 more tests for basic text calls. 
+
+    lib/PDF/Builder/Content/Text.pm, INFO/KNOWN_INCOMP
+     Per PDF::API2, add paragraphs() as an alias for section(). Document some
+      minor inconsistencies in option names and behavior introduced with
+      these changes.
 
     lib/PDF/Builder/Annotation.pm, lib/PDF/Builder/Basic/PDF/Dict-File.pm, 
       lib/PDF/Builder/Resource/Font/SynFont.pm, examples/041_annot_fileattach,

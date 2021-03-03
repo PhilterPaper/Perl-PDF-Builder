@@ -29,6 +29,12 @@ PDFStr()        method in Basic/PDF/Utils.pm
 PDFUtf()        method in Basic/PDF/Utils.pm
    Use PDFString() instead. May be removed on or after October, 2022.
 
+lead()          method in Content.pm
+   Use leading() instead. May be removed on or after March, 2023.
+
+textlead()      method in Lite.pm
+   Use textleading() instead. May be removed on or after March, 2023.
+
 *** If I have missed any deprecated interfaces, please let me know! ***
 
 ======= Deprecated items that already have been removed ======================
