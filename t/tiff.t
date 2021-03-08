@@ -76,8 +76,8 @@ ok($@, q{Fail fast if the requested file doesn't exist});
 
 ##############################################################
 # common data for remaining tests
-my $width = 70;
-my $height = 46;
+my $width = 1000;
+my $height = 100;
 $tiff = 'test.tif';
 my $pdfout = 'test.pdf';
 
@@ -85,12 +85,21 @@ my $pdfout = 'test.pdf';
 # They may require software installation on your system, and 
 # will be skipped if the necessary software is not found.
 
-my $convert;
+my ($convert, $gs);
 if (can_run("magick")) {
     $convert = "magick convert";
 }
 elsif ($OSNAME ne 'MSWin32' and can_run("convert")) {
     $convert = "convert";
+}
+if (can_run("gswin64c")) {
+    $gs = "gswin64c";
+}
+elsif (can_run("gswin32c")) {
+    $gs = "gswin32c";
+}
+elsif (can_run("gs")) {
+    $gs = "gs";
 }
 
 ##############################################################
@@ -98,10 +107,9 @@ elsif ($OSNAME ne 'MSWin32' and can_run("convert")) {
 # doesn't seem to work well with this, so skip for time being.
 
 SKIP: {
-    skip "Further work is needed on PDF::Builder and the test process to handle the alpha layer properly.", 1;
-    skip "No 'convert' utility available.", 1 unless defined $convert;
+    skip "No 'convert' utility available.", 1 unless defined $convert and defined $gs;
 
-system("$convert rose: -depth 1 -alpha on $tiff");
+system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:Somelongtextwithnospaces $tiff");
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page();
@@ -113,7 +121,8 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-my $example = `$convert $pdfout -depth 1 -resize 1x1 txt:-`;
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pngalpha -g$width"."x$height -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
+my $example = `$convert out.png -colorspace gray -depth 1 -resize 1x1 txt:-`;
 my $expected = `$convert $tiff -depth 1 -resize 1x1 txt:-`;
 # ----------
 
@@ -127,9 +136,9 @@ is($example, $expected, 'alpha');
 
 SKIP: {
     skip "No 'convert' utility available, or no Graphics::TIFF.", 1 unless
-        defined $convert and $has_GT;
+        defined $convert and defined $gs and $has_GT;
 
-system("$convert rose: -depth 1 -compress Group4 $tiff");
+system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:Somelongtextwithnospaces -background white -alpha off -compress Group4 $tiff");
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page();
@@ -141,8 +150,13 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-my $example = `$convert $pdfout -depth 1 -colorspace gray -alpha off -resize 1x1 txt:-`;
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g$width"."x$height -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
+my $example = `$convert out.png -depth 1 -resize 1x1 txt:-`;
+$example =~ /gray\((\d+)\)/;
+$example = $1;
 my $expected = `$convert $tiff -depth 1 -resize 1x1 txt:-`;
+$expected =~ /gray\((\d+)\)/;
+$expected = $1;
 # ----------
 
 is($example, $expected, 'G4 (not converted to flate)');
@@ -153,9 +167,9 @@ is($example, $expected, 'G4 (not converted to flate)');
 # Graphics::TIFF not needed for this test
 
 SKIP: {
-    skip "No 'convert' utility available.", 1 unless defined $convert;
+    skip "No 'convert' utility available.", 1 unless defined $convert and defined $gs;
 
-system("$convert rose: -threshold 50% -depth 1 -compress lzw $tiff");
+system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:Somelongtextwithnospaces -background white -alpha off -compress lzw $tiff");
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page;
@@ -167,8 +181,13 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-my $example = `$convert $pdfout -depth 1 -alpha off -resize 1x1 txt:-`;
-my $expected = `$convert $tiff -depth 1 -resize 1x1 txt:-`;
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g$width"."x$height -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
+my $example = `$convert out.png -depth 1 -alpha off -resize 1x1 txt:-`;
+$example =~ /gray\((\d+)\)/;
+$example = $1;
+my $expected = `$convert $tiff -depth 1 -alpha off -resize 1x1 txt:-`;
+$expected =~ /gray\((\d+)\)/;
+$expected = $1;
 # ----------
 
 is($example, $expected, 'lzw (converted to flate)');
@@ -199,5 +218,5 @@ pass 'successfully read TIFF with colormap';
 ##############################################################
 # cleanup. all tests involving these files skipped?
 
-unlink $pdfout, $tiff, 'colormap.png';
+unlink $pdfout, $tiff, 'colormap.png', 'out.png';
 
