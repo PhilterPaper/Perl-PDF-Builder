@@ -2,7 +2,8 @@
 use warnings;
 use strict;
 use English qw( -no_match_vars );
-use IPC::Cmd qw(can_run);
+use IPC::Cmd qw(can_run run);
+use File::Spec;
 use Test::More tests => 12;
 
 use PDF::Builder;
@@ -75,36 +76,40 @@ ok($@, q{Fail fast if the requested file doesn't exist});
 
 ##############################################################
 # common data for remaining tests
-my $width = 568;
-my $height = 1000;
+my $width = 1000;
+my $height = 100;
 $tiff = 'test.tif';
 my $pdfout = 'test.pdf';
 
-# WARNING: do not attempt to run the following 3 tests on a
-# Windows system. Windows has a 'convert' utility to convert
-# a filesystem from FAT32 to NTFS, and you don't want to
-# accidentally run that one! The test ($OSNAME) is for 'linux'
-# but testing for 'not windows' might do just as well. Even
-# better might be to see if 'convert' and 'tiffcp' are the
-# right utilties, if found. Otherwise, the OS is irrelevant.
-#
-# NOTE: following 3 tests use Linux/TIFF utilities convert
-# and tiffcp. They may require software installation on 
-# your Linux system, and will be skipped if the necessary
-# software is not found.
+# NOTE: following 4 tests use 'convert' tool from ImageMagick.
+# They may require software installation on your system, and 
+# will be skipped if the necessary software is not found.
+
+my ($convert, $gs);
+if (can_run("magick")) {
+    $convert = "magick convert";
+}
+elsif ($OSNAME ne 'MSWin32' and can_run("convert")) {
+    $convert = "convert";
+}
+if (can_run("gswin64c")) {
+    $gs = "gswin64c";
+}
+elsif (can_run("gswin32c")) {
+    $gs = "gswin32c";
+}
+elsif (can_run("gs")) {
+    $gs = "gs";
+}
 
 ##############################################################
 # convert not available on all systems. PDF::Builder itself
 # doesn't seem to work well with this, so skip for time being.
 
 SKIP: {
-    skip "Further work is needed on PDF::Builder and the test process to handle the alpha layer properly.", 1;
-#    skip "Non-Linux system, or no 'convert' utility", !(
-#      $OSNAME eq 'linux'
-#        and can_run('convert')
-#    );
-# ----------
-system(sprintf"convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' %s", $width, $height, $tiff);
+    skip "No 'convert' utility available.", 1 unless defined $convert and defined $gs;
+
+system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:Somelongtextwithnospaces $tiff");
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page();
@@ -116,26 +121,24 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-my $example = `convert $pdfout -depth 1 -resize 1x1 txt:-`;
-my $expected = `convert $tiff -depth 1 -resize 1x1 txt:-`;
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pngalpha -g$width"."x$height -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
+my $example = `$convert out.png -colorspace gray -depth 1 -resize 1x1 txt:-`;
+my $expected = `$convert $tiff -depth 1 -resize 1x1 txt:-`;
 # ----------
 
 is($example, $expected, 'alpha');
 }
 
 ##############################################################
-# tiffcp, convert and Graphics::TIFF not available on all systems.
+# convert and Graphics::TIFF not available on all systems.
 # Graphics::TIFF needed or you get message "Chunked CCITT G4 TIFF not supported"
 #  from PDF::Builder's TIFF processing library.
 
 SKIP: {
-    skip "Non-Linux system, or no 'convert' or no 'tiffcp'", 1 unless
-      $has_GT and $OSNAME eq 'linux'
-         and can_run('convert')
-         and can_run('tiffcp');
-# ----------
-system(sprintf "convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s", $width, $height, $tiff);
-system("tiffcp -c g3 $tiff tmp.tif && mv tmp.tif $tiff");
+    skip "No 'convert' utility available, or no Graphics::TIFF.", 1 unless
+        defined $convert and defined $gs and $has_GT;
+
+system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:Somelongtextwithnospaces -background white -alpha off -compress Group4 $tiff");
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page();
@@ -147,25 +150,26 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-my $example = `convert $pdfout -depth 1 -colorspace gray -alpha off -resize 1x1 txt:-`;
-my $expected = `convert $tiff -depth 1 -resize 1x1 txt:-`;
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g$width"."x$height -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
+my $example = `$convert out.png -depth 1 -resize 1x1 txt:-`;
+$example =~ /gray\((\d+)\)/;
+$example = $1;
+my $expected = `$convert $tiff -depth 1 -resize 1x1 txt:-`;
+$expected =~ /gray\((\d+)\)/;
+$expected = $1;
 # ----------
 
-is($example, $expected, 'G3 (not converted to flate)');
+is($example, $expected, 'G4 (not converted to flate)');
 }
 
 ##############################################################
-# tiffcp and convert not available on all systems.
+# convert not available on all systems.
 # Graphics::TIFF not needed for this test
 
 SKIP: {
-    skip "Non-Linux system, or no 'convert' or no 'tiffcp'", 1 unless
-      $OSNAME eq 'linux'
-         and can_run('convert')
-         and can_run('tiffcp');
-# ----------
-system(sprintf"convert -depth 1 -gravity center -pointsize 78 -size %dx%d caption:'Lorem ipsum etc etc' -background white -alpha off %s", $width, $height, $tiff);
-system("tiffcp -c lzw $tiff tmp.tif && mv tmp.tif $tiff");
+    skip "No 'convert' utility available.", 1 unless defined $convert and defined $gs;
+
+system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:Somelongtextwithnospaces -background white -alpha off -compress lzw $tiff");
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page;
@@ -177,8 +181,13 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-my $example = `convert $pdfout -depth 1 -colorspace gray -alpha off -resize 1x1 txt:-`;
-my $expected = `convert $tiff -depth 1 -resize 1x1 txt:-`;
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g$width"."x$height -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
+my $example = `$convert out.png -depth 1 -alpha off -resize 1x1 txt:-`;
+$example =~ /gray\((\d+)\)/;
+$example = $1;
+my $expected = `$convert $tiff -depth 1 -alpha off -resize 1x1 txt:-`;
+$expected =~ /gray\((\d+)\)/;
+$expected = $1;
 # ----------
 
 is($example, $expected, 'lzw (converted to flate)');
@@ -189,11 +198,12 @@ is($example, $expected, 'lzw (converted to flate)');
 # Graphics::TIFF needed for this test
 
 SKIP: {
-    skip "Non-Linux system, or no 'convert'", 1 unless
-      $has_GT and $OSNAME eq 'linux'
-         and can_run('convert');
+    skip "No 'convert' utility available, or no Graphics::TIFF.", 1 unless
+        defined $convert and $has_GT;
+
 # .png file is temporary file (output, input, erased)
-system("convert rose: -type palette -depth 2 colormap.png && convert colormap.png $tiff && rm colormap.png");
+system("$convert rose: -type palette -depth 2 colormap.png");
+system("$convert colormap.png $tiff");
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page;
 $page->mediabox( $width, $height );
@@ -208,8 +218,5 @@ pass 'successfully read TIFF with colormap';
 ##############################################################
 # cleanup. all tests involving these files skipped?
 
-unlink $pdfout, $tiff;
+unlink $pdfout, $tiff, 'colormap.png', 'out.png';
 
-##############################################################
-
-1;
