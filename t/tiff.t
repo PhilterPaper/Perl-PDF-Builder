@@ -4,7 +4,7 @@ use strict;
 use English qw( -no_match_vars );
 use IPC::Cmd qw(can_run run);
 use File::Spec;
-use Test::More tests => 12;
+use Test::More tests => 13;
 
 use PDF::Builder;
 
@@ -82,7 +82,7 @@ my $tiff_f = 'test.tif';
 my $pdfout = 'test.pdf';
 
 # NOTE: following 4 tests use 'convert' tool from ImageMagick.
-# They may require software installation on your system, and 
+# They may require software installation on your system, and
 # will be skipped if the necessary software is not found.
 #
 # Some of the following tests will need ghostScript on Windows platforms.
@@ -99,7 +99,7 @@ if      (can_run("magick")) {
     $convert = "convert";
 }
 # on Windows, ImageMagick can be 64-bit or 32-bit version, so try both. it's
-#   needed for some magick convert operations, and also standalone, and 
+#   needed for some magick convert operations, and also standalone, and
 #   usually must be installed.
 # on Linux-like systems, it's usually just 'gs' and comes with the platform.
 if      (can_run("gswin64c")) {
@@ -130,8 +130,8 @@ $pdf->end();
 
 # ----------
 system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pngalpha -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
-my $example = `$convert out.png -colorspace gray -depth 1 -resize 1x1 txt:-`;
-my $expected = `$convert $tiff_f -depth 1 -resize 1x1 txt:-`;
+my $example = `$convert out.png -colorspace gray -depth 1 txt:-`;
+my $expected = `$convert $tiff_f -depth 1 txt:-`;
 # ----------
 
 is($example, $expected, 'alpha');
@@ -157,23 +157,19 @@ $pdf->end();
 
 # ----------
 system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
-my $example = `$convert out.png -depth 1 -resize 1x1 txt:-`;
-$example =~ /gray\((\d+)\)/;
-$example = $1;
-my $expected = `$convert $tiff_f -depth 1 -resize 1x1 txt:-`;
-$expected =~ /gray\((\d+)\)/;
-$expected = $1;
+my $example = `$convert out.png -depth 1 txt:-`;
+my $expected = `$convert $tiff_f -depth 1 txt:-`;
 # ----------
 
 is($example, $expected, 'G4 (not converted to flate)');
 }
 
-# LZW convert to Flate ------------------
-# convert needed for this test
+# LZW (NOT converted to Flate) ------------------
+# convert and ghostscript needed for these two tests
 
 SKIP: {
-    skip "No 'convert' utility available.", 1 unless 
-        defined $convert and defined $gs;
+    skip "No 'convert' utility available.", 1 unless
+        defined $convert and defined $gs and $has_GT;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -compress lzw $tiff_f");
 # ----------
@@ -188,15 +184,35 @@ $pdf->end();
 
 # ----------
 system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
-my $example = `$convert out.png -depth 1 -alpha off -resize 1x1 txt:-`;
-$example =~ /gray\((\d+)\)/;
-$example = $1;
-my $expected = `$convert $tiff_f -depth 1 -alpha off -resize 1x1 txt:-`;
-$expected =~ /gray\((\d+)\)/;
-$expected = $1;
+my $example = `$convert out.png -depth 1 -alpha off txt:-`;
+my $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
-is($example, $expected, 'lzw (converted to flate)');
+    is($example, $expected, 'lzw (not converted to flate) with GT');
+}
+
+SKIP: {
+    skip "No 'convert' utility available.", 1 unless
+        defined $convert and defined $gs;
+
+system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -compress lzw $tiff_f");
+# ----------
+$pdf = PDF::Builder->new(-file => $pdfout);
+my $page = $pdf->page;
+$page->mediabox( $width, $height );
+$gfx = $page->gfx();
+my $img = $pdf->image_tiff($tiff_f, -nouseGT => 1);
+$gfx->image( $img, 0, 0, $width, $height );
+$pdf->save();
+$pdf->end();
+
+# ----------
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
+my $example = `$convert out.png -depth 1 -alpha off txt:-`;
+my $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
+# ----------
+
+    is($example, $expected, 'lzw (not converted to flate) without GT');
 }
 
 # read TIFF with colormap ------------------
@@ -224,4 +240,3 @@ pass 'successfully read TIFF with colormap';
 # cleanup. all tests involving these files skipped?
 
 unlink $pdfout, $tiff_f, 'colormap.png', 'out.png';
-
