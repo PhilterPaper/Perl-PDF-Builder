@@ -2,9 +2,17 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.022     2021-03-12
+3.022     2021-03-16
 
 *   comment out SVG mention in Builder.pm, Page.pm & POD until finished
+
+*   fix build process to ensure consistent "unix" formatting of most files
+      (#150)
+
+    t/tiff.t, lib/PDF/Builder/Resource/XObject/Image/TIFF-TIFF_GT.pm
+     Per #148, update by carygravel to stop converting LZW-compressed TIFFs
+      to Flate compression (unnecessary, as PDF directly supports LZW, and 
+      there were supposedly some edge-case bugs in the code).
 
     t/tiff.t per #143, update by carygravel to enable proper testing on all
       platforms including Windows.
