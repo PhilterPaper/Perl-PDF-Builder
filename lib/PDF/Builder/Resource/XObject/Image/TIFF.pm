@@ -151,6 +151,8 @@ sub handle_flate {
 sub handle_lzw {
     my ($self, $pdf, $tif) = @_;
 
+    $self->{' nofilt'} = 1;
+    $self->{'Filter'} = PDFArray(PDFName('LZWDecode'));
     if (ref($tif->{'imageOffset'})) {
         $self->{' stream'} = '';
         my $d = scalar @{$tif->{'imageOffset'}};
