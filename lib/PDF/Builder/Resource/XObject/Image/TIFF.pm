@@ -158,11 +158,16 @@ sub handle_lzw {
         $self->{' stream'} = '';
         my $d = scalar @{$tif->{'imageOffset'}};
         foreach (1 .. $d) {
-            my $buf;
             $tif->{'fh'}->seek(shift(@{$tif->{'imageOffset'}}), 0);
-            $tif->{'fh'}->read($self->{' stream'}, shift(@{$tif->{'imageLength'}}));
+            my $buf;
+            $tif->{'fh'}->read($buf, shift(@{$tif->{'imageLength'}}));
+            my $filter = PDF::Builder::Basic::PDF::Filter::LZWDecode->new();
+            $self->{' stream'} .= $filter->infilt($buf);
         }
-    } else {
+        my $filter = PDF::Builder::Basic::PDF::Filter::LZWDecode->new();
+        $self->{' stream'} = $filter->outfilt($self->{' stream'});
+    }
+    else {
         $tif->{'fh'}->seek($tif->{'imageOffset'}, 0);
         $tif->{'fh'}->read($self->{' stream'}, $tif->{'imageLength'});
     }

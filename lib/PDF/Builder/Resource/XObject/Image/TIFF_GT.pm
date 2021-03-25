@@ -643,6 +643,7 @@ sub handle_ccitt {
     return $self;
 } # end of handle_ccitt()
 
+
 sub handle_lzw {
     my ($self, $pdf, $tif, %opts) = @_;
 
@@ -656,9 +657,18 @@ sub handle_lzw {
     $decode->{'EndOfLine'} = PDFBool(1);
     $decode->{'EncodedByteAlign'} = PDFBool(1);
 
-    for my $i (0 .. $tif->{'object'}->NumberOfStrips() - 1) {
-        $self->{' stream'} .= $tif->{'object'}->ReadRawStrip($i, -1);
+    my $n_strips = $tif->{'object'}->NumberOfStrips();
+    if ($n_strips == 1) {
+        $self->{' stream'} .= $tif->{'object'}->ReadRawStrip(0, -1);
+        return $self;
     }
+
+    my $stream = '';
+    for my $i (0 .. $n_strips - 1) {
+        $stream .= $tif->{'object'}->ReadEncodedStrip($i, -1);
+    }
+    my $filter = PDF::Builder::Basic::PDF::Filter::LZWDecode->new();
+    $self->{' stream'} .= $filter->outfilt($stream);
 
     return $self;
 } # end of handle_lzw()
