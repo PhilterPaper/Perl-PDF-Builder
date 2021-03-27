@@ -95,6 +95,55 @@ sub usesLib {
     return $self->{'usesGT'}->val();
 }
 
+sub deLZW {
+    my ($ibits, $stream) = @_;
+
+    my $bits = $ibits;
+    my $resetcode = 1 << ($ibits - 1);
+    my $endcode = $resetcode + 1;
+    my $nextcode = $endcode + 1;
+    my $ptr = 0;
+    $stream = unpack('B*', $stream);
+    my $maxptr = length($stream);
+    my $tag;
+    my $out = '';
+    my $outptr = 0;
+
+    # print STDERR "reset=$resetcode\nend=$endcode\nmax=$maxptr\n";
+
+    my @d = map { chr($_) } (0 .. $resetcode-1);
+
+    while ($ptr+$bits <= $maxptr) {
+        $tag = 0;
+        foreach my $off (reverse 1 .. $bits) {
+            $tag <<= 1;
+            $tag |= substr($stream, $ptr+$bits-$off, 1);
+        }
+        # print STDERR "ptr=$ptr,tag=$tag,bits=$bits,next=$nextcode\n";
+        # print STDERR "tag to large\n" if($tag>$nextcode);
+        $ptr += $bits;
+        if      ($tag == $resetcode) {
+            $bits = $ibits;
+            $nextcode = $endcode+1;
+            next;
+        } elsif ($tag == $endcode) {
+            last;
+        } elsif ($tag < $resetcode) {
+            $d[$nextcode] = $d[$tag];
+            $out .= $d[$nextcode];
+            $nextcode++;
+        } elsif ($tag > $endcode) {
+            $d[$nextcode] = $d[$tag];
+            $d[$nextcode] .= substr($d[$tag+1], 0, 1);
+            $out .= $d[$nextcode];
+            $nextcode++;
+        }
+        $bits++ if $nextcode == (1 << $bits);
+    }
+
+    return $out;
+}
+
 sub handle_generic {
     my ($self, $pdf, $tif) = @_;
 
@@ -151,8 +200,13 @@ sub handle_flate {
 sub handle_lzw {
     my ($self, $pdf, $tif) = @_;
 
-    $self->{' nofilt'} = 1;
-    $self->{'Filter'} = PDFArray(PDFName('LZWDecode'));
+    $self->filters('FlateDecode');
+    my $imageWidth = $tif->{'imageWidth'};
+    my $mod = $imageWidth%8;
+    if ($mod > 0) {
+	$imageWidth += 8-$mod;
+    }
+    my $max_raw_strip = $imageWidth*$tif->{'bitsPerSample'}*$tif->{'RowsPerStrip'}/8;
 
     if (ref($tif->{'imageOffset'})) {
         $self->{' stream'} = '';
@@ -160,11 +214,17 @@ sub handle_lzw {
         foreach (1 .. $d) {
             my $buf;
             $tif->{'fh'}->seek(shift(@{$tif->{'imageOffset'}}), 0);
-            $tif->{'fh'}->read($self->{' stream'}, shift(@{$tif->{'imageLength'}}));
+            $tif->{'fh'}->read($buf, shift(@{$tif->{'imageLength'}}));
+            $buf = deLZW(9, $buf);
+            if (length($buf) > $max_raw_strip) {
+                $buf = substr($buf, 0, $max_raw_strip);
+            }
+            $self->{' stream'} .= $buf;
         }
     } else {
         $tif->{'fh'}->seek($tif->{'imageOffset'}, 0);
         $tif->{'fh'}->read($self->{' stream'}, $tif->{'imageLength'});
+        $self->{' stream'} = deLZW(9, $self->{' stream'});
     }
 
     return $self;
@@ -299,7 +359,6 @@ sub tiffTag {
 }
 
 =back
-
 =cut
 
 1;

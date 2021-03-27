@@ -2,20 +2,23 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.022     2021-03-16
+3.022     2021-03-27
 
-*   comment out SVG mention in Builder.pm, Page.pm & POD until finished
+    docs/buildDoc.pl add "end of page" (###) marker to make it clear that
+      you're seeing the bottom of the HTML page.
 
-*   fix build process to ensure consistent "unix" formatting of most files
-      (#150)
+    Update build process to ensure consistent "unix" formatting of most 
+      human-readable files (#150). Some non-CPAN builds were complaining
+      about MS-DOS format (CRLF line ends) on some files.
 
     t/tiff.t, lib/PDF/Builder/Resource/XObject/Image/TIFF-TIFF_GT.pm
      Per #148, update by carygravel to stop converting LZW-compressed TIFFs
       to Flate compression (unnecessary, as PDF directly supports LZW, and 
       there were supposedly some edge-case bugs in the code).
+      == REMOVED == still problems, development under way
 
-    t/tiff.t per #143, update by carygravel to enable proper testing on all
-      platforms including Windows.
+    t/tiff.t per #143, update by carygravel to enable proper TIFF testing 
+      on all platforms including Windows.
 
     lib/PDF/Builder/Content-Lite.pm, INFO/DEPRECATED, t/content.t
      Per PDF::API2, deprecated lead() and replace by leading(). Lite's
