@@ -2,6 +2,8 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
+3.023     2021-03-27  UNRELEASED
+
 3.022     2021-03-27
 
     docs/buildDoc.pl add "end of page" (###) marker to make it clear that
