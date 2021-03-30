@@ -4,6 +4,7 @@ use strict;
 use English qw( -no_match_vars );
 use IPC::Cmd qw(can_run run);
 use File::Spec;
+use File::Temp;
 use Test::More tests => 13;
 
 use PDF::Builder;
@@ -80,8 +81,10 @@ ok($@, q{Fail fast if the requested file doesn't exist});
 # common data for remaining tests
 my $width = 1000;
 my $height = 100;
-my $tiff_f = 'test.tif';
-my $pdfout = 'test.pdf';
+my $directory = File::Temp->newdir();
+my $tiff_f = File::Spec->catfile($directory, 'test.tif');
+my $pdfout = File::Spec->catfile($directory, 'test.pdf');
+my $pngout = File::Spec->catfile($directory, 'out.png');
 
 # NOTE: following 4 tests use 'convert' tool from ImageMagick.
 # They may require software installation on your system, and
@@ -131,8 +134,8 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pngalpha -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
-my $example = `$convert out.png -colorspace gray -depth 1 txt:-`;
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pngalpha -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+my $example = `$convert $pngout -colorspace gray -depth 1 txt:-`;
 my $expected = `$convert $tiff_f -depth 1 txt:-`;
 # ----------
 
@@ -158,8 +161,8 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
-my $example = `$convert out.png -depth 1 txt:-`;
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+my $example = `$convert $pngout -depth 1 txt:-`;
 my $expected = `$convert $tiff_f -depth 1 txt:-`;
 # ----------
 
@@ -185,8 +188,8 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
-my $example = `$convert out.png -depth 1 -alpha off txt:-`;
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+my $example = `$convert $pngout -depth 1 -alpha off txt:-`;
 my $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
@@ -209,8 +212,8 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
-my $example = `$convert out.png -depth 1 -alpha off txt:-`;
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+my $example = `$convert $pngout -depth 1 -alpha off txt:-`;
 my $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
@@ -225,8 +228,9 @@ SKIP: {
         defined $convert and $has_GT;
 
 # .png file is temporary file (output, input, erased)
-system("$convert rose: -type palette -depth 2 colormap.png");
-system("$convert colormap.png $tiff_f");
+my $colormap = File::Spec->catfile($directory, 'colormap.png');
+system("$convert rose: -type palette -depth 2 $colormap");
+system("$convert $colormap $tiff_f");
 $pdf = PDF::Builder->new(-file => $pdfout);
 my $page = $pdf->page;
 $page->mediabox( $width, $height );
@@ -240,5 +244,3 @@ pass 'successfully read TIFF with colormap';
 
 ##############################################################
 # cleanup. all tests involving these files skipped?
-
-unlink $pdfout, $tiff_f, 'colormap.png', 'out.png';
