@@ -643,6 +643,36 @@ sub handle_ccitt {
     return $self;
 } # end of handle_ccitt()
 
+
+sub handle_lzw {
+    my ($self, $pdf, $tif, %opts) = @_;
+
+    $self->{' nofilt'} = 1;
+    $self->{'Filter'} = PDFArray(PDFName('LZWDecode'));
+    my $decode = PDFDict();
+    $self->{'DecodeParms'} = PDFArray($decode);
+    $decode->{'Columns'} = PDFNum($tif->{'imageWidth'});
+    $decode->{'Rows'} = PDFNum($tif->{'imageHeight'});
+    $decode->{'DamagedRowsBeforeError'} = PDFNum(100);
+    $decode->{'EndOfLine'} = PDFBool(1);
+    $decode->{'EncodedByteAlign'} = PDFBool(1);
+
+    my $n_strips = $tif->{'object'}->NumberOfStrips();
+    if ($n_strips == 1) {
+        $self->{' stream'} .= $tif->{'object'}->ReadRawStrip(0, -1);
+        return $self;
+    }
+
+    my $stream = '';
+    for my $i (0 .. $n_strips - 1) {
+        $stream .= $tif->{'object'}->ReadEncodedStrip($i, -1);
+    }
+    my $filter = PDF::Builder::Basic::PDF::Filter::LZWDecode->new();
+    $self->{' stream'} .= $filter->outfilt($stream);
+
+    return $self;
+} # end of handle_lzw()
+
 sub read_tiff {
     my ($self, $pdf, $tif, %opts) = @_;
 
@@ -678,6 +708,8 @@ sub read_tiff {
     # check filters and handle separately
     if (defined $tif->{'filter'} and $tif->{'filter'} eq 'CCITTFaxDecode') {
         $self->handle_ccitt($pdf, $tif, %opts);
+    } elsif (defined $tif->{'filter'} and $tif->{'filter'} eq 'LZWDecode') {
+        $self->handle_lzw($pdf, $tif, %opts);
     } else {
         $self->handle_generic($pdf, $tif, %opts);
     }

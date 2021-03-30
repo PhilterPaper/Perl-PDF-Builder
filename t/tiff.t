@@ -6,7 +6,7 @@ use IPC::Cmd qw(can_run run);
 use File::Spec;
 use File::Temp;
 use version;
-use Test::More tests => 13;
+use Test::More tests => 15;
 
 use PDF::Builder;
 # 0: allow use of Graphics::TIFF, 1: force non-GT usage
@@ -183,7 +183,7 @@ is($example, $expected, 'G4 (not converted to flate)');
 # convert and Graphics::TIFF needed for these two tests
 
 SKIP: {
-    skip "No 'convert' utility available, or no Graphics::TIFF.", 1 unless
+    skip "No 'convert' utility available, or no Graphics::TIFF.", 2 unless
         defined $convert and defined $gs and $has_GT;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -compress lzw $tiff_f");
@@ -203,11 +203,30 @@ my $example = `$convert $pngout -depth 1 -alpha off txt:-`;
 my $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
-is($example, $expected, 'lzw (not converted to flate) with GT');
+is($example, $expected, 'single-strip lzw (not converted to flate) with GT');
+
+system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -define tiff:rows-per-strip=50 -compress lzw $tiff_f");
+# ----------
+$pdf = PDF::Builder->new(-file => $pdfout);
+$page = $pdf->page();
+$page->mediabox( $width, $height );
+$gfx = $page->gfx();
+$img = $pdf->image_tiff($tiff_f, -nouseGT => 0);
+$gfx->image( $img, 0, 0, $width, $height );
+$pdf->save();
+$pdf->end();
+
+# ----------
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+$example = `$convert $pngout -depth 1 -alpha off txt:-`;
+$expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
+# ----------
+
+is($example, $expected, 'multi-strip lzw (not converted to flate) with GT');
 }
 
 SKIP: {
-    skip "No 'convert' utility available.", 1 unless
+    skip "No 'convert' utility available.", 2 unless
         defined $convert and defined $gs;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -compress lzw $tiff_f");
@@ -227,7 +246,27 @@ my $example = `$convert $pngout -depth 1 -alpha off txt:-`;
 my $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
-is($example, $expected, 'lzw (not converted to flate) without GT');
+is($example, $expected, 'single-strip lzw (not converted to flate) without GT');
+
+skip "currently fails due to bug inherited from PDF::API2", 1;
+system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -define tiff:rows-per-strip=50 -compress lzw $tiff_f");
+# ----------
+$pdf = PDF::Builder->new(-file => $pdfout);
+$page = $pdf->page();
+$page->mediabox( $width, $height );
+$gfx = $page->gfx();
+$img = $pdf->image_tiff($tiff_f, -nouseGT => 1);
+$gfx->image( $img, 0, 0, $width, $height );
+$pdf->save();
+$pdf->end();
+
+# ----------
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+$example = `$convert $pngout -depth 1 -alpha off txt:-`;
+$expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
+# ----------
+
+is($example, $expected, 'multi-strip lzw (not converted to flate) without GT');
 }
 
 # read TIFF with colormap ------------------
