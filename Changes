@@ -2,7 +2,10 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.023     2021-03-27  UNRELEASED
+3.023     2021-03-30  UNRELEASED
+
+    t/tiff.t use a temporary directory for various test files, enabling use
+      from a Read-Only directory and/or running tests in parallel (#153).
 
 3.022     2021-03-27
 
