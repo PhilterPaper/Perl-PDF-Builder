@@ -176,7 +176,7 @@ sub readTags {
     # may also be known as T6Options or Group4Options
     $self->{'g4Options'} = $self->{'object'}->GetField(TIFFTAG_GROUP4OPTIONS);
 
-    $self->{'lzwPredictor'} = $self->{'object'}->GetField(TIFFTAG_PREDICTOR);
+    $self->{'Predictor'} = $self->{'object'}->GetField(TIFFTAG_PREDICTOR);
     $self->{'imageId'} = $self->{'object'}->GetField(TIFFTAG_OPIIMAGEID);
     # TIFFTAG_SUBFILETYPE = 3 bits for various subfiles within image file
     # TIFFTAG_OSUBFILETYPE = 3 values concerning image types

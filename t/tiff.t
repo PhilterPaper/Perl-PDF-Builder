@@ -6,7 +6,7 @@ use IPC::Cmd qw(can_run run);
 use File::Spec;
 use File::Temp;
 use version;
-use Test::More tests => 15;
+use Test::More tests => 17;
 
 use PDF::Builder;
 # 0: allow use of Graphics::TIFF, 1: force non-GT usage
@@ -223,6 +223,29 @@ $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
 is($example, $expected, 'multi-strip lzw (not converted to flate) with GT');
+
+$width = 20;
+$height = 20;
+system("$convert -depth 8 -size 2x2 pattern:gray50 -scale 1000% -alpha off -define tiff:predictor=2 -compress lzw $tiff_f");
+# ----------
+$pdf = PDF::Builder->new(-file => $pdfout);
+$page = $pdf->page();
+$page->mediabox( $width, $height );
+$gfx = $page->gfx();
+$img = $pdf->image_tiff($tiff_f, -nouseGT => 0);
+$gfx->image( $img, 0, 0, $width, $height );
+$pdf->save();
+$pdf->end();
+
+# ----------
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
+$example = `$convert out.png -depth 8 -alpha off txt:-`;
+$expected = `$convert $tiff_f -depth 8 -alpha off txt:-`;
+# ----------
+
+is($example, $expected, 'lzw+horizontal predictor (not converted to flate) with GT');
+$width = 1000;
+$height = 100;
 }
 
 SKIP: {
@@ -247,6 +270,29 @@ my $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
 is($example, $expected, 'single-strip lzw (not converted to flate) without GT');
+
+$width = 20;
+$height = 20;
+system("$convert -depth 8 -size 2x2 pattern:gray50 -scale 1000% -alpha off -define tiff:predictor=2 -compress lzw $tiff_f");
+# ----------
+$pdf = PDF::Builder->new(-file => $pdfout);
+$page = $pdf->page();
+$page->mediabox( $width, $height );
+$gfx = $page->gfx();
+$img = $pdf->image_tiff($tiff_f, -nouseGT => 1);
+$gfx->image( $img, 0, 0, $width, $height );
+$pdf->save();
+$pdf->end();
+
+# ----------
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
+$example = `$convert out.png -depth 1 -alpha off txt:-`;
+$expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
+# ----------
+
+is($example, $expected, 'lzw+horizontal predictor (not converted to flate) without GT');
+$width = 1000;
+$height = 100;
 
 skip "currently fails due to bug inherited from PDF::API2", 1;
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -define tiff:rows-per-strip=50 -compress lzw $tiff_f");

@@ -656,6 +656,9 @@ sub handle_lzw {
     $decode->{'DamagedRowsBeforeError'} = PDFNum(100);
     $decode->{'EndOfLine'} = PDFBool(1);
     $decode->{'EncodedByteAlign'} = PDFBool(1);
+    if (defined $tif->{'Predictor'} and $tif->{'Predictor'} > 1) {
+        $decode->{'Predictor'} = PDFNum($tif->{'Predictor'});
+    }
 
     my $n_strips = $tif->{'object'}->NumberOfStrips();
     if ($n_strips == 1) {

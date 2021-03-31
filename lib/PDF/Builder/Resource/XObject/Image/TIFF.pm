@@ -153,6 +153,16 @@ sub handle_lzw {
 
     $self->{' nofilt'} = 1;
     $self->{'Filter'} = PDFArray(PDFName('LZWDecode'));
+    my $decode = PDFDict();
+    $self->{'DecodeParms'} = PDFArray($decode);
+    $decode->{'Columns'} = PDFNum($tif->{'imageWidth'});
+    $decode->{'Rows'} = PDFNum($tif->{'imageHeight'});
+    $decode->{'DamagedRowsBeforeError'} = PDFNum(100);
+    $decode->{'EndOfLine'} = PDFBool(1);
+    $decode->{'EncodedByteAlign'} = PDFBool(1);
+    if (defined $tif->{'Predictor'} and $tif->{'Predictor'} > 1) {
+        $decode->{'Predictor'} = PDFNum($tif->{'Predictor'});
+    }
 
     if (ref($tif->{'imageOffset'})) {
         $self->{' stream'} = '';
