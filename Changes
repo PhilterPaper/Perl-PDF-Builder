@@ -2,7 +2,12 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.023     2021-03-30  UNRELEASED
+3.023     2021-03-31  UNRELEASED
+
+    t/tiff.t add version check (not just if installed) for ImageMagick and
+      Ghostscript. Some smoke tests apparently blew up for using too low
+      level versions. If too low version, or any problems determining the
+      version, tiff.t fails gracefully by skipping those tests.
 
     t/tiff.t use a temporary directory for various test files, enabling use
       from a Read-Only directory and/or running tests in parallel (#153).

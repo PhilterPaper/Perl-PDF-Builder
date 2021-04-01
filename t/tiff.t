@@ -5,6 +5,7 @@ use English qw( -no_match_vars );
 use IPC::Cmd qw(can_run run);
 use File::Spec;
 use File::Temp;
+use version;
 use Test::More tests => 13;
 
 use PDF::Builder;
@@ -103,6 +104,11 @@ if      (can_run("magick")) {
 } elsif ($OSNAME ne 'MSWin32' and can_run("convert")) {
     $convert = "convert";
 }
+# check if reasonably recent version
+$convert = check_version($convert, '-version', 'ImageMagick ([0-9.]+)', '6.9.7');
+# $convert undef if not installed, can't parse format, version too low
+# will skip "No 'convert' utility"
+
 # on Windows, ImageMagick can be 64-bit or 32-bit version, so try both. it's
 #   needed for some magick convert operations, and also standalone, and
 #   usually must be installed.
@@ -114,6 +120,10 @@ if      (can_run("gswin64c")) {
 } elsif (can_run("gs")) {
     $gs = "gs";
 }
+# check if reasonably recent version
+$gs = check_version($gs, '-v', 'Ghostscript ([0-9.]+)', '9.25.0');
+# $convert undef if not installed, can't parse format, version too low
+# will skip "No 'convert' utility"
 
 # alpha layer handling ------------------
 # convert and Graphics::TIFF needed
@@ -244,3 +254,19 @@ pass 'successfully read TIFF with colormap';
 
 ##############################################################
 # cleanup. all tests involving these files skipped?
+
+# check non-Perl utility versions
+sub check_version {
+    my ($cmd, $arg, $regex, $min_ver) = @_;
+
+    # was the check routine already defined (installed)?
+    if (defined $cmd) {
+	# should match dotted version number
+	if (`$cmd $arg` =~ m/$regex/) {
+	    if (version->parse($1) >= version->parse($min_ver)) {
+		return $cmd;
+	    }
+	}
+    }
+    return; # cmd not defined (not installed) so return undef
+}
