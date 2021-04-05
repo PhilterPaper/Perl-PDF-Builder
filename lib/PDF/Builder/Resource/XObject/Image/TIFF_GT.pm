@@ -152,12 +152,79 @@ sub usesLib {
     return $self->{'usesGT'}->val();
 }
 
+
+sub decode_all_strips {
+    my ($self, $tif) = @_;
+    $self->{' stream'} = '';
+    for my $i (0 .. $tif->{object}->NumberOfStrips() - 1) {
+        $self->{' stream'} .= $tif->{object}->ReadEncodedStrip($i, -1);
+    }
+    return;
+}
+
+
+sub handle_alpha {
+    my ($self, $pdf, $tif, %opts) = @_;
+    my $transparency = (defined $opts{'-notrans'} && $opts{'-notrans'} == 1)? 0: 1;
+    my ($alpha, $dict);
+
+    # handle any Alpha channel/layer
+    my $h = $tif->{imageHeight};  # in pixels
+    my $w = $tif->{imageWidth};
+    my $samples = 1; # fallback
+
+    if      (defined $tif->{ExtraSamples} &&
+	     $tif->{ExtraSamples} == EXTRASAMPLE_ASSOCALPHA) {
+	# Gray or RGB pre-multiplication will likely have to be backed out
+        if      ($tif->{colorSpace} eq 'DeviceGray') {
+	    # Gray or Bilevel (pre-multiplied) + Alpha 
+	    $samples = 1;
+        } elsif ($tif->{colorSpace} eq 'DeviceRGB') {
+	    # RGB (pre-multiplied) + Alpha 
+	    $samples = 3;
+	} else {
+	    warn "Invalid TIFF file, requested Alpha for $tif->{colorSpace}".
+	         ", PDF will likely be defective!\n";
+	}
+	($self->{' stream'}, $alpha) = split_alpha($self->{' stream'}, $samples, $tif->{bitsPerSample}, $w*$h);
+	$self->{' stream'} = descale($self->{' stream'}, $samples, $tif->{bitsPerSample}, $alpha, $w*$h);
+    } elsif (defined $tif->{ExtraSamples} &&
+	     $tif->{ExtraSamples} == EXTRASAMPLE_UNASSALPHA) {
+	# Gray or RGB at full value, no adjustment needed
+        if      ($tif->{colorSpace} eq 'DeviceGray') {
+	    # Gray or Bilevel + Alpha
+	    $samples = 1;
+        } elsif ($tif->{colorSpace} eq 'DeviceRGB') {
+	    # RGB + Alpha
+	    $samples = 3;
+	} else {
+	    warn "Invalid TIFF file, requested Alpha for $tif->{colorSpace}".
+	         ", PDF will likely be defective!\n";
+	}
+	($self->{' stream'}, $alpha) = split_alpha($self->{' stream'}, $samples, $tif->{bitsPerSample}, $w*$h);
+    }
+
+    # $alpha is undef if no alpha layer found
+    if (defined $alpha and $transparency) {
+        $dict = PDFDict();
+        $pdf->new_obj($dict);
+        $dict->{Type} = PDFName('XObject');
+        $dict->{Subtype} = PDFName('Image');
+        $dict->{Width} = PDFNum($w);
+        $dict->{Height} = PDFNum($h);
+        $dict->{ColorSpace} = PDFName('DeviceGray');  # Alpha is always
+        $dict->{BitsPerComponent} = PDFNum($tif->{bitsPerSample});
+        $self->{SMask} = $dict;
+        $dict->{' stream'} = $alpha;
+    }
+    return $dict;
+}
+
+
 # non-CCITT compression methods
 sub handle_generic {
     my ($self, $pdf, $tif, %opts) = @_;
-    my ($stripcount, $buffer);
 
-    $self->filters('FlateDecode');
     # colorspace DeviceGray or DeviceRGB already set in read_tiff()
     # bits_per_component 1 2 4 8 16? already set in read_tiff()
     my $dict = PDFDict();
@@ -169,103 +236,29 @@ sub handle_generic {
     if (!defined $tif->{'filter'} && $tif->{'bitsPerSample'} == 1) {
         $self->{'Decode'} = PDFArray(PDFNum(1), PDFNum(0));
     }
-    $stripcount = $tif->{'object'}->NumberOfStrips();
-    $buffer = '';
-    for my $i (0 .. $stripcount - 1) {
-        $buffer .= $tif->{'object'}->ReadEncodedStrip($i, -1);
-    }
-
-    my $transparency = (defined $opts{'-notrans'} && $opts{'-notrans'} == 1)? 0: 1;
-    my $alpha;
-
-    # handle any Alpha channel/layer
-    my $h = $tif->{'imageHeight'};  # in pixels
-    my $w = $tif->{'imageWidth'};
-    $dict->{'Columns'} = PDFNum($w);
-    my $samples = 1; # fallback
-
-#    # code common to associated and unassociated alpha
-#    if (defined $tif->{'ExtraSamples'} &&
-#	($tif->{'ExtraSamples'} == EXTRASAMPLE_ASSOCALPHA ||
-#	 $tif->{'ExtraSamples'} == EXTRASAMPLE_UNASSALPHA)) {
-##print STDERR "This file has Alpha layer\n";
-#    }
-
-    if      (defined $tif->{'ExtraSamples'} &&
-	     $tif->{'ExtraSamples'} == EXTRASAMPLE_ASSOCALPHA) {
-	# Gray or RGB pre-multiplication will likely have to be backed out
-        if      ($tif->{'colorSpace'} eq 'DeviceGray') {
-	    # Gray or Bilevel (pre-multiplied) + Alpha 
-	    $samples = 1;
-        } elsif ($tif->{'colorSpace'} eq 'DeviceRGB') {
-	    # RGB (pre-multiplied) + Alpha 
-	    $samples = 3;
-	} else {
-	    warn "Invalid TIFF file, requested Alpha for $tif->{'colorSpace'}".
-	         ", PDF will likely be defective!\n";
-	}
-	($buffer, $alpha) = split_alpha($buffer, $samples, $tif->{'bitsPerSample'}, $w*$h);
-	$buffer = descale($buffer, $samples, $tif->{'bitsPerSample'}, $alpha, $w*$h);
-    } elsif (defined $tif->{'ExtraSamples'} &&
-	     $tif->{'ExtraSamples'} == EXTRASAMPLE_UNASSALPHA) {
-	# Gray or RGB at full value, no adjustment needed
-        if      ($tif->{'colorSpace'} eq 'DeviceGray') {
-	    # Gray or Bilevel + Alpha 
-	    $samples = 1;
-        } elsif ($tif->{'colorSpace'} eq 'DeviceRGB') {
-	    # RGB + Alpha 
-	    $samples = 3;
-	} else {
-	    warn "Invalid TIFF file, requested Alpha for $tif->{'colorSpace'}".
-	         ", PDF will likely be defective!\n";
-	}
-	($buffer, $alpha) = split_alpha($buffer, $samples, $tif->{'bitsPerSample'}, $w*$h);
-    }
-
-    $self->{' stream'} .= $buffer;
-    # $alpha is undef if no alpha layer found
-    if (defined $alpha) {
-	# an alpha layer was found. use it?
-        if (!$transparency) {
-            # suppress any transparency (alpha layer)?
-	    $alpha = undef;
-        } else {
-	    # we will have transparency
-	    $pdf->new_obj($dict);
-            $dict->{'Type'} = PDFName('XObject');
-            $dict->{'Subtype'} = PDFName('Image');
-            $dict->{'Width'} = PDFNum($w);
-            $dict->{'Height'} = PDFNum($h);
-            $dict->{'ColorSpace'} = PDFName('DeviceGray');  # Alpha is always
-            $dict->{'BitsPerComponent'} = PDFNum($tif->{'bitsPerSample'});
-            $self->{'SMask'} = $dict;
-            delete $self->{' nofilt'};
-	    $dict->{' stream'} = $alpha;
-        }
-    } 
+    $self->decode_all_strips($tif);
+    my $alpha = $self->handle_alpha($pdf, $tif, %opts);
 
     # compress all but short streams
     if (length($self->{' stream'}) > 32) {
         $self->{' stream'} = Compress::Zlib::compress($self->{' stream'});
         $self->filters('FlateDecode');  # tell reader it's compressed...
-        $self->{' nofilt'} = 1;  # ...but writer not to compress on the fly
     } else {
         # too short to bother compressing. '/Filter [ /FlateDecode ] ' 
         # takes up 25 bytes all by itself
         delete $self->{'Filter'};
-        $self->{' nofilt'} = 1;
     }
-    if (defined $dict->{' stream'}) {  # there is transparency?
-        if (length($dict->{' stream'}) > 32) {
-            $dict->{' stream'} = Compress::Zlib::compress($dict->{' stream'});
-            $dict->filters('FlateDecode');  # tell reader it's compressed...
-            $dict->{' nofilt'} = 1;  # ...but writer not to compress on the fly
+    $self->{' nofilt'} = 1;
+    if (defined $alpha and $alpha->{' stream'}) {  # there is transparency?
+        if (length($alpha->{' stream'}) > 32) {
+            $alpha->{' stream'} = Compress::Zlib::compress($alpha->{' stream'});
+            $alpha->filters('FlateDecode');  # tell reader it's compressed...
         } else {
             # too short to bother compressing. '/Filter [ /FlateDecode ] ' 
             # takes up 25 bytes all by itself
-            delete $dict->{'Filter'};
-            $dict->{' nofilt'} = 1;
+            delete $alpha->{'Filter'};
         }
+        $alpha->{' nofilt'} = 1;
     }
 
     return $self;
@@ -647,31 +640,46 @@ sub handle_ccitt {
 sub handle_lzw {
     my ($self, $pdf, $tif, %opts) = @_;
 
+    # colorspace DeviceGray or DeviceRGB already set in read_tiff()
+    # bits_per_component 1 2 4 8 16? already set in read_tiff()
     $self->{' nofilt'} = 1;
-    $self->{'Filter'} = PDFArray(PDFName('LZWDecode'));
-    my $decode = PDFDict();
-    $self->{'DecodeParms'} = PDFArray($decode);
-    $decode->{'Columns'} = PDFNum($tif->{'imageWidth'});
-    $decode->{'Rows'} = PDFNum($tif->{'imageHeight'});
-    $decode->{'DamagedRowsBeforeError'} = PDFNum(100);
-    $decode->{'EndOfLine'} = PDFBool(1);
-    $decode->{'EncodedByteAlign'} = PDFBool(1);
-    if (defined $tif->{'Predictor'} and $tif->{'Predictor'} > 1) {
-        $decode->{'Predictor'} = PDFNum($tif->{'Predictor'});
+    $self->{Filter} = PDFArray(PDFName('LZWDecode'));
+    my $dict = PDFDict();
+    $self->{DecodeParms} = PDFArray($dict);
+    $dict->{Columns} = PDFNum($tif->{imageWidth});
+    $dict->{Rows} = PDFNum($tif->{imageHeight});
+    # colorspace DeviceGray or DeviceRGB already set in read_tiff()
+    # bits_per_component 1 2 4 8 16? already set in read_tiff()
+    $dict->{BitsPerComponent} = PDFNum($tif->{bitsPerSample});
+    $dict->{Colors} = PDFNum($tif->{colorSpace} eq 'DeviceGray'?1 :3);
+    if (defined $tif->{Predictor} and $tif->{Predictor} > 1) {
+        $dict->{Predictor} = PDFNum($tif->{Predictor});
     }
 
-    my $n_strips = $tif->{'object'}->NumberOfStrips();
-    if ($n_strips == 1) {
-        $self->{' stream'} .= $tif->{'object'}->ReadRawStrip(0, -1);
-        return $self;
+    # have to decode in case we have alpha to split out
+    $self->decode_all_strips($tif);
+    my $alpha = $self->handle_alpha($pdf, $tif, %opts);
+
+    # bilevel must be flipped
+    if ($alpha and $tif->{bitsPerSample} == 1) {
+        $self->{Decode} = PDFArray(PDFNum(1), PDFNum(0));
     }
 
-    my $stream = '';
-    for my $i (0 .. $n_strips - 1) {
-        $stream .= $tif->{'object'}->ReadEncodedStrip($i, -1);
+    my $filter = PDF::Builder::Basic::PDF::Filter::LZWDecode->new($dict);
+    $self->{' stream'} = $filter->outfilt($self->{' stream'});
+
+    if (defined $alpha and defined $alpha->{' stream'}) {  # there is transparency?
+        if (length($alpha->{' stream'}) > 32) {
+            my $filter = PDF::Builder::Basic::PDF::Filter::LZWDecode->new();
+            $alpha->{' stream'} = $filter->outfilt($alpha->{' stream'});
+            $alpha->filters('LZWDecode');  # tell reader it's compressed...
+        } else {
+            # too short to bother compressing. '/Filter [ /LZWDecode ] ' 
+            # takes up 25 bytes all by itself
+            delete $alpha->{Filter};
+        }
+        $alpha->{' nofilt'} = 1;  # ...but writer not to compress on the fly
     }
-    my $filter = PDF::Builder::Basic::PDF::Filter::LZWDecode->new();
-    $self->{' stream'} .= $filter->outfilt($stream);
 
     return $self;
 } # end of handle_lzw()

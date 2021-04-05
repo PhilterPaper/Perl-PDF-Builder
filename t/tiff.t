@@ -6,7 +6,7 @@ use IPC::Cmd qw(can_run run);
 use File::Spec;
 use File::Temp;
 use version;
-use Test::More tests => 17;
+use Test::More tests => 18;
 
 use PDF::Builder;
 # 0: allow use of Graphics::TIFF, 1: force non-GT usage
@@ -129,7 +129,7 @@ $gs = check_version($gs, '-v', 'Ghostscript ([0-9.]+)', '9.25.0');
 # convert and Graphics::TIFF needed
 
 SKIP: {
-    skip "No 'convert' utility available, or no Graphics::TIFF.", 1 unless 
+    skip "No 'convert' utility available, or no Graphics::TIFF.", 1 unless
         defined $convert and defined $gs and $has_GT;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" $tiff_f");
@@ -149,7 +149,7 @@ my $example = `$convert $pngout -colorspace gray -depth 1 txt:-`;
 my $expected = `$convert $tiff_f -depth 1 txt:-`;
 # ----------
 
-is($example, $expected, 'alpha');
+is($example, $expected, 'alpha + flate');
 }
 
 # G4 (NOT converted to Flate) ------------------
@@ -183,7 +183,7 @@ is($example, $expected, 'G4 (not converted to flate)');
 # convert and Graphics::TIFF needed for these two tests
 
 SKIP: {
-    skip "No 'convert' utility available, or no Graphics::TIFF.", 2 unless
+    skip "No 'convert' utility available, or no Graphics::TIFF.", 3 unless
         defined $convert and defined $gs and $has_GT;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -compress lzw $tiff_f");
@@ -246,6 +246,25 @@ $expected = `$convert $tiff_f -depth 8 -alpha off txt:-`;
 is($example, $expected, 'lzw+horizontal predictor (not converted to flate) with GT');
 $width = 1000;
 $height = 100;
+
+system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -compress lzw $tiff_f");
+# ----------
+$pdf = PDF::Builder->new(-file => $pdfout);
+$page = $pdf->page();
+$page->mediabox( $width, $height );
+$gfx = $page->gfx();
+$img = $pdf->image_tiff($tiff_f, -nouseGT => $noGT);
+$gfx->image( $img, 0, 0, $width, $height );
+$pdf->save();
+$pdf->end();
+
+# ----------
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pngalpha -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+$example = `$convert $pngout -colorspace gray -depth 1 txt:-`;
+$expected = `$convert $tiff_f -depth 1 txt:-`;
+# ----------
+
+is($example, $expected, 'alpha + lzw');
 }
 
 SKIP: {
