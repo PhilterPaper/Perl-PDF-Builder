@@ -183,7 +183,7 @@ is($example, $expected, 'G4 (not converted to flate)');
 # convert and Graphics::TIFF needed for these two tests
 
 SKIP: {
-    skip "No 'convert' utility available, or no Graphics::TIFF.", 3 unless
+    skip "No 'convert' utility available, or no Graphics::TIFF.", 4 unless
         defined $convert and defined $gs and $has_GT;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -compress lzw $tiff_f");
