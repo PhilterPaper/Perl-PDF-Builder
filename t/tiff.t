@@ -238,8 +238,8 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
-$example = `$convert out.png -depth 8 -alpha off txt:-`;
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+$example = `$convert $pngout -depth 8 -alpha off txt:-`;
 $expected = `$convert $tiff_f -depth 8 -alpha off txt:-`;
 # ----------
 
@@ -285,8 +285,8 @@ $pdf->save();
 $pdf->end();
 
 # ----------
-system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=out.png $pdfout");
-$example = `$convert out.png -depth 1 -alpha off txt:-`;
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+$example = `$convert $pngout -depth 1 -alpha off txt:-`;
 $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 

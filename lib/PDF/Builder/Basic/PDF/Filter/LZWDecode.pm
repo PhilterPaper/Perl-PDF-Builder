@@ -1,10 +1,10 @@
 package PDF::Builder::Basic::PDF::Filter::LZWDecode;
 
-use base 'PDF::Builder::Basic::PDF::Filter::FlateDecode';
-
 use strict;
 use warnings;
 use Carp;
+use POSIX;
+use base 'PDF::Builder::Basic::PDF::Filter::FlateDecode';
 
 #no warnings qw[ deprecated recursion uninitialized ];
 
@@ -85,6 +85,16 @@ sub infilt {
     }
     $self->{partial_code} = $partial_code;
     $self->{partial_bits} = $partial_bits;
+
+    if ( $self->{DecodeParms} and $self->{DecodeParms}->{Predictor} ) {
+        my $predictor = $self->{DecodeParms}->{Predictor}->val;
+        if ( $predictor > 1 ) {
+            return $self->_depredict($result);
+        }
+        else {
+            croak "Invalid predictor: $predictor";
+        }
+    }
     return $result;
 }
 
@@ -98,6 +108,16 @@ sub outfilt {
     $self->{buf}     = q{};
     $self->{buf_pos} = 0;
     $self->_write_code( $self->{clear_table} );
+
+    if ( $self->{DecodeParms} and $self->{DecodeParms}->{Predictor} ) {
+        my $predictor = $self->{DecodeParms}->{Predictor}->val;
+        if ( $predictor > 1 ) {
+            $str = $self->_predict($str);
+        }
+        else {
+            croak "Invalid predictor: $predictor";
+        }
+    }
 
     for my $i ( 0 .. length $str ) {
         my $char = substr $str, $i, 1;
@@ -210,6 +230,64 @@ sub read_dat {
     $partial_bits -= $code_length;
 
     return ( $code, $partial_code, $partial_bits );
+}
+
+sub _depredict {
+    my ( $self, $data ) = @_;
+    my $param = $self->{DecodeParms};
+    my $alpha = $param->{Alpha} ? $param->{Alpha}->val() : 0;
+    my $bpc =
+      $param->{BitsPerComponent} ? $param->{BitsPerComponent}->val() : 8;
+    my $colors  = $param->{Colors}  ? $param->{Colors}->val()  : 1;
+    my $columns = $param->{Columns} ? $param->{Columns}->val() : 1;
+    my $rows    = $param->{Rows}    ? $param->{Rows}->val()    : 0;
+
+    my $comp = $colors + $alpha;
+    my $bpp  = ceil( $bpc * $comp / 8 );
+    my $max  = 256;
+    if ( $bpc == 8 ) {
+        my @data = unpack 'C*', $data;
+        for my $j ( 0 .. $rows - 1 ) {
+            my $count = $bpp * ( $j * $columns + 1 );
+            for my $i ( $bpp .. $columns * $bpp - 1 ) {
+                $data[$count] =
+                  ( $data[$count] + $data[ $count - $bpp ] ) % $max;
+                $count++;
+            }
+        }
+        $data = pack 'C*', @data;
+        return $data;
+    }
+    return $data;
+}
+
+sub _predict {
+    my ( $self, $data ) = @_;
+    my $param = $self->{DecodeParms};
+    my $alpha = $param->{Alpha} ? $param->{Alpha}->val() : 0;
+    my $bpc =
+      $param->{BitsPerComponent} ? $param->{BitsPerComponent}->val() : 8;
+    my $colors  = $param->{Colors}  ? $param->{Colors}->val()  : 1;
+    my $columns = $param->{Columns} ? $param->{Columns}->val() : 1;
+    my $rows    = $param->{Rows}    ? $param->{Rows}->val()    : 0;
+
+    my $comp = $colors + $alpha;
+    my $bpp  = ceil( $bpc * $comp / 8 );
+    my $max  = 256;
+    if ( $bpc == 8 ) {
+        my @data = unpack 'C*', $data;
+        for my $j ( 0 .. $rows - 1 ) {
+            my $count = $bpp * $columns * ( $j + 1 ) - 1;
+            for my $i ( $bpp .. $columns * $bpp - 1 ) {
+                $data[$count] -= $data[ $count - $bpp ];
+                if ( $data[$count] < 0 ) { $data[$count] += $max }
+                $count--;
+            }
+        }
+        $data = pack 'C*', @data;
+        return $data;
+    }
+    return $data;
 }
 
 1;
