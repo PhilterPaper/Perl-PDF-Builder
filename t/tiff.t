@@ -312,23 +312,25 @@ $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 is($example, $expected, 'lzw+horizontal predictor (not converted to flate) without GT');
 $width = 1000;
 $height = 100;
+}
 
-skip "currently fails due to bug inherited from PDF::API2", 1;
+SKIP: {
+    skip "currently fails due to bug inherited from PDF::API2", 1;
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -define tiff:rows-per-strip=50 -compress lzw $tiff_f");
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
-$page = $pdf->page();
+my $page = $pdf->page();
 $page->mediabox( $width, $height );
 $gfx = $page->gfx();
-$img = $pdf->image_tiff($tiff_f, -nouseGT => 1);
+my $img = $pdf->image_tiff($tiff_f, -nouseGT => 1);
 $gfx->image( $img, 0, 0, $width, $height );
 $pdf->save();
 $pdf->end();
 
 # ----------
 system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
-$example = `$convert $pngout -depth 1 -alpha off txt:-`;
-$expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
+my $example = `$convert $pngout -depth 1 -alpha off txt:-`;
+my $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
 is($example, $expected, 'multi-strip lzw (not converted to flate) without GT');
