@@ -2,7 +2,11 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.023     2021-03-31  UNRELEASED
+3.023     2021-04-07  UNRELEASED
+
+    INFO/Changes-ver_2, /lib/PDF/Builder/Basic/PDF/String.pm, t/string.t
+     Per PDF::API2 changes related to [RT 134957], change some regex flags 
+      to fix encoding of \n in a PDF string.
 
     t/tiff.t add version check (not just if installed) for ImageMagick and
       Ghostscript. Some smoke tests apparently blew up for using too low

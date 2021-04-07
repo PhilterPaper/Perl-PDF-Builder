@@ -21,7 +21,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.022'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.023'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -198,11 +198,11 @@ sub as_pdf {
         $str = join('', map { sprintf('%04X' , $_) } unpack('U*', $str) );
         return "<FEFF$str>";
     } else {
-        if ($str =~ m/[^\n\r\t\b\f\040-\176\200-\377]/oi) {
-            $str =~ s/(.)/sprintf('%02X', ord($1))/oge;
+        if ($str =~ m/[^\n\r\t\b\f\040-\176\200-\377]/) {
+            $str =~ s/(.)/sprintf('%02X', ord($1))/sge;
             return "<$str>";
         } else {
-            $str =~ s/([\n\r\t\b\f\\()])/\\$out_trans{$1}/ogi;
+            $str =~ s/([\n\r\t\b\f\\()])/\\$out_trans{$1}/g;
             return "($str)";
         }
     }
