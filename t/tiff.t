@@ -116,7 +116,7 @@ if      (can_run("magick")) {
 # check if reasonably recent version
 $convert = check_version($convert, '-version', 'ImageMagick ([0-9.]+)', '6.9.7');
 # $convert undef if not installed, can't parse format, version too low
-# will skip "No 'convert' utility"
+# will skip "No ImageMagick"
 
 # on Windows, ImageMagick can be 64-bit or 32-bit version, so try both. it's
 #   needed for some magick convert operations, and also standalone, and
@@ -132,14 +132,14 @@ if      (can_run("gswin64c")) {
 # check if reasonably recent version
 $gs = check_version($gs, '-v', 'Ghostscript ([0-9.]+)', '9.25.0');
 # $convert undef if not installed, can't parse format, version too low
-# will skip "No 'convert' utility"
+# will skip "No Ghostscript"
 
 # alpha layer handling ------------------
 # convert and Graphics::TIFF needed
 
 # 9
 SKIP: {
-    skip "No 'convert' utility available, or no Graphics::TIFF.", 1 unless
+    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
         defined $convert and defined $gs and $has_GT;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" $tiff_f");
@@ -155,8 +155,8 @@ $pdf->end();
 
 # ----------
 system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pngalpha -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
-$example = `$convert $pngout -colorspace gray -depth 1 txt:-`;
-$expected = `$convert $tiff_f -depth 1 txt:-`;
+my $example = `$convert $pngout -colorspace gray -depth 1 txt:-`;
+my $expected = `$convert $tiff_f -depth 1 txt:-`;
 # ----------
 
 is($example, $expected, 'alpha + flate');
@@ -167,7 +167,7 @@ is($example, $expected, 'alpha + flate');
 
 # 10
 SKIP: {
-    skip "No 'convert' utility available, or no Graphics::TIFF.", 1 unless
+    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
         defined $convert and defined $gs and $has_GT;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -compress Group4 $tiff_f");
@@ -195,7 +195,7 @@ is($example, $expected, 'G4 (not converted to flate)');
 
 # 11
 SKIP: {
-    skip "No 'convert' utility available, or no Graphics::TIFF.", 1 unless
+    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
         defined $convert and defined $gs and $has_GT;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -compress lzw $tiff_f");
@@ -300,7 +300,7 @@ is($example, $expected, 'alpha + lzw');
 
 # 15
 SKIP: {
-    skip "No 'convert' utility available.", 1 unless
+    skip "Either ImageMagick or Ghostscript not available.", 1 unless
         defined $convert and defined $gs;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -compress lzw $tiff_f");
@@ -381,7 +381,7 @@ is($example, $expected, 'multi-strip lzw (not converted to flate) without GT');
 
 # 18
 SKIP: {
-    skip "No 'convert' utility available, or no Graphics::TIFF.", 1 unless
+    skip "Either ImageMagick or Graphics::TIFF not available.", 1 unless
         defined $convert and $has_GT;
 
 # .png file is temporary file (output, input, erased)

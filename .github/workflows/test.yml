@@ -3,14 +3,32 @@ on:
   - push
   - pull_request
 jobs:
-  test:
-    name: Test
+  full-ubuntu:
+    name: Full_Ubuntu
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: sudo apt install fonts-dejavu-core libfont-ttf-perl libgd-perl libio-compress-perl libtest-exception-perl libtest-memory-cycle-perl
+      - run: sudo apt-add-repository ppa:jeffreyratcliffe/ppa
+      - run: sudo apt update
+      - run: sudo apt install libfont-ttf-perl libgd-perl libio-compress-perl libtest-exception-perl libtest-memory-cycle-perl ghostscript libgraphics-tiff-perl gsfonts
       - run: perl Makefile.PL
-      - run: make test
+      - run: make test TEST_VERBOSE=1
+  nogt:
+    name: noGT
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: sudo apt install libfont-ttf-perl libgd-perl libio-compress-perl libtest-exception-perl libtest-memory-cycle-perl ghostscript gsfonts
+      - run: perl Makefile.PL
+      - run: make test TEST_VERBOSE=1
+  nogt_nogs:
+    name: noGT_noGS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: sudo apt install libfont-ttf-perl libgd-perl libio-compress-perl libtest-exception-perl libtest-memory-cycle-perl gsfonts
+      - run: perl Makefile.PL
+      - run: make test TEST_VERBOSE=1
 # lint:
 #   name: Lint
 #   runs-on: ubuntu-latest
