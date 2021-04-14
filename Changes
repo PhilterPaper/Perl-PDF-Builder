@@ -2,7 +2,24 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.023     2021-04-07  UNRELEASED
+3.023     2021-04-14  UNRELEASED
+
+*   [ ] t/deprecations.t, INFO/DEPRECATED 
+     Update to test all deprecated interfaces and replacements
+*   [ ] check all examples and internal calls for deprecated interfaces
+
+*   [ ] latest round of PDF::API2 changes
+
+    examples/README, examples/examples.output
+     Discuss the issue of close heavy lines in the example bar codes appearing 
+      to merge or "blot" together. This is at least partially a consequence of 
+      lower resolution display screens (rounding errors), and although the bars 
+      separate when printed, I'm still concerned that they will not be reliably 
+      scannable.  
+
+    All files (.pm and .pl) containing $LAST_UPDATE can now access this
+      string from outside the file, in the same manner as $VERSION. The
+      variable declarator has been changed from 'my' to 'our'.
 
     INFO/Changes-ver_2, /lib/PDF/Builder/Basic/PDF/String.pm, t/string.t
      Per PDF::API2 changes related to [RT 134957], change some regex flags 
