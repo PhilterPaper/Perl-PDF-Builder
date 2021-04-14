@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 use warnings;
 use strict;
+use File::Spec;
 
 use Test::More tests => 7;
 
@@ -44,7 +45,7 @@ is($pdf->pages(),
 
 # Open a PDF
 
-$pdf = PDF::Builder->open('t/resources/sample.pdf');
+$pdf = PDF::Builder->open(File::Spec->catfile('t', 'resources', 'sample.pdf'));
 
 isa_ok($pdf,
        'PDF::Builder',
