@@ -86,21 +86,15 @@ sub infilt {
     $self->{partial_code} = $partial_code;
     $self->{partial_bits} = $partial_bits;
 
-    if ( $self->{DecodeParms} and $self->{DecodeParms}->{Predictor} ) {
-        my $predictor = $self->{DecodeParms}->{Predictor}->val;
-        if ( $predictor > 1 ) {
-            return $self->_depredict($result);
-        }
-        else {
-            croak "Invalid predictor: $predictor";
-        }
+    if ($self->_predictor_type == 2) {
+        return $self->_depredict($result);
     }
     return $result;
 }
 
 sub outfilt {
     my ( $self, $str, $is_end ) = @_;
-    my $max_code   = 32767;
+    my $max_code   = 32_767;
     my $bytes_in   = 0;
     my $checkpoint = 0;
     my $last_ratio = 0;
@@ -109,14 +103,8 @@ sub outfilt {
     $self->{buf_pos} = 0;
     $self->_write_code( $self->{clear_table} );
 
-    if ( $self->{DecodeParms} and $self->{DecodeParms}->{Predictor} ) {
-        my $predictor = $self->{DecodeParms}->{Predictor}->val;
-        if ( $predictor > 1 ) {
-            $str = $self->_predict($str);
-        }
-        else {
-            croak "Invalid predictor: $predictor";
-        }
+    if ($self->_predictor_type == 2) {
+        $str = $self->_predict($str);
     }
 
     for my $i ( 0 .. length $str ) {
@@ -221,7 +209,7 @@ sub read_dat {
             return ( undef, $partial_code, $partial_bits );
         }
         $partial_code = ( $partial_code << 8 ) + unpack 'C', ${$data_ref};
-        substr( ${$data_ref}, 0, 1 ) = q{};
+        substr ${$data_ref}, 0, 1, q{};
         $partial_bits += 8;
     }
 
@@ -230,6 +218,23 @@ sub read_dat {
     $partial_bits -= $code_length;
 
     return ( $code, $partial_code, $partial_bits );
+}
+
+sub _predictor_type {
+    my ($self) = @_;
+    if ( $self->{DecodeParms} and $self->{DecodeParms}->{Predictor} ) {
+        my $predictor = $self->{DecodeParms}->{Predictor}->val;
+        if ( $predictor == 1 or $predictor == 2 ) {
+            return $predictor
+        }
+        elsif ( $predictor == 3 ) {
+            croak 'Floating point TIFF predictor not yet supported';
+        }
+        else {
+            croak "Invalid predictor: $predictor";
+        }
+    }
+    return 1
 }
 
 sub _depredict {
