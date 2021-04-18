@@ -5,7 +5,7 @@ use strict;
 use Test::More;
 use File::Find;
 
-my $GrTFversion = 7;     # minimum version of Graphics::TIFF
+my $GrTFversion = 10;    # minimum version of Graphics::TIFF
 my $LpngVersion = 0.56;  # minimum version of Image::PNG::Libpng
 
 # Test all of the modules to make sure that a simple "use Module"

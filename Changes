@@ -2,13 +2,22 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.023     2021-04-14  UNRELEASED
+3.023     2021-04-17  UNRELEASED
 
 *   [ ] t/deprecations.t, INFO/DEPRECATED 
      Update to test all deprecated interfaces and replacements
 *   [ ] check all examples and internal calls for deprecated interfaces
 
 *   [ ] latest round of PDF::API2 changes
+
+    lib/PDF/Builder/Basic/PDF/Filter/LZWDecode.pm, lib/PDF/Builder.pm,
+      lib/PDF/Builder/Resource/XObject/Image/TIFF-TIFF_GT.pm, 
+      lib/PDF/Builder/Resource/XObject/Image/TIFF/File-File_GT.pm, 
+      t/filter-lzwdecode.t, t/tiff.t, t/00-all-usable.t, Makefile.PL
+     Further improvements to TIFF LZW file handling [ref GH 151 and PR 156] for 
+      single and multi-strip, and horizontal predictor. Continuation of work
+      to stop converting LZW-compressed TIFF to Flate. Code by @carygravel.
+      Increase required Graphics::TIFF version to 10 due to fix in GT.
 
     examples/README, examples/examples.output
      Discuss the issue of close heavy lines in the example bar codes appearing 

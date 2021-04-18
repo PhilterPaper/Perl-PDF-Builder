@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.001'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.023'; # manually update whenever code is changed
 
 use IO::File;
 
@@ -233,7 +233,7 @@ sub readTags {
                 $self->{'colorMapSamples'} = $valCount;
                 $self->{'colorMapLength'} = $valCount*2; # shorts!
             } elsif ($valTag == 317) {
-                $self->{'lzwPredictor'} = $valOffset;
+                $self->{'Predictor'} = $valOffset;
             } elsif ($valTag == 0x800d) {
                 # imageID
                 my $here = $fh->tell();
