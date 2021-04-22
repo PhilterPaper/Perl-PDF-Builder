@@ -2,13 +2,18 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.023     2021-04-17  UNRELEASED
+3.023     2021-04-21  UNRELEASED
 
 *   [ ] t/deprecations.t, INFO/DEPRECATED 
      Update to test all deprecated interfaces and replacements
 *   [ ] check all examples and internal calls for deprecated interfaces
 
 *   [ ] latest round of PDF::API2 changes
+
+    .gitignore, lib/PDF/Builder.pm, lib/PDF/Builder/Basic/PDF/File.pm, t/tiff.t
+     Some minor cleanup, fix TIFF tests because grouped skips don't seem to
+      work properly on Strawberry Perl, initialize $xmin in File.pm to prevent
+      error message.
 
     lib/PDF/Builder/Basic/PDF/Filter/LZWDecode.pm, lib/PDF/Builder.pm,
       lib/PDF/Builder/Resource/XObject/Image/TIFF-TIFF_GT.pm, 

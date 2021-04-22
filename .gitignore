@@ -17,5 +17,6 @@ pod2htmd.tmp
 /latest_release
 /Changes_new
 /comp.list
+/pdfbpm.list
 # quick test files
 *-short
