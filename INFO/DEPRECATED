@@ -30,10 +30,10 @@ get_*box()      methods in Page.pm
    August, 2021.
 
 PDFStr()        method in Basic/PDF/Utils.pm
-   Use PDFString() instead. May be removed on or after October, 2022.
+   NOT scheduled to be removed, but use PDFString() instead. 
 
 PDFUtf()        method in Basic/PDF/Utils.pm
-   Use PDFString() instead. May be removed on or after October, 2022.
+   NOT scheduled to be removed, but use PDFString() instead. 
 
 lead()          method in Content.pm
    Use leading() instead. May be removed on or after March, 2023.

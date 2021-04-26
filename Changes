@@ -2,13 +2,24 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.023     2021-04-21  UNRELEASED
-
-*   [ ] t/deprecations.t, INFO/DEPRECATED 
-     Update to test all deprecated interfaces and replacements
-*   [ ] check all examples and internal calls for deprecated interfaces
+3.023     2021-04-25  UNRELEASED
 
 *   [ ] latest round of PDF::API2 changes
+
+    t/deprecations.t
+     Update for new PDF::API2 t-tests and a number of other deprecated items.
+      Test both deprecated interfaces and their replacements.
+
+    lib/PDF/Builder/Content/Text.pm, examples/BarCode-Boxes-Content-
+      ContentText-Rotated.pl, examples/021_synfonts-022_truefonts-
+      022_truefonts_diacrits_utf8-023_cjkfonts-024_bdffonts-040_annotation
+     Per 3.022 change of lead() to leading(), update examples to use leading() 
+      instead of lead().
+
+    In releases 3.020 through 3.022, INFO/DEPRECATED erroneously listed
+     PDFStr() and PDFUtf() as being scheduled for removal after October 2022.
+     These two routines ARE deprecated (use PDFString() instead), but there
+     are currently no plans to REMOVE them.
 
     .gitignore, lib/PDF/Builder.pm, lib/PDF/Builder/Basic/PDF/File.pm, t/tiff.t
      Some minor cleanup, fix TIFF tests because grouped skips don't seem to
