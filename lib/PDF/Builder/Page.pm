@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.023'; # manually update whenever code is changed
 
 use POSIX qw(floor);
 use Scalar::Util qw(weaken);
@@ -63,7 +63,7 @@ sub new {
 
 #=item $page = PDF::Builder::Page->coerce($pdf, $pdfpage)
 #
-#Returns a page object converted from $pdfpage (called from $pdf->openpage()).
+#Returns a page object converted from $pdfpage (called from $pdf->open_page()).
 #
 #=cut
 

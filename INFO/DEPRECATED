@@ -41,6 +41,9 @@ lead()          method in Content.pm
 textlead()      method in Lite.pm
    Use textleading() instead. May be removed on or after March, 2023.
 
+openpage()      method in Builder.pm
+   Use open_page() instead. May be removed on or after June, 2023.
+
 *** If I have missed any deprecated interfaces, please let me know! ***
 
 ======= Deprecated items that already have been removed ======================

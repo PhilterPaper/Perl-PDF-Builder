@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 67;
+use Test::More tests => 68;
 
 use PDF::Builder;
 my ($pdf, $page, $pdf2, $pdf_string, $media, $sizes_PDF, $sizes_page, @box);
@@ -47,9 +47,9 @@ $pdf2 = PDF::Builder->open_scalar($pdf_string);
 $page = $pdf2->openpage(1);
 is(ref($page), 'PDF::Builder::Page',
    q{openpage still works});
-#$page = $pdf2->open_page(1);   not yet implemented in PDF::Builder
-#is(ref($page), 'PDF::Builder::Page',
-#   q{open_page replacement for openpage IS available});
+$page = $pdf2->open_page(1);
+is(ref($page), 'PDF::Builder::Page',
+   q{open_page replacement for openpage IS available});
 
 # PDF::Builder-specific cases to ADD tests for (deprecated but NOT yet removed):
 #
@@ -419,8 +419,8 @@ like($pdf2->stringify(), qr/15 TL/, q{leading replacement for lead IS available}
 
 sub array_comp {
    my ($expected_size_ref, @got_size) = @_;
-   my $len_e = length(@{$expected_size_ref});
-   my $len_g = length(@got_size);
+   my $len_e = scalar(@{$expected_size_ref});
+   my $len_g = scalar(@got_size);
    if ($len_e != $len_g) { return 0; }
    for (my $e = 0; $e < $len_e; $e++) {
        if ($expected_size_ref->[$e] != $got_size[$e]) { return 0; }

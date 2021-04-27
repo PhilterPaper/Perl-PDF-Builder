@@ -4,7 +4,10 @@ See also INFO/Changes_2020 for earlier version 3 release logs.
 
 3.023     2021-04-26  UNRELEASED
 
-*   [ ] latest round of PDF::API2 changes
+    lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm, INFO/DEPRECATED, 
+      t/annotate-deprecations.t
+     Per PDF::API2, simplify Builder's ' fixed' to ' opened'. Rename
+      'openpage()' to 'open_page()' and deprecate old name.
 
     INFO/Changes-ver_2, t/pdf.t
      Per changes in PDF::API2, sync up with 2.040 release.
