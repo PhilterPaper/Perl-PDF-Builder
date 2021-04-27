@@ -1,11 +1,19 @@
 Change log for PDF::API2 version 2.xxx (predecessor to PDF::Builder)
 
-2.040     2021-04-07
+2.041     2021-04-26
+
+2.040     2021-04-13
 
     - Fix open() followed by stringify() resulting in a corrupt (mostly-empty)
       PDF, which was broken by changes in 2.039 (reported by Gareth Tunley).
       (NOT fixed in Builder, code looks like something similiar had been done 
       some time ago, and new t-tests run fine on existing Builder code)
+
+    - [RT #134993] Calling open($filename) followed by saveas($same_filename)
+      instead of update() resulted in a corrupt PDF in 2.039, which no longer
+      reads the entire file into memory on open (reported by Marco Pessotto).
+      (NOT yet implemented, sounds like RT #113516 enhancement of not reading 
+      whole file had a bug).
 
     - [RT #134957] Fix encoding of \n in a PDF string containing non-printable
       characters (reported by Stuart Henderson).

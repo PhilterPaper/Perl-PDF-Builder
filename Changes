@@ -2,9 +2,12 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.023     2021-04-25  UNRELEASED
+3.023     2021-04-26  UNRELEASED
 
 *   [ ] latest round of PDF::API2 changes
+
+    INFO/Changes-ver_2, t/pdf.t
+     Per changes in PDF::API2, sync up with 2.040 release.
 
     t/deprecations.t
      Update for new PDF::API2 t-tests and a number of other deprecated items.
