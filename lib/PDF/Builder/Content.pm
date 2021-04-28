@@ -7,7 +7,7 @@ use warnings;
 #no warnings qw( deprecated recursion uninitialized );
 
 # VERSION
-my $LAST_UPDATE = '3.022'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.023'; # manually update whenever code is changed
 
 use Carp;
 use Compress::Zlib qw();
@@ -2060,7 +2060,7 @@ sub _sweep {
 		$result = $ptheta - $dtheta;
 	    } else { # into bottom quadrants
 		$dtheta += $max; # remaining CCW amount from -pi
-                $result = -pi - $dtheta;
+                $result = -1*pi - $dtheta;  # -pi caused some problems
 	    }
 	}
     } else { # p in QIII or QIV

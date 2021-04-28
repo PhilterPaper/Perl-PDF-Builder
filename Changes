@@ -2,7 +2,12 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.023     2021-04-26  UNRELEASED
+3.023     2021-04-27  UNRELEASED
+
+    lib/PDF/Builder/Content.pm
+     Problem with use of "pi" constant caused a warning on compile in one 
+      CPAN smoke test (Perl 5.20 for one tester). Changed "-pi" in one
+      expression to "-1*pi" and hopefully that will silence the messages.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm, INFO/DEPRECATED, 
       t/annotate-deprecations.t
