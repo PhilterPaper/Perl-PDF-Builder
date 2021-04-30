@@ -7,7 +7,7 @@ use warnings;
 my $LAST_UPDATE = '3.023'; # manually update whenever code is changed
 
 use IO::File;
-use Graphics::TIFF 7 ':all';  # already confirmed to be installed
+use Graphics::TIFF ':all';  # already confirmed to be installed
 
 =head1 NAME
 

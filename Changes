@@ -2,7 +2,11 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.023     2021-04-27  UNRELEASED
+3.023     2021-04-29  UNRELEASED
+
+    .gitattributes, .github/workflows/test.yml
+     Added .gitattributes to stop certain line-end changes that were causing 
+      CI tests to fail, add Windows tests to CI.
 
     lib/PDF/Builder/Content.pm
      Problem with use of "pi" constant caused a warning on compile in one 

@@ -8,7 +8,7 @@ use ExtUtils::MakeMaker 6.5503;
 my $PERL_version = '5.020000';  # can't use in "use" statement above! eval?
                                 # could read from .perl-version file otherwise
 my $MakeMaker_version = '6.5503';
-my $version = '3.022';          # PDFbuild.pl updates from 'version' file
+my $version = '3.023';          # PDFbuild.pl updates from 'version' file
 
 # optional libraries... prompt user whether or not to install
 # nice to have but not vital for many users
@@ -73,63 +73,74 @@ my $make_choice = sub {
 
 my %WriteMakefileArgs =
 (
- NAME		=> "PDF::Builder",
- DISTNAME       => "PDF-Builder",
- VERSION        => $version,
+  NAME		 => "PDF::Builder",
+  DISTNAME       => "PDF-Builder",
+  VERSION        => $version,
 # ABSTRACT_FROM	 => $master,
- ABSTRACT       => "Facilitates the creation and modification of PDF files",
+  ABSTRACT       => "Facilitates the creation and modification of PDF files",
 
- AUTHOR		=> 'Phil Perry',
- LICENSE	=> "lgpl",
- MIN_PERL_VERSION	=> $PERL_version,
- INSTALLDIRS	=> "site",
+  AUTHOR	 => 'Phil Perry',
+  LICENSE 	 => "lgpl",  # "lgpl_2_1", also MIT ("mit") on some files
+  MIN_PERL_VERSION	=> $PERL_version,
+  INSTALLDIRS	 => "site",
 
- CONFIGURE_REQUIRES => {
+  CONFIGURE_REQUIRES => {
     "ExtUtils::MakeMaker" => $MakeMaker_version,
- },
+  },
 
 # BUILD_REQUIRES => {  # mandatory prereqs listed here
 # },
 
- TEST_REQUIRES	=> {
+  TEST_REQUIRES	=> {
     "Test::Exception" => 0,
     "Test::Memory::Cycle" => 1.0,
- },
+  },
 
- PREREQ_PM => {
+  PREREQ_PM => {
     "Compress::Zlib" => 1.0,
-    "Font::TTF" => 1.04,
+    "Font::TTF" => 1.04,   # TBD consider moving to optional, but lots of
+                           # examples, etc. would need to be updated
 
     # === found in CORE, so no need to explicitly list
-    #"utf8" => 0,
-    #"File::Temp" => 0,
-    #"File::Basename" => 0,
+    #"Carp" => 0,
+    #"constant" => 0,
+    #"Encode" => 0,
+    #"Exporter" =>0,
+    #"FileHandle" => 0,
     #"File::Find" => 0,
-    #"Scalar::Util" => 0,
+    #"File::Basename" => 0,
+    #"File::Temp" => 0,
     #"IO::File" => 0,
-    #"Unicode::UCD" => 0,
-    #"warnings" => 0,
-    #"Math::Trig" => 0,
     #"List::Util" => 0,
+    #"Math::Trig" => 0,
     #"POSIX" => 0
+    #"Scalar::Util" => 0,
+    #"strict" => 0,
+    #"Unicode::UCD" => 0,
+    #"utf8" => 0,
+    #"vars" => 0,
+    #"warnings" => 0,
+    #
+    #"Win32::TieRegistry" => 0,  # NOT core, but not currently used
+    #                            # if manually use Win32, need to install
   },
 
   META_MERGE        => {
 
-    "meta-spec" => { version => 2 },
+    "meta-spec" => { "version" => 2 },
 
-    resources => {
+    "resources" => {
 
-      homepage => "https://metacpan.org/pod/PDF::Builder",
+      "homepage" => "https://metacpan.org/pod/PDF::Builder",
 
-      repository => {
-          type => 'git',
-          url => 'git://github.com/PhilterPaper/Perl-PDF-Builder.git',
-          web => 'https://github.com/PhilterPaper/Perl-PDF-Builder',
+      "repository" => {
+        "type" => 'git',
+        "url"  => 'git://github.com/PhilterPaper/Perl-PDF-Builder.git',
+        "web"  => 'https://github.com/PhilterPaper/Perl-PDF-Builder',
       },
 
-      bugtracker => {
-	  web => 'https://github.com/PhilterPaper/Perl-PDF-Builder/issues',
+      "bugtracker" => {
+	"web"  => 'https://github.com/PhilterPaper/Perl-PDF-Builder/issues',
       },
 
     },
@@ -187,8 +198,8 @@ END
   # build 'recommends' entry into %WriteMakefileArgs
   for ($i = 0; $i < $list_len; $i++) {
     if (index($c, $choice_list[$i][0]) < 0) { next; }
-    $WriteMakefileArgs{'META_MERGE'}{'recommends'}{
-      "$choice_list[$i][1]"} = $choice_list[$i][2];
+    $WriteMakefileArgs{'META_MERGE'}{'recommends'}{"$choice_list[$i][1]"} = 
+      $choice_list[$i][2];
   }
 }
 
