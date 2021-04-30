@@ -1,0 +1,2 @@
+# don't do line-end conversions on certain types
+*.pdf  binary
