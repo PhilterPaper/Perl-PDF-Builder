@@ -1,0 +1,66 @@
+{
+   "abstract" : "Facilitates the creation and modification of PDF files",
+   "author" : [
+      "Phil Perry"
+   ],
+   "dynamic_config" : 1,
+   "generated_by" : "ExtUtils::MakeMaker version 7.62, CPAN::Meta::Converter version 2.150010",
+   "license" : [
+      "lgpl_2_1"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : 2
+   },
+   "name" : "PDF-Builder",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "inc"
+      ]
+   },
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "6.66"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "6.66"
+         }
+      },
+      "runtime" : {
+	 "recommends" : {
+            "Graphics::TIFF" : "15",
+            "Image::PNG::Libpng" : "0.56",
+            "HarfBuzz::Shaper" : "0.024"
+	 },
+         "requires" : {
+            "Compress::Zlib" : "1.0",
+            "Font::TTF" : "1.04",
+            "perl" : "5.022000"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "Test::Exception" : "0",
+            "Test::Memory::Cycle" : "1.0"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/PhilterPaper/Perl-PDF-Builder/issues"
+      },
+      "homepage" : "https://metacpan.org/pod/PDF::Builder",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/PhilterPaper/Perl-PDF-Builder.git",
+         "web" : "https://github.com/PhilterPaper/Perl-PDF-Builder"
+      }
+   },
+   "version" : "3.023",
+   "x_serialization_backend" : "JSON::PP version 4.06"
+}

@@ -2,11 +2,31 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.023     2021-04-29  UNRELEASED
+3.023     2021-06-03 
+
+    version file (for distribution build), README.md, lib/PDF/Builder.pm,
+      t/00-all-usable.t
+     Modified to prereq Perl 5.22 instead of 5.20 (is 6 years old now). Also 
+      Graphics::TIFF minimum upped to 15 due to changes. Keep files up to date 
+      on GitHub so can successfully run without full build.
+
+    Makefile.PL, MANIFEST, META.json (add), META.yml (add), .perl-version 
+      (deleted), optional_update.pl (add), README.md
+     Modify build process to have optional prereqs properly installed. Also
+      ensure that mandatory and optional prereqs are consistently updated and
+      handled. Since the vast majority of users will use the default of
+      installing all optional prereqs, the selection process has been moved
+      from Makefile.PL to optional_update.pl (for those manually running
+      Makefile.PL). optional_update.pl updates Makefile.PL, META.json, and
+      META.yml upon selection of which (if any) optional prerequisites are to
+      be installed on a manual run of Makefile.PL. I don't want to risk 
+      getting META.json and META.yml (needed for properly installing the 
+      "recommends" optionals) out of sync by failing to update them at install 
+      from Makefile.PL, so all are now shipped with all optionals selected.
 
     .gitattributes, .github/workflows/test.yml
      Added .gitattributes to stop certain line-end changes that were causing 
-      CI tests to fail, add Windows tests to CI.
+      CI tests to fail, add Windows tests to CI. From @carygravel.
 
     lib/PDF/Builder/Content.pm
      Problem with use of "pi" constant caused a warning on compile in one 
@@ -19,7 +39,10 @@ See also INFO/Changes_2020 for earlier version 3 release logs.
       'openpage()' to 'open_page()' and deprecate old name.
 
     INFO/Changes-ver_2, t/pdf.t
-     Per changes in PDF::API2, sync up with 2.040 release.
+     Per changes in PDF::API2, sync up with 2.040 release. There are still
+      a small number of changes not implemented (yet) in PDF::Builder, which
+      either appear to be unnecessary, or the underlying code has changed too
+      much to cleanly port the changes without a massive rewrite.
 
     t/deprecations.t
      Update for new PDF::API2 t-tests and a number of other deprecated items.
@@ -51,7 +74,7 @@ See also INFO/Changes_2020 for earlier version 3 release logs.
       Increase required Graphics::TIFF version to 10 due to fix in GT.
 
     examples/README, examples/examples.output
-     Discuss the issue of close heavy lines in the example bar codes appearing 
+     Discuss the issue of close, heavy lines in the example bar codes appearing 
       to merge or "blot" together. This is at least partially a consequence of 
       lower resolution display screens (rounding errors), and although the bars 
       separate when printed, I'm still concerned that they will not be reliably 
@@ -59,7 +82,8 @@ See also INFO/Changes_2020 for earlier version 3 release logs.
 
     All files (.pm and .pl) containing $LAST_UPDATE can now access this
       string from outside the file, in the same manner as $VERSION. The
-      variable declarator has been changed from 'my' to 'our'.
+      variable declarator has been changed from 'my' to 'our' during package
+      build.
 
     INFO/Changes-ver_2, /lib/PDF/Builder/Basic/PDF/String.pm, t/string.t
      Per PDF::API2 changes related to [RT 134957], change some regex flags 
@@ -68,10 +92,12 @@ See also INFO/Changes_2020 for earlier version 3 release logs.
     t/tiff.t add version check (not just if installed) for ImageMagick and
       Ghostscript. Some smoke tests apparently blew up for using too low
       level versions. If too low version, or any problems determining the
-      version, tiff.t fails gracefully by skipping those tests.
+      version, tiff.t fails gracefully by skipping those tests. From
+      @carygravel.
 
     t/tiff.t use a temporary directory for various test files, enabling use
-      from a Read-Only directory and/or running tests in parallel (#153).
+      from a Read-Only directory and/or running tests in parallel (from
+      @ppisar, #153).
 
 3.022     2021-03-27
 
