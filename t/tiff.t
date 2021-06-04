@@ -105,9 +105,9 @@ my $pngout = File::Spec->catfile($directory, 'out.png');
 #   may have to do this manually
 
 my ($convert, $gs);
-# Linux-like systems usually have a pre-installed "convert" utility, while
-# Windows must use ImageMagick. In addition, be careful NOT to run "convert"
-# on Windows, as this is a HDD reformatter!
+# ImageMagick pre-v7 has a "convert" utility.
+# On v7, this is called via "magick convert"
+# On Windows, be careful NOT to run "convert", as this is a HDD reformatter!
 if      (can_run("magick")) {
     $convert = "magick convert";
 } elsif ($OSNAME ne 'MSWin32' and can_run("convert")) {
@@ -220,7 +220,7 @@ is($example, $expected, 'single-strip lzw (not converted to flate) with GT');
 
 # 12
 SKIP: {
-    skip "No 'convert' utility available, or no Graphics::TIFF.", 1 unless
+    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
         defined $convert and defined $gs and $has_GT;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -define tiff:rows-per-strip=50 -compress lzw $tiff_f");
@@ -245,7 +245,7 @@ is($example, $expected, 'multi-strip lzw (not converted to flate) with GT');
 
 # 13
 SKIP: {
-    skip "No 'convert' utility available, or no Graphics::TIFF.", 1 unless
+    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
         defined $convert and defined $gs and $has_GT;
 
 $width = 20;
@@ -272,7 +272,7 @@ is($example, $expected, 'lzw+horizontal predictor (not converted to flate) with 
 
 # 14
 SKIP: {
-    skip "No 'convert' utility available, or no Graphics::TIFF.", 1 unless
+    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
         defined $convert and defined $gs and $has_GT;
 
 $width = 1000;
@@ -324,7 +324,7 @@ is($example, $expected, 'single-strip lzw (not converted to flate) without GT');
 }
 
 SKIP: {
-    skip "No 'convert' utility available.", 1 unless
+    skip "Either ImageMagick or Ghostscript not available.", 1 unless
         defined $convert and defined $gs;
 
 # 16
@@ -409,7 +409,9 @@ sub check_version {
     # was the check routine already defined (installed)?
     if (defined $cmd) {
 	# should match dotted version number
-	if (`$cmd $arg` =~ m/$regex/) {
+        my $output = `$cmd $arg`;
+        diag($output);
+	if ($output =~ m/$regex/) {
 	    if (version->parse($1) >= version->parse($min_ver)) {
 		return $cmd;
 	    }
