@@ -1,0 +1,31 @@
+# PDF::Builder version being built
+# update *.pm, *.pl, Builder.pm, Makefile.PL, META.*
+VERSION 3.023
+
+# minimum Perl version needed
+# EVERY RELEASE: check https://www.cpan.org/src/ "First release in each branch
+#   of Perl" (NOT "Latest releases in each branch of Perl"!) and subtract 
+#   6 years to get date of oldest release, and then go one release before that. 
+#   Would be nice to read cpan First Release and figure out min Perl version.
+##PERL_V_DOT   5.20.0  dist.ini, .travis.yml
+# update Makefile.PL, META.*
+PERL_V        5.022000
+
+# minimum ExeUtils::Makemaker needed for configuration
+# update Makefile.PL, META.*
+MAKE_MAKER   6.66        # 6.5503 may also work
+
+# mandatory prerequisites
+# update Makefile.PL, META.*
+TEST_EXCEPTION     0
+TEST_MEMORY_CYCLE  1.0
+
+COMPRESS_ZLIB      1.0
+FONT_TTF           1.04
+
+# optional prerequisites
+# update Makefile.PL, META.*, Builder.pm, t/00-all-usable.t
+GRAPHICS_TIFF    15
+HARFBUZZ_SHAPER  0.024
+IMAGE_PNG_LIBPNG 0.56
+

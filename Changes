@@ -4,6 +4,8 @@ See also INFO/Changes_2020 for earlier version 3 release logs.
 
 3.023     2021-06-03 
 
+    version, .gitignore   put version in GitHub as it's now fairly involved
+
     version file (for distribution build), README.md, lib/PDF/Builder.pm,
       t/00-all-usable.t
      Modified to prereq Perl 5.22 instead of 5.20 (is 6 years old now). Also 

@@ -12,8 +12,6 @@ pod2htmd.tmp
 # ignore .html documentation
 *.html
 # local build process
-/PDFbuild.pl
-/version
 /latest_release
 /Changes_new
 /comp.list
