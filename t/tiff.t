@@ -137,9 +137,8 @@ $gs = check_version($gs, '-v', 'Ghostscript ([0-9.]+)', '9.25.0');
 # alpha layer handling ------------------
 # convert and Graphics::TIFF needed
 
-# 9
 SKIP: {
-    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
+    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 6 unless
         defined $convert and defined $gs and $has_GT;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" $tiff_f");
@@ -159,16 +158,11 @@ my $example = `$convert $pngout -colorspace gray -depth 1 txt:-`;
 my $expected = `$convert $tiff_f -depth 1 txt:-`;
 # ----------
 
+# 9
 is($example, $expected, 'alpha + flate');
-}
 
 # G4 (NOT converted to Flate) ------------------
 # convert and Graphics::TIFF are needed
-
-# 10
-SKIP: {
-    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
-        defined $convert and defined $gs and $has_GT;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -compress Group4 $tiff_f");
 # ----------
@@ -187,16 +181,11 @@ $example = `$convert $pngout -depth 1 txt:-`;
 $expected = `$convert $tiff_f -depth 1 txt:-`;
 # ----------
 
+# 10
 is($example, $expected, 'G4 (not converted to flate)');
-}
 
 # LZW (NOT converted to Flate) ------------------
 # convert and Graphics::TIFF needed for these two tests
-
-# 11
-SKIP: {
-    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
-        defined $convert and defined $gs and $has_GT;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -compress lzw $tiff_f");
 # ----------
@@ -215,13 +204,8 @@ $example = `$convert $pngout -depth 1 -alpha off txt:-`;
 $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
+# 11
 is($example, $expected, 'single-strip lzw (not converted to flate) with GT');
-}
-
-# 12
-SKIP: {
-    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
-        defined $convert and defined $gs and $has_GT;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -define tiff:rows-per-strip=50 -compress lzw $tiff_f");
 # ----------
@@ -238,15 +222,11 @@ $pdf->end();
 system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
 $example = `$convert $pngout -depth 1 -alpha off txt:-`;
 $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
-# ----------
 
+# 12
 is($example, $expected, 'multi-strip lzw (not converted to flate) with GT');
-}
 
-# 13
-SKIP: {
-    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
-        defined $convert and defined $gs and $has_GT;
+# ----------
 
 $width = 20;
 $height = 20;
@@ -265,15 +245,11 @@ $pdf->end();
 system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
 $example = `$convert $pngout -depth 8 -alpha off txt:-`;
 $expected = `$convert $tiff_f -depth 8 -alpha off txt:-`;
-# ----------
 
+# 13
 is($example, $expected, 'lzw+horizontal predictor (not converted to flate) with GT');
-}
 
-# 14
-SKIP: {
-    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
-        defined $convert and defined $gs and $has_GT;
+# ----------
 
 $width = 1000;
 $height = 100;
@@ -295,12 +271,12 @@ $example = `$convert $pngout -colorspace gray -depth 1 txt:-`;
 $expected = `$convert $tiff_f -depth 1 txt:-`;
 # ----------
 
+# 14
 is($example, $expected, 'alpha + lzw');
 }
 
-# 15
 SKIP: {
-    skip "Either ImageMagick or Ghostscript not available.", 1 unless
+    skip "Either ImageMagick or Ghostscript not available.", 3 unless
         defined $convert and defined $gs;
 
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -compress lzw $tiff_f");
@@ -318,16 +294,12 @@ $pdf->end();
 system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
 $example = `$convert $pngout -depth 1 -alpha off txt:-`;
 $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
+
+# 15
+is($example, $expected, 'single-strip lzw (not converted to flate) without GT');
+
 # ----------
 
-is($example, $expected, 'single-strip lzw (not converted to flate) without GT');
-}
-
-SKIP: {
-    skip "Either ImageMagick or Ghostscript not available.", 1 unless
-        defined $convert and defined $gs;
-
-# 16
 $width = 20;
 $height = 20;
 system("$convert -depth 8 -size 2x2 pattern:gray50 -scale 1000% -alpha off -define tiff:predictor=2 -compress lzw $tiff_f");
@@ -345,17 +317,36 @@ $pdf->end();
 system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
 $example = `$convert $pngout -depth 1 -alpha off txt:-`;
 $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
+
+# 16
+is($example, $expected, 'lzw+horizontal predictor (not converted to flate) without GT');
+
 # ----------
 
-is($example, $expected, 'lzw+horizontal predictor (not converted to flate) without GT');
-$width = 1000;
-$height = 100;
+# read TIFF with colormap ------------------
+# convert and Graphics::TIFF needed for this test
+
+# .png file is temporary file (output, input, erased)
+my $colormap = File::Spec->catfile($directory, 'colormap.png');
+system("$convert rose: -type palette -depth 2 $colormap");
+system("$convert $colormap $tiff_f");
+$pdf = PDF::Builder->new(-file => $pdfout);
+$page = $pdf->page;
+$page->mediabox( $width, $height );
+$gfx = $page->gfx();
+$img = $pdf->image_tiff($tiff_f, -nouseGT => $noGT);
+$gfx->image( $img, 0, 0, $width, $height );
+$pdf->save();
+$pdf->end();
+# 17
+pass 'successfully read TIFF with colormap';
 }
 
-# 17
 SKIP: {
    #skip "currently fails due to bug inherited from PDF::API2", 1;
     skip "multi-strip lzw without GT is not currently supported", 1;
+$width = 1000;
+$height = 100;
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -define tiff:rows-per-strip=50 -compress lzw $tiff_f");
 # ----------
 $pdf = PDF::Builder->new(-file => $pdfout);
@@ -373,30 +364,8 @@ $example = `$convert $pngout -depth 1 -alpha off txt:-`;
 $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
-is($example, $expected, 'multi-strip lzw (not converted to flate) without GT');
-}
-
-# read TIFF with colormap ------------------
-# convert and Graphics::TIFF needed for this test
-
 # 18
-SKIP: {
-    skip "Either ImageMagick or Graphics::TIFF not available.", 1 unless
-        defined $convert and $has_GT;
-
-# .png file is temporary file (output, input, erased)
-my $colormap = File::Spec->catfile($directory, 'colormap.png');
-system("$convert rose: -type palette -depth 2 $colormap");
-system("$convert $colormap $tiff_f");
-$pdf = PDF::Builder->new(-file => $pdfout);
-$page = $pdf->page;
-$page->mediabox( $width, $height );
-$gfx = $page->gfx();
-$img = $pdf->image_tiff($tiff_f, -nouseGT => $noGT);
-$gfx->image( $img, 0, 0, $width, $height );
-$pdf->save();
-$pdf->end();
-pass 'successfully read TIFF with colormap';
+is($example, $expected, 'multi-strip lzw (not converted to flate) without GT');
 }
 
 ##############################################################
