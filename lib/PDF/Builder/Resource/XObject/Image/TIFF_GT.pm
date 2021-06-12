@@ -182,7 +182,7 @@ sub handle_alpha {
 	         ", PDF will likely be defective!\n";
 	}
 	($self->{' stream'}, $alpha) = 
-	    split_alpha($self->{' stream'}, $samples, $tif->{'bitsPerSample'}, $w*$h);
+	    split_alpha($self->{' stream'}, $samples, $tif->{'bitsPerSample'}, $w, $h);
 	$self->{' stream'} = 
 	    descale($self->{' stream'}, $samples, $tif->{'bitsPerSample'}, $alpha, $w*$h);
     } elsif (defined $tif->{'ExtraSamples'} &&
@@ -199,7 +199,7 @@ sub handle_alpha {
 	         ", PDF will likely be defective!\n";
 	}
 	($self->{' stream'}, $alpha) = 
-	    split_alpha($self->{' stream'}, $samples, $tif->{'bitsPerSample'}, $w*$h);
+	    split_alpha($self->{' stream'}, $samples, $tif->{'bitsPerSample'}, $w, $h);
     }
 
     # $alpha is undef if no alpha layer found
@@ -266,7 +266,8 @@ sub handle_generic {
 # returns $buffer and $alpha strings
 # TBD: fill order or other directional issues?
 sub split_alpha {
-    my ($inbuf, $samples, $bps, $count) = @_;
+    my ($inbuf, $samples, $bps, $w, $h) = @_;
+    my $count = $w * $h;
     my $outbuf = '';
     my $alpha = '';
 
@@ -326,48 +327,32 @@ sub split_alpha {
     } else {
         # fractional bytes (bps < 8) possible to have not 2**N?
         my $strideBits = $bps*($samples+1);
-	my @inBits = ();    # bits from inbuf string
-	my @outBits = ();   # bits to outbuf string (starts empty)
-	my @outABits = ();  # build alpha string (starts empty)
-	my $inByte = 0;
-	my $outByte = 0;
-	my $outAByte = 0;
-        for (my $i=0; $i<$count; $i++) {
-	    # i-th pixel is next 2 or more bits in inBits
-	    # build up enough bits in inBits
-	    while (scalar(@inBits) < $strideBits) {
-		push @inBits, split(//, unpack('B8', substr($inbuf, $inByte++, 1)));
-	    }
-	    # now have enough bits in inBits array for adding to output buffer
-	    push @outBits, splice(@inBits, 0, $samples*$bps);
-	    # now have enough bits in inBits array for adding to alpha buffer
-	    push @outABits, splice(@inBits, 0, $bps);
-	    # do we have at least one full byte to output to outbuf?
-	    while (scalar(@outBits) >= 8) {
-		substr($outbuf, $outByte++, 1) = pack('B8', join('', splice(@outBits, 0, 8)));
-	    }
-	    # do we have at least one full byte to output to alpha?
-	    while (scalar(@outABits) >= 8) {
-		substr($alpha, $outAByte++, 1) = pack('B8', join('', splice(@outABits, 0, 8)));
-	    }
-	    # there may be leftover bits (for next pixel) in inBits
-	    # outBits and outABits may also have partial content yet to write
-        }
-	# got to the end. anything not yet written in @outBits and @outABits?
-	if (scalar(@outBits)) {
-            # pad out to 8 bits in length (should be no more than 7)
-            while (scalar(@outBits) < 8) {
-                push @outBits, 0;
+	my $inbits = unpack('B*', $inbuf);    # bits from inbuf string
+	my $outbits = '';   # bits to outbuf string (starts empty)
+	my $outbits_a = '';  # build alpha string (starts empty)
+        my $index = 0;
+        for my $row (0 .. $h-1) {
+            my $rowbuf = '';
+            my $rowbuf_a = '';
+            for my $column (0 .. $w-1) {
+                $rowbuf .= substr($inbits, $index, $samples*$bps);
+                $index += $samples*$bps;
+                $rowbuf_a .= substr($inbits, $index, $bps);
+                $index += $bps;
             }
-	    substr($outbuf, $outByte++, 1) = pack('B8', join('', @outBits));
+
+            # padding for input could be different from output, e.g. width = 4
+            # requires no padding on input, but 4 on output.
+            $index += $w*$samples*($bps+1) % 8;
+
+            # given that bilevel images with a width that is not divisible by 8
+            # are padded to make a whole number of bytes per row, the padding
+            # must be adjusted when deinterleaving the alpha layer.
+            $outbits .= $rowbuf . pad_buffer($rowbuf, $samples, $bps);
+            $outbits_a .= $rowbuf_a . pad_buffer($rowbuf_a, 1, $bps);
         }
-	if (scalar(@outABits)) {
-            # pad out to 8 bits in length (should be no more than 7)
-            while (scalar(@outABits) < 8) {
-                push @outABits, 0;
-            }
-	    substr($alpha, $outAByte++, 1) = pack('B8', join('', @outABits));
-        }
+        $outbuf = pack('B*', $outbits);
+        $alpha = pack('B*', $outbits_a);
     } # end of fractional byte (bits) handling
 
 ## debug
@@ -416,6 +401,19 @@ sub split_alpha {
 
     return ($outbuf, $alpha);
 } # end of split_alpha()
+
+sub pad_buffer {
+    my ($buf, $samples, $bps) = @_;
+    my $padbuf = '';
+    my $pad = length($buf) % 8;
+    if ($pad) {
+        $pad = 8 - $pad;
+    }
+    for (0..$samples*$bps*$pad-1) {
+        $padbuf .= '0';
+    }
+    return $padbuf;
+}
 
 # bps = width of a sample in bits, samples 1 (G) or 3 (RGB)
 # return updated buffer  WARNING: not tested!
