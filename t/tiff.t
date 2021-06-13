@@ -11,6 +11,7 @@ use Test::More tests => 19;
 use PDF::Builder;
 # 0: allow use of Graphics::TIFF, 1: force non-GT usage
 my $noGT = 0;
+my $diag = '';
 
 # Filename 3 tests ------------------
 # tests 1 and 3 will mention TIFF_GT if Graphics::TIFF is installed and
@@ -159,7 +160,7 @@ my $example = `$convert $pngout -colorspace gray -depth 1 txt:-`;
 my $expected = `$convert $tiff_f -depth 1 txt:-`;
 # ----------
 
-is($example, $expected, 'alpha + flate');
+is($example, $expected, 'alpha + flate') or diag($diag);
 }
 
 # G4 (NOT converted to Flate) ------------------
@@ -187,7 +188,7 @@ $example = `$convert $pngout -depth 1 txt:-`;
 $expected = `$convert $tiff_f -depth 1 txt:-`;
 # ----------
 
-is($example, $expected, 'G4 (not converted to flate)');
+is($example, $expected, 'G4 (not converted to flate)') or diag($diag);
 }
 
 # LZW (NOT converted to Flate) ------------------
@@ -215,7 +216,7 @@ $example = `$convert $pngout -depth 1 -alpha off txt:-`;
 $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
-is($example, $expected, 'single-strip lzw (not converted to flate) with GT');
+is($example, $expected, 'single-strip lzw (not converted to flate) with GT') or diag($diag);
 }
 
 # 12
@@ -240,7 +241,7 @@ $example = `$convert $pngout -depth 1 -alpha off txt:-`;
 $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
-is($example, $expected, 'multi-strip lzw (not converted to flate) with GT');
+is($example, $expected, 'multi-strip lzw (not converted to flate) with GT') or diag($diag);
 }
 
 # 13
@@ -267,7 +268,7 @@ $example = `$convert $pngout -depth 8 -alpha off txt:-`;
 $expected = `$convert $tiff_f -depth 8 -alpha off txt:-`;
 # ----------
 
-is($example, $expected, 'lzw+horizontal predictor (not converted to flate) with GT');
+is($example, $expected, 'lzw+horizontal predictor (not converted to flate) with GT') or diag($diag);
 }
 
 # 14
@@ -295,7 +296,7 @@ $example = `$convert $pngout -colorspace gray -depth 1 txt:-`;
 $expected = `$convert $tiff_f -depth 1 txt:-`;
 # ----------
 
-is($example, $expected, 'alpha + lzw');
+is($example, $expected, 'alpha + lzw') or diag($diag);
 }
 
 # 15
@@ -320,7 +321,7 @@ $example = `$convert $pngout -depth 1 -alpha off txt:-`;
 $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
-is($example, $expected, 'single-strip lzw (not converted to flate) without GT');
+is($example, $expected, 'single-strip lzw (not converted to flate) without GT') or diag($diag);
 }
 
 SKIP: {
@@ -347,7 +348,7 @@ $example = `$convert $pngout -depth 1 -alpha off txt:-`;
 $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
-is($example, $expected, 'lzw+horizontal predictor (not converted to flate) without GT');
+is($example, $expected, 'lzw+horizontal predictor (not converted to flate) without GT') or diag($diag);
 $width = 1000;
 $height = 100;
 }
@@ -373,7 +374,7 @@ $example = `$convert $pngout -depth 1 -alpha off txt:-`;
 $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
-is($example, $expected, 'multi-strip lzw (not converted to flate) without GT');
+is($example, $expected, 'multi-strip lzw (not converted to flate) without GT') or diag($diag);
 }
 
 # read TIFF with colormap ------------------
@@ -396,7 +397,7 @@ $img = $pdf->image_tiff($tiff_f, -nouseGT => $noGT);
 $gfx->image( $img, 0, 0, $width, $height );
 $pdf->save();
 $pdf->end();
-pass 'successfully read TIFF with colormap';
+pass 'successfully read TIFF with colormap' or diag($diag);
 }
 
 # 19
@@ -426,7 +427,7 @@ $example =~ s/(.*\n).*\n.*\n$/$1/;
 $expected =~ s/(.*\n).*\n.*\n$/$1/;
 # ----------
 
-is($example, $expected, "bilevel and alpha when width not a whole number of bytes with GT");
+is($example, $expected, "bilevel and alpha when width not a whole number of bytes with GT") or diag($diag);
 }
 
 ##############################################################
@@ -440,7 +441,7 @@ sub check_version {
     if (defined $cmd) {
 	# should match dotted version number
         my $output = `$cmd $arg`;
-        diag($output);
+        $diag .= $output;
 	if ($output =~ m/$regex/) {
 	    if (version->parse($1) >= version->parse($min_ver)) {
 		return $cmd;
