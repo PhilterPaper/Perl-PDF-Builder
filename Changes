@@ -2,15 +2,21 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.023     2021-06-03 
+3.023     2021-06-14 
 
-    version, .gitignore   put version in GitHub as it's now fairly involved
+    .github/workflows/test.yml Update PATH for new ImageMagick level.
 
-    version file (for distribution build), README.md, lib/PDF/Builder.pm,
-      t/00-all-usable.t
+    lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm, t/tiff.t
+     Fix for ticket #154 by @carygravel, and add a test for bilevel+alpha
+      where rows are not filling out a full array of bytes.
+
+    version (for distribution build), README.md, lib/PDF/Builder.pm,
+      t/00-all-usable.t, .gitignore
      Modified to prereq Perl 5.22 instead of 5.20 (is 6 years old now). Also 
       Graphics::TIFF minimum upped to 15 due to changes. Keep files up to date 
-      on GitHub so can successfully run without full build.
+      on GitHub so can successfully run without full build. Put version in 
+      GitHub as it's now fairly involved and I don't want to accidentally 
+      lose it!
 
     Makefile.PL, MANIFEST, META.json (add), META.yml (add), .perl-version 
       (deleted), optional_update.pl (add), README.md
