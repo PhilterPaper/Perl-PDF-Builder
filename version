@@ -1,6 +1,6 @@
 # PDF::Builder version being built
 # update *.pm, *.pl, Builder.pm, Makefile.PL, META.*
-VERSION 3.023
+VERSION 3.024
 
 # minimum Perl version needed
 # EVERY RELEASE: check https://www.cpan.org/src/ "First release in each branch
@@ -25,7 +25,7 @@ FONT_TTF           1.04
 
 # optional prerequisites
 # update Makefile.PL, META.*, Builder.pm, t/00-all-usable.t
-GRAPHICS_TIFF    15
+GRAPHICS_TIFF    16
 HARFBUZZ_SHAPER  0.024
-IMAGE_PNG_LIBPNG 0.56
+IMAGE_PNG_LIBPNG 0.57
 

@@ -162,7 +162,7 @@ my %samples = (
    # Some Khmer text (a Cambodian script). I don't think the first "word" means
    # anything, but the second may be something like "a dog".
    'Khmer' => { 'title' => "Khmer", 
-	        'fontFile' => '/Users/Phil/Desktop/PDF Builder tickets/D.O.N.E/khmer/KhmerOS_.ttf',
+	        'fontFile' => '/Users/Phil/Desktop/closed tickets/D.O.N.E/khmer/KhmerOS_.ttf',
 		'dir' => 'L',
 		'script' => 'Khmr',
 		# KA COENG KA and "dog" CHA COENG KA AE 

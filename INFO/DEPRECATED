@@ -44,6 +44,10 @@ textlead()      method in Lite.pm
 openpage()      method in Builder.pm
    Use open_page() instead. May be removed on or after June, 2023.
 
+default()       method in Builder.pm
+   May be renamed in the future, as is flagged by Perl::Critic as reserved.
+   Use with caution.
+
 *** If I have missed any deprecated interfaces, please let me know! ***
 
 ======= Deprecated items that already have been removed ======================

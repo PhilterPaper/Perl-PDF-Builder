@@ -32,8 +32,8 @@
       },
       "runtime" : {
 	 "recommends" : {
-            "Graphics::TIFF" : "15",
-            "Image::PNG::Libpng" : "0.56",
+            "Graphics::TIFF" : "16",
+            "Image::PNG::Libpng" : "0.57",
             "HarfBuzz::Shaper" : "0.024"
 	 },
          "requires" : {

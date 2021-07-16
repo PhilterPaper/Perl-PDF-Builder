@@ -422,8 +422,12 @@ $pdf->end();
 system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
 $example = `$convert $pngout -depth 1 -alpha off txt:-`;
 $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
-# for reasons I don't understand, gs swaps the last two pixels here, so let's
-# ignore them
+# "For reasons I don't understand, gs swaps the last two pixels here, so let's
+# ignore them." This glitch is reported by @carygravel ("gs consistently 
+# swapped two pixels in the last byte of the first row" over multiple test 
+# images), but the PDF produced appears to be OK -- it's just something odd 
+# happening in producing the PNG for comparison. We'll keep an eye on it, as I 
+# don't particularly like magic solutions. See PR #165.
 $example =~ s/(.*\n).*\n.*\n$/$1/;
 $expected =~ s/(.*\n).*\n.*\n$/$1/;
 # ----------
@@ -452,6 +456,9 @@ sub check_version {
     return; # cmd not defined (not installed) so return undef
 }
 
-sub show_diag { $failed = 1 }
+sub show_diag { 
+    $failed = 1;
+    return;
+}
 
 if ($failed) { diag($diag) }

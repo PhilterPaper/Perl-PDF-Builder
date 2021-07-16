@@ -20,9 +20,9 @@ no_index:
     - t
     - inc
 recommends:
-  Graphics::TIFF: '15'
+  Graphics::TIFF: '16'
   HarfBuzz::Shaper: '0.024'
-  Image::PNG::Libpng: '0.56'
+  Image::PNG::Libpng: '0.57'
 requires:
   Compress::Zlib: '1.0'
   Font::TTF: '1.04'

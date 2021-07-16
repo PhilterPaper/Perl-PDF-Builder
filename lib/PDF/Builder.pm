@@ -8,8 +8,8 @@ use warnings;
 our $VERSION = '3.023'; # VERSION
 our $LAST_UPDATE = '3.023'; # manually update whenever code is changed
 
-my $GrTFversion = 15;    # minimum version of Graphics::TIFF
-my $LpngVersion = 0.56;  # minimum version of Image::PNG::Libpng
+my $GrTFversion = 16;    # minimum version of Graphics::TIFF
+my $LpngVersion = 0.57;  # minimum version of Image::PNG::Libpng
 
 use Carp;
 use Encode qw(:all);
@@ -703,6 +703,10 @@ pages to preserve graphics-state for modification.
 enables importing of annotations (B<*EXPERIMENTAL*>).
 
 =back
+
+B<CAUTION:> Perl::Critic (tools/1_pc.pl) has started flagging the name 
+"default" as a reserved keyword in higher Perl versions. Use with caution, and
+be aware that this name I<may> have to be changed in the future.
 
 =cut
 

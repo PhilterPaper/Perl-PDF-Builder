@@ -1,5 +1,6 @@
-use strict;
+#!/usr/bin/perl
 use warnings;
+use strict;
 
 # a utility to select which optional prerequisites to remove from the
 # "recommends" list in Makefile.PL, META.json, and META.yml before manually
@@ -21,8 +22,8 @@ our $LAST_UPDATE = '3.023'; # manually update whenever code is changed
 # master list of optional prerequisites:
 # make sure that any updates to patterns etc. keep the same order
 my %options = (
-	'1' => ["Graphics::TIFF",     "15"   ],
-	'2' => ["Image::PNG::Libpng", "0.56" ],
+	'1' => ["Graphics::TIFF",     "16"   ],
+	'2' => ["Image::PNG::Libpng", "0.57" ],
 	'3' => ["HarfBuzz::Shaper",   "0.024"],
               );
 
@@ -71,6 +72,8 @@ update_Makefile();
 update_META_json();
 update_META_yml();
 
+return;
+
 # in all cases, remove "recommends" if @list is empty
 # Makefile.PL find line and # out if not in @list, remove any # if in @list
 sub update_Makefile {
@@ -83,16 +86,17 @@ sub update_Makefile {
 
     my $infile = "Makefile.PL";
     my $outtemp = "xxxx.tmp";
-    unless (open(IN, "<$infile")) {
+    my ($IN, $OUT);
+    unless (open($IN, "<", $infile)) {
 	die "Unable to read $infile for update\n";
     }
-    unless (open(OUT, ">$outtemp")) {
+    unless (open($OUT, ">", $outtemp)) {
 	die "Unable to write temporary output file for $infile update\n";
     }
 
     my ($line, $i);
     my $flag = 0;
-    while ($line = <IN>) {
+    while ($line = <$IN>) {
 	# $line still has line-end \n
 	 
         # no optionals requested? #-out "recommends" => { and },
@@ -135,13 +139,15 @@ sub update_Makefile {
 		last;
 	    }
 	}
-	print OUT $line;
+	print $OUT $line;
     }
 
-    close(IN);
-    close(OUT);
+    close($IN);
+    close($OUT);
     system("copy $outtemp $infile");
     unlink($outtemp);
+
+    return;
 } # end of update_Makefile()
 
 # META.json find line and remove if not in @list, add back in if in @list
@@ -155,16 +161,17 @@ sub update_META_json {
 
     my $infile = "META.json";
     my $outtemp = "xxxx.tmp";
-    unless (open(IN, "<$infile")) {
+    my ($IN, $OUT);
+    unless (open($IN, "<", $infile)) {
 	die "Unable to read $infile for update\n";
     }
-    unless (open(OUT, ">$outtemp")) {
+    unless (open($OUT, ">", $outtemp)) {
 	die "Unable to write temporary output file for $infile update\n";
     }
 
     my ($line, $i);
     my $flag = 0;
-    while ($line = <IN>) {
+    while ($line = <$IN>) {
 	# $line still has line-end \n
 	 
 	# NOTE: my understanding is that an empty { } is legal
@@ -180,13 +187,13 @@ sub update_META_json {
 	    for ($i=1; $i<=$numEntries; $i++) {
 		# is $i in @list? replace in file
 		if (member_of($i, @list)) {
-		    print OUT "            \"$options{$i}[0]\" : \"$options{$i}[1]\"";
+		    print $OUT "            \"$options{$i}[0]\" : \"$options{$i}[1]\"";
 		    if (++$count == scalar(@list)) {
 		        # last one, no comma
-		        print OUT "\n";
+		        print $OUT "\n";
 		    } else {
 		        # not last one, add comma
-		        print OUT ",\n";
+		        print $OUT ",\n";
 	            }
 	        }
 	    }
@@ -194,13 +201,15 @@ sub update_META_json {
 	    # erase this entry (all optional entries will be erased)
 	    next;
 	}
-	print OUT $line;
+	print $OUT $line;
     }
 
-    close(IN);
-    close(OUT);
+    close($IN);
+    close($OUT);
     system("copy $outtemp $infile");
     unlink($outtemp);
+
+    return;
 } # end of update_META_json()
 
 # META.yml find line and # out if not in @list, remove any # if in @list
@@ -214,15 +223,16 @@ sub update_META_yml {
 
     my $infile = "META.yml";
     my $outtemp = "xxxx.tmp";
-    unless (open(IN, "<$infile")) {
+    my ($IN, $OUT);
+    unless (open($IN, "<", $infile)) {
 	die "Unable to read $infile for update\n";
     }
-    unless (open(OUT, ">$outtemp")) {
+    unless (open($OUT, ">", $outtemp)) {
 	die "Unable to write temporary output file for $infile update\n";
     }
 
     my ($line, $i);
-    while ($line = <IN>) {
+    while ($line = <$IN>) {
 	# $line still has line-end \n
 	 
         # no optionals requested? #-out recommends:
@@ -248,13 +258,15 @@ sub update_META_yml {
 		last;
 	    }
 	}
-	print OUT $line;
+	print $OUT $line;
     }
 
-    close(IN);
-    close(OUT);
+    close($IN);
+    close($OUT);
     system("copy $outtemp $infile");
     unlink($outtemp);
+
+    return;
 } # end of update_META_yml()
 
 sub member_of {

@@ -2,7 +2,14 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.023     2021-06-14 
+3.024     2021-07-15  UNRELEASED
+
+3.023     2021-07-15 
+
+*   lib/PDF/Builder.pm, INFO/DEPRECATED
+     FUTURE: Builder.pm's "default()" method may need to be renamed. 
+      Some time after Perl 5.26, Perl::Critic started flagging "default" as a 
+      reserved keyword. This needs to be further investigated.
 
     .github/workflows/test.yml Update PATH for new ImageMagick level.
 
@@ -13,10 +20,10 @@ See also INFO/Changes_2020 for earlier version 3 release logs.
     version (for distribution build), README.md, lib/PDF/Builder.pm,
       t/00-all-usable.t, .gitignore
      Modified to prereq Perl 5.22 instead of 5.20 (is 6 years old now). Also 
-      Graphics::TIFF minimum upped to 15 due to changes. Keep files up to date 
-      on GitHub so can successfully run without full build. Put version in 
-      GitHub as it's now fairly involved and I don't want to accidentally 
-      lose it!
+      Graphics::TIFF minimum upped to 16 and Image::PNG::Libpng to 0.57 due 
+      to changes. Keep files up to date on GitHub so can successfully run 
+      without full build. Put "version" in GitHub as it's now fairly involved 
+      and I don't want to accidentally lose it!
 
     Makefile.PL, MANIFEST, META.json (add), META.yml (add), .perl-version 
       (deleted), optional_update.pl (add), README.md
