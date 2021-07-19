@@ -2,7 +2,13 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.024     2021-07-15  UNRELEASED
+3.024     2021-07-19  UNRELEASED
+
+    optional_update.pl, MANIFEST, README.md 
+     optional_update moved to tools/, otherwise it
+      was being placed in the PDF/ directory by the installer. Note that you 
+      should be in your PDF::Builder root (parent of tools/) and run
+      tools/optional_update.pl.
 
 3.023     2021-07-15 
 

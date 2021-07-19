@@ -25,7 +25,8 @@ and improve PDF::Builder. Read about the list of optional libraries in
 PDF::Builder::Docs, and decide whether or not you want to install any of them.
 By default, all are installed (as "recommended", so failure to install will
 not fail the overall PDF::Builder installation). You may choose which ones to
-install by modifying certain installation files with "optional\_update.pl".
+install by modifying certain installation files with 
+"tools/optional\_update.pl".
 
 ## Requirements
 
@@ -77,7 +78,7 @@ These libraries should be automatically installed...
 
 These libraries are _recommended_ for improved functionality and performance.
 The default behavior is to attempt to install all of them during PDF::Builder
-installation. If you use optional\_update.pl to _not_ to install any of
+installation. If you use tools/optional\_update.pl to _not_ to install any of
 them, or they fail to install automatically, you can always manually install 
 them later.
 

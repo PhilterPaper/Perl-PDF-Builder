@@ -17,7 +17,7 @@ use strict;
 # optional prerequisites, do not need to exclude unused optionals.
 
 our $VERSION = '3.023'; # VERSION
-our $LAST_UPDATE = '3.023'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 # master list of optional prerequisites:
 # make sure that any updates to patterns etc. keep the same order
@@ -71,8 +71,6 @@ print "list: @list\n";
 update_Makefile();
 update_META_json();
 update_META_yml();
-
-return;
 
 # in all cases, remove "recommends" if @list is empty
 # Makefile.PL find line and # out if not in @list, remove any # if in @list
