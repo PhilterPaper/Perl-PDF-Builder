@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 ##########################
-# NOTE: appears to bring in the entire Ming font (Chinese), rather than a
-#       subset. sorry about that! ref RT 130041
 # Note to maintainer: don't forget to refresh HarfBuzz_example.pdf
 ##########################
 # demonstrate some usage of HarfBuzz::Shaper and related text calls
@@ -393,7 +391,10 @@ $y = 750;
  	  	'dir' => 'T',  
  	  	'script' => 'Chin',
 # 	  	'text' => ["\x{5A40}\x{5A41}\x{5A42}\x{5A43}", " PDF::Builder ", "\x{5A44}\x{5A45}"] },
- 	  	'text' => ["\x{58D8}\x{5A41}\x{5C62}\x{6A13}", " PDF::Builder ", "\x{6DDA}\x{6F0F}"] },
+# 	  	'text' => ["\x{58D8}\x{5A41}\x{5C62}\x{6A13}", " PDF::Builder ", "\x{6DDA}\x{6F0F}"] },
+# want to show some punctuation that gets rotated around in TTB mode. text is Google Translate-produced "use this (whiter teeth)"
+##              'text' => ["使用這個（更白的牙齒）。"] },
+                'text' => ["\x{4F7F}\x{7528}\x{9019}\x{500B}\x{FF08}\x{66F4}\x{767D}\x{7684}\x{7259}\x{9F52}\x{FF09}\x{3002}"] },
 
    # Languages which are normally RTL don't seem to behave with TTB.
    # I would expect them to be reversed, but they aren't. Maybe the direction

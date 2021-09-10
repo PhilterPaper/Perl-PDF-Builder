@@ -1,4 +1,4 @@
-Road Map for Future Development of PDF::Builder                  02 July 2021
+Road Map for Future Development of PDF::Builder             09 September 2021
 
 In order to encourage others to contribute code and/or algorithms to the
 effort, I am publishing this road map of where I would like the product to go.
@@ -48,7 +48,11 @@ A. ## DONE ## release 3.018
 
    UPDATE: See Text::Layout and HarfBuzz::Shaper packages. Layout is usable
      with Builder (but no explicit support yet). Shaper is supported by Builder
-     for ligatures and complex scripts.
+     for ligatures and complex scripts. Need to see if it supports true small
+     and petite capitals (included with font) as a sort of alternate glyphs.
+     It's probably not feasible to decompose outline fonts and shrink them
+     down nonlinearly (stroke widths reduced less than overall height/width)
+     and recreate the new outlines as synthetic small/petite caps.
 
 B. Unification of font support: including character set and encoding support
    improvements [see CTS 16 and CTS 23] to make more commonality between using 
@@ -213,6 +217,18 @@ S. Many requests in wkHTMLtoPDF to output an entire web page into a single
    during render to the file? Another possibility is to use a negative 
    Y-coordinate to mean "place me at the bottom". Also remember that beyond 
    200 inches in height, support in readers and tools will vary.
+
+T. Extend the pageLabel() call to not only label the reader's thumb, but 
+   also place the SAME page label text somewhere on the page. This might be
+   combined with header() and footer() calls, possibly to call pageLabel()
+   when the page numbering field is encountered (if flag set to do both).
+   The idea is to minimize labor and ensure a consistent page numbering 
+   between the paper and the reader's thumb. header() and footer() might be
+   placed in the top and bottom margins, leaving it to the user not to write
+   into these areas. See #171 for pageLabel() enhancements. Also, page label
+   for outlines/bookmarks should be consistent with the thumb and what's
+   printed on the page. A manual page number call to put the page label on
+   an arbitrary place (such as centered in the outside margin) would be good.
 
 =============================================================================
 II. Items to add to a separate area (new module or sub-module)
