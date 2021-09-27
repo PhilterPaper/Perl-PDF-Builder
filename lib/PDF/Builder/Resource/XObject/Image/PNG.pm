@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.019'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use Compress::Zlib;
 use POSIX qw(ceil floor);
@@ -26,9 +26,7 @@ Inherits from L<PDF::Builder::Resource::XObject::Image>
 
 =over
 
-=item $res = PDF::Builder::Resource::XObject::Image::PNG->new($pdf, $file, $name, %opts)
-
-=item $res = PDF::Builder::Resource::XObject::Image::PNG->new($pdf, $file, $name)
+=item $res = PDF::Builder::Resource::XObject::Image::PNG->new($pdf, $file, %opts)
 
 =item $res = PDF::Builder::Resource::XObject::Image::PNG->new($pdf, $file)
 
@@ -42,10 +40,20 @@ If the Image::PNG::Libpng package is installed, the PNG_IPL library will be
 used instead of the PNG library. In such a case, use of the PNG library may be
 forced via the C<-nouseIPL> flag (see Builder documentation for C<image_png()>).
 
-opts: -notrans
+B<opts:>
 
-   No transparency -- ignore tRNS chunk if provided, ignore Alpha channel
-   if provided.
+=over
+
+=item -notrans => 1
+
+No transparency -- ignore tRNS chunk if provided, ignore Alpha channel
+if provided.
+
+=item -name => 'string'
+
+This is the name you can give for the PNG image object. The default is Pxnnnn.
+
+=back
 
 =head2 Supported PNG types
 
@@ -100,7 +108,11 @@ unsupported methods.
 # TBD: gAMA (gamma) chunk, perhaps some others?
 
 sub new {
-    my ($class, $pdf, $file, $name, %opts) = @_;
+    my ($class, $pdf, $file, %opts) = @_;
+
+    my ($name, $compress);
+    if (exists $opts{'-name'}) { $name = $opts{'-name'}; }
+   #if (exists $opts{'-compress'}) { $compress = $opts{'-compress'}; }
 
     my $self;
 

@@ -2,7 +2,23 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.024     2021-07-19  UNRELEASED
+3.024     2021-09-27  UNRELEASED
+
+    lib/PDF/Builder/Resource/XObject/Image/GD-GIF-JPEG-PNG-PNM-TIFF.pm
+      Add -name option to name the image object if desired.
+      In sync with PDF::API2, add -compress option for PNM. 
+
+    lib/PDF/Builder/Resource/XObject/Image/GIF-PNM.pm minor changes to sync
+      with PDF::API2 changes.
+
+    examples/HarfBuzz.pl, examples/resources/HarfBuzz_example.pdf
+     show a better Chinese (CJK) example in vertical mode, which demonstrates 
+      rotation of punctuation such as ( ). Continuation of #144.
+
+    INFO/RoadMap  comments on page labeling (slider thumb) enhancements per 
+      #171, including possibly integrating with header() and footer() calls
+      that place a page number on the paper, and any outline/bookmarks, so
+      that they all give a consistent page label (number).
 
     optional_update.pl, MANIFEST, README.md 
      optional_update moved to tools/, otherwise it
@@ -12,7 +28,7 @@ See also INFO/Changes_2020 for earlier version 3 release logs.
 
 3.023     2021-07-15 
 
-*   lib/PDF/Builder.pm, INFO/DEPRECATED
+    lib/PDF/Builder.pm, INFO/DEPRECATED
      FUTURE: Builder.pm's "default()" method may need to be renamed. 
       Some time after Perl 5.26, Perl::Critic started flagging "default" as a 
       reserved keyword. This needs to be further investigated.

@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use IO::File;
 use PDF::Builder::Util;
@@ -17,14 +17,34 @@ use Scalar::Util qw(weaken);
 
 PDF::Builder::Resource::XObject::Image::JPEG - support routines for JPEG image library. Inherits from L<PDF::Builder::Resource::XObject::Image>
 
+=head1 METHODS
+
+=item $res = PDF::Builder::Resource::XObject::Image::JPEG->new($pdf, $file, %opts)
+
+=item $res = PDF::Builder::Resource::XObject::Image::JPEG->new($pdf, $file)
+
+Options:
+
+=over
+
+=item -name => 'string'
+
+This is the name you can give for the JPEG image object. The default is Jxnnnn.
+
+=back
+
 =cut
 
 sub new {
-    my ($class, $pdf, $file, $name) = @_;
+    my ($class, $pdf, $file, %opts) = @_;
+
+    my ($name, $compress);
+    if (exists $opts{'-name'}) { $name = $opts{'-name'}; }
+   #if (exists $opts{'-compress'}) { $compress = $opts{'-compress'}; }
 
     my $fh = IO::File->new();
 
-    $class = ref($class) if ref $class;
+    $class = ref($class) if ref($class);
 
     my $self = $class->SUPER::new($pdf, $name || 'Jx' . pdfkey());
     $pdf->new_obj($self) unless $self->is_obj($pdf);

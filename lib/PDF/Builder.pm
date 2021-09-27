@@ -5,9 +5,10 @@ use warnings;
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
-our $VERSION = '3.023'; # VERSION
-our $LAST_UPDATE = '3.023'; # manually update whenever code is changed
+our $VERSION = '3.024'; # VERSION
+our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
+# updated during CPAN build
 my $GrTFversion = 16;    # minimum version of Graphics::TIFF
 my $LpngVersion = 0.57;  # minimum version of Image::PNG::Libpng
 
@@ -2152,6 +2153,8 @@ sub unifont {
 
 =over
 
+=item $jpeg = $pdf->image_jpeg($file, %options)
+
 =item $jpeg = $pdf->image_jpeg($file)
 
 Imports and returns a new JPEG image object. C<$file> may be either a filename 
@@ -2162,20 +2165,18 @@ and C<examples/Content.pl> for some examples of placing an image on a page.
 
 =cut
 
-# =item $jpeg = $pdf->image_jpeg($file, %options)   no current options
-
 sub image_jpeg {
     my ($self, $file, %opts) = @_;
 
     require PDF::Builder::Resource::XObject::Image::JPEG;
-    my $obj = PDF::Builder::Resource::XObject::Image::JPEG->new($self->{'pdf'}, $file);
+    my $obj = PDF::Builder::Resource::XObject::Image::JPEG->new($self->{'pdf'}, $file, %opts);
 
     $self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
 }
 
-=item $tiff = $pdf->image_tiff($file, %opts)
+=item $tiff = $pdf->image_tiff($file, %options)
 
 =item $tiff = $pdf->image_tiff($file)
 
@@ -2187,8 +2188,10 @@ See L<PDF::Builder::Resource::XObject::Image::TIFF> and
 L<PDF::Builder::Resource::XObject::Image::TIFF_GT> for additional information
 and C<examples/Content.pl>
 for some examples of placing an image on a page (JPEG, but the principle is
-the same). There is an optional TIFF library described, that gives more
-capability than the default one.
+the same). 
+There is an optional TIFF library (TIFF_GT) described, that gives more
+capability than the default one. However, note that C<$file> can only be
+a filename when using this library.
 
 =cut
 
@@ -2206,12 +2209,12 @@ sub image_tiff {
     if ($rc == 1) {
 	# Graphics::TIFF (_GT suffix) available and to be used
         require PDF::Builder::Resource::XObject::Image::TIFF_GT;
-        $obj = PDF::Builder::Resource::XObject::Image::TIFF_GT->new($self->{'pdf'}, $file, 'Ix'.pdfkey(), %opts);
+        $obj = PDF::Builder::Resource::XObject::Image::TIFF_GT->new($self->{'pdf'}, $file, %opts);
         $self->{'pdf'}->out_obj($self->{'pages'});
     } else {
 	# Graphics::TIFF not available, or is but is not to be used
         require PDF::Builder::Resource::XObject::Image::TIFF;
-        $obj = PDF::Builder::Resource::XObject::Image::TIFF->new($self->{'pdf'}, $file, 'Ix'.pdfkey(), %opts);
+        $obj = PDF::Builder::Resource::XObject::Image::TIFF->new($self->{'pdf'}, $file, %opts);
         $self->{'pdf'}->out_obj($self->{'pages'});
 
 	if ($rc == 0 && $MSG_COUNT[0]++ == 0) {
@@ -2264,24 +2267,27 @@ sub LA_GT {
     return $rc;
 }
 
+=item $pnm = $pdf->image_pnm($file, %options)
+
 =item $pnm = $pdf->image_pnm($file)
 
 Imports and returns a new PNM image object. C<$file> may be either a filename 
 or a filehandle.
 
-See C<examples/Content.pl>
-for some examples of placing an image on a page (JPEG, but the principle is
-the same).
+See L<PDF::Builder::Resource::XObject::Image::PNM> for additional information
+and C<examples/Content.pl> for some examples of placing an image on a page
+(JPEG, but the principle is the same).
 
 =cut
-
-# =item $pnm = $pdf->image_pnm($file, %options)   no current options
 
 sub image_pnm {
     my ($self, $file, %opts) = @_;
 
+    $opts{'-compress'} //= $self->{'forcecompress'};
+
     require PDF::Builder::Resource::XObject::Image::PNM;
-    my $obj = PDF::Builder::Resource::XObject::Image::PNM->new($self->{'pdf'}, $file);
+    my $obj = PDF::Builder::Resource::XObject::Image::PNM->new($self->{'pdf'}, $file, %opts);
+
     $self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
@@ -2299,8 +2305,11 @@ See L<PDF::Builder::Resource::XObject::Image::PNG> and
 L<PDF::Builder::Resource::XObject::Image::PNG_IPL> for additional information
 and C<examples/Content.pl>
 for some examples of placing an image on a page (JPEG, but the principle is
-the same). There is an optional PNG library (PNG_IPL) described, that gives more
-capability than the default one.
+the same). 
+
+There is an optional PNG library (PNG_IPL) described, that gives more
+capability than the default one. However, note that C<$file> can only be
+a filename when using this library.
 
 =cut
 
@@ -2318,12 +2327,12 @@ sub image_png {
     if ($rc == 1) {
         # Image::PNG::Libpng (_IPL suffix) available and to be used
         require PDF::Builder::Resource::XObject::Image::PNG_IPL;
-        $obj = PDF::Builder::Resource::XObject::Image::PNG_IPL->new($self->{'pdf'}, $file, 'Px'.pdfkey(), %opts);
+        $obj = PDF::Builder::Resource::XObject::Image::PNG_IPL->new($self->{'pdf'}, $file, %opts);
         $self->{'pdf'}->out_obj($self->{'pages'});
     } else {
         # Image::PNG::Libpng not available, or is but is not to be used
         require PDF::Builder::Resource::XObject::Image::PNG;
-        $obj = PDF::Builder::Resource::XObject::Image::PNG->new($self->{'pdf'}, $file, 'Px'.pdfkey(), %opts);
+        $obj = PDF::Builder::Resource::XObject::Image::PNG->new($self->{'pdf'}, $file, %opts);
         $self->{'pdf'}->out_obj($self->{'pages'});
 
         if ($rc == 0 && $MSG_COUNT[1]++ == 0) {
@@ -2375,6 +2384,8 @@ sub LA_IPL {
     return $rc;
 }
 
+=item $gif = $pdf->image_gif($file, %options)
+
 =item $gif = $pdf->image_gif($file)
 
 Imports and returns a new GIF image object. C<$file> may be either a filename 
@@ -2385,8 +2396,6 @@ and C<examples/Content.pl> for some examples of placing an image on a page
 (JPEG, but the principle is the same).
 
 =cut
-
-# =item $gif = $pdf->image_gif($file, %options)   no current options
 
 sub image_gif {
     my ($self, $file, %opts) = @_;
@@ -2404,16 +2413,6 @@ sub image_gif {
 
 Imports and returns a new image object from Image::GD.
 
-Valid %options are:
-
-=over
-
-=item -lossless => 1
-
-Use lossless compression.
-
-=back
-
 See L<PDF::Builder::Resource::XObject::Image::GD> for additional information
 and C<examples/Content.pl> for some examples of placing an image on a page 
 (JPEG, but the principle is the same).
@@ -2424,7 +2423,7 @@ sub image_gd {
     my ($self, $gd, %options) = @_;
 
     require PDF::Builder::Resource::XObject::Image::GD;
-    my $obj = PDF::Builder::Resource::XObject::Image::GD->new($self->{'pdf'}, $gd, undef, %options);
+    my $obj = PDF::Builder::Resource::XObject::Image::GD->new($self->{'pdf'}, $gd, %options);
     $self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;

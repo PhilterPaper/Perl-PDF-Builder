@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.023'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use Compress::Zlib;
 
@@ -23,7 +23,7 @@ PDF::Builder::Resource::XObject::Image::TIFF - TIFF image support
 
 =over
 
-=item  $res = PDF::Builder::Resource::XObject::Image::TIFF->new($pdf, $file, $name)
+=item  $res = PDF::Builder::Resource::XObject::Image::TIFF->new($pdf, $file, %opts)
 
 =item  $res = PDF::Builder::Resource::XObject::Image::TIFF->new($pdf, $file)
 
@@ -33,14 +33,28 @@ If the Graphics::TIFF package is installed, the TIFF_GT library will be used
 instead of the TIFF library. In such a case, use of the TIFF library may be 
 forced via the C<-nouseGT> flag (see Builder documentation for C<image_tiff()>).
 
+Options:
+
+=over
+
+=item -name => 'string'
+
+This is the name you can give for the TIFF image object. The default is Ixnnnn.
+
+=back
+
 =cut
 
 sub new {
-    my ($class, $pdf, $file, $name) = @_;
+    my ($class, $pdf, $file, %opts) = @_;
+
+    my ($name, $compress);
+    if (exists $opts{'-name'}) { $name = $opts{'-name'}; }
+   #if (exists $opts{'-compress'}) { $compress = $opts{'-compress'}; }
 
     my $self;
 
-    my $tif = PDF::Builder::Resource::XObject::Image::TIFF::File->new($file);
+    my $tif = PDF::Builder::Resource::XObject::Image::TIFF::File->new($file, %opts);
 
  # dump everything in tif except huge data streams
 # foreach (sort keys %{ $tif }) {
@@ -58,7 +72,7 @@ sub new {
     # in case of problematic things
     #  proxy to other modules
 
-    $class = ref($class) if ref $class;
+    $class = ref($class) if ref($class);
 
     $self = $class->SUPER::new($pdf, $name || 'Ix'.pdfkey());
     $pdf->new_obj($self) unless $self->is_obj($pdf);

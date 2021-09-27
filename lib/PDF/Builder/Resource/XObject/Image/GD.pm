@@ -4,10 +4,9 @@ use base 'PDF::Builder::Resource::XObject::Image';
 
 use strict;
 use warnings;
-#no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use PDF::Builder::Util;
 use PDF::Builder::Basic::PDF::Utils;
@@ -17,22 +16,46 @@ use Scalar::Util qw(weaken);
 
 PDF::Builder::Resource::XObject::Image::GD - support routines for Graphics Development image library. Inherits from L<PDF::Builder::Resource::XObject::Image>
 
+=head1 METHODS
+
+=item $res = PDF::Builder::Resource::XObject::Image::GD->new($pdf, $file, %opts)
+
+=item $res = PDF::Builder::Resource::XObject::Image::GD->new($pdf, $file)
+
+Options:
+
+=over
+
+=item -name => 'string'
+
+This is the name you can give for the GD image object. The default is Dxnnnn.
+
+=item -lossless => 1
+
+Use lossless compression.
+
+=back
+
 =cut
 
 sub new {
-    my ($class, $pdf, $obj, $name, @opts) = @_;
+    my ($class, $pdf, $obj, %opts) = @_;
+
+    my ($name, $compress);
+    if (exists $opts{'-name'}) { $name = $opts{'-name'}; }
+   #if (exists $opts{'-compress'}) { $compress = $opts{'-compress'}; }
 
     my $self;
 
-    $class = ref $class if ref $class;
+    $class = ref($class) if ref($class);
 
-    $self = $class->SUPER::new($pdf, $name || 'Jx'.pdfkey());
+    $self = $class->SUPER::new($pdf, $name || 'Dx'.pdfkey());
     $pdf->new_obj($self) unless $self->is_obj($pdf);
 
     $self->{' apipdf'} = $pdf;
     weaken $self->{' apipdf'};
 
-    $self->read_gd($obj, @opts);
+    $self->read_gd($obj, %opts);
 
     return $self;
 }

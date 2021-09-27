@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use Compress::Zlib;
 use POSIX qw(ceil floor);
@@ -28,9 +28,7 @@ Inherits from L<PDF::Builder::Resource::XObject::Image>
 
 =over
 
-=item $res = PDF::Builder::Resource::XObject::Image::PNG_IPL->new($pdf, $file, $name, %opts)
-
-=item $res = PDF::Builder::Resource::XObject::Image::PNG_IPL->new($pdf, $file, $name)
+=item $res = PDF::Builder::Resource::XObject::Image::PNG_IPL->new($pdf, $file, %opts)
 
 =item $res = PDF::Builder::Resource::XObject::Image::PNG_IPL->new($pdf, $file)
 
@@ -57,6 +55,10 @@ if provided.
 
 If the PNG source is 16bps, tell the libpng library to strip down all
 channels to 8bps, permitting use on PDF 1.4 output.
+
+=item -name => 'string'
+
+This is the name you can give for the PNG image object. The default is Pxnnnn.
 
 =back
 
@@ -113,7 +115,11 @@ be unsupported methods.
 # TBD: gAMA (gamma) chunk, perhaps some others?
 
 sub new {
-    my ($class, $pdf, $file, $name, %opts) = @_;
+    my ($class, $pdf, $file, %opts) = @_;
+
+    my ($name, $compress);
+    if (exists $opts{'-name'}) { $name = $opts{'-name'}; }
+   #if (exists $opts{'-compress'}) { $compress = $opts{'-compress'}; }
 
     my $self;
 

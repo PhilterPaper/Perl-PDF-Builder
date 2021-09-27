@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.023'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use Compress::Zlib;
 
@@ -25,9 +25,7 @@ PDF::Builder::Resource::XObject::Image::TIFF_GT - TIFF image support
 
 =over
 
-=item  $res = PDF::Builder::Resource::XObject::Image::TIFF_GT->new($pdf, $file, $name, %opts)
-
-=item  $res = PDF::Builder::Resource::XObject::Image::TIFF_GT->new($pdf, $file, $name)
+=item  $res = PDF::Builder::Resource::XObject::Image::TIFF_GT->new($pdf, $file, %opts)
 
 =item  $res = PDF::Builder::Resource::XObject::Image::TIFF_GT->new($pdf, $file)
 
@@ -46,6 +44,10 @@ Options:
 =item -notrans => 1
 
 Ignore any alpha layer (transparency) and make the image fully opaque.
+
+=item -name => 'string'
+
+This is the name you can give for the TIFF image object. The default is Ixnnnn.
 
 =back
 
@@ -72,16 +74,20 @@ so he can't do anything about it!
 =cut
 
 sub new {
-    my ($class, $pdf, $file, $name, %opts) = @_;
+    my ($class, $pdf, $file, %opts) = @_;
+
+    my ($name, $compress);
+    if (exists $opts{'-name'}) { $name = $opts{'-name'}; }
+   #if (exists $opts{'-compress'}) { $compress = $opts{'-compress'}; }
 
     my $self;
 
-    my $tif = PDF::Builder::Resource::XObject::Image::TIFF::File_GT->new($file);
+    my $tif = PDF::Builder::Resource::XObject::Image::TIFF::File_GT->new($file, %opts);
 
     # in case of problematic things
     #  proxy to other modules
 
-    $class = ref($class) if ref $class;
+    $class = ref($class) if ref($class);
 
     $self = $class->SUPER::new($pdf, $name || 'Ix'.pdfkey());
     $pdf->new_obj($self) unless $self->is_obj($pdf);
