@@ -53,7 +53,16 @@ jobs:
       - uses: actions/checkout@v2
       - run: choco install imagemagick dejavufonts ghostscript
       - run: refreshenv
-      - run: echo "C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin;C:\Program Files\ImageMagick-7.1.0-Q16-HDRI;C:\Program Files\gs\gs9.55.0\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - run: |
+          $folders = Get-ChildItem "C:\Program Files\ImageMagick*"
+          foreach ($folder in $folders) {
+              $imfolder = $folder.FullName
+          }
+          $folders = Get-ChildItem "C:\Program Files\gs"
+          foreach ($folder in $folders) {
+              $gsfolder = $folder.FullName
+          }
+          echo "C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin;$imfolder;$gsfolder\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - run: magick convert -version
       - run: gswin64c -v
       - run: cpan Font::TTF GD IO::Compress Test::Exception Test::Memory::Cycle Graphics::TIFF
