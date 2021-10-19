@@ -6,7 +6,7 @@ use IPC::Cmd qw(can_run run);
 use File::Spec;
 use File::Temp;
 use version;
-use Test::More tests => 19;
+use Test::More tests => 25;
 
 use PDF::Builder;
 # 0: allow use of Graphics::TIFF, 1: force non-GT usage
@@ -433,6 +433,168 @@ $expected =~ s/(.*\n).*\n.*\n$/$1/;
 # ----------
 
 is($example, $expected, "bilevel and alpha when width not a whole number of bytes with GT") or show_diag();
+}
+
+# 20
+TODO: {
+local $TODO = "No support for alpha layer without GT yet";
+SKIP: {
+    skip "Either ImageMagick or Ghostscript not available.", 1 unless
+        defined $convert and defined $gs;
+$width = 6;
+$height = 1;
+system("$convert -depth 1 -size ${width}x${height} pattern:gray50 -alpha on $tiff_f");
+$pdf = PDF::Builder->new(-file => $pdfout);
+$page = $pdf->page();
+$page->mediabox( $width, $height );
+$gfx = $page->gfx();
+$img = $pdf->image_tiff($tiff_f, -nouseGT => 1);
+$gfx->image( $img, 0, 0, $width, $height );
+$pdf->save();
+$pdf->end();
+
+# ----------
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+$example = `$convert $pngout -depth 1 -alpha off txt:-`;
+$expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
+# for reasons I don't understand, gs swaps the last two pixels here, so let's
+# ignore them
+$example =~ s/(.*\n).*\n.*\n$/$1/;
+$expected =~ s/(.*\n).*\n.*\n$/$1/;
+# ----------
+
+is($example, $expected, "bilevel and alpha when width not a whole number of bytes without GT");
+}
+}
+
+# 21
+SKIP: {
+    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
+        defined $convert and defined $gs and $has_GT;
+
+$width = 6;
+$height = 2;
+system("$convert -depth 1 -size ${width}x${height} pattern:gray50 -alpha off -define tiff:rows-per-strip=1 -compress fax $tiff_f");
+$pdf = PDF::Builder->new(-file => $pdfout);
+$page = $pdf->page();
+$page->mediabox( $width, $height );
+$gfx = $page->gfx();
+$img = $pdf->image_tiff($tiff_f, -nouseGT => 0);
+$gfx->image( $img, 0, 0, $width, $height );
+$pdf->save();
+$pdf->end();
+
+# ----------
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+$example = `$convert $pngout -depth 1 -alpha off txt:-`;
+$expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
+# ----------
+
+is($example, $expected, 'multi-strip group 3 (not converted to flate) with GT');
+}
+
+# 22
+SKIP: {
+    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
+        defined $convert and defined $gs and $has_GT;
+
+$width = 6;
+$height = 2;
+system("$convert -depth 1 -size ${width}x${height} pattern:gray50 -alpha off -define tiff:rows-per-strip=1 -compress group4 $tiff_f");
+$pdf = PDF::Builder->new(-file => $pdfout);
+$page = $pdf->page();
+$page->mediabox( $width, $height );
+$gfx = $page->gfx();
+$img = $pdf->image_tiff($tiff_f, -nouseGT => 0);
+$gfx->image( $img, 0, 0, $width, $height );
+$pdf->save();
+$pdf->end();
+
+# ----------
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+$example = `$convert $pngout -depth 1 -alpha off txt:-`;
+$expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
+# ----------
+
+is($example, $expected, 'multi-strip g4 (not converted to flate) with GT');
+}
+
+# 23
+SKIP: {
+    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
+        defined $convert and defined $gs and $has_GT;
+
+$width = 6;
+$height = 2;
+system("$convert -depth 1 -size ${width}x${height} pattern:gray50 -alpha off -define tiff:rows-per-strip=1 -define quantum:polarity=min-is-black -compress fax $tiff_f");
+$pdf = PDF::Builder->new(-file => $pdfout);
+$page = $pdf->page();
+$page->mediabox( $width, $height );
+$gfx = $page->gfx();
+$img = $pdf->image_tiff($tiff_f, -nouseGT => 0);
+$gfx->image( $img, 0, 0, $width, $height );
+$pdf->save();
+$pdf->end();
+
+# ----------
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+$example = `$convert $pngout -depth 1 -alpha off txt:-`;
+$expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
+# ----------
+
+is($example, $expected, 'multi-strip g3 min-is-black (not converted to flate) with GT');
+}
+
+# 24
+SKIP: {
+    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
+        defined $convert and defined $gs and $has_GT;
+
+$width = 6;
+$height = 2;
+system("$convert -depth 1 -size ${width}x${height} pattern:gray50 -alpha off -define tiff:rows-per-strip=1 -define quantum:polarity=min-is-black -compress group4 $tiff_f");
+$pdf = PDF::Builder->new(-file => $pdfout);
+$page = $pdf->page();
+$page->mediabox( $width, $height );
+$gfx = $page->gfx();
+$img = $pdf->image_tiff($tiff_f, -nouseGT => 0);
+$gfx->image( $img, 0, 0, $width, $height );
+$pdf->save();
+$pdf->end();
+
+# ----------
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+$example = `$convert $pngout -depth 1 -alpha off txt:-`;
+$expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
+# ----------
+
+is($example, $expected, 'multi-strip g4 min-is-black (not converted to flate) with GT');
+}
+
+# 25
+SKIP: {
+    skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
+        defined $convert and defined $gs and $has_GT;
+
+$width = 6;
+$height = 2;
+system("$convert -depth 1 -size ${width}x${height} pattern:gray50 -alpha off -define tiff:fill-order=lsb -compress group4 $tiff_f");
+$pdf = PDF::Builder->new(-file => $pdfout);
+$page = $pdf->page();
+$page->mediabox( $width, $height );
+$gfx = $page->gfx();
+$img = $pdf->image_tiff($tiff_f, -nouseGT => 0);
+$gfx->image( $img, 0, 0, $width, $height );
+$pdf->save();
+$pdf->end();
+
+# ----------
+system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+$example = `$convert $pngout -depth 1 -alpha off txt:-`;
+$expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
+# ----------
+
+is($example, $expected, 'LSB fillorder with GT');
 }
 
 ##############################################################

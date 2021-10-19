@@ -26,6 +26,7 @@ use PDF::Builder::Basic::PDF::Filter::ASCIIHexDecode;
 use PDF::Builder::Basic::PDF::Filter::FlateDecode;
 use PDF::Builder::Basic::PDF::Filter::LZWDecode;
 use PDF::Builder::Basic::PDF::Filter::RunLengthDecode;
+use PDF::Builder::Basic::PDF::Filter::CCITTFaxDecode;
 use Scalar::Util qw(blessed reftype);
 
 =head1 NAME
