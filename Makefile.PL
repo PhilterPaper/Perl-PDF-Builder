@@ -50,6 +50,7 @@ my %WriteMakefileArgs =
   PREREQ_PM => {
     "Compress::Zlib" => 1.0,
     "Font::TTF" => 1.04,
+    "Readonly" => 0,
 
     # === found in CORE, so no need to explicitly list
     #"Carp" => 0,
@@ -98,7 +99,7 @@ my %WriteMakefileArgs =
     # recommends (optional prereqs) goes here
     # if remove or comment out any, also do so in META.json and META.yml
     "recommends" => {
-      "Graphics::TIFF" => 16,
+      "Graphics::TIFF" => 17,
       # advanced/fast PNG image processing.
       "Image::PNG::Libpng" => 0.57,
       # text shaping for Latin script ligatures and kerning, and for 

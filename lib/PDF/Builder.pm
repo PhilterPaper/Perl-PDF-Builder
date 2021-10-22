@@ -9,7 +9,7 @@ our $VERSION = '3.024'; # VERSION
 our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 # updated during CPAN build
-my $GrTFversion = 16;    # minimum version of Graphics::TIFF
+my $GrTFversion = 17;    # minimum version of Graphics::TIFF
 my $LpngVersion = 0.57;  # minimum version of Image::PNG::Libpng
 
 use Carp;

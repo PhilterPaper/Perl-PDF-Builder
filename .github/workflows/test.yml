@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: sudo apt install libfont-ttf-perl libgd-perl libio-compress-perl libtest-exception-perl libtest-memory-cycle-perl ghostscript gsfonts
+      - run: sudo apt install libfont-ttf-perl libgd-perl libio-compress-perl libtest-exception-perl libtest-memory-cycle-perl libreadonly-perl ghostscript gsfonts
       - run: perl Makefile.PL
       - run: make test TEST_VERBOSE=1
   nogt_nogs:
@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: sudo apt install libfont-ttf-perl libgd-perl libio-compress-perl libtest-exception-perl libtest-memory-cycle-perl gsfonts
+      - run: sudo apt install libfont-ttf-perl libgd-perl libio-compress-perl libtest-exception-perl libtest-memory-cycle-perl libreadonly-perl gsfonts
       - run: perl Makefile.PL
       - run: make test TEST_VERBOSE=1
 # lint:
@@ -43,7 +43,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-      - run: cpan Font::TTF GD IO::Compress Test::Exception Test::Memory::Cycle
+      - run: cpan Font::TTF GD IO::Compress Test::Exception Test::Memory::Cycle Readonly
       - run: perl Makefile.PL
       - run: make test TEST_VERBOSE=1
   full-windows:
