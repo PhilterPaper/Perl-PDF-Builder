@@ -354,9 +354,8 @@ $width = 1000;
 $height = 100;
 }
 
-# 17
+# 17    TODO
 SKIP: {
-   #skip "currently fails due to bug inherited from PDF::API2", 1;
     skip "multi-strip lzw without GT is not currently supported", 1;
 system("$convert -depth 1 -gravity center -pointsize 78 -size ${width}x${height} caption:\"A caption for the image\" -background white -alpha off -define tiff:rows-per-strip=50 -compress lzw $tiff_f");
 # ----------
@@ -435,12 +434,12 @@ $expected =~ s/(.*\n).*\n.*\n$/$1/;
 is($example, $expected, "bilevel and alpha when width not a whole number of bytes with GT") or show_diag();
 }
 
-# 20
-TODO: {
-local $TODO = "No support for alpha layer without GT yet";
+# 20    TODO
 SKIP: {
-    skip "Either ImageMagick or Ghostscript not available.", 1 unless
-        defined $convert and defined $gs;
+     skip "alpha layer without GT is not currently supported", 1;
+#SKIP: {
+#    skip "Either ImageMagick or Ghostscript not available.", 1 unless
+#        defined $convert and defined $gs;
 $width = 6;
 $height = 1;
 system("$convert -depth 1 -size ${width}x${height} pattern:gray50 -alpha on $tiff_f");
@@ -464,7 +463,6 @@ $expected =~ s/(.*\n).*\n.*\n$/$1/;
 # ----------
 
 is($example, $expected, "bilevel and alpha when width not a whole number of bytes without GT");
-}
 }
 
 # 21
@@ -519,14 +517,16 @@ $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 is($example, $expected, 'multi-strip g4 (not converted to flate) with GT');
 }
 
-# 23
+# 23   this one blows up test.yml under Windows (only)
 SKIP: {
     skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
         defined $convert and defined $gs and $has_GT;
 
 $width = 6;
 $height = 2;
+print STDERR "23 about to create a TIFF file $tiff_f\n";
 system("$convert -depth 1 -size ${width}x${height} pattern:gray50 -alpha off -define tiff:rows-per-strip=1 -define quantum:polarity=min-is-black -compress fax $tiff_f");
+print STDERR "23 about to create a PDF file $pdfout\n";
 $pdf = PDF::Builder->new(-file => $pdfout);
 $page = $pdf->page();
 $page->mediabox( $width, $height );
@@ -537,11 +537,15 @@ $pdf->save();
 $pdf->end();
 
 # ----------
+print STDERR "23 about to create a PNG file $pngout\n";
 system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+print STDERR "23 about to create \$example output\n";
 $example = `$convert $pngout -depth 1 -alpha off txt:-`;
+print STDERR "23 about to create \$expected output\n";
 $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
+print STDERR "23 about to compare expected and example\n";
 is($example, $expected, 'multi-strip g3 min-is-black (not converted to flate) with GT');
 }
 
