@@ -592,11 +592,17 @@ print STDERR "25 about to create a TIFF file $tiff_f\n";
 system("$convert -depth 1 -size ${width}x${height} pattern:gray50 -alpha off -define tiff:fill-order=lsb -compress group4 $tiff_f");
 print STDERR "25 about to create a PDF file $pdfout\n";
 $pdf = PDF::Builder->new(-file => $pdfout);
+print STDERR "25 about to create a page\n";
 $page = $pdf->page();
+print STDERR "25 set mediabox $width x $height\n";
 $page->mediabox( $width, $height );
+print STDERR "25 create graphics context\n";
 $gfx = $page->gfx();
+print STDERR "25 create tiff image from $tiff_f\n";
 $img = $pdf->image_tiff($tiff_f, -nouseGT => 0);
+print STDERR "25 add $width x $height tiff image to PDF\n";
 $gfx->image( $img, 0, 0, $width, $height );
+print STDERR "25 save PDF and end\n";
 $pdf->save();
 $pdf->end();
 
