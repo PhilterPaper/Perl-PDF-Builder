@@ -517,7 +517,7 @@ $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 is($example, $expected, 'multi-strip g4 (not converted to flate) with GT');
 }
 
-# 23   this one blows up test.yml under Windows (only)
+# 23
 SKIP: {
     skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
         defined $convert and defined $gs and $has_GT;
@@ -556,7 +556,9 @@ SKIP: {
 
 $width = 6;
 $height = 2;
+print STDERR "24 about to create a TIFF file $tiff_f\n";
 system("$convert -depth 1 -size ${width}x${height} pattern:gray50 -alpha off -define tiff:rows-per-strip=1 -define quantum:polarity=min-is-black -compress group4 $tiff_f");
+print STDERR "24 about to create a PDF file $pdfout\n";
 $pdf = PDF::Builder->new(-file => $pdfout);
 $page = $pdf->page();
 $page->mediabox( $width, $height );
@@ -567,11 +569,15 @@ $pdf->save();
 $pdf->end();
 
 # ----------
+print STDERR "24 about to create a PNG file $pngout\n";
 system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+print STDERR "24 about to create \$example output\n";
 $example = `$convert $pngout -depth 1 -alpha off txt:-`;
+print STDERR "24 about to create \$expected output\n";
 $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
+print STDERR "24 about to compare expected and example\n";
 is($example, $expected, 'multi-strip g4 min-is-black (not converted to flate) with GT');
 }
 
@@ -582,7 +588,9 @@ SKIP: {
 
 $width = 6;
 $height = 2;
+print STDERR "25 about to create a TIFF file $tiff_f\n";
 system("$convert -depth 1 -size ${width}x${height} pattern:gray50 -alpha off -define tiff:fill-order=lsb -compress group4 $tiff_f");
+print STDERR "25 about to create a PDF file $pdfout\n";
 $pdf = PDF::Builder->new(-file => $pdfout);
 $page = $pdf->page();
 $page->mediabox( $width, $height );
@@ -593,11 +601,15 @@ $pdf->save();
 $pdf->end();
 
 # ----------
+print STDERR "25 about to create a PNG file $pngout\n";
 system("$gs -q -dNOPAUSE -dBATCH -sDEVICE=pnggray -g${width}x${height} -dPDFFitPage -dUseCropBox -sOutputFile=$pngout $pdfout");
+print STDERR "25 about to create \$example output\n";
 $example = `$convert $pngout -depth 1 -alpha off txt:-`;
+print STDERR "25 about to create \$expected output\n";
 $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 # ----------
 
+print STDERR "25 about to compare expected and example\n";
 is($example, $expected, 'LSB fillorder with GT');
 }
 
