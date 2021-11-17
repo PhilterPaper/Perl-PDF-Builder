@@ -873,7 +873,14 @@ sub xmpMetadata {
 
 =item $pdf->pageLabel($index, $options)
 
-Sets page label options.
+Sets page label options, for the page-selection slider thumb (I<not> the
+outline/bookmarks). At this time, there is no method to automatically
+synchronize a page's label with the outline/bookmarks, or to somewhere on the
+printed page.
+
+Note that many PDF Readers ignore these settings, and (at most) simply give
+you the physical page number 1, 2, 3,... instead of the page label specified 
+here.
 
 B<Supported Options:>
 
@@ -881,46 +888,84 @@ B<Supported Options:>
 
 =item -style
 
-Roman, roman, decimal, Alpha or alpha.
+B<Roman> (I,II,III,...), B<roman> (i,ii,iii,...), B<decimal> (1,2,3,...), 
+B<Alpha> (A,B,C,...), B<alpha> (a,b,c,...), or B<nocounter>. This is the 
+styling of the counter part of the label (unless C<nocounter>, in which case 
+there is no counter output).
 
 =item -start
 
-Restart numbering at given number.
+(Re)start numbering the I<counter> at given page number (this is a decimal 
+integer, I<not> the styled counter). By default it starts at 1, and B<resets>
+to 1 at each call to C<pageLabel()>! You need to explicitly give C<-start> if 
+you want to I<continue> counting at the current page number when you call
+C<pageLabel()>, whether or not you are changing the format.
+
+Also note that the counter starts at physical page B<1>, while the page 
+C<$index> number in the C<pageLabel()> call (as well as the PDF PageLabels 
+dictionary) starts at logical page (index) B<0>.
 
 =item -prefix
 
-Text prefix for numbering.
+Text prefix for numbering, such as an Appendix letter B<B->. If C<-style> is 
+I<nocounter>, just this text is used, otherwise a styled counter will be 
+appended. If C<-style> is omitted, remember that it will default to a decimal 
+number, which will be appended to the prefix.
+
+According to the Adobe/ISO PDF specification, a prefix of 'Content' has a 
+special meaning, in that any /S counter is ignored and only that text is used. 
+However, this appears to be ignored (use a style of I<nocounter> to suppress
+the counter).
 
 =back
 
 B<Example:>
 
-    # Start with Roman Numerals
+    # Start with lowercase Roman Numerals at the 1st page, starting with i (1)
     $pdf->pageLabel(0, {
         -style => 'roman',
     });
 
-    # Switch to Arabic
+    # Switch to Arabic (decimal) at the 5th page, starting with 1
     $pdf->pageLabel(4, {
         -style => 'decimal',
     });
 
-    # Numbering for Appendix A
+    # invalid style at the 25th page, should just continue 
+    # with decimal at the current counter
+    $pdf->pageLabel(24, {
+        -style => 'glorp',  # fail over to decimal
+	-start => 21,  # necessary, otherwise would restart at 1
+    });
+
+    # No page label at the 31st and 32nd pages. Note that this could be
+    # confusing to the person viewing the PDF, but may be appropriate if
+    # the page itself has no numbering.
+    $pdf->pageLabel(30, {
+        -style => 'nocounter',
+    });
+
+    # Numbering for Appendix A at the 33rd page, A-1, A-2,...
     $pdf->pageLabel(32, {
-        -start => 1,
+        -start => 1,  # unnecessary
         -prefix => 'A-'
     });
 
-    # Numbering for Appendix B
+    # Numbering for Appendix B at the 37th page, B-1, B-2,...
     $pdf->pageLabel( 36, {
-        -start => 1,
         -prefix => 'B-'
     });
 
-    # Numbering for the Index
+    # Numbering for the Index at the 41st page, Index I, Index II,...
     $pdf->pageLabel(40, {
-        -style => 'Roman'
-        -start => 1,
+        -style => 'Roman',
+        -start => 1,  # unnecessary
+        -prefix => 'Index '  # note trailing space
+    });
+
+    # Unnumbered 'Index' at the 45th page, Index, Index,...
+    $pdf->pageLabel(40, {
+        -style => 'nocounter',
         -prefix => 'Index '
     });
 
@@ -941,15 +986,22 @@ sub pageLabel {
 
         my $d = PDFDict();
         if (defined $opts->{'-style'}) {
-            $d->{'S'} = PDFName($opts->{'-style'} eq 'Roman' ? 'R' :
-                                $opts->{'-style'} eq 'roman' ? 'r' :
-                                $opts->{'-style'} eq 'Alpha' ? 'A' :
-                                $opts->{'-style'} eq 'alpha' ? 'a' : 'D');
+	    if ($opts->{'-style'} ne 'nocounter') {
+		# defaults to decimal if unrecogized style given
+                $d->{'S'} = PDFName($opts->{'-style'} eq 'Roman' ? 'R' :
+                                    $opts->{'-style'} eq 'roman' ? 'r' :
+                                    $opts->{'-style'} eq 'Alpha' ? 'A' :
+                                    $opts->{'-style'} eq 'alpha' ? 'a' : 'D');
+	    } else {
+		# for nocounter (no styled counter), do not create /S entry
+	    }
         } else {
+	    # default to decimal counter if no -style given
             $d->{'S'} = PDFName('D');
         }
 
         if (defined $opts->{'-prefix'}) {
+	    # 'Content' supposedly treated differently
             $d->{'P'} = PDFString($opts->{'-prefix'}, 's');
         }
 
@@ -959,7 +1011,6 @@ sub pageLabel {
 
         $nums->add_elements($d);
     }
-
     return;
 } # end of pageLabel()
 
