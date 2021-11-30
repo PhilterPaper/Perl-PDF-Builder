@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.022'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 use List::Util qw(min max);
@@ -38,7 +38,7 @@ sub new {
 
     my $self = $class->SUPER::new();
     $self->{'Type'}   = PDFName('Annot');
-    $self->{'Border'} = PDFArray(PDFNum(0), PDFNum(0), PDFNum(1));
+    $self->{'Border'} = PDFArray(PDFNum(0), PDFNum(0), PDFNum(0)); # no border
 
     return $self;
 }
@@ -173,7 +173,8 @@ sub url {
 
 Defines the annotation as a text note with content string C<$text> and
 options %options (-rect, -color, -text, -open: see descriptions below). 
-The C<$text> may include newlines \n for multiple lines.
+The C<$text> may include newlines \n for multiple lines. The option -border is
+ignored, since an I<icon> is used.
 
 C<-text> is the popup's label string, not to be confused with the main C<$text>.
 
@@ -220,6 +221,7 @@ sub text {
 
     $self->rect(@{$options{'-rect'}}) if defined $options{'-rect'};
     $self->open($options{'-open'}) if defined $options{'-open'};
+   #$self->border($options{'-border'}) if defined $options{'-border'}; # ignored
     $self->Color(@{$options{'-color'}}) if defined $options{'-color'};
     # popup label (title)
     # have seen /T as (xFEFF UTF-16 chars)
@@ -582,12 +584,17 @@ sub rect {
 Sets the border-style of the annotation, if applicable, as given by the
 -border option. There are three entries in the array:
 horizontal and vertical corner radii, and border width.
+An optional fourth entry (described below) may be used for a dashed or dotted
+line.
 
 A border is used in annotations where text or some other material is put down,
-and a clickable rectangle is defined over it (-rect). A border is not used
-when an icon is being used to mark the clickable area.
+and a clickable rectangle is defined over it (-rect). A border is not shown
+when an B<icon> is being used to mark the clickable area.
 
-The default is [0 0 1] (solid line of width 1, with sharp corners).
+A I<PDF Reader> normally defaults to [0 0 1] (solid line of width 1, with 
+sharp corners) if no border (C</Border>) is specified. Keeping compatibility
+with PDF::API2's longstanding practice, PDF::Builder defaults to no visible
+border C<[0 0 0]> (solid line of width 0, and thus invisible).
 
 Defining option:
 
@@ -595,17 +602,22 @@ Defining option:
 
 =item -border => [CRh, CRv, W]
 
-=item -border => [CRh, CRv, W [, on, off...]]
+=item -border => [CRh, CRv, W, [on, off...]]
+
+Note that the square brackets [ and ] are literally I<there>, indicating a 
+vector or array of values. They do B<not> indicate optional values!
 
 Set annotation B<border style> of horizontal and vertical corner radii C<CRh> 
 and C<CRv> (value 0 for squared corners) and width C<W> (value 0 for no border).
-The default is squared corners and a solid line of width 1 ([0 0 1]).
+The PDF::Builder default is no border (while a I<PDF Reader> typically defaults
+to squared corners and a solid line of width 1 ([0 0 1]), if no /Border entry
+is given).
 Optionally, a dash pattern array may be given (C<on> length, C<off> length,
 as one or more I<pairs>). The default is a solid line.
 
 The border vector seems to ignore the first two settings (corner radii), but 
 the line thickness works, on basic Readers. 
-The radii I<may> work on some other Readers.
+The corner radii I<may> work on some other Readers.
 
 =back
 

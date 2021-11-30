@@ -15,7 +15,7 @@ $annotation->text('This is an annotation', -rect => [ 72, 144, 172, 244 ]);
 
 my $string = $pdf->stringify();
 like($string,
-     qr{/Type /Annot /Subtype /Text /Border \[ 0 0 1 \] /Contents \(This is an annotation\) /Rect \[ 72 144 172 244 \]},
+     qr{/Type /Annot /Subtype /Text /Border \[ 0 0 0 \] /Contents \(This is an annotation\) /Rect \[ 72 144 172 244 \]},
      q{Text Annotation in a rectangle});
 
 # [RT #118352] Crash if $page->annotation is called on a page with an
@@ -39,7 +39,7 @@ $annotation->text('This is an annotation', -rect => [ 72, 144, 172, 244 ]);
 
 $string = $pdf->stringify();
 like($string,
-     qr{/Type /Annot /Subtype /Text /Border \[ 0 0 1 \] /Contents \(This is an annotation\) /Rect \[ 72 144 172 244 \]},
+     qr{/Type /Annot /Subtype /Text /Border \[ 0 0 0 \] /Contents \(This is an annotation\) /Rect \[ 72 144 172 244 \]},
      q{Add an annotation to an existing annotations array stored in an indirect object});
 
 1;

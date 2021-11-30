@@ -2,7 +2,25 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2020 for earlier version 3 release logs.
 
-3.024     2021-09-27  UNRELEASED
+3.024     2021-11-29  UNRELEASED
+
+*   version, Makefile.PL .....
+     #175 TIFF-related improvements per Cary Gravel. Use Graphics::TIFF v17,
+      new code for bilevel (CCITT Fax G3 and G4).
+
+*   lib/PDF/Builder/Basic/PDF/File.pm
+      Per RT 136648, PDF::API2 fix to avoid unnecessary extra trailers.
+
+    lib/PDF/Builder/Annotation.pm, t/annotate.t, examples/040_annotation, 
+      examples/041_annot_fileattach, examples/042_links
+     Annotations revert to "no border" [#176] to match up with PDF::API2 
+      behavior.
+
+    lib/PDF/Builder.pm  per #171, allow blank or prefix-only page label (on 
+      Reader's thumb slider) with -style => 'nocounter'.
+
+    lib/PDF/Builder/Basic/PDF/Filter/ASCIIHexDecode.pm
+      Per RT 136648, PDF::API2 fix when writing xref streams.
 
     lib/PDF/Builder/Resource/XObject/Image/GD-GIF-JPEG-PNG-PNM-TIFF.pm
       Add -name option to name the image object if desired.

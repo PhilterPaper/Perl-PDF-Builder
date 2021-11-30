@@ -5,12 +5,18 @@ use PDF::Builder;
 
 # program settings
 my $border = 1;  # line width of click rectangle, 0 for none
+
 my $b_red   = 0; # click rectangle border color (here medium green)
 my $b_green = 0.5;
 my $b_blue  = 0;
+
+my $normal_text_color = 'black';
+my $link_text_color   = 'blue';
+
 my $font_size = 20; # 20pt text
 my $local_movie = ""; # a local movie file such as .avi
 
+# ===========================================
 my $PDFname = $0;
    $PDFname =~ s/\..*$//;  # remove any existing extension
    $PDFname .= '.pdf';     # add new extension
@@ -20,6 +26,7 @@ my $page = $pdf->page();
 my $text = $page->text();
 my $font = $pdf->corefont('Times-Roman');
 $text->font($font, $font_size);
+$text->fillcolor($normal_text_color);
 
 my $x = 100;
 my $y = 700;
@@ -35,7 +42,7 @@ $text->text("Click ");
 $x += $text->advancewidth("Click ");
 
 # x,y should be at LL corner of "here" (on baseline)
-$text->fillcolor('blue');
+$text->fillcolor($link_text_color);
 $text->text("here");
 my $target_width = $text->advancewidth("here");
 
@@ -48,7 +55,7 @@ $annotation->url("https://www.google.com",
 		);
 
 # restore color and do rest of line
-$text->fillcolor('black');
+$text->fillcolor($normal_text_color);
 $text->text(" to go to Google.");
 
 # ---------- go to a specific location in a browser
@@ -60,7 +67,7 @@ $text->text("Go to ");
 $x += $text->advancewidth("Go to ");
 
 # x,y should be at LL corner of "here" (on baseline)
-$text->fillcolor('blue');
+$text->fillcolor($link_text_color);
 $text->text("a specific point");
 $target_width = $text->advancewidth("a specific point");
 
@@ -73,8 +80,16 @@ $annotation->url("https://www.catskilltech.com/forum/index.html#c5",
 		);
 
 # restore color and do rest of line
-$text->fillcolor('black');
+$text->fillcolor($normal_text_color);
 $text->text(" on a website.");
+
+# ---------- reminder to user
+$x = 50;
+$y = 300;
+$text->translate($x, $y);
+$text->text("In these examples the link text is explicitly colored blue and the");
+$text->translate($x, $y-25);
+$text->text("link box is outlined in green. These may be changed in the code.");
 
 # ---------- go to a page within THIS document
 $page = $pdf->page();  # page 2
@@ -94,7 +109,7 @@ $text->text("Click ");
 $x += $text->advancewidth("Click ");
 
 # x,y should be at LL corner of "here" (on baseline)
-$text->fillcolor('blue');
+$text->fillcolor($link_text_color);
 $text->text("here");
 $target_width = $text->advancewidth("here");
 
@@ -108,7 +123,7 @@ $annotation->link($tgt_page,
 		);
 
 # restore color and do rest of line
-$text->fillcolor('black');
+$text->fillcolor($normal_text_color);
 $text->text(" to go to Page 1.");
 
 # same, except position and zoom
@@ -120,7 +135,7 @@ $text->text("Click ");
 $x += $text->advancewidth("Click ");
 
 # x,y should be at LL corner of "here" (on baseline)
-$text->fillcolor('blue');
+$text->fillcolor($link_text_color);
 $text->text("here");
 $target_width = $text->advancewidth("here");
 
@@ -135,7 +150,7 @@ $annotation->link($tgt_page,
 		);
 
 # restore color and do rest of line
-$text->fillcolor('black');
+$text->fillcolor($normal_text_color);
 $text->text(" to go to Page 1 positioned/zoomed.");
 
 
@@ -157,7 +172,7 @@ $text->text("Click ");
 $x += $text->advancewidth("Click ");
 
 # x,y should be at LL corner of "here" (on baseline)
-$text->fillcolor('blue');
+$text->fillcolor($link_text_color);
 $text->text("here");
 $target_width = $text->advancewidth("here");
 
@@ -171,7 +186,7 @@ $annotation->pdf_file("resources/HarfBuzz_example.pdf",
 		);
 
 # restore color and do rest of line
-$text->fillcolor('black');
+$text->fillcolor($normal_text_color);
 $text->text(" to go to Page 1 of another PDF document.");
 
 # same, except position and zoom
@@ -183,7 +198,7 @@ $text->text("Click ");
 $x += $text->advancewidth("Click ");
 
 # x,y should be at LL corner of "here" (on baseline)
-$text->fillcolor('blue');
+$text->fillcolor($link_text_color);
 $text->text("here");
 $target_width = $text->advancewidth("here");
 
@@ -198,7 +213,7 @@ $annotation->pdf_file("resources/HarfBuzz_example.pdf",
 		);
 
 # restore color and do rest of line
-$text->fillcolor('black');
+$text->fillcolor($normal_text_color);
 $text->text(" to go to Page 1 of another PDF document, windowed.");
 
 # ---------- launch (default OS action) another file
@@ -221,7 +236,7 @@ $text->text("Click ");
 $x += $text->advancewidth("Click ");
 
 # x,y should be at LL corner of "here" (on baseline)
-$text->fillcolor('blue');
+$text->fillcolor($link_text_color);
 $text->text("here");
 $target_width = $text->advancewidth("here");
 
@@ -234,7 +249,7 @@ $annotation->file("resources/sample.txt",
 		);
 
 # restore color and do rest of line
-$text->fillcolor('black');
+$text->fillcolor($normal_text_color);
 $text->text(" to \"launch\" a .txt file.");
 
 # ----------------------
@@ -258,7 +273,7 @@ $annotation->file("resources/sample.txt",
 		);
 
 # restore color 
-$text->fillcolor('black');
+$text->fillcolor($normal_text_color);
 
 # ----------------------
 if ($local_movie ne '' && -r $local_movie) {
