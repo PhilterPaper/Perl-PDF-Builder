@@ -2,6 +2,7 @@ package PDF::Builder::Basic::PDF::Filter::CCITTFaxDecode;
 
 use strict;
 use warnings;
+
 use Carp;
 use POSIX;
 use PDF::Builder::Basic::PDF::Filter::CCITTFaxDecode::Reader;
@@ -11,7 +12,7 @@ no if $] >= 5.018, warnings => 'experimental::smartmatch';
 use base 'PDF::Builder::Basic::PDF::Filter::FlateDecode';
 
 # VERSION
-my $LAST_UPDATE = '3.023';    # manually update whenever code is changed
+my $LAST_UPDATE = '3.024';    # manually update whenever code is changed
 
 sub codeword {
     my ($bits) = @_;

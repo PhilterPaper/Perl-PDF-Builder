@@ -18,9 +18,13 @@ PDF::Builder::Resource::XObject::Image::GD - support routines for Graphics Devel
 
 =head1 METHODS
 
+=over 
+
 =item $res = PDF::Builder::Resource::XObject::Image::GD->new($pdf, $file, %opts)
 
 =item $res = PDF::Builder::Resource::XObject::Image::GD->new($pdf, $file)
+
+=back
 
 Options:
 

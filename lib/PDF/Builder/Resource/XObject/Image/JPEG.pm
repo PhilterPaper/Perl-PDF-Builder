@@ -19,9 +19,13 @@ PDF::Builder::Resource::XObject::Image::JPEG - support routines for JPEG image l
 
 =head1 METHODS
 
+=over
+
 =item $res = PDF::Builder::Resource::XObject::Image::JPEG->new($pdf, $file, %opts)
 
 =item $res = PDF::Builder::Resource::XObject::Image::JPEG->new($pdf, $file)
+
+=back
 
 Options:
 

@@ -2,10 +2,20 @@ package PDF::Builder::Basic::PDF::Filter::CCITTFaxDecode::Reader;
 
 use strict;
 use warnings;
+
 use Carp;
 use Readonly;
 Readonly my $BITS2BYTES_SHIFT => 3;
 Readonly my $BITS_PER_BYTE    => 8;
+
+# VERSION
+my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+
+=head1 NAME
+
+PDF::Builder::Basic::PDF::Filter::CCITTFaxDecode::Reader - uncompress stream filters for CCITT 1 bit fax formats
+
+=cut
 
 sub new {
     my ( $class, $data ) = @_;

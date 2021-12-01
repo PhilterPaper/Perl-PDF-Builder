@@ -24,9 +24,13 @@ PDF::Builder::Resource::XObject::Image::PNM - support routines for PNM (Portable
 
 =head2 METHODS
 
+=over
+
 =item $res = PDF::Builder::Resource::XObject::Image::PNM->new($pdf, $file, %opts)
 
 =item $res = PDF::Builder::Resource::XObject::Image::PNM->new($pdf, $file)
+
+=back
 
 Options:
 

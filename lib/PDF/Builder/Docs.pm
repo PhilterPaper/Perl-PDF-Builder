@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.023'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 # originally part of Builder.pm, it was split out due to its length
 
@@ -510,6 +510,22 @@ In 2009, Otto Hirr started the PDF::API3 fork, but it never went anywhere.
 In 2011, PDF::API2 maintenance was taken over by Steve Simms. 
 In 2017, PDF::Builder was forked by Phil M. Perry, who desired a more aggressive
 schedule of new features and bug fixes than Simms was providing. 
+
+According to "pdfapi2_for_fun_and_profit_APW2005.pdf" (on 
+http://pdfapi2.sourceforge.net, an unmaintained site), the history of PDF::API2
+(the predecessor to PDF::Builder) goes as such:
+
+=over
+
+=item E<nbsp> E<nbsp> E<bull>E<nbsp> First Code implemented based on PDFlib-0.6 (AFPL)
+
+=item E<nbsp> E<nbsp> E<bull>E<nbsp> Changed to Text::PDF with a total rewrite as Text::PDF::API (procedural)
+
+=item E<nbsp> E<nbsp> E<bull>E<nbsp> Unmaintainable Code triggered rewrite into new Namespace PDF::API2 (object-oriented, LGPL)
+
+=item E<nbsp> E<nbsp> E<bull>E<nbsp> Object-Structure streamlined in 0.4x
+
+=back
 
 At Simms's request, the name of the new offering was changed from PDF::API4
 to PDF::Builder, to reduce the chance of confusion due to parallel development.
