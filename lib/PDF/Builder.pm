@@ -164,9 +164,14 @@ The full source is on https://github.com/PhilterPaper/Perl-PDF-Builder.
 
 The release distribution is on CPAN: https://metacpan.org/pod/PDF::Builder.
 
-Bug reports are on https://github.com/PhilterPaper/Perl-PDF-Builder/issues?q=is%3Aissue+sort%3Aupdated-desc (with "bug" label), feature requests have an "enhancement" label, and general discussions (architecture, roadmap, etc.) have a "general discussion" label.
+Bug reports are on https://github.com/PhilterPaper/Perl-PDF-Builder/issues?q=is%3Aissue+sort%3Aupdated-desc 
+(with "bug" label), feature requests have an "enhancement" label, and general discussions (architecture, roadmap, etc.) 
+have a "general discussion" label.
 
-Do B<not> under I<any> circumstances open a PR (Pull Request) to report a bug. It is a waste of both your and our time and effort. Open a regular ticket (issue), and attach a Perl (.pl) program illustrating the problem, if possible. If you believe that you have a program patch, and offer to share it as a PR, we may give the go-ahead. Unsolicited PRs may be closed without further action.
+Do B<not> under I<any> circumstances open a PR (Pull Request) to report a bug. It is a waste of both your and 
+our time and effort. Open a regular ticket (issue), and attach a Perl (.pl) program illustrating the problem, if possible. 
+If you believe that you have a program patch, and offer to share it as a PR, we may give the go-ahead. Unsolicited PRs 
+may be closed without further action.
 
 =head1 LICENSE
 
@@ -280,7 +285,8 @@ sub new {
     $self->{'pages'} = PDF::Builder::Basic::PDF::Pages->new($self->{'pdf'});
     $self->{'pages'}->proc_set(qw(PDF Text ImageB ImageC ImageI));
     $self->{'pages'}->{'Resources'} ||= PDFDict();
-    $self->{'pdf'}->new_obj($self->{'pages'}->{'Resources'}) unless $self->{'pages'}->{'Resources'}->is_obj($self->{'pdf'});
+    $self->{'pdf'}->new_obj($self->{'pages'}->{'Resources'}) 
+        unless $self->{'pages'}->{'Resources'}->is_obj($self->{'pdf'});
     $self->{'catalog'} = $self->{'pdf'}->{'Root'};
     weaken $self->{'catalog'};
     $self->{'fonts'} = {};
@@ -332,7 +338,8 @@ sub new {
 
     my $version = eval { $PDF::Builder::VERSION } || '(Unreleased Version)';
    #$self->info('Producer' => "PDF::Builder $version [$^O]");
-    $self->info('Producer' => "PDF::Builder $version [see https://github.com/PhilterPaper/Perl-PDF-Builder/blob/master/INFO/SUPPORT]");
+    $self->info('Producer' => "PDF::Builder $version [see ".
+                "https://github.com/PhilterPaper/Perl-PDF-Builder/blob/master/INFO/SUPPORT]");
 
     return $self;
 } # end of new()
@@ -408,7 +415,8 @@ sub verCheckOutput {
     # ' version' should be the same as $outVer
     if ($PDFver > $outVer) {
         if ($msgVer) {
-	    print "PDF version of requested feature '$featureName'\n  is higher than outVer of $outVer (outVer reset to $PDFver)\n";
+	    print "PDF version of requested feature '$featureName'\n  is higher than outVer ".
+              "of $outVer (outVer reset to $PDFver)\n";
 	}
         $outVer = $myself->{' version'} = $PDFver;
         return 1;
@@ -508,7 +516,9 @@ sub open_scalar {
         }
         if ($newVer > $currentVer) {
 	    if (length($newVer) > length($currentVer)) {
-		print STDERR "Unable to update 'content' version because override '$newVer' is longer than header version '$currentVer'.\nYou may receive warnings about features that bump up the PDF level.\n";
+		print STDERR "Unable to update 'content' version because override '$newVer' is longer ".
+          "than header version '$currentVer'.\nYou may receive warnings about features ".
+          "that bump up the PDF level.\n";
 	    } else {
 		if (length($newVer) < length($currentVer)) {
 		    # unlikely, but cover all the bases
@@ -668,10 +678,12 @@ sub preferences {
             $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('FitBV'), PDFNum($args{'-fitbv'}));
         } elsif (defined $args{'-fitr'}) {
             croak 'insufficient parameters to -fitr => []' unless scalar @{$args{'-fitr'}} == 4;
-            $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('FitR'), map { PDFNum($_) } @{$args{'-fitr'}});
+            $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('FitR'), 
+                map { PDFNum($_) } @{$args{'-fitr'}});
         } elsif (defined $args{'-xyz'}) {
             croak 'insufficient parameters to -xyz => []' unless scalar @{$args{'-xyz'}} == 3;
-            $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('XYZ'), map { PDFNum($_) } @{$args{'-xyz'}});
+            $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('XYZ'), 
+                map { PDFNum($_) } @{$args{'-xyz'}});
         }
     }
     $self->{'pdf'}->out_obj($self->{'catalog'});
@@ -853,7 +865,9 @@ sub xmpMetadata {
         $self->{'pdf'}->new_obj($self->{'catalog'}->{'Metadata'});
     } else {
         $self->{'catalog'}->{'Metadata'}->realise();
-        $self->{'catalog'}->{'Metadata'}->{' stream'} = unfilter($self->{'catalog'}->{'Metadata'}->{'Filter'}, $self->{'catalog'}->{'Metadata'}->{' stream'});
+        $self->{'catalog'}->{'Metadata'}->{' stream'} = 
+            unfilter($self->{'catalog'}->{'Metadata'}->{'Filter'}, 
+                     $self->{'catalog'}->{'Metadata'}->{' stream'});
         delete $self->{'catalog'}->{'Metadata'}->{' nofilt'};
         delete $self->{'catalog'}->{'Metadata'}->{'Filter'};
     }
@@ -1011,6 +1025,7 @@ sub pageLabel {
 
         $nums->add_elements($d);
     }
+
     return;
 } # end of pageLabel()
 
@@ -1520,9 +1535,11 @@ sub importPageIntoForm {
     # This should never get past MediaBox, since it's a required object.
     foreach my $k (qw(MediaBox ArtBox TrimBox BleedBox CropBox)) {
        #next unless defined $s_page->{$k};
-       #my $box = _walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, $self->{'pdf'}, $s_page->{$k});
+       #my $box = _walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, 
+       #   $self->{'pdf'}, $s_page->{$k});
         next unless defined $s_page->find_prop($k);
-        my $box = _walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, $self->{'pdf'}, $s_page->find_prop($k));
+        my $box = _walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, 
+            $self->{'pdf'}, $s_page->find_prop($k));
         $xo->bbox(map { $_->val() } $box->elements());
         last;
     }
@@ -1538,7 +1555,8 @@ sub importPageIntoForm {
             $s_page->{$k}->{$sk}->realise() if ref($s_page->{$k}->{$sk}) =~ /Objind$/;
             foreach my $ssk (keys %{$s_page->{$k}->{$sk}}) {
                 next if $ssk =~ /^ /;
-                $xo->resource($sk, $ssk, _walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, $self->{'pdf'}, $s_page->{$k}->{$sk}->{$ssk}));
+                $xo->resource($sk, $ssk, _walk_obj($self->{'apiimportcache'}->{$s_pdf}, 
+                              $s_pdf->{'pdf'}, $self->{'pdf'}, $s_page->{$k}->{$sk}->{$ssk}));
             }
         }
     }
@@ -1668,7 +1686,8 @@ sub import_page {
         if (my $a = $s_pdf->{'pdf'}->{'Root'}->realise()->{'AcroForm'}) {
             $a->realise();
 
-            $AcroForm = _walk_obj({}, $s_pdf->{'pdf'}, $self->{'pdf'}, $a, qw(NeedAppearances SigFlags CO DR DA Q));
+            $AcroForm = _walk_obj({}, $s_pdf->{'pdf'}, $self->{'pdf'}, $a, 
+                        qw(NeedAppearances SigFlags CO DR DA Q));
         }
         my @Fields = ();
         my @Annots = ();
@@ -2272,7 +2291,8 @@ sub image_tiff {
 	    # give warning message once, unless silenced (-silent) or
 	    # deliberately not using Graphics::TIFF (rc == -1)
 	    if (!defined $opts{'-silent'} || $opts{'-silent'} == 0) {
-	        print STDERR "Your system does not have Graphics::TIFF installed, so some\nTIFF functions may not run correctly.\n";
+	        print STDERR "Your system does not have Graphics::TIFF installed, ".
+                         "so some\nTIFF functions may not run correctly.\n";
 		# even if -silent only once, COUNT still incremented
 	    }
 	}
@@ -2390,7 +2410,8 @@ sub image_png {
             # give warning message once, unless silenced (-silent) or
             # deliberately not using Image::PNG::Libpng (rc == -1)
             if (!defined $opts{'-silent'} || $opts{'-silent'} == 0) {
-                print STDERR "Your system does not have Image::PNG::Libpng installed, so some\nPNG functions may not run correctly.\n";
+                print STDERR "Your system does not have Image::PNG::Libpng installed, ".
+                             "so some\nPNG functions may not run correctly.\n";
                 # even if -silent only once, COUNT still incremented
             }
         }
@@ -2917,7 +2938,8 @@ sub IntegrityCheck {
 			# first /Parent (should not be more)
 		        $objList{$objKey}->[$idx_parent] = $Parent;
 		   #} else {
-		   #    print STDERR "$IC Additional Parent ($Parent) in object $objKey, already list $objList{$objKey}->[$idx_parent] as Parent.\n" if $level >= $level_error;
+		   #    print STDERR "$IC Additional Parent ($Parent) in object $objKey, already list ".
+           #                 "$objList{$objKey}->[$idx_parent] as Parent.\n" if $level >= $level_error;
 		   #}
 		}
 
@@ -2946,7 +2968,8 @@ sub IntegrityCheck {
 		        @{$objList{$objKey}->[$idx_kid_list]} = @Kids;
 			$objList{$objKey}->[$idx_kid_cnt] = scalar(@Kids);
 		   #} else {
-		   #    print STDERR "$IC Multiple Kids lists in object $objKey, already list @{$objList{$objKey}->[$idx_kid_list]} as Kids.\n" if $level >= $level_error;
+		   #    print STDERR "$IC Multiple Kids lists in object $objKey, already list ".
+           #                 "@{$objList{$objKey}->[$idx_kid_list]} as Kids.\n" if $level >= $level_error;
 		   #}
 		}
 
@@ -3077,16 +3100,21 @@ sub IntegrityCheck {
 		    $objList{$child}[$idx_par_clmd] = $thisObj;
 		} else {
 		    # someone else has already claimed to be parent
-		    print STDERR "$IC object $thisObj wants to claim object $child as its child, but $objList{$child}[$idx_par_clmd] already has!\nPossibly $child is on more than one /Kids list?\n" if $level >= $level_error;
+		    print STDERR "$IC object $thisObj wants to claim object $child as its child, ".
+                         "but $objList{$child}[$idx_par_clmd] already has!\nPossibly $child ".
+                         "is on more than one /Kids list?\n" if $level >= $level_error;
 		}
 	        # if no object defined for child, already flagged as missing
 		if ($objList{$child}[$idx_defined] == 1) {
 		    # child should list thisObj as its Parent
 		    if      ($objList{$child}[$idx_parent] == -1) {
-		        print STDERR "$IC object $thisObj claims $child as a child (/Kids), but $child claims no Parent!\n" if $level >= $level_error;
+		        print STDERR "$IC object $thisObj claims $child as a child (/Kids), but ".
+                             "$child claims no Parent!\n" if $level >= $level_error;
 		        $objList{$child}[$idx_parent] = $thisObj;
 		    } elsif ($objList{$child}[$idx_parent] != $thisObj) {
-		        print STDERR "$IC object $thisObj claims $child as a child (/Kids), but $child claims $objList{$child}[$idx_parent] as its parent!\n" if $level >= $level_error;
+		        print STDERR "$IC object $thisObj claims $child as a child (/Kids), but ".
+                             "$child claims $objList{$child}[$idx_parent] as its parent!\n" 
+                    if $level >= $level_error;
                     }
 		}
 	    }

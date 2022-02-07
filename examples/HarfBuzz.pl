@@ -51,7 +51,7 @@ my $ligFont =     # for full ligature list, Shaper ignores
   # '/WINDOWS/Fonts/verdana.ttf';
   # '/WINDOWS/Fonts/arial.ttf';
     '/WINDOWS/Fonts/times.ttf';
-my $arabicFont = '/Program Files (x86)/Adobe/Acrobat Reader DC/Resource/Font/AdobeArabic-Regular.otf';
+my $arabicFont = '/Program Files/Adobe/Acrobat DC/Resource/Font/AdobeArabic-Regular.otf';
 # You will certainly have to modify the font file locations and names
 # per your local installation and operating system, here and below in %samples.
 # Some .ttf fonts may be usable by HarfBuzz for shaping, but others don't seem
@@ -152,7 +152,7 @@ my %samples = (
    # and removal, all taken care of by HarfBuzz.
    'Devan' => { 'title' => "Devanagari", # see PP_Advanced pg 26 & 27
 	                                 # and PP_Avanced_typography_in_PDF.pdf
-	        'fontFile' => '/Program Files (x86)/Adobe/Acrobat Reader DC/Resource/Font/AdobeDevanagari-Regular.otf',
+	        'fontFile' => '/Program Files/Adobe/Acrobat DC/Resource/Font/AdobeDevanagari-Regular.otf',
 		'dir' => 'L',
 		'script' => 'Deva',
 	        'text' => ["\x{091A}\x{093F}\x{0928}\x{094D}\x{0939}\x{0947}", " PDF::Builder ", "\x{0905}\x{0932}\x{093f}\x{091c}\x{093f}\x{0939}\x{094d}\x{0935}\x{0940}\x{092f}"] },
@@ -386,8 +386,8 @@ $y = 750;
    # some random Chinese characters. most interested in what direction is
    # the default, and what is settable
    'TTBChinese' => { 'title' => 'TTBChinese',
-#   	        'fontFile' => '/Program Files (x86)/Adobe/Acrobat Reader DC/Resource/CIDFont/AdobeMingStd-Light.otf',
-   	        'fontFile' => '/Program Files (x86)/Adobe/Acrobat Reader DC/Resource/CIDFont/AdobeGothicStd-Light.otf',
+#   	        'fontFile' => '/Program Files/Adobe/Acrobat DC/Resource/CIDFont/AdobeMingStd-Light.otf',
+   	        'fontFile' => '/Program Files/Adobe/Acrobat DC/Resource/CIDFont/AdobeGothicStd-Light.otf',
  	  	'dir' => 'T',  
  	  	'script' => 'Chin',
 # 	  	'text' => ["\x{5A40}\x{5A41}\x{5A42}\x{5A43}", " PDF::Builder ", "\x{5A44}\x{5A45}"] },

@@ -80,6 +80,7 @@ sub wxByCId {
     my ($self, $g) = @_;
 
     my $w;
+
     my $widths = $self->data()->{'wx'};
 
     if      (ref($widths) eq 'ARRAY' && defined $widths->[$g]) {
@@ -182,6 +183,7 @@ sub cidsByUtf {
 		    ($_ and $_>0x7f and $_<0xA0)? uniByName(nameByUni($_)): $_ 
 	    } 
 	    unpack('U*', $s)));
+
     utf8::downgrade($s);
     return $s;
 }
@@ -290,7 +292,7 @@ sub encodeByName {
 
     if (defined $enc) {
         $self->data()->{'e2u'} = [ 
-	    map { ($_ and $_>0x7f && $_<0xA0)? uniByName(nameByUni($_)): $_ } 
+	    map { ($_ and $_>0x7f and $_<0xA0)? uniByName(nameByUni($_)): $_ } 
 	    unpack('U*', decode($enc, pack('C*', 0..255)))
 	];
     }
@@ -305,7 +307,7 @@ sub encodeByName {
 
     $self->data()->{'u2e'} = {};
     foreach my $n (reverse 0..255) {
-        $self->data()->{'u2e'}->{$self->data()->{'e2u'}->[$n]} //= $n
+        $self->data()->{'u2e'}->{$self->data()->{'e2u'}->[$n]} //= $n;
     }
 
     return $self;
