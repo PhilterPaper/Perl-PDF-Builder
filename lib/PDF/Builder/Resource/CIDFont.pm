@@ -82,7 +82,7 @@ sub wxByCId {
     my $w;
     my $widths = $self->data()->{'wx'};
 
-    if      (ref($widths) eq 'ARRAY') && defined $widths->[$g]) {
+    if      (ref($widths) eq 'ARRAY' && defined $widths->[$g]) {
         $w = int($widths->[$g]);
     } elsif (ref($widths) eq 'HASH' && defined $widths->{$g}) {
         $w = int($widths->{$g});
