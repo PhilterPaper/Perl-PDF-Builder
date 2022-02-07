@@ -7,7 +7,7 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
 *   lib/PDF/Builder/Basic/PDF/File.pm
       Per RT 136648, PDF::API2 fix to avoid unnecessary extra trailers.
 
-*   lib/PDF/Builder/Resource/CIDFont.pm
+    lib/PDF/Builder/Resource/CIDFont.pm
       Per PDF::API2 code style and uninitialized variable changes.
 
     INFO/Changes_2021, MANIFEST, README.md, lib/PDF/Builder.pm, INFO/LICENSE
