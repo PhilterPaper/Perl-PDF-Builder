@@ -8,12 +8,14 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 # command line flags, mutually exclusive:
 # -raw   show full output of each t-test run
 # -noOK  exclude "ok" lines so can easily spot error lines  DEFAULT
 
+ # add after filter-lzwdecode
+ # filter-ccittfaxdecode
 my @test_list = qw(
  00-all-usable
  01-basic
@@ -32,6 +34,7 @@ my @test_list = qw(
  extgstate
  filter-ascii85decode
  filter-asciihexdecode
+ filter-lzwdecode
  filter-runlengthdecode
  font-corefont
  font-synfont

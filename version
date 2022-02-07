@@ -22,10 +22,11 @@ TEST_MEMORY_CYCLE  1.0
 
 COMPRESS_ZLIB      1.0
 FONT_TTF           1.04
+# READONLY         0     Future usage?
 
 # optional prerequisites
 # update Makefile.PL, META.*, Builder.pm, t/00-all-usable.t
-GRAPHICS_TIFF    16
+GRAPHICS_TIFF    16   # will be 17 when TIFF changes go in
 HARFBUZZ_SHAPER  0.024
 IMAGE_PNG_LIBPNG 0.57
 

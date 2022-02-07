@@ -225,6 +225,7 @@ t/extgstate.t
 t/filter-ascii85decode.t
 t/filter-asciihexdecode.t
 t/filter-lzwdecode.t
+#t/filter-ccittfaxdecode.t
 t/filter-runlengthdecode.t
 t/font-corefont.t
 t/font-synfont.t

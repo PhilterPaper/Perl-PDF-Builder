@@ -19,14 +19,14 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.022'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Filter::ASCII85Decode;
 use PDF::Builder::Basic::PDF::Filter::ASCIIHexDecode;
 use PDF::Builder::Basic::PDF::Filter::FlateDecode;
 use PDF::Builder::Basic::PDF::Filter::LZWDecode;
 use PDF::Builder::Basic::PDF::Filter::RunLengthDecode;
-use PDF::Builder::Basic::PDF::Filter::CCITTFaxDecode;
+# use PDF::Builder::Basic::PDF::Filter::CCITTFaxDecode;   when TIFF changes in
 use Scalar::Util qw(blessed reftype);
 
 =head1 NAME

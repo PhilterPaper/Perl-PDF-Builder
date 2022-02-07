@@ -6,7 +6,8 @@ use IPC::Cmd qw(can_run run);
 use File::Spec;
 use File::Temp;
 use version;
-use Test::More tests => 25;
+use Test::More tests => 19;
+#use Test::More tests => 25;   when TIFF changes in
 
 use PDF::Builder;
 # 0: allow use of Graphics::TIFF, 1: force non-GT usage
@@ -434,6 +435,7 @@ $expected =~ s/(.*\n).*\n.*\n$/$1/;
 is($example, $expected, "bilevel and alpha when width not a whole number of bytes with GT") or show_diag();
 }
 
+if (0) {           ####################################### when TIFF changes in
 # 20    TODO
 SKIP: {
      skip "alpha layer without GT is not currently supported", 1;
@@ -594,6 +596,7 @@ $expected = `$convert $tiff_f -depth 1 -alpha off txt:-`;
 
 is($example, $expected, 'LSB fillorder with GT');
 }
+}                  ####################################### when TIFF changes in
 
 ##############################################################
 # cleanup. all tests involving these files skipped?
