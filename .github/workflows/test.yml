@@ -29,6 +29,7 @@ jobs:
       - run: sudo apt install libfont-ttf-perl libgd-perl libio-compress-perl libtest-exception-perl libtest-memory-cycle-perl libreadonly-perl gsfonts
       - run: perl Makefile.PL
       - run: make test TEST_VERBOSE=1
+## currently doesn't work. remove for the time being
 # lint:
 #   name: Lint
 #   runs-on: ubuntu-latest
@@ -38,14 +39,15 @@ jobs:
 #       env:
 #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #         FILTER_REGEX_EXCLUDE: Makefile.PL
-  basic-windows:
-    name: Basic Windows
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-      - run: cpan Font::TTF GD IO::Compress Test::Exception Test::Memory::Cycle Readonly
-      - run: perl Makefile.PL
-      - run: make test TEST_VERBOSE=1
+## currently doesn't work. remove for the time being
+#  basic-windows:
+#    name: Basic Windows
+#    runs-on: windows-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - run: cpan Font::TTF GD IO::Compress Test::Exception Test::Memory::Cycle Readonly
+#      - run: perl Makefile.PL
+#      - run: make test TEST_VERBOSE=1
 ## currently doesn't work. remove for the time being
 # full-windows:
 #   name: Full Windows
