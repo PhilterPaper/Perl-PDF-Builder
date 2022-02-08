@@ -574,10 +574,7 @@ sub ui2ba {
 
 sub handle_ccitt {
     my ($self, $pdf, $tif, %opts) = @_;
-
-    if (ref($tif->{'imageOffset'})) {
-        die "Chunked CCITT G3/G4 TIFF not supported.";
-    }
+    my ($stripcount);
 
     $self->{' nofilt'} = 1;
     $self->{'Filter'} = PDFArray(PDFName('CCITTFaxDecode'));
@@ -588,12 +585,10 @@ sub handle_ccitt {
         (defined $tif->{'g3Options'} && $tif->{'g3Options'} & 0x1))? PDFNum(-1): PDFNum(0);
     $decode->{'Columns'} = PDFNum($tif->{'imageWidth'});
     $decode->{'Rows'} = PDFNum($tif->{'imageHeight'});
+    $decode->{'BlackIs1'} = PDFBool($tif->{'whiteIsZero'} == 1? 1: 0);
+    $decode->{'DamagedRowsBeforeError'} = PDFNum(100);
     # all CCITT Fax need to flip black/white
-    # default is false, in which case we can save the couple of bytes and not
-    # include it
-    if ( $tif->{blackIsZero} ) {
-        $decode->{'BlackIs1'} = PDFBool(1)
-    }
+    $self->{'Decode'} = PDFArray(PDFNum(1), PDFNum(0));
 
     # g3Options       bit 0 = 0 for 1-Dimensional, = 1 for 2-Dimensional MR
     #  aka T4Options  bit 1 = 0 (compressed data only)
@@ -601,44 +596,41 @@ sub handle_ccitt {
     # g4Options       bit 0 = 0 MMR 2-D compression
     #  aka T6Options  bit 1 = 0 (compressed data only)
     #  aka Group4Options
-    if ($decode->{K}{val} == 0) {
+    if (defined($tif->{'g3Options'}) && ($tif->{'g3Options'} & 0x4)) {
         $decode->{'EndOfLine'} = PDFBool(1);
         $decode->{'EncodedByteAlign'} = PDFBool(1);
     }
+    # TBD currently nothing to look at for g4Options
 
-    # if we have Group4 and multiple strips, we have to decode and recode
-    my $stripcount = $tif->{'object'}->NumberOfStrips();
-    if ($decode->{K}{val} < 0 and $stripcount > 1) {
-        $self->decode_all_strips($tif);
-        my $filter = PDF::Builder::Basic::PDF::Filter::CCITTFaxDecode->new($decode);
-        $self->{' stream'} = $filter->outfilt($self->{' stream'});
-    }
-
-    # for G3 or only one strip, we can use the TIFF data directly
-    else {
+    if (ref($tif->{'imageOffset'})) {
+        die "Chunked CCITT G3/G4 TIFF not supported.";
+    } else {
+	$stripcount = $tif->{'object'}->NumberOfStrips();
 	for my $i (0 .. $stripcount - 1) {
             $self->{' stream'} .= $tif->{'object'}->ReadRawStrip($i, -1);
 	}
-    }
-
-    # if bit fill order in data is opposite of PDF spec (Lsb2Msb), need to
-    # swap each byte end-for-end: x01->x80, x02->x40, x03->xC0, etc.
-    if ($tif->{'fillOrder'} == FILLORDER_LSB2MSB) { # Lsb first, PDF is Msb
-        my ($oldByte, $newByte);
-        for my $j ( 0 .. length($self->{' stream'}) ) {
-            # swapping j-th byte of stream
-            $oldByte = ord(substr($self->{' stream'}, $j, 1));
-            if ($oldByte == 0 || $oldByte == 255) { next; }
-            $newByte = 0;
-            if ($oldByte & 0x01) { $newByte |= 0x80; }
-            if ($oldByte & 0x02) { $newByte |= 0x40; }
-            if ($oldByte & 0x04) { $newByte |= 0x20; }
-            if ($oldByte & 0x08) { $newByte |= 0x10; }
-            if ($oldByte & 0x10) { $newByte |= 0x08; }
-            if ($oldByte & 0x20) { $newByte |= 0x04; }
-            if ($oldByte & 0x40) { $newByte |= 0x02; }
-            if ($oldByte & 0x80) { $newByte |= 0x01; }
-            substr($self->{' stream'}, $j, 1) = chr($newByte);
+        # if bit fill order in data is opposite of PDF spec (Lsb2Msb), need to 
+	# swap each byte end-for-end: x01->x80, x02->x40, x03->xC0, etc.
+	#
+	# a 256-entry lookup table could probably do just as well and build
+	# up the replacement string rather than constantly substr'ing.
+	if ($tif->{'fillOrder'} == 2) { # Lsb first, PDF is Msb
+	    my ($oldByte, $newByte);
+	    for my $j ( 0 .. length($self->{' stream'}) ) {
+	        # swapping j-th byte of stream
+		$oldByte = ord(substr($self->{' stream'}, $j, 1));
+		if ($oldByte == 0 || $oldByte == 255) { next; }
+		$newByte = 0;
+		if ($oldByte & 0x01) { $newByte |= 0x80; }
+		if ($oldByte & 0x02) { $newByte |= 0x40; }
+		if ($oldByte & 0x04) { $newByte |= 0x20; }
+		if ($oldByte & 0x08) { $newByte |= 0x10; }
+		if ($oldByte & 0x10) { $newByte |= 0x08; }
+		if ($oldByte & 0x20) { $newByte |= 0x04; }
+		if ($oldByte & 0x40) { $newByte |= 0x02; }
+		if ($oldByte & 0x80) { $newByte |= 0x01; }
+                substr($self->{' stream'}, $j, 1) = chr($newByte);
+	    }
         }
     }
 
