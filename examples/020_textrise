@@ -184,6 +184,7 @@ $pdf->end();
 exit;
 
 # TBD these might go into content or content::text
+#     it might be a good idea to save and restore the font, too
 sub subscript {
   my ($subsupscl, $f1, $fsize, $text) = @_;
   $txt->font($f1,$fsize*$subsupscl);
