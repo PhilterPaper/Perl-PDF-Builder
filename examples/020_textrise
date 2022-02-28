@@ -183,23 +183,40 @@ $pdf->end();
 
 exit;
 
-# TBD these might go into content or content::text
-#     it might be a good idea to save and restore the font, too
+# TBD These might go into content or content::text.
+#     As a method, $txt might not have to be passed in if can use $self.
+#     It might be a good idea to save and restore the font and size, too
+#     (might need to extend font() method to return the current font and size).
+#     Restores old rise() value, such as for putting superscript on a
+#     subscript, etc., instead of hardcoded 0. Use the current font size 
+#     instead of passing it in. Could have optional values to override the 
+#     font, size, rise %, etc., by default using the old font. The sub/sup scale
+#     might default, with an override (is it strongly dependent on font?).
+#     Potentially only the $text might be a mandatory parameter, or combine
+#     the functions with a 'sup' or 'sub' parameter, since only one line diff.
+# TBD Probably doesn't yet handle super on sub and vice-versa, or super on
+#     super, etc. Needs more thought.
 sub subscript {
-  my ($subsupscl, $f1, $fsize, $text) = @_;
-  $txt->font($f1,$fsize*$subsupscl);
-  $txt->rise(-10*$subsupscl);
+  my ($subsupscl, $font, $fsize, $text) = @_;
+  my $oldRise = $txt->rise();
+  # save old font here -- need anyway for font() call unless override given
+  $txt->font($font, $fsize*$subsupscl);
+  $txt->rise(-$fsize/2*$subsupscl);
   $txt->text($text);
-  $txt->rise(0);
+  # restore old font here
+  $txt->rise($oldRise);
   return;
 }
 
 sub superscript {
-  my ($subsupscl, $f1, $fsize, $text) = @_;
-  $txt->font($f1,$fsize*$subsupscl);
-  $txt->rise(10*$subsupscl);
+  my ($subsupscl, $font, $fsize, $text) = @_;
+  my $oldRise = $txt->rise();
+  # save old font here -- need anyway for font() call unless override given
+  $txt->font($font, $fsize*$subsupscl);
+  $txt->rise($fsize/2*$subsupscl);
   $txt->text($text);
-  $txt->rise(0);
+  # restore old font here
+  $txt->rise($oldRise);
   return;
 }
 

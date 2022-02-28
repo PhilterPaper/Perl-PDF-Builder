@@ -50,7 +50,7 @@ my $ligFont =     # for full ligature list, Shaper ignores
   # '/Users/Phil/AppData/Local/Microsoft/Windows/Fonts/NimbusRoman-Regular.otf';
   # '/WINDOWS/Fonts/verdana.ttf';
   # '/WINDOWS/Fonts/arial.ttf';
-    '/WINDOWS/Fonts/times.ttf';
+    '/WINDOWS/Fonts/times.ttf';  # missing fj and et
 my $arabicFont = '/Program Files/Adobe/Acrobat DC/Resource/Font/AdobeArabic-Regular.otf';
 # You will certainly have to modify the font file locations and names
 # per your local installation and operating system, here and below in %samples.
@@ -104,8 +104,8 @@ my %samples = (
 		  'dir' => 'L',
 		  'script' => 'Latn',
 		  'specials' => 1, # -liga plus call Builder filter
-		  # ss/eszett sz/eszett 'n/'n, ff fi fl ffi oo
-	          'text' => ["strasse strasze R 'n R staff fish flow good"] },
+		  # ss/eszett sz/eszett 'n/'n, ff fi fl fj oo
+	          'text' => ["strasse strasze R 'n R staff fish flow fjord good"] },
    'LatinL3' => { 'title' => "LatinL3",
 	          'fontFile' => $ligFont,
 		  'dir' => 'L',
