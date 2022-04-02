@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-#      - run: sudo apt-add-repository ppa:jeffreyratcliffe/ppa
+      - run: sudo apt-add-repository ppa:jeffreyratcliffe/ppa
       - run: sudo apt update
       - run: sudo apt install libfont-ttf-perl libgd-perl libio-compress-perl libtest-exception-perl libtest-memory-cycle-perl ghostscript libgraphics-tiff-perl gsfonts
       - run: perl Makefile.PL
