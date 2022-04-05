@@ -1,4 +1,5 @@
 # This file is manually maintained
+# if add or delete a .pm file, also update META.yml and META.json files
 .perlcriticrc
 Changes
 CONTRIBUTING

@@ -50,7 +50,7 @@ my $ligFont =     # for full ligature list, Shaper ignores
   # '/Users/Phil/AppData/Local/Microsoft/Windows/Fonts/NimbusRoman-Regular.otf';
   # '/WINDOWS/Fonts/verdana.ttf';
   # '/WINDOWS/Fonts/arial.ttf';
-    '/WINDOWS/Fonts/times.ttf';  # missing fj and et
+    '/WINDOWS/Fonts/times.ttf';  # missing fj, ij, and et
 my $arabicFont = '/Program Files/Adobe/Acrobat DC/Resource/Font/AdobeArabic-Regular.otf';
 # You will certainly have to modify the font file locations and names
 # per your local installation and operating system, here and below in %samples.
@@ -118,9 +118,9 @@ my %samples = (
 		  'dir' => 'L',
 		  'script' => 'Latn',
 		  'specials' => 1, # -liga plus call Builder filter
-		  # tz TZ ue vy ffi ffl
+		  # tz TZ ue vy ffi ffl ij
 		  # TBD see if setting language to German will do ss, tz, TZ
-	          'text' => ["Tirpitz TIRPITZ blue heavy suffice waffle"] },
+	          'text' => ["Tirpitz TIRPITZ blue heavy suffice waffle pij"] },
 
    # Demonstrate kerning (closing up overlapping characters) in a Latin script.
    # You should see AVA and AWAY are closed up, due to letter shapes. This can

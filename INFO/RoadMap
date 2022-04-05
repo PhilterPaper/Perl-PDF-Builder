@@ -230,6 +230,12 @@ T. Extend the pageLabel() call to not only label the reader's thumb, but
    printed on the page. A manual page number call to put the page label on
    an arbitrary place (such as centered in the outside margin) would be good.
 
+U. Consider PCF (bitmapped font format) font support, in a manner similar to
+   the more primitive BDF support. PCF fonts are common on some systems (X11
+   used them extensively), but it's unlikely that there would be much interest
+   to widely use them today. 
+   See https://fontforge.org/docs/techref/pcf-format.html
+
 =============================================================================
 II. Items to add to a separate area (new module or sub-module)
 
