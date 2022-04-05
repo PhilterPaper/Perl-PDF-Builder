@@ -30,9 +30,10 @@ $grf->strokecolor('green'); # just leave line color as green
 #   will not ascend above the original baseline (i.e., it is NOT the distance
 #   between the baseline and the TOP of the text!)
 
-$grf->poly(50,800, 400,800);
+$grf->poly(50,800, 430,800);
+$grf->poly(420,805, 430,805, 430,795, 420,795);
 $grf->stroke();
-$txt->translate(405,800);
+$txt->translate(435,800);
 $txt->fillcolor('green');
 $txt->font($f1, $fsize*$subsupscl);
 $txt->text('Baseline');
@@ -40,7 +41,7 @@ $txt->text('Baseline');
 $txt->fillcolor('black');
 $txt->font($f1, $fsize);
 $txt->translate(50,800);
-$txt->text('normal text');
+$txt->text('normal text ');
 $txt->rise(5);
 $txt->text('rise = 5 units');
 $txt->rise(-5);
@@ -48,9 +49,10 @@ $txt->text('rise = -5 units');
 $txt->rise(0);
 
 # ----------------------------
-$grf->poly(50,600, 420,600);
+$grf->poly(50,600, 430,600);
+$grf->poly(420,610, 430,610, 430,590, 420,590);
 $grf->stroke();
-$txt->translate(425,600);
+$txt->translate(435,600);
 $txt->fillcolor('green');
 $txt->font($f1, $fsize*$subsupscl);
 $txt->text('Baseline');
@@ -58,7 +60,7 @@ $txt->text('Baseline');
 $txt->fillcolor('black');
 $txt->font($f1, $fsize);
 $txt->translate(50,600);
-$txt->text('normal text');
+$txt->text('normal text ');
 $txt->rise(10);
 $txt->text('rise = 10 units');
 $txt->rise(-10);
@@ -66,9 +68,10 @@ $txt->text('rise = -10 units');
 $txt->rise(0);
 
 # ----------------------------
-$grf->poly(50,400, 420,400);
+$grf->poly(50,400, 430,400);
+$grf->poly(420,420, 430,420, 430,380, 420,380);
 $grf->stroke();
-$txt->translate(425,400);
+$txt->translate(435,400);
 $txt->fillcolor('green');
 $txt->font($f1, $fsize*$subsupscl);
 $txt->text('Baseline');
@@ -76,7 +79,7 @@ $txt->text('Baseline');
 $txt->fillcolor('black');
 $txt->font($f1, $fsize);
 $txt->translate(50,400);
-$txt->text('normal text');
+$txt->text('normal text ');
 $txt->rise(20);
 $txt->text('rise = 20 units');
 $txt->rise(-20);
@@ -149,7 +152,7 @@ $txt->font($f1,$fsize);
 $txt->text(' is an equation.');
 
 # ----------------------------
-# just for the halibut, use functions
+# ah, just for the halibut, use functions
 $txt->translate(50,65);
 $txt->font($f2, $fsize);                   # italic y
 $txt->text('y'); 
