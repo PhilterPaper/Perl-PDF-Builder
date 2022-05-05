@@ -326,6 +326,13 @@ F. Support for SVG graphics (drawing), support for troff's eqn, pic, and tbl
    having to rewrite marked up text. Also provide a full graphing functions 
    library (stacked/unstacked line, bar, scatter plots etc. in 2D and 3D).
 
+   eqn might be done with something based on (translated from) the MathJax
+   Javascript package (TypeScript source). There doesn't appear to be a Perl
+   implementation, and supposedly MathJax is highly dependent on the browser
+   DOM, which could be a problem. However, it might be easier than starting
+   from scratch (with all due credit and links to the MathJax authors/site).
+   I won't know unless I take a deep dive into the MathJax source.
+
 G. Prepress production markup: convenience functions to place a watermark or
    draft notice on all (or selected) pages, crop marks (based on trimbox),
    temporarily draw page bounding boxes, temporarily draw object limit boxes,

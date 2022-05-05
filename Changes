@@ -2,17 +2,30 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.024     2022-04-05  UNRELEASED
+3.024     2022-05-04  UNRELEASED
+ 
+*   t/tiff.t  IF GhostScript problem unresolved by release date, go ahead and 
+      restrict Ghostscript 9.56.* in tests. This is a SEPARATE problem from 
+      GD's failure to build in CI (fix suggested to owner). ***************
+
+*   on or after 5/10/2022 make Perl 5.24 the earliest supported: cpan_update,
+      version, perhaps other files
 
 *   lib/PDF/Builder/Basic/PDF/File.pm
      Per RT 136648, PDF::API2 fix to avoid unnecessary extra trailers.
 
+    t/tiff.t add exclude_version() function to exclude GhostScript or
+      ImageMagick from all or selected uses, if your installed version
+      falls with a range of excluded version numbers.
+
     META.json, META.yml, MANIFEST add "provides" entry to make package
       sites happier.
 
-    INFO/RoadMap add comments on PCF-format bitmapped fonts.
+    INFO/RoadMap add comments on PCF-format bitmapped fonts, and possible
+      MathJax-based eqn support.
 
-    INFO/LICENSE moved to top level, to make package sites happier.
+    INFO/LICENSE, MANIFEST 
+      License moved up to top level, to make package sites happier.
 
     examples/HarfBuzz.pl, examples/resources/HarfBuzz_example.pdf
      Add 'fj' and 'ij' ligatures, although Times doesn't appear to include 

@@ -118,6 +118,11 @@ if      (can_run("magick")) {
 }
 # check if reasonably recent version
 $convert = check_version($convert, '-version', 'ImageMagick ([0-9.]+)', '6.9.7');
+# use $convertX instead of $convert in selected tests if IM excluded version 
+# (error) found
+#$convertX = exclude_version($convert, '-v', 'ImageMagick ([0-9.]+)', 
+#         ['8.0.4','100.0', ]);
+
 # $convert undef if not installed, can't parse format, version too low
 # will skip "No ImageMagick"
 
@@ -134,6 +139,10 @@ if      (can_run("gswin64c")) {
 }
 # check if reasonably recent version
 $gs = check_version($gs, '-v', 'Ghostscript ([0-9.]+)', '9.25.0');
+# use $gsX instead of $gs in selected tests if GS excluded version (error) found
+#$gsX = exclude_version($gs, '-v', 'Ghostscript ([0-9.]+)', 
+#         ['9.55.0','9.55.1', ]);
+
 # $convert undef if not installed, can't parse format, version too low
 # will skip "No Ghostscript"
 
@@ -614,6 +623,40 @@ sub check_version {
 	    if (version->parse($1) >= version->parse($min_ver)) {
 		return $cmd;
 	    }
+	}
+    }
+    return; # cmd not defined (not installed) so return undef
+}
+
+# exclude specified non-Perl utility versions
+# do not call if don't have one or more exclusion ranges
+sub exclude_version {
+    my ($cmd, $arg, $regex, $ex_ver_r) = @_;
+
+    my (@ex_ver, $my_ver);
+    if (defined $ex_ver_r) {
+	@ex_ver = @$ex_ver_r;
+    } else {
+	return; # called w/o exclusion list: fail
+    }
+    # need 2, 4, 6,... dotted versions
+    if (!scalar(@ex_ver) || scalar(@ex_ver)%2) {
+	return; # called with zero or odd number of elements: fail
+    }
+
+    if (defined $cmd) {
+	# dotted version number should not fall into an excluded range
+        my $output = `$cmd $arg`;
+        $diag .= $output;
+	if ($output =~ m/$regex/) {
+	    $my_ver = version->parse($1);
+	    for (my $i=0; $i<scalar(@ex_ver); $i+=2) {
+	        if ($my_ver >= version->parse($ex_ver[$i  ]) &&
+		    $my_ver <= version->parse($ex_ver[$i+1])) {
+		    return; # fell into one of the exclusion ranges
+	        }
+	    }
+	    return $cmd; # didn't hit any exclusions, so OK
 	}
     }
     return; # cmd not defined (not installed) so return undef

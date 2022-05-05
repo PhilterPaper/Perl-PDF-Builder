@@ -114,12 +114,13 @@ licenses and warranty statement.
 
 * INFO/RoadMap file for the PDF::Builder road map
 * CONTRIBUTING file for how to contribute to the project
-* INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues (preferred), or the author's website
+* LICENSE file for more on the license term
+* INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues 
 * INFO/DEPRECATED file for information on deprecated features
 * INFO/KNOWN\_INCOMP file for known incompatibilities with PDF::API2
+* INFO/CONVERSION file for how to convert from PDF::API2 to PDF::Builder
 * INFO/Changes\* files for older change logs
 * INFO/PATENTS file for information on patents
-* INFO/CONVERSION file for how to convert from PDF::API2 to PDF::Builder
 
 `INFO/old/` also has some build and test tool files that are not currently used.
 
