@@ -26,7 +26,7 @@ recommends:
 requires:
   Compress::Zlib: '1.0'
   Font::TTF: '1.04'
-  perl: '5.022000'
+  perl: '5.024000'
 resources:
   bugtracker: https://github.com/PhilterPaper/Perl-PDF-Builder/issues
   homepage: https://metacpan.org/pod/PDF::Builder

@@ -2,13 +2,13 @@
 
 use strict;
 use warnings;
-use 5.022000;
+use 5.024000;
 use ExtUtils::MakeMaker 6.66;
 
-my $PERL_version = '5.022000';  # Both here and in "use" statement above,
+my $PERL_version = '5.024000';  # Both here and in "use" statement above,
                                 # PDFbuild.pl updates from 'version' file
 my $MakeMaker_version = '6.66';
-my $version = '3.023';          # PDFbuild.pl updates from 'version' file
+my $version = '3.024';          # PDFbuild.pl updates from 'version' file
 
 # optional libraries... most users will attempt to install full set. they are
 # nice to have but not vital for many users. if one fails to install, it might 

@@ -32,7 +32,7 @@ install by modifying certain installation files with
 
 ### Perl
 
-**Perl 5.22** or higher. It will likely run on somewhat earlier versions, but
+**Perl 5.24** or higher. It will likely run on somewhat earlier versions, but
 the CPAN installer may refuse to install it. The reason this version was
 chosen was so that LTS (Long Term Support) versions of Perl going back about
 6 years are officially supported (by PDF::Builder), and older versions are not
@@ -41,14 +41,14 @@ are an artifact of old Perl releases.
 
 #### Older Perls
 
-If you MUST install on an older (pre 5.22) Perl, you can try the following for
+If you MUST install on an older (pre 5.24) Perl, you can try the following for
 Strawberry Perl (Windows). NO PROMISES! Something similar MAY work for other
 OS's and Perl installations:
 
 1. Unpack installation file (`.tar.gz`, via a utility such as 7-Zip) into a directory, and cd to that directory
-1. Edit META.json and change 5.022000 to 5.016000 or whatever level desired
-1. Edit META.yml and change 5.022000 to 5.016000 or whatever level desired
-1. Edit Makefile.PL and change `use 5.022000;` to `use 5.016000;`, change `$PERL_version` from `5.022000` to `5.016000`
+1. Edit META.json and change 5.024000 to 5.016000 or whatever level desired
+1. Edit META.yml and change 5.024000 to 5.016000 or whatever level desired
+1. Edit Makefile.PL and change `use 5.024000;` to `use 5.016000;`, change `$PERL_version` from `5.024000` to `5.016000`
 1. `cpan .`
 
 Note that some Perl installers MAY have a means to override or suppress the
@@ -91,6 +91,25 @@ Strawberry Perl for Windows), no other tools or manually-installed prereqs are
 needed (worst case, you can unpack the `.tar.gz` file and copy files into
 place yourself!). Currently there are no compiles and links (Perl extensions)
 done during the install process, only copying of .pm Perl module files.
+
+## Manually building
+
+As is the usual practice with building such a package (from the command line), 
+the steps are:
+
+perl Makefile.PL
+make
+make test
+make install
+
+If you have your system configured to run Perl for a .pl/.PL file, you may be 
+able to omit "perl" from the first command, which creates a Makefile. "make" 
+is the generic command to run (it feeds on the Makefile), but your system may 
+have it under a different name, such as dmake (Strawberry Perl on Windows), 
+gmake, or nmake.
+
+PDF::Builder does not currently compile and link anything, so gcc, g++, etc.
+will not be used. The build process merely copies .pm files around.
 
 ## Copyright
 

@@ -54,6 +54,15 @@ A. ## DONE ## release 3.018
      down nonlinearly (stroke widths reduced less than overall height/width)
      and recreate the new outlines as synthetic small/petite caps.
 
+(A1.) Look at examples/HarfBuzz.pl to see some problems with ligatures. In some
+     cases, such as "waffle", a PDF Reader can search for and find it even if
+     "ffl" has been replaced by a ligature (single glyph). However, in other
+     cases, such as "strasse", the Reader can NOT find the word when "ss" has
+     been replaced by an eszet. My keyboard doesn't have an eszet, so I can't
+     easily test if it can be searched for. I don't think there's anything in
+     the PDF::Builder code which is substituting eszet for "ss". Interestingly, 
+     the "st" ligature in the same word does not present any problem.
+
 B. Unification of font support: including character set and encoding support
    improvements [see CTS 16 and CTS 23] to make more commonality between using 
    UTF-8 and single byte encodings, across all the font types (core, TrueType, 

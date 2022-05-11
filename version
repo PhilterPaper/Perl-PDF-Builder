@@ -9,7 +9,7 @@ VERSION 3.024
 #   Would be nice to read cpan First Release and figure out min Perl version.
 ##PERL_V_DOT   5.20.0  dist.ini, .travis.yml
 # update Makefile.PL, META.*
-PERL_V        5.022000
+PERL_V        5.024000
 
 # minimum ExeUtils::Makemaker needed for configuration
 # update Makefile.PL, META.*
@@ -26,7 +26,7 @@ FONT_TTF           1.04
 
 # optional prerequisites
 # update Makefile.PL, META.*, Builder.pm, t/00-all-usable.t
-GRAPHICS_TIFF    16   # will be 17 when TIFF changes go in
-HARFBUZZ_SHAPER  0.024
+GRAPHICS_TIFF    16   # will be 17+ when TIFF changes go in
+HARFBUZZ_SHAPER  0.024  # 0.026 is current release
 IMAGE_PNG_LIBPNG 0.57
 
