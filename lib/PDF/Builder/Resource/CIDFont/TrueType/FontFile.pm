@@ -7,7 +7,7 @@ use warnings;
 #no warnings qw[ recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use Carp;
 use Encode qw(:all);
@@ -699,6 +699,12 @@ sub subsetByCId {
     $self->data()->{'subset'} = 1;
     vec($self->data()->{'subvec'}, $g, 1) = 1;
     return if $self->iscff();
+    # if loca table not defined in the font (offset into glyf table), is there
+    # an alternative we can use, or just return undef? per Apple TT Ref:
+    # The 'loca' table only used with fonts that have TrueType outlines (that 
+    # is, a 'glyf' table). Fonts that have no TrueType outlines do not require 
+    # a 'loca' table. 
+    return if !defined $self->font()->{'loca'};
     if (defined $self->font()->{'loca'}->read()->{'glyphs'}->[$g]) {
         $self->font()->{'loca'}->read()->{'glyphs'}->[$g]->read();
         return map { vec($self->data()->{'subvec'}, $_, 1) = 1; } $self->font()->{'loca'}->{'glyphs'}->[$g]->get_refs();

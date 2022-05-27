@@ -2,7 +2,7 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.024     2022-05-10  UNRELEASED
+3.024     2022-05-27  UNRELEASED
  
 *   t/tiff.t  IF GhostScript problem unresolved by release date, go ahead and 
       restrict Ghostscript 9.56.* in tests. This is a SEPARATE problem from 
@@ -10,6 +10,11 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
 
 *   lib/PDF/Builder/Basic/PDF/File.pm
      Per RT 136648, PDF::API2 fix to avoid unnecessary extra trailers.
+
+    lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm
+     "loca" table in TTF is optional, so to fix PDFAPI2#47, return from 
+     subsetByCId() method early if no such table.
+*  check pdfapi2-47.pl once "position" implemented, to see if completely fixed
 
     Makefile.PL, META.json, META.yml, README.md
      Perl 5.24 is the earliest supported version.
