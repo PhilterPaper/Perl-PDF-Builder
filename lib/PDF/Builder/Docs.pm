@@ -1600,7 +1600,7 @@ create a PDF using C<cjkfont>, and then use an external utility (e.g.,
 C<pdfcairo>) to embed the font in the PDF. It may also be possible to use 
 C<ttfont> instead, to produce the PDF, provided you can deduce the correct 
 font file name from examining the PDF file (e.g., on my Windows system, the 
-"Ming" font would be C<< $font = $pdf->ttfont("C:/Program Files (x86)/Adobe/Acrobat Reader DC/Resource/CIDFont/AdobeMingStd-Light.otf") >>.
+"Ming" font would be C<< $font = $pdf->ttfont("C:/Program Files/Adobe/Acrobat DC/Resource/CIDFont/AdobeMingStd-Light.otf") >>.
 Of course, the font file used would have to be C<.ttf> or C<.otf>.
 It may act a little differently than C<cjkfont> (due a a different Cmap), but 
 you I<should> be able to embed the font file into the PDF.

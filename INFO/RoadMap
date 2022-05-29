@@ -1,14 +1,13 @@
-Road Map for Future Development of PDF::Builder             09 September 2021
+Road Map for Future Development of PDF::Builder                   29 May 2022
 
 In order to encourage others to contribute code and/or algorithms to the
 effort, I am publishing this road map of where I would like the product to go.
 Please, no copyrighted code or patented algorithms, unless the owner releases
 them under an Open Source license! The content of this road map is open to
-discussion, too, either on the GitHub bugs list (feature requests with the
-"enhancement" label or "general discussion" label) or under the forum (Feature 
-Requests or General Discussions). If you have a one-off suggestion, there is
-a contact link on the forum so you don't have to sign up for either the forum
-or GitHub to be heard.
+discussion, too, on the GitHub bugs list (feature requests with the
+"enhancement" label or "general discussion" label). If you have a one-off 
+suggestion, there is a contact page on my site, so you don't have to sign up 
+for GitHub to be heard.
 
 If there are no contributions on something, I reserve the right to write my
 own modules (dependent on PDF::Builder) and sell them.

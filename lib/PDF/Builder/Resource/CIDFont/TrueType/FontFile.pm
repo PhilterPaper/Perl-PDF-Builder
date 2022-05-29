@@ -736,12 +736,14 @@ sub outobjdeep {
 	}
     } else {
         if ($self->data()->{'subset'} && !$self->data()->{'nosubset'}) {
+	  if (defined $f->{'glyf'}) { # glyf table not always present?
             $f->{'glyf'}->read();
             for (my $i = 0; $i < $self->glyphNum(); $i++) {
                 next if $self->subvec($i);
                 $f->{'loca'}{'glyphs'}->[$i] = undef;
             #    print STDERR "$i,";
             }
+          }
         }
 
 	if ($self->data()->{'noembed'} != 1) {
