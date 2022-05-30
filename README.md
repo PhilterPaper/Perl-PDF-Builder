@@ -97,10 +97,10 @@ done during the install process, only copying of .pm Perl module files.
 As is the usual practice with building such a package (from the command line), 
 the steps are:
 
-perl Makefile.PL
-make
-make test
-make install
+1. perl Makefile.PL
+1. make
+1. make test
+1. make install
 
 If you have your system configured to run Perl for a .pl/.PL file, you may be 
 able to omit "perl" from the first command, which creates a Makefile. "make" 
@@ -115,7 +115,7 @@ will not be used. The build process merely copies .pm files around.
 
 This software is Copyright (c) 2017-2022 by Phil M. Perry.
 
-Previous copyrights are held by others (Steve Simms, Alfred Reibenschuh, et al.).
+Previous copyrights are held by others (Steve Simms, Alfred Reibenschuh, et al.). See The HISTORY section of the documentation for more information.
 
 ## License
 
