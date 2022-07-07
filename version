@@ -7,9 +7,9 @@ VERSION 3.024
 #   of Perl" (NOT "Latest releases in each branch of Perl"!) and subtract 
 #   6 years to get date of oldest release, and then go one release before that. 
 #   Would be nice to read cpan First Release and figure out min Perl version.
-##PERL_V_DOT   5.20.0  dist.ini, .travis.yml
+PERL_V_DOT   5.24.0  # dist.ini, .travis.yml
 # update Makefile.PL, META.*
-PERL_V        5.024000
+PERL_V       5.024000
 
 # minimum ExeUtils::Makemaker needed for configuration
 # update Makefile.PL, META.*
@@ -22,7 +22,7 @@ TEST_MEMORY_CYCLE  1.0
 
 COMPRESS_ZLIB      1.0
 FONT_TTF           1.04
-# READONLY         0     Future usage?
+# READONLY         0     Future usage? per TIFF changes
 
 # optional prerequisites
 # update Makefile.PL, META.*, Builder.pm, t/00-all-usable.t
