@@ -20,7 +20,7 @@ use warnings;
 use Scalar::Util 'isweak';
 
 # VERSION
-my $LAST_UPDATE = '3.022'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -120,6 +120,11 @@ sub release {
 
     my @tofree = grep { !isweak $_ } values %$self;
     %$self = ();
+
+    # PDFs with highly-interconnected page trees or outlines can hit Perl's
+    # recursion limit pretty easily, so disable the warning for this specific
+    # loop.
+    no warnings 'recursion'; ## no critic
 
     while (my $item = shift @tofree) {
         # common case: value is not reference

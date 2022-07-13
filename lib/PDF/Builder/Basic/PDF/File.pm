@@ -21,7 +21,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.023'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -49,11 +49,11 @@ Within this class hierarchy, rather than making everything visible via methods,
 which would be a lot of work, there are various instance variables which are
 accessible via associative array referencing. To distinguish instance variables
 from content variables (which may come from the PDF content itself), each such
-variable will start with a space.
+variable name will start with a space.
 
-Variables which do not start with a space directly reflect elements in a PDF
-dictionary. In the case of a C<PDF::Builder::Basic::PDF::File>, the elements 
-reflect those in the trailer dictionary.
+Variable names which do not start with a space directly reflect elements in a 
+PDF dictionary. In the case of a C<PDF::Builder::Basic::PDF::File>, the 
+elements reflect those in the trailer dictionary.
 
 Since some variables are not designed for class users to access, variables are
 marked in the documentation with B<(R)> to indicate that such an entry should 
@@ -69,7 +69,7 @@ This variable allows the user to create a new root entry to occur in the trailer
 dictionary which is output when the file is written or appended. If you wish to
 override the root element in the dictionary you have, use this entry to indicate
 that without losing the current Root entry. Notice that newroot should point to
-a PDF level object and not just to a dictionary which does not have object 
+a PDF level object and not just to a dictionary, which does not have object 
 status.
 
 =item INFILE (R)
@@ -335,6 +335,11 @@ sub release {
         $self->{$key} = undef;
         delete $self->{$key};
     }
+
+    # PDFs with highly-interconnected page trees or outlines can hit Perl's
+    # recursion limit pretty easily, so disable the warning for this specific
+    # loop.
+    no warnings 'recursion'; ## no critic
 
     while (my $item = shift @tofree) {
         if      (blessed($item) and $item->can('release')) {
@@ -1515,13 +1520,6 @@ sub out_trailer {
         $self->ship_out();
     }
 
-    #    $size = @{$self->{' printed'}} + @{$self->{' free'}};
-    #    $tdict->{'Size'} = PDFNum($tdict->{'Size'}->val() + $size);
-    # PDFSpec 1.3 says for /Size: (Required) Total number of entries in the file's
-    # cross-reference table, including the original table and all updates. Which
-    # is what the previous two lines implement.
-    # But this seems to make Acrobat croak on saving so we try the following from
-    # basil.duval@epfl.ch
     $tdict->{'Size'} = PDFNum($self->{' maxobj'});
 
     my $tloc = $fh->tell();
@@ -1553,10 +1551,6 @@ sub out_trailer {
 
     $j = 0; my $first = -1; $k = 0;
     for ($i = 0; $i <= $#xreflist + 1; $i++) {
-        # if ($i == 0) {
-        #     $first = $i; $j = $xreflist[0]->{' objnum'};
-        #     $fh->printf("0 1\n%010d 65535 f \n", $ff);
-        # }
         if ($i > $#xreflist || $self->{' objects'}{$xreflist[$i]->uid()}[0] != $j + 1) {
 ##          $fh->print(($first == -1 ? "0 " : "$self->{' objects'}{$xreflist[$first]->uid()}[0] ") . ($i - $first) . "\n");
             push @out, ($first == -1 ? "0 " : "$self->{' objects'}{$xreflist[$first]->uid()}[0] ") . ($i - $first) . "\n";

@@ -1422,7 +1422,7 @@ sub open_page {
     weaken $page->{' api'};
 
     return $page;
-} # end of openpage()
+} # end of open_page()
 
 =item $page = $pdf->openpage($page_number)
 
@@ -1527,6 +1527,7 @@ sub importPageIntoForm {
         $s_page = $s_idx;
     } else {
         $s_page = $s_pdf->open_page($s_idx);
+	die "Unable to open page '$s_idx' in source PDF" unless defined $s_page;
     }
 
     $self->{'apiimportcache'} ||= {};
@@ -1646,6 +1647,7 @@ sub import_page {
         $s_page = $s_idx;
     } else {
         $s_page = $s_pdf->open_page($s_idx);
+	die "Unable to open page '$s_idx' in source PDF" unless defined $s_page;
     }
 
     if (ref($t_idx) eq 'PDF::Builder::Page') {
@@ -2114,6 +2116,13 @@ sub ttfont {
 Returns a new CJK font object. These are TrueType-like fonts for East Asian
 languages (Chinese, Japanese, Korean).
 For details, see L<PDF::Builder::Docs/CJK Fonts>.
+
+B<NOTE:> C<cjkfont> is quite old and is not well supported. We recommend that
+you try using C<ttfont> (or another font routine, if not TTF/OTF) with the
+appropriate CJK font file. Most appear to be .ttf or .otf format. Support for
+C<cjkfont> I<may> be dropped in a future release. We would appreciate hearing
+from you if you are successfully using C<cjkfont>, and are unable to use
+C<ttfont> instead.
 
 See also L<PDF::Builder::Resource::CIDFont::CJKFont>
 
@@ -2784,19 +2793,19 @@ sub outlines {
     my $self = shift();
 
     require PDF::Builder::Outlines;
-    $self->{'pdf'}->{'Root'}->{'Outlines'} ||= PDF::Builder::Outlines->new($self);
-
     my $obj = $self->{'pdf'}->{'Root'}->{'Outlines'};
-#    bless $obj, 'PDF::Builder::Outlines';
-#    $obj->{' apipdf'} = $self->{'pdf'};
-#    $obj->{' api'}    = $self;
-#    weaken $obj->{' apipdf'};
-#    weaken $obj->{' api'};
+    if ($obj) {
+        bless $obj, 'PDF::Builder::Outlines';
+        $obj->{' api'} = $self;
+        weaken $obj->{' api'};
+    } else {
+	$obj = PDF::Builder::Outlines->new($self);
 
-    $self->{'pdf'}->new_obj($obj) unless $obj->is_obj($self->{'pdf'});
-    $self->{'pdf'}->out_obj($obj);
-    $self->{'pdf'}->out_obj($self->{'pdf'}->{'Root'});
-
+	$self->{'pdf'}->{'Root'}->{'Outlines'} = $obj;
+        $self->{'pdf'}->new_obj($obj) unless $obj->is_obj($self->{'pdf'});
+        $self->{'pdf'}->out_obj($obj);
+        $self->{'pdf'}->out_obj($self->{'pdf'}->{'Root'});
+    }
     return $obj;
 }
 

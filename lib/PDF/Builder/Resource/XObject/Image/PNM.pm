@@ -43,8 +43,8 @@ This is the name you can give for the PNM image object. The default is Nxnnnn.
 =item -compress => 1
 
 This is the compression you can give for the PNM image object. Any value will
-cause the use of I<Flate> compression, otherwise I<ASCIIHexDecode>.
-If not explicitly given, use whatever the global C<forcecompress> setting is.
+cause the use of I<Flate> compression, otherwise (C<-compress> not given),
+I<ASCIIHexDecode> is used.
 
 =back
 

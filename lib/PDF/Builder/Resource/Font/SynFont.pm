@@ -4,10 +4,9 @@ use base 'PDF::Builder::Resource::Font';
 
 use strict;
 use warnings;
-#no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.022'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use Math::Trig;    # CAUTION: deg2rad(0) = deg2rad(360) = 0!
 use Unicode::UCD 'charinfo';
@@ -17,17 +16,13 @@ use PDF::Builder::Basic::PDF::Utils;
 
 =head1 NAME
 
-PDF::Builder::Resource::Font::SynFont - Module for using synthetic Fonts.
+PDF::Builder::Resource::Font::SynFont - Module for creating temporary synthetic Fonts.
 
 =head1 SYNOPSIS
 
-    #
-    use PDF::Builder;
-    #
     $pdf = PDF::Builder->new();
     $cft = $pdf->corefont('Times-Roman');  # ttfont, etc. also works
     $sft = $pdf->synfont($cft, -condense => .75);  # condense by 25%
-    #
 
 This works for I<corefonts>, I<PS fonts>, and I<TTF/OTF fonts>; but does not
 work for I<CJK fonts> or I<bitmapped fonts>.
@@ -71,7 +66,10 @@ wraps around). 0 degrees of italic slant (obliqueness) is the default.
 
 I<-bold>
 ... embolding factor (0.1+, bold=1, heavy=2, ...). It is additional outline
-B<thickness> (B<linewidth>), which expands the character outwards.
+B<thickness> (B<linewidth>), which expands the character (glyph) outwards (as
+well as shrinking unfilled enclosed areas such as bowls and counters). 
+Normally, the glyph's outline is not drawn (it is only filled); this adds
+a thick outline.
 
 I<-space>
 ... additional charspacing in em (0-1000).
@@ -143,19 +141,20 @@ sub new
         'wx' => { 'space' => '600' },
     };
 
+    my $data = $self->data();
     if (ref($font->fontbbox())) {
-        $self->data()->{'fontbbox'} = [ @{$font->fontbbox()} ];
+        $data->{'fontbbox'} = [ @{$font->fontbbox()} ];
     } else {
-        $self->data()->{'fontbbox'} = [ $font->fontbbox() ];
+        $data->{'fontbbox'} = [ $font->fontbbox() ];
     }
-    $self->data()->{'fontbbox'}->[0] *= $cond;
-    $self->data()->{'fontbbox'}->[2] *= $cond;
+    $data->{'fontbbox'}->[0] *= $cond;
+    $data->{'fontbbox'}->[2] *= $cond;
 
     $self->{'Subtype'} = PDFName('Type3');
     $self->{'FirstChar'} = PDFNum($first);
     $self->{'LastChar'} = PDFNum($last);
     $self->{'FontMatrix'} = PDFArray(map { PDFNum($_) } ( 0.001, 0, 0, 0.001, 0, 0 ) );
-    $self->{'FontBBox'} = PDFArray(map { PDFNum($_) } ( $self->fontbbox() ) );
+    $self->{'FontBBox'} = PDFArray(map { PDFNum($_) } $self->fontbbox() );
 
     my $procs = PDFDict();
     $pdf->new_obj($procs);
@@ -167,10 +166,12 @@ sub new
     $self->{'Resources'}->{'Font'} = $xo;
     $self->{'Resources'}->{'Font'}->{'FSN'} = $font;
     foreach my $w ($first .. $last) {
-        $self->data()->{'char'}->[$w] = $font->glyphByEnc($w);
+        $data->{'char'}->[$w] = $font->glyphByEnc($w);
 	# possible non-standard name... use $w as Unicode value
-        $self->data()->{'uni'}->[$w] = (uniByName($self->data()->{'char'}->[$w]))||$w;
-        $self->data()->{'u2e'}->{$self->data()->{'uni'}->[$w]} = $w;
+        $data->{'uni'}->[$w] = (uniByName($data->{'char'}->[$w])) || $w;
+	if (defined $data->{'uni'}->[$w]) {
+            $data->{'u2e'}->{$data->{'uni'}->[$w]} = $w;
+	}
     }
 
     if ($font->isa('PDF::Builder::Resource::CIDFont')) {
@@ -178,9 +179,10 @@ sub new
         $self->{'Encoding'}->{'Type'} = PDFName('Encoding');
         $self->{'Encoding'}->{'Differences'} = PDFArray();
         foreach my $w ($first .. $last) {
-            if (defined $self->data()->{'char'}->[$w] && 
-		$self->data()->{'char'}->[$w] ne '.notdef') {
-                $self->{'Encoding'}->{'Differences'}->add_elements(PDFNum($w),PDFName($self->data()->{'char'}->[$w]));
+	    my $char = $data->{'char'}->[$w];
+            if (defined $char && $char ne '.notdef') {
+                $self->{'Encoding'}->{'Differences'}->add_elements(PDFNum($w),
+			                                       PDFName($char));
             }
         }
     } else {
@@ -191,26 +193,26 @@ sub new
     foreach my $w ($first .. $last) {
 	# $w is the "standard encoding" (similar to Windows-1252) PDF 
 	# single byte encoding. first 32 .notdef, 255 = U+00FF ydieresis
-        if ($self->data()->{'char'}->[$w] eq '.notdef') {
+        if ($data->{'char'}->[$w] eq '.notdef') {
             push @widths, $self->missingwidth();
             next;
         }
         my $char = PDFDict();
 
        #my $wth = int($font->width(chr($w)) * 1000 * $cond + 2 * $space);
-        my $uni = $self->data()->{'uni'}->[$w];
-	    my $wth = int($font->width(chr($uni)) * 1000 * $cond + 2*$space);
+        my $uni = $data->{'uni'}->[$w];
+	my $wth = int($font->width(chr($uni)) * 1000 * $cond + 2*$space);
 
         $procs->{$font->glyphByEnc($w)} = $char;
        #$char->{'Filter'} = PDFArray(PDFName('FlateDecode'));
         $char->{' stream'} = $wth." 0 ".join(' ',map { int($_) } $self->fontbbox())." d1\n";
         $char->{' stream'} .= "BT\n";
-        $char->{' stream'} .= join(' ', 1, 0, tan(deg2rad($oblique)), 1, 0, 0)." Tm\n" if $oblique;
-        $char->{' stream'} .= "2 Tr ".($bold)." w\n" if $bold;
-       #my $ci = charinfo($self->data()->{'uni'}->[$w]);
+        $char->{' stream'} .= join(' ', (1, 0, tan(deg2rad($oblique)), 1, 0, 0))." Tm\n" if $oblique;
+        $char->{' stream'} .= "2 Tr $bold w\n" if $bold;
+       #my $ci = charinfo($data->{'uni'}->[$w]);
         my $ci = {};
-  	if ($self->data()->{'uni'}->[$w] ne '') {
-    	    $ci = charinfo($self->data()->{'uni'}->[$w]);
+  	if ($data->{'uni'}->[$w] ne '') {
+    	    $ci = charinfo($data->{'uni'}->[$w]);
   	}
 	
         # Small Caps
@@ -313,7 +315,7 @@ sub new
 	# finale... all modifications to font have been done
         $char->{' stream'} .= " Tj\nET ";
         push @widths, $wth;
-        $self->data()->{'wx'}->{$font->glyphByEnc($w)} = $wth;
+        $data->{'wx'}->{$font->glyphByEnc($w)} = $wth;
         $pdf->new_obj($char);
     } # loop through 255 standard encoding points
 
@@ -323,36 +325,38 @@ sub new
     $procs->{'.notdef'} = $procs->{'space'};
 
     $self->{'Widths'} = PDFArray(map { PDFNum($_) } @widths);
-    $self->data()->{'e2n'} = $self->data()->{'char'};
-    $self->data()->{'e2u'} = $self->data()->{'uni'};
+    $data->{'e2n'} = $data->{'char'};
+    $data->{'e2u'} = $data->{'uni'};
 
-    $self->data()->{'u2c'} = {};
-    $self->data()->{'u2e'} = {};
-    $self->data()->{'u2n'} = {};
-    $self->data()->{'n2c'} = {};
-    $self->data()->{'n2e'} = {};
-    $self->data()->{'n2u'} = {};
+    $data->{'u2c'} = {};
+    $data->{'u2e'} = {};
+    $data->{'u2n'} = {};
+    $data->{'n2c'} = {};
+    $data->{'n2e'} = {};
+    $data->{'n2u'} = {};
 
     foreach my $n (reverse 0 .. 255) {
-        $self->data()->{'n2c'}->{$self->data()->{'char'}->[$n] || '.notdef'} = 
-	  $n unless defined $self->data()->{'n2c'}->{$self->data()->{'char'}->[$n] || '.notdef'};
-        $self->data()->{'n2e'}->{$self->data()->{'e2n'}->[$n] || '.notdef'} =
-	  $n unless defined $self->data()->{'n2e'}->{$self->data()->{'e2n'}->[$n] || '.notdef'};
+        $data->{'n2c'}->{$data->{'char'}->[$n] || '.notdef'} = 
+	  $n unless defined $data->{'n2c'}->{$data->{'char'}->[$n] || '.notdef'};
+        $data->{'n2e'}->{$data->{'e2n'}->[$n] || '.notdef'} =
+	  $n unless defined $data->{'n2e'}->{$data->{'e2n'}->[$n] || '.notdef'};
 
-        $self->data()->{'n2u'}->{$self->data()->{'e2n'}->[$n] || '.notdef'} =
-	  $self->data()->{'e2u'}->[$n] unless defined $self->data()->{'n2u'}->{$self->data()->{'e2n'}->[$n] || '.notdef'};
-        $self->data()->{'n2u'}->{$self->data()->{'char'}->[$n] || '.notdef'} =
-	  $self->data()->{'uni'}->[$n] unless defined $self->data()->{'n2u'}->{$self->data()->{'char'}->[$n] || '.notdef'};
+        $data->{'n2u'}->{$data->{'e2n'}->[$n] || '.notdef'} =
+	  $data->{'e2u'}->[$n] unless defined $data->{'n2u'}->{$data->{'e2n'}->[$n] || '.notdef'};
+        $data->{'n2u'}->{$data->{'char'}->[$n] || '.notdef'} =
+	  $data->{'uni'}->[$n] unless defined $data->{'n2u'}->{$data->{'char'}->[$n] || '.notdef'};
 
-        $self->data()->{'u2c'}->{$self->data()->{'uni'}->[$n]} =
-	  $n unless defined $self->data()->{'u2c'}->{$self->data()->{'uni'}->[$n]};
-        $self->data()->{'u2e'}->{$self->data()->{'e2u'}->[$n]} =
-	  $n unless defined $self->data()->{'u2e'}->{$self->data()->{'e2u'}->[$n]};
+        $data->{'u2c'}->{$data->{'uni'}->[$n]} =
+	  $n unless defined $data->{'u2c'}->{$data->{'uni'}->[$n]};
+        $data->{'u2e'}->{$data->{'e2u'}->[$n]} =
+	  $n unless defined $data->{'u2e'}->{$data->{'e2u'}->[$n]};
 
-        $self->data()->{'u2n'}->{$self->data()->{'e2u'}->[$n]} =
-	  ($self->data()->{'e2n'}->[$n] || '.notdef') unless defined $self->data()->{'u2n'}->{$self->data()->{'e2u'}->[$n]};
-        $self->data()->{'u2n'}->{$self->data()->{'uni'}->[$n]} =
-	  ($self->data()->{'char'}->[$n] || '.notdef') unless defined $self->data()->{'u2n'}->{$self->data()->{'uni'}->[$n]};
+	my $value = $data->{'e2n'}->[$n];
+        $data->{'u2n'}->{$data->{'e2u'}->[$n]} =
+	  ($value || '.notdef') unless defined $data->{'u2n'}->{$data->{'e2u'}->[$n]};
+	$value = $data->{'char'}->[$n];
+        $data->{'u2n'}->{$data->{'uni'}->[$n]} =
+	  ($value || '.notdef') unless defined $data->{'u2n'}->{$data->{'uni'}->[$n]};
     }
 
     return $self;

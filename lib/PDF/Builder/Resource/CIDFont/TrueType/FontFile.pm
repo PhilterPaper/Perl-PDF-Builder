@@ -736,7 +736,8 @@ sub outobjdeep {
 	}
     } else {
         if ($self->data()->{'subset'} && !$self->data()->{'nosubset'}) {
-	  if (defined $f->{'glyf'}) { # glyf table not always present?
+	  # glyf table is optional, according to Apple
+	  if (defined $f->{'glyf'}) {
             $f->{'glyf'}->read();
             for (my $i = 0; $i < $self->glyphNum(); $i++) {
                 next if $self->subvec($i);
