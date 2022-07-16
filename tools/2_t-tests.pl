@@ -42,8 +42,10 @@ my @test_list = qw(
  font-type1
  gd
  gif
+ info
  jpg
  lite
+ named-destinations
  outline
  page
  papersizes
@@ -58,6 +60,7 @@ my @test_list = qw(
  string
  text
  tiff
+ version
  viewer-preferences
                   );
 # override full list above, and run just one or two tests

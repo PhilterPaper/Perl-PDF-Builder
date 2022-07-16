@@ -7,17 +7,37 @@ my $test_count = 2;
 
 use PDF::Builder;
 
-#my $pfb_file = '/usr/share/fonts/type1/gsfonts/a010013l.pfb';
-#my $pfm_file = '/usr/share/fonts/type1/gsfonts/a010013l.pfm';
-my $pfb_file = 'C:/Program Files (x86)/MikTex 2.9/fonts/type1/urw/bookman/ubkd8a.pfb';
-my $pfm_file = 'C:/Program Files (x86)/MikTex 2.9/fonts/type1/urw/bookman/ubkd8a.pfm';
+my (@pfb_list, @pfm_list);
+my ($pfb_file, $pfm_file);
+
+# Unix/Linux systems
+push @pfb_list, '/usr/share/fonts/type1/gsfonts/a010013l.pfb';
+push @pfm_list, '/usr/share/fonts/type1/gsfonts/a010013l.pfm';
+
+# Windows systems (MikTex installation assumed, as Windows doesn't come
+# with any Type1 fonts preinstalled)
+push @pfb_list, 'C:/Program Files (x86)/MikTex 2.9/fonts/type1/urw/bookman/ubkd8a.pfb';
+push @pfm_list, 'C:/Program Files (x86)/MikTex 2.9/fonts/type1/urw/bookman/ubkd8a.pfm';
+
+foreach (@pfb_list) {
+    if (-f $_ && -r $_) {
+        $pfb_file = $_; 
+	last;
+    }
+}
+foreach (@pfm_list) {
+    if (-f $_ && -r $_) {
+        $pfm_file = $_; 
+	last;
+    }
+}
 
 SKIP: {
     skip "Skipping Type1 tests... URW Gothic L Book font not found", $test_count
-        unless (-f $pfb_file and -r $pfb_file and -f $pfm_file and -r $pfm_file);
+        unless (defined $pfb_file and defined $pfm_file);
 
     my $pdf = PDF::Builder->new();
-    my $font = $pdf->psfont($pfb_file, -pfmfile => $pfm_file);
+    my $font = $pdf->font($pfb_file, -pfmfile => $pfm_file); # was psfont()
 
     # Do something with the font to see if it appears to have opened
     # properly.

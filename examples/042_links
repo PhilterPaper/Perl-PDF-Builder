@@ -47,7 +47,8 @@ $text->text("here");
 my $target_width = $text->advancewidth("here");
 
 my $annotation = $page->annotation();
-$annotation->url("https://www.google.com",
+# method 'url' is still usable
+$annotation->uri("https://www.google.com",
 	         -rect => [$x-1, $y-5, $x+1+$target_width, $y-5+1+$font_size],
 		                         # clickable area
 		 -border => [0, 0, $border],    # show border
@@ -72,7 +73,8 @@ $text->text("a specific point");
 $target_width = $text->advancewidth("a specific point");
 
 $annotation = $page->annotation();
-$annotation->url("https://www.catskilltech.com/#Catskills",
+# method 'url' is still usable
+$annotation->uri("https://www.catskilltech.com/#Catskills",
 	         -rect => [$x-1, $y-5, $x+1+$target_width, $y-5+1+$font_size],
 		                         # clickable area
 		 -border => [0, 0, $border],    # show border
@@ -115,7 +117,8 @@ $target_width = $text->advancewidth("here");
 
 $annotation = $page->annotation();
 my $tgt_page = $pdf->openpage(1);  # target page 1
-$annotation->link($tgt_page,
+# method 'link' is still usable
+$annotation->goto($tgt_page,
 	         -rect => [$x-1, $y-5, $x+1+$target_width, $y-5+1+$font_size],
 		                         # clickable area
 		 -border => [0, 0, $border],    # show border
@@ -141,7 +144,8 @@ $target_width = $text->advancewidth("here");
 
 $annotation = $page->annotation();
 $tgt_page = $pdf->openpage(1);  # target page 1
-$annotation->link($tgt_page,
+# method 'link' is still usable
+$annotation->goto($tgt_page,
 	         -rect => [$x-1, $y-5, $x+1+$target_width, $y-5+1+$font_size],
 		                         # clickable area
 		 -border => [0, 0, $border],    # show border
@@ -177,7 +181,8 @@ $text->text("here");
 $target_width = $text->advancewidth("here");
 
 $annotation = $page->annotation();
-$annotation->pdf_file("resources/HarfBuzz_example.pdf",
+# methods 'pdfile' and 'pdf_file' are still usable
+$annotation->pdf("resources/HarfBuzz_example.pdf",
                  1, # page number
 	         -rect => [$x-1, $y-5, $x+1+$target_width, $y-5+1+$font_size],
 		                         # clickable area
@@ -203,7 +208,8 @@ $text->text("here");
 $target_width = $text->advancewidth("here");
 
 $annotation = $page->annotation();
-$annotation->pdf_file("resources/HarfBuzz_example.pdf",
+# methods 'pdfile' and 'pdf_file' are still usable
+$annotation->pdf("resources/HarfBuzz_example.pdf",
                  1, # page number
 	         -rect => [$x-1, $y-5, $x+1+$target_width, $y-5+1+$font_size],
 		                         # clickable area
@@ -241,7 +247,8 @@ $text->text("here");
 $target_width = $text->advancewidth("here");
 
 $annotation = $page->annotation();
-$annotation->file("resources/sample.txt",
+# method 'file' is still usable
+$annotation->launch("resources/sample.txt",
 	         -rect => [$x-1, $y-5, $x+1+$target_width, $y-5+1+$font_size],
 		                         # clickable area
 		 -border => [0, 0, $border],    # show border
@@ -265,7 +272,8 @@ $text->text($line_of_text);
 $target_width = $text->advancewidth($line_of_text);
 
 $annotation = $page->annotation();
-$annotation->file("resources/sample.txt",
+# method 'file' is still usable
+$annotation->launch("resources/sample.txt",
 	         -rect => [$x-4, $y-7, $x+5+$target_width, $y-7+6+$font_size],
 		                         # clickable area
 		 -border => [0, 0, 3, [5,5]],    # show border (thick, dashed)

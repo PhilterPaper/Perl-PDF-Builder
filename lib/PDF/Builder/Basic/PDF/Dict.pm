@@ -19,10 +19,9 @@ use base 'PDF::Builder::Basic::PDF::Objind';
 
 use strict;
 use warnings;
-#no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.022'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 our $mincache = 16 * 1024 * 1024;
 
@@ -64,7 +63,7 @@ source PDF the stream starts.
 =cut
 
 sub new {
-    my ($class) = @_;
+    my $class = shift();  # have @_ used, later
 
     $class = ref($class) if ref($class);
 

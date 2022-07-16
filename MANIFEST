@@ -208,6 +208,7 @@ t/resources/1x1-lzw.tif
 t/resources/sample.pdf
 t/resources/sample-xrefstm.pdf
 t/resources/sample-xrefstm-index.pdf
+t/resources/test-rgba.png
 t/00-all-usable.t
 t/01-basic.t
 t/02-xrefstm.t
@@ -225,8 +226,8 @@ t/deprecations.t
 t/extgstate.t
 t/filter-ascii85decode.t
 t/filter-asciihexdecode.t
-t/filter-lzwdecode.t
 #t/filter-ccittfaxdecode.t
+t/filter-lzwdecode.t
 t/filter-runlengthdecode.t
 t/font-corefont.t
 t/font-synfont.t
@@ -234,8 +235,10 @@ t/font-ttf.t
 t/font-type1.t
 t/gd.t
 t/gif.t
+t/info.t
 t/jpg.t
 t/lite.t
+t/named-destinations.t
 t/outline.t
 t/page.t
 t/papersizes.t
@@ -250,4 +253,5 @@ t/rt126274.t
 t/string.t
 t/text.t
 t/tiff.t
+t/version.t
 t/viewer-preferences.t

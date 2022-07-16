@@ -117,6 +117,12 @@ This software is Copyright (c) 2017-2022 by Phil M. Perry.
 
 Previous copyrights are held by others (Steve Simms, Alfred Reibenschuh, et al.). See The HISTORY section of the documentation for more information.
 
+We would like to acknowledge the efforts and contributions of a number of
+users of PDF::Builder (and its predecessor, PDF::API2), who have given their
+time to report issues, ask for new features, and have even contributed code.
+Generally, you will find their names listed in the Changes and/or issue tickets
+related to some particular item.
+
 ## License
 
 This is free software, licensed under:

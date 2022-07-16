@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.023'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use POSIX qw(floor);
 use Scalar::Util qw(weaken);
@@ -85,6 +85,13 @@ sub coerce {
 #=cut
 
 # appears to be internal routine
+# replace any use by call to out_obj: $self->{' apipdf'}->out_obj($self);
+
+# PDF::API2 2.042: DEPRECATED
+# Marking the page as dirty should only be needed in rare cases
+# when the page hash is being edited directly rather than through the API. In
+# that case, the out_obj call can be made manually. There's no reason (that I
+# can think of) to have a specific call just (and only) for Page objects.
 
 sub update {
     my ($self) = @_;
@@ -549,7 +556,7 @@ sub annotation {
 
     unless (exists $self->{'Annots'}) {
         $self->{'Annots'} = PDFArray();
-        $self->update();
+        $self->{' apipdf'}->out_obj($self);
     } elsif (ref($self->{'Annots'}) =~ /Objind/) {
         $self->{'Annots'}->realise();
     }

@@ -2,7 +2,7 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.024     2022-07-07  UNRELEASED
+3.024     2022-07-16  UNRELEASED
 
 *   see what's going on with ->transform(translate=>[ ]) vs ->translate()
     possibly something new in API2 update. translate vs old -translate
@@ -27,6 +27,54 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
 
 **  confirm build process is clean, especially all the new uses of version, 
     plus new Perl 5.24 minimum
+
+*   t/info.t (new), t/version.t (new), MANIFEST, tools/2_t-tests.pl
+
+*   lib/PDF/Builder.pm, lib/PDF/Builder/ViewerPreferences.pm (new), MANIFEST
+     Per PDF::API2 change, split up function of $pdf->preferences into several
+      easier-to-use methods: page_mode(), page_layout(), viewer_preferences(),
+      open_action().
+
+    lib/PDF/Builder/NamedDestination-Annotation.pm, t/named-destinations.t, 
+      MANIFEST, tools/2_t-tests.pl
+     Minor cleanup plus locations may now be given without leading dashes.
+      'link' is now alias for 'goto', 'file' is now alias for 'launch', 'url' 
+      is now alias for 'uri', and 'pdf_file' and 'pdfile' are now aliases for 
+      'pdf' method names.
+
+    lib/PDF/Builder/Dict.pm
+     Fix doubled $class (per PDF::API2 fix).
+
+    lib/PDF/Builder.pm, t/font-ttf.t, font-type1.t
+     Add convenience font() method to combine corefont(), ttfont(), psfont(),
+      and bdfont(). This is for PDF::API2 compatibility, and the original
+      methods are unchanged. Font search path changes: add font_path() and
+      set_font_path() for base search paths for fonts. Rename addFontDirs()
+      to add_to_font_path() (keeping the old name around).
+
+    lib/PDF/Builder/Page.pm, lib/PDF/Builder.pm
+     Deprecate unneeded update() method. Per PDF::API2 changes.
+
+    lib/PDF/Builder.pm, t/deprecations.t, t/pdf.t, t/rt67767.t
+     Rename method open_scalar() to from_string(). from_string() should be
+      used for new work. This is for compatibility with PDF::API2 changes
+      renaming open_scalar() to from_string(). Although open_scalar() should 
+      still be supported for some time, it is possible that it may be 
+      deprecated and removed in the future.
+
+    lib/PDF/Builder.pm
+     Permit the save(filename) method to be used as an alias for 
+      saveas(filename). This is for compatibility with PDF::API2 changes 
+      combining save() and saveas().
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Lite.pm, t/annotate.t, t/barcode.t,
+      t/bbox.t, t/circular-references.t, t/content.t, t/cs-webcolor.t, 
+      t/deprecations.t, t/extgstate.t, t/gd.t, t/gif.t, t/jpg.t, t/outlines.t, 
+      t/pdf.t, t/png.t, t/pnm.t, t/rt120450.t, t/rt67767.t, t/69503.t,
+      t/text.t, t/tiff.t, t/viewer-preferences.t, examples/011_open_update,
+      t/resources/test-rgba.png (new), MANIFEST
+     pdf->stringify() renamed to pdf->to_string() (original still available).
+      Also catch up on some new t-tests from API2.
 
     lib/PDF/Builder/Basic/PDF/File-Objind.pm  
      Per RT131657 PDF::API2 fix, Suppress recursion warnings while releasing 

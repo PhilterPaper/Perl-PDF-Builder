@@ -20,7 +20,7 @@ my ($pdf, $page, $pdf2, $pdf_string, $media, $sizes_PDF, $sizes_page, @box);
 # create a dummy PDF (as string) for further tests
 $pdf = PDF::Builder->new();
 $pdf->page()->gfx()->fillcolor('blue');
-$pdf_string = $pdf->stringify();
+$pdf_string = $pdf->to_string();
 
 ## openScalar() -> open_scalar()
 #  removed from PDF::Builder, deprecated in PDF::API2
@@ -30,6 +30,7 @@ $pdf_string = $pdf->stringify();
 $pdf = PDF::Builder->open_scalar($pdf_string);
 is(ref($pdf), 'PDF::Builder',
    q{open_scalar replacement for openScalar IS available});
+####### possible future deprecate open_scalar() in favor of from_string()
 
 ## importpage() -> import_page()
 #  removed from PDF::Builder, deprecated in PDF::API2
@@ -43,7 +44,7 @@ is(ref($page), 'PDF::Builder::Page',
 
 ## openpage() -> open_page()
 #  replaced by open_page in API2
-$pdf2 = PDF::Builder->open_scalar($pdf_string);
+$pdf2 = PDF::Builder->from_string($pdf_string);
 $page = $pdf2->openpage(1);
 is(ref($page), 'PDF::Builder::Page',
    q{openpage still works});
@@ -405,11 +406,11 @@ ok(array_comp($sizes_page, @box),
 $pdf2 = PDF::Builder->new('-compress' => 'none');
 my $text = $pdf2->page()->text();
 $text->lead(15);
-like($pdf2->stringify(), qr/15 TL/, q{lead still works });
+like($pdf2->to_string(), qr/15 TL/, q{lead still works });
 $pdf2 = PDF::Builder->new('-compress' => 'none');
 $text = $pdf2->page()->text();
 $text->leading(15);
-like($pdf2->stringify(), qr/15 TL/, q{leading replacement for lead IS available});
+like($pdf2->to_string(), qr/15 TL/, q{leading replacement for lead IS available});
 #
 #  textlead() -> textleading()   Lite.pm only, no t test
 

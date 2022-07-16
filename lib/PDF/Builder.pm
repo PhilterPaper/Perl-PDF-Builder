@@ -33,8 +33,13 @@ use PDF::Builder::NamedDestination;
 
 use Scalar::Util qw(weaken);
 
-our @FontDirs = ( (map { "$_/PDF/Builder/fonts" } @INC),
-                  qw[ /usr/share/fonts /usr/local/share/fonts c:/windows/fonts c:/winnt/fonts ] );
+my @font_path = __PACKAGE__->set_font_path(
+                  '/usr/share/fonts',
+		  '/usr/local/share/fonts',
+		  'C:/Windows/Fonts',
+		  'C:/WinNT/Fonts'
+	                                  );
+
 our @MSG_COUNT = (0,  # [0] Graphics::TIFF not installed
 	          0,  # [1] Image::PNG::Libpng not installed
 		  0,  # [2] TBD...
@@ -255,7 +260,7 @@ B<Example:>
 
     $pdf = PDF::Builder->new();
     ...
-    print $pdf->stringify();
+    print $pdf->to_string();
 
     $pdf = PDF::Builder->new(-compress => 'none');
     # equivalent to $pdf->{'forcecompress'} = 'none'; (or older, 0)
@@ -389,7 +394,7 @@ sub open {  ## no critic
     $disk_fh->close();
     $scalar_fh->seek(0, 0);
 
-    my $self = $class->open_scalar($content, %options);
+    my $self = $class->from_string($content, %options);
     $self->{'pdf'}->{' fname'} = $file;
 
     return $self;
@@ -456,9 +461,9 @@ sub verCheckInput {
     }
 }
 
-=item $pdf = PDF::Builder->open_scalar($pdf_string, %options)
+=item $pdf = PDF::Builder->from_string($pdf_string, %options)
 
-=item $pdf = PDF::Builder->open_scalar($pdf_string)
+=item $pdf = PDF::Builder->from_string($pdf_string)
 
 Opens a PDF contained in a string. See C<new()> for other options.
 
@@ -478,14 +483,23 @@ B<Example:>
     undef $/;  # Read the whole file at once
     $pdf_string = <$fh>;
 
-    $pdf = PDF::Builder->open_scalar($pdf_string);
+    $pdf = PDF::Builder->from_string($pdf_string);
     ...
     $pdf->saveas('our/new.pdf');
 
+B<alternate name:> open_scalar
+
+C<from_string> was formerly known as C<open_scalar> (and even before that,
+as C<openScalar>), and this older name is still
+valid as an alternative to C<from_string>. It is I<possible> that C<open_scalar>
+will be deprecated and then removed some time in the future, so it may be
+advisable to use C<from_string> in new work.
 
 =cut
 
-sub open_scalar {
+sub open_scalar { return from_string(@_); } ## no critic
+
+sub from_string {
     my ($class, $content, %options) = @_;
 
     my $self = {};
@@ -571,7 +585,7 @@ sub open_scalar {
     $self->{'infoMeta'} = [qw(Author CreationDate ModDate Creator Producer Title Subject Keywords)];
 
     return $self;
-} # end of open_scalar()
+} # end of from_string()
 
 =item $pdf->preferences(%options)
 
@@ -1041,6 +1055,12 @@ B<Example:>
     ...
     $pdf->save();
 
+B<Note:> this method is now considered obsolete, and may be deprecated. It
+allows for objects to be written to disk in advance of finally
+saving and closing the file.  Otherwise, it's no different than just calling
+C<save()> when all changes have been made.  There's no memory advantage since
+C<ship_out> doesn't remove objects from memory.
+
 =cut
 
 sub finishobjects {
@@ -1098,6 +1118,10 @@ B<Example:>
     ...
     $pdf->update();
 
+B<Note:> it is considered better to simply C<save()> the file, rather than
+calling C<update()>. They end up doing the same thing, anyway. This method
+may be deprecated in the future.
+
 =cut
 
 sub update {
@@ -1144,8 +1168,11 @@ sub saveas {
 
 =item $pdf->save()
 
+=item $pdf->save(filename)
+
 Save the document to an already-defined file (or filename) and 
 remove the object structure from memory.
+Optionally, a new filename may be given.
 
 B<Caution:> Although the object C<$pdf> will still exist, it is no longer
 usable for any purpose after invoking this method! You will receive error
@@ -1157,11 +1184,25 @@ B<Example:>
     ...
     $pdf->save();
 
+B<Note:> now that C<save()> can take a filename as an argument, it effectively
+is interchangeable with C<saveas()>. This is strictly for compatibility with
+recent changes to PDF::API2. Unlike PDF::API2, we are not deprecating
+the C<saveas()> method, because in user interfaces, "save" normally means that
+the current filename is known and is to be used, while "saveas" normally means
+that (whether or not there is a current filename) a new filename is to be used.
+
 =cut
 
 sub save {
-    my ($self) = @_;
+    my ($self, $file) = @_;
 
+    if (defined $file) {
+	return $self->saveas($file);
+    }
+
+    # NOTE: the current PDF::API2 version is quite different, but this may be
+    # a consequence of merging save() and saveas(). Let's give this unchanged
+    # version a try.
     if      ($self->{'opened_scalar'}) {
         die "Invalid method invocation: use 'saveas' instead of 'save'.";
     } elsif ($self->{'partial_save'}) {
@@ -1174,7 +1215,7 @@ sub save {
     return;
 }
 
-=item $string = $pdf->stringify()
+=item $string = $pdf->to_string()
 
 Return the document as a string and remove the object structure from memory.
 
@@ -1186,39 +1227,51 @@ B<Example:>
 
     $pdf = PDF::Builder->new();
     ...
-    print $pdf->stringify();
+    print $pdf->to_string();
+
+B<alternate name:> stringify
+
+C<to_string> was formerly known as C<stringify>, and this older name is still
+valid as an alternative to C<to_string>. It is I<possible> that C<stringify>
+will be deprecated and then removed some time in the future, so it may be
+advisable to use C<to_string> in new work.
 
 =cut
 
 # Maintainer's note: The object is being destroyed because it contains
 # circular references that would otherwise result in memory not being
 # freed if the object merely goes out of scope.  If possible, the
-# circular references should be eliminated so that stringify doesn't
-# need to be destructive.
+# circular references should be eliminated so that to_string doesn't
+# need to be destructive. See t/circular-references.t.
 #
 # I've opted not to just require a separate call to release() because
 # it would likely introduce memory leaks in many existing programs
 # that use this module.
 # - Steve S. (see bug RT 81530)
 
-sub stringify {
+sub stringify { return to_string(@_); } ## no critic
+
+sub to_string {
     my $self = shift();
 
-    my $str = '';
-    # is only set to 1 (within open_scalar()), otherwise is undef
+    my $string = '';
+    # is only set to 1 (within from_string()), otherwise is undef
     if ($self->{'opened_scalar'}) { 
         $self->{'pdf'}->append_file();
-        $str = ${$self->{'content_ref'}};
+        $string = ${$self->{'content_ref'}};
     } else {
         my $fh = FileHandle->new();
         # we should be writing to the STRING $str
-        CORE::open($fh, '>', \$str) || die "Can't begin scalar IO";
+        CORE::open($fh, '>', \$string) || die "Can't begin scalar IO";
         $self->{'pdf'}->out_file($fh);
         $fh->close();
     }
+
+    # This can be eliminated once we're confident that circular references are
+    # no longer an issue. See t/circular-references.t
     $self->end();
 
-    return $str;
+    return $string;
 }
 
 # there IS a release() method defined and documented in Basic/PDF/File.pm
@@ -1235,7 +1288,7 @@ Remove the object structure from memory. PDF::Builder contains circular
 references, so this call is necessary in long-running processes to
 keep from running out of memory.
 
-This will be called automatically when you save or stringify a PDF.
+This will be called automatically when you save or to_string a PDF.
 You should only need to call it explicitly if you are reading PDF
 files and not writing them.
 
@@ -2006,37 +2059,12 @@ sub artbox {
 
 =head1 FONT METHODS
 
-=over
-
-=item @directories = PDF::Builder::addFontDirs($dir1, $dir2, ...)
-
-Adds one or more directories to the search path for finding font
-files.
-
-Returns the list of searched directories.
-
-=cut
-
-sub addFontDirs {
-    my @dirs = @_;
-    push @FontDirs, @dirs;
-    return @FontDirs;
-}
-
-sub _findFont {
-    my $font = shift();
-
-    my @fonts = ($font, map { "$_/$font" } @FontDirs);
-    shift @fonts while scalar(@fonts) and not -f $fonts[0];
-
-    return $fonts[0];
-}
-
 =item $font = $pdf->corefont($fontname, %options)
 
 =item $font = $pdf->corefont($fontname)
 
-Returns a new Adobe core font object. For details, see L<PDF::Builder::Docs/Core Fonts>.
+Returns a new Adobe core font object. For details, 
+see L<PDF::Builder::Docs/Core Fonts>.
 
 See also L<PDF::Builder::Resource::Font::CoreFont>.
 
@@ -2109,6 +2137,29 @@ sub ttfont {
     return $obj;
 }
 
+=item $font = $pdf->bdfont($bdf_file, @options)
+
+=item $font = $pdf->bdfont($bdf_file)
+
+Returns a new BDF (bitmapped distribution format) font object, based on the 
+specified Adobe BDF file.
+
+See also L<PDF::Builder::Resource::Font::BdFont>
+
+=cut
+
+sub bdfont {
+    my ($self, $bdf_file, @opts) = @_;
+
+    require PDF::Builder::Resource::Font::BdFont;
+    my $obj = PDF::Builder::Resource::Font::BdFont->new($self->{'pdf'}, $bdf_file, @opts);
+
+    $self->{'pdf'}->out_obj($self->{'pages'});
+    # $obj->tounicodemap(); # does not support Unicode!
+
+    return $obj;
+}
+
 =item $font = $pdf->cjkfont($cjkname, %options)
 
 =item $font = $pdf->cjkfont($cjkname)
@@ -2140,6 +2191,174 @@ sub cjkfont {
     return $obj;
 }
 
+=item my $font = $pdf->font($name, %options)
+
+Add a font to the PDF.  Returns the font object, to be used by
+L<PDF::API2::Content>.
+
+The font C<$name> is either the name of one of the 
+L<standard 14 fonts|PDF::Builder::Resource::Font::CoreFont/"STANDARD FONTS"> 
+(e.g., Helvetica) or the path to a font file.
+The file extension (if path given) determines what type of font file it is.
+
+    my $pdf = PDF::Builder->new();
+    my $font1 = $pdf->font('Helvetica-Bold');
+    my $font2 = $pdf->font('/path/to/ComicSans.ttf');
+    my $page = $pdf->page();
+    my $content = $page->text();
+
+    $content->position(1 * 72, 9 * 72);
+    $content->font($font1, 24);
+    $content->text('Hello, World!');
+
+    $content->position(0, -36);
+    $content->font($font2, 12);
+    $content->text('This is some sample text.');
+
+    $pdf->save('sample.pdf');
+
+The path can be omitted if the font file is in the current directory or one of
+the directories returned by C<font_path>.
+
+TrueType (ttf/otf), Adobe PostScript Type 1 (pfa/pfb), and Adobe Glyph Bitmap
+Distribution Format (bdf) fonts are supported.
+
+The following C<%options> are available:
+
+=over
+
+=item * format
+
+The font format is normally detected automatically based on the file's
+extension.  If you're using a font with an atypical extension, you can set
+C<format> to one of C<truetype> (TrueType or OpenType), C<type1> (PostScript
+Type 1), or C<bitmap> (Adobe Bitmap).
+
+=item * kerning
+
+Kerning (automatic adjustment of space between pairs of characters) is enabled
+by default if the font includes this information.  Set this option to false to
+disable.
+
+=item * afm_file (PostScript Type 1 fonts only)
+
+Specifies the location of the font metrics file.
+
+=item * pfm_file (PostScript Type 1 fonts only)
+
+Specifies the location of the printer font metrics file.  This option overrides
+the -encode option.
+
+=item * embed (TrueType fonts only)
+
+Fonts are embedded in the PDF by default, which is required to ensure that they
+can be viewed properly on a device that doesn't have the font installed.  Set
+this option to false to prevent the font from being embedded.
+
+=back
+
+=cut
+
+sub font {
+    my ($self, $name, %options) = @_;
+
+    if (exists $options{'kerning'}) {
+        $options{'-dokern'} = delete $options{'kerning'};
+    }
+
+    require PDF::Builder::Resource::Font::CoreFont;
+    if (PDF::Builder::Resource::Font::CoreFont->is_standard($name)) {
+        return $self->corefont($name, %options);
+    }
+
+    my $format = $options{'format'};
+    $format //= ($name =~ /\.[ot]tf$/i ? 'truetype' :
+                 $name =~ /\.pf[ab]$/i ? 'type1'    :
+                 $name =~ /\.bdf$/i    ? 'bitmap'   : '');
+
+    if      ($format eq 'truetype') {
+        $options{'embed'} //= 1;
+        return $self->ttfont($name, %options);
+    } elsif ($format eq 'type1') {
+        if (exists $options{'afm_file'}) {
+            $options{'-afmfile'} = delete $options{'afm_file'};
+        }
+        if (exists $options{'pfm_file'}) {
+            $options{'-pfmfile'} = delete $options{'pfm_file'};
+        }
+        return $self->psfont($name, %options);
+    } elsif ($format eq 'bitmap') {
+        return $self->bdfont($name, %options);
+    } elsif ($format) {
+        croak "Unrecognized font format: $format";
+    } elsif ($name =~ /(\..*)$/) {
+        croak "Unrecognized font file extension: $1";
+    } else {
+        croak "Unrecognized font: $name";
+    }
+}
+
+=item @directories = PDF::Builder::add_to_font_path('/my/fonts', '/path/to/fonts', ...)
+
+Adds one or more directories to the list of paths to be searched for font files.
+
+Returns the font search path.
+
+B<alternate name:> addFontDirs
+
+Prior to recent changes to PDF::API2, this method was addFontDirs(). This 
+method is still available, but may be deprecated some time in the future.
+
+=cut
+
+sub addFontDirs { return add_to_font_path(@_); } ## no critic
+
+sub add_to_font_path {
+    # Allow this method to be called using either :: or -> notation.
+    shift() if ref($_[0]);
+    shift() if $_[0] eq __PACKAGE__;
+
+    push @font_path, @_;
+    return @font_path;
+}
+
+=item @directories = PDF::API2->set_font_path('/my/fonts', '/path/to/fonts');
+
+Replace the existing font search path. This should only be necessary if you
+need to remove a directory from the path for some reason, or if you need to
+reorder the list.
+
+Returns the font search path.
+
+=cut
+
+# I don't know why there are separate set and query methods, but to maintain
+# compatibility, we'll follow that convention...
+
+sub set_font_path {
+    # Allow this method to be called using either :: or -> notation.
+    shift() if ref($_[0]);
+    shift() if $_[0] eq __PACKAGE__;
+
+    @font_path = ((map { "$_/PDF/Builder/fonts" } @INC), @_);
+
+    return @font_path;
+}
+
+sub _findFont {
+    my $font = shift();
+
+    # Check the current directory
+    return $font if -f $font;
+
+    # Check the font search path
+    foreach my $directory (@font_path) {
+        return "$directory/$font" if -f "$directory/$font";
+    }
+
+    return;
+}
+
 =item $font = $pdf->synfont($basefont, %options)
 
 =item $font = $pdf->synfont($basefont)
@@ -2152,7 +2371,15 @@ For details, see L<PDF::Builder::Docs/Synthetic Fonts>.
 
 See also L<PDF::Builder::Resource::Font::SynFont>
 
+B<alternate name:> synthetic_font
+
+Prior to recent PDF::API2 changes, the routine to create modified fonts was
+"synfont". PDF::API2 has renamed it to "synthetic_font", which I don't like,
+but to maintain compatibility, "synthetic_font" is available as an alias.
+
 =cut
+
+sub synthetic_font { return synfont(@_); } ## no critic
 
 sub synfont {
     my ($self, $font, %opts) = @_;
@@ -2168,29 +2395,6 @@ sub synfont {
 
     $self->{'pdf'}->out_obj($self->{'pages'});
     $obj->tounicodemap() if $opts{'-unicodemap'};
-
-    return $obj;
-}
-
-=item $font = $pdf->bdfont($bdf_file, @options)
-
-=item $font = $pdf->bdfont($bdf_file)
-
-Returns a new BDF (bitmapped distribution format) font object, based on the 
-specified Adobe BDF file.
-
-See also L<PDF::Builder::Resource::Font::BdFont>
-
-=cut
-
-sub bdfont {
-    my ($self, $bdf_file, @opts) = @_;
-
-    require PDF::Builder::Resource::Font::BdFont;
-    my $obj = PDF::Builder::Resource::Font::BdFont->new($self->{'pdf'}, $bdf_file, @opts);
-
-    $self->{'pdf'}->out_obj($self->{'pages'});
-    # $obj->tounicodemap(); # does not support Unicode!
 
     return $obj;
 }

@@ -64,9 +64,7 @@ sub new {
 
 =over
 
-=item $annotation->link($page, %options)
-
-=item $annotation->link($page)
+=item $annotation->goto($page, %options)
 
 Defines the annotation as a launch-page with page C<$page> (within I<this>
 document) and options %options (-rect, -border, -color, I<fit>: see 
@@ -75,9 +73,17 @@ descriptions below).
 B<Note> that C<$page> is I<not> a simple page number, but is a page structure
 such as C<$pdf-E<gt>openpage(page_number)>. 
 
+B<alternate name:> link
+
+Originally this method was named C<link>, but a recent PDF::API2 change made it
+C<goto>. For compatibility, it has been changed to C<goto>, with C<link> 
+still available as an alias.
+
 =cut
 
-sub link {  ## no critic
+sub link { return goto(@_); } ## no critic
+
+sub goto {  ## no critic
     my ($self, $page, %options) = @_;
 
     $self->{'Subtype'} = PDFName('Link');
@@ -93,7 +99,7 @@ sub link {  ## no critic
     return $self;
 }
 
-=item $annotation->pdf_file($pdffile, $page_number, %options)
+=item $annotation->pdf($pdffile, $page_number, %options)
 
 Defines the annotation as a PDF-file with filepath C<$pdffile>, on page 
 C<$page_number>, and options %options (-rect, -border, -color, I<fit>: see 
@@ -102,11 +108,18 @@ is found in a different PDF file, not the current document.
 
 C<$page_number> is the physical page number, starting at 1: 1, 2,...
 
+B<alternate names:> pdfile, pdf_file
+
+Originally this method was named C<pdfile>, and then C<pdf_file> but a recent 
+PDF::API2 change made it C<pdf>. For compatibility, it has been changed to 
+C<pdf>, with C<pdfile> and C<pdf_file> still available as aliases.
+
 =cut
 
-# Note: renamed from pdfile() to pdf_file().
+sub pdfile { return pdf(@_); } ## no critic 
+sub pdf_file { return pdf(@_); } ## no critic 
 
-sub pdf_file {
+sub pdf {
     my ($self, $url, $page_number, %options) = @_;
     # note that although "url" is used, it may be a local file
 
@@ -124,16 +137,24 @@ sub pdf_file {
     return $self;
 }
 
-=item $annotation->file($file, %options)
+=item $annotation->launch($file, %options)
 
 Defines the annotation as a launch-file with filepath C<$file> (a local file)
 and options %options (-rect, -border, -color: see descriptions below). 
 I<How> the file is displayed depends on the operating system, type of file, 
 and local configuration or mapping.
 
+B<alternate name:> file
+
+Originally this method was named C<file>, but a recent PDF::API2 change made it
+C<launch>. For compatibility, it has been changed to C<launch>, with C<file> 
+still available as an alias.
+
 =cut
 
-sub file {
+sub file { return launch(@_); } ## no critic
+
+sub launch {
     my ($self, $file, %options) = @_;
 
     $self->{'Subtype'}  = PDFName('Link');
@@ -147,15 +168,23 @@ sub file {
     return $self;
 }
 
-=item $annotation->url($url, %options)
+=item $annotation->uri($url, %options)
 
 Defines the annotation as a launch-url with url C<$url> and
 options %options (-rect, -border, -color: see descriptions below). 
 This page is usually brought up in a browser, and may be remote.
 
+B<alternate name:> url
+
+Originally this method was named C<url>, but a recent PDF::API2 change made it
+C<uri>. For compatibility, it has been changed to C<uri>, with C<url> still
+available as an alias.
+
 =cut
 
-sub url {
+sub url { return uri(@_); } ## no critic
+
+sub uri {
     my ($self, $url, %options) = @_;
 
     $self->{'Subtype'}    = PDFName('Link');

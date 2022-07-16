@@ -2,10 +2,9 @@ package PDF::Builder::Lite;
 
 use strict;
 use warnings;
-#no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.022'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 # NOTE that this sub-package has not been tested and is not well documented!
 #      It is possible that it will be deprecated and removed.
 
@@ -105,7 +104,7 @@ sub saveas {
     my ($self, $file) = @_;
 
     if ($file eq '-') {
-        return $self->{'api'}->stringify();
+        return $self->{'api'}->to_string();
     } else {
         $self->{'api'}->saveas($file);
         return $self;
