@@ -2,7 +2,7 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.024     2022-07-16  UNRELEASED
+3.024     2022-08-06  UNRELEASED
 
 *   see what's going on with ->transform(translate=>[ ]) vs ->translate()
     possibly something new in API2 update. translate vs old -translate
@@ -30,13 +30,29 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
 
 *   t/info.t (new), t/version.t (new), MANIFEST, tools/2_t-tests.pl
 
-*   lib/PDF/Builder.pm, lib/PDF/Builder/ViewerPreferences.pm (new), MANIFEST
+*   All "options" whose name begins with a dash (hyphen) "-" may now be given
+     without a dash. E.g., "-translate => [30,25]" may now be given as
+     "translate => [30,25]". This is in keeping with the new practices on
+     PDF::API2. The old (dashed) names are still valid, although they may be
+     deprecated in the future.
+
+    lib/PDF/Builder.pm, INFO/KNOWN_INCOMPAT
+     Various changes to keep compatibility with latest PDF::API2, although
+      not all old methods are deprecated. Some methods are added, some are
+      renamed (alternate names added), and some may have minor changes or
+      extended functionality.
+
+      The only known incompatibility introduced is that PDF::API2 now uses
+      separate location name strings and arrays of dimension and zoom data,
+      rather than the old hash element (which PDF::Builder still uses).
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/ViewerPreferences.pm (new), MANIFEST
      Per PDF::API2 change, split up function of $pdf->preferences into several
       easier-to-use methods: page_mode(), page_layout(), viewer_preferences(),
       open_action().
 
-    lib/PDF/Builder/NamedDestination-Annotation.pm, t/named-destinations.t, 
-      MANIFEST, tools/2_t-tests.pl
+    lib/PDF/Builder/NamedDestination-Annotation.pm, t/named-destinations.t 
+      (new), MANIFEST, tools/2_t-tests.pl, examples/042_links
      Minor cleanup plus locations may now be given without leading dashes.
       'link' is now alias for 'goto', 'file' is now alias for 'launch', 'url' 
       is now alias for 'uri', and 'pdf_file' and 'pdfile' are now aliases for 

@@ -6,16 +6,15 @@ use strict;
 use warnings;
 
 use Carp;
+use Encode qw(:all);
 
 # VERSION
-my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 # TBD: do -rect and -border apply to Named Destinations (link, url, file)? 
 #      There is nothing to implement these options. Perhaps the code was copied 
 #      from Annotations and never cleaned up? Disable mention of these options 
 #      for now (in the POD). Only link handles the destination page fit option.
-
-use Encode qw(:all);
 
 use PDF::Builder::Util;
 use PDF::Builder::Basic::PDF::Utils;
@@ -75,12 +74,13 @@ object, the
 location of the window on that page, and possible coordinate and zoom arguments.
 
     # The XYZ location takes three arguments
-    my $dest1 = PDF::API2::NamedDestination->new($pdf);
-    $dest->dest($pdf->open_page(1), 'xyz' => ($x, $y, $zoom));
+    my $dest1 = PDF::Builder::NamedDestination->new($pdf);
+    $dest->dest($pdf->open_page(1), 'xyz' => [$x, $y, $zoom]);
 
-    # The Fit location doesn't require any arguments
-    my $dest2 = PDF::API2::NamedDestination->new($pdf);
-    $dest->dest($pdf->open_page(2), 'fit');
+    # The Fit location doesn't require any arguments, but one is still
+    # needed for the hash array
+    my $dest2 = PDF::Builder::NamedDestination->new($pdf);
+    $dest->dest($pdf->open_page(2), 'fit' => 1);
 
 The following locations ($location) are available. They may be given with a 
 leading hyphen (dash), e.g., '-xyz', or without a hyphen (e.g., 'xyz').
@@ -156,11 +156,14 @@ the same as the calling page's.
 B<alternate name:> destination
 
 This method was originally C<dest()>, which PDF::API2 renamed to 
-C<destination()>. We are keeping the original name, and for compatibility,
-allow C<destination> as an alias.
+C<destination()>. We are keeping the original name, and for partial 
+compatibility, allow C<destination> as an alias. B<Note that> the old PDF::API2
+(and still, for PDF::Builder), uses a hash element for the location and 
+dimension/zoom information, while the new PDF::API2 uses a string and an array.
 
 =cut
 
+# new in PDF::API2
 #sub _array {
 #    my $page = shift();
 #    my $location = shift();
@@ -323,6 +326,8 @@ sub dest {
     return $self;
 }
 
+=head2 Target Destinations
+
 =item $dest->goto($page, $location, @args);
 
 A go-to action changes the view to a specified destination (page, location, and
@@ -391,16 +396,18 @@ sub launch {
     return $self;
 }
 
-=item $dest->pdf($pdffile, $pagenum, %opts)
+=item $dest->pdf($pdf_file, $pagenum, %opts)
 
-Defines the destination as a PDF-file with filepath C<$pdffile>, on page
+Defines the destination as a PDF-file with filepath C<$pdf_file>, on page
 C<$pagenum>, and options %opts (same as dest()).
 
 B<alternate names:> pdf_file, pdfile
 
 Originally this method was C<pdfile>, and had been earlier renamed to 
 C<pdf_file>, but recently PDF::API2 changed the name to C<pdf>. "pdfile" and 
-"pdf_file" are retained for compatibility.
+"pdf_file" are retained for compatibility. B<Note that> the position and zoom
+information is still given as a hash element in PDF::Builder, while PDF::API2
+has changed to a position string and an array of dimensions.
 
 =cut
 

@@ -2,6 +2,7 @@ package PDF::Builder;
 
 use strict;
 use warnings;
+#no warnings qw[ deprecated recursion uninitialized ];
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
@@ -14,6 +15,7 @@ my $LpngVersion = 0.57;  # minimum version of Image::PNG::Libpng
 
 use Carp;
 use Encode qw(:all);
+use English;
 use FileHandle;
 
 use PDF::Builder::Basic::PDF::Utils;
@@ -69,18 +71,18 @@ PDF::Builder - Facilitates the creation and modification of PDF files
     $page = $pdf->open_page($page_number);
 
     # Set the page size
-    $page->mediabox('Letter');
+    $page->size('Letter');  # or mediabox()
 
     # Add a built-in font to the PDF
     $font = $pdf->corefont('Helvetica-Bold');
 
     # Add an external TTF font to the PDF
-    $font = $pdf->ttfont('/path/to/font.ttf');
+    $font = $pdf->font('/path/to/font.ttf');  # or ttfont() in this case
 
     # Add some text to the page
     $text = $page->text();
     $text->font($font, 20);
-    $text->translate(200, 700);
+    $text->position(200, 700);  # or translate()
     $text->text('Hello World!');
 
     # Save the PDF
@@ -154,12 +156,13 @@ point.
 The history of PDF::Builder is a complex and exciting saga... OK, it may be
 mildly interesting. Have a look at L<PDF::Builder::Docs/History> section.
 
-=head1 AUTHOR
+=head2 AUTHOR
 
 PDF::API2 was originally written by Alfred Reibenschuh. See the HISTORY section
 for more information.
 
-It was maintained by Steve Simms.
+It was maintained by Steve Simms, who is still contributing new code to it
+(which often ends up in PDF::Builder).
 
 PDF::Builder is currently being maintained by Phil M. Perry.
 
@@ -170,15 +173,16 @@ The full source is on https://github.com/PhilterPaper/Perl-PDF-Builder.
 The release distribution is on CPAN: https://metacpan.org/pod/PDF::Builder.
 
 Bug reports are on https://github.com/PhilterPaper/Perl-PDF-Builder/issues?q=is%3Aissue+sort%3Aupdated-desc 
-(with "bug" label), feature requests have an "enhancement" label, and general discussions (architecture, roadmap, etc.) 
-have a "general discussion" label.
+(with "bug" label), feature requests have an "enhancement" label, and general 
+discussions (architecture, roadmap, etc.) have a "general discussion" label.
 
-Do B<not> under I<any> circumstances open a PR (Pull Request) to report a bug. It is a waste of both your and 
-our time and effort. Open a regular ticket (issue), and attach a Perl (.pl) program illustrating the problem, if possible. 
-If you believe that you have a program patch, and offer to share it as a PR, we may give the go-ahead. Unsolicited PRs 
-may be closed without further action.
+Do B<not> under I<any> circumstances open a PR (Pull Request) to report a bug. 
+It is a waste of both your and our time and effort. Open a regular ticket 
+(issue), and attach a Perl (.pl) program illustrating the problem, if possible. 
+If you believe that you have a program patch, and offer to share it as a PR, we 
+may give the go-ahead. Unsolicited PRs may be closed without further action.
 
-=head1 LICENSE
+=head2 LICENSE
 
 This software is Copyright (c) 2017-2022 by Phil M. Perry.
 
@@ -207,13 +211,11 @@ This library is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 
-=head1 GENERIC METHODS
+=head1 GENERAL PURPOSE METHODS
 
 =over
 
 =item $pdf = PDF::Builder->new(%options)
-
-=item $pdf = PDF::Builder->new()
 
 Creates a new PDF object. 
 
@@ -221,38 +223,60 @@ B<Options>
 
 =over
 
-=item -file
+=item file
 
 If you will be saving it as a file and
-already know the filename, you can give the '-file' option to minimize
-possible memory requirements later on. 
+already know the filename, you can give the 'file' option to minimize
+possible memory requirements later on (the file is opened immediately for
+writing, rather than waiting until the C<save>). The C<file> may also be
+a filehandle.
 
-=item -compress
+B<alternate option name:> -file
 
-The '-compress' option can be
-given to specify stream compression: default is 'flate', 'none' is no
+This is simply the older version, kept for compatibility with old code.
+
+=item compress
+
+The 'compress' option can be
+given to specify stream compression: default is 'flate', 'none' (or 0) is no
 compression. No other compression methods are currently supported.
 
-=item -outver
+B<alternate option name:> -compress
 
-The '-outver' option defaults to 1.4 as the output PDF version and the highest 
+This is simply the older version, kept for compatibility with old code.
+
+=item outver
+
+The 'outver' option defaults to 1.4 as the output PDF version and the highest 
 allowed feature version (attempts to use anything higher will give a warning).
-If an existing PDF with a higher version is read in, -outver will be increased 
-to that version, with a warning.
+If an existing PDF with a higher version is read in, C<outver> will be 
+increased to that version, with a warning.
 
-=item -msgver
+B<alternate option name:> -outver
 
-The '-msgver' option value of 1 (default) gives a warning message if the 
-'-outver' PDF level has to be bumped up due to either a higher PDF level file 
+This is simply the older version, kept for compatibility with old code.
+
+=item msgver
+
+The 'msgver' option value of 1 (default) gives a warning message if the 
+'outver' PDF level has to be bumped up due to either a higher PDF level file 
 being read in, or a higher level feature was requested. A value of 0 
 suppresses the warning message.
 
-=item -diaglevel
+B<alternate option name:> -msgver
 
-The '-diaglevel' option can be
+This is simply the older version, kept for compatibility with old code.
+
+=item diaglevel
+
+The 'diaglevel' option can be
 given to specify the level of diagnostics given by IntegrityCheck(). The
 default is level 2 (errors and warnings). 
 See L<PDF::Builder::Docs/IntegrityCheck> for more information.
+
+B<alternate option name:> -diaglevel
+
+This is simply the older version, kept for compatibility with old code.
 
 =back
 
@@ -262,14 +286,14 @@ B<Example:>
     ...
     print $pdf->to_string();
 
-    $pdf = PDF::Builder->new(-compress => 'none');
+    $pdf = PDF::Builder->new(compress => 'none');
     # equivalent to $pdf->{'forcecompress'} = 'none'; (or older, 0)
 
     $pdf = PDF::Builder->new();
     ...
     $pdf->saveas('our/new.pdf');
 
-    $pdf = PDF::Builder->new(-file => 'our/new.pdf');
+    $pdf = PDF::Builder->new(file => 'our/new.pdf');
     ...
     $pdf->save();
 
@@ -300,14 +324,27 @@ sub new {
     $self->{'pdf'}->{' userUnit'} = 1.0; # default global User Unit
     $self->mediabox('letter');  # default to US Letter 8.5in x 11in 
 
-    if (exists $options{'-compress'}) {
-      $self->{'forcecompress'} = $options{'-compress'};
+    if      (exists $options{'compress'}) {
+      $self->{'forcecompress'} = $options{'compress'};
       # at this point, no validation of given value! none/flate (0/1).
       # note that >0 is often used as equivalent to 'flate'
+    } elsif (exists $options{'-compress'}) {
+      $self->{'forcecompress'} = $options{'-compress'};
+      # alternate name
     } else {
       $self->{'forcecompress'} = 'flate';
       # code should also allow integers 0 (= 'none') and >0 (= 'flate') 
       # for compatibility with old usage where forcecompress is directly set. 
+    }
+    if (exists $options{'diaglevel'}) {
+	my $diaglevel = $options{'diaglevel'};
+	if ($diaglevel < 0 || $diaglevel > 5) {
+	    print "diaglevel must be in range 0-5. using 2\n";
+	    $diaglevel = 2;
+	}
+	$self->{'diaglevel'} = $diaglevel;
+    } else {
+	$self->{'diaglevel'} = 2; # default: errors and warnings
     }
     if (exists $options{'-diaglevel'}) {
 	my $diaglevel = $options{'-diaglevel'};
@@ -321,6 +358,13 @@ sub new {
     }
 
     $self->preferences(%options);
+    if (defined $options{'outver'}) {
+        if ($options{'outver'} >= 1.4) {
+	    $self->{'pdf'}->{' version'} = $outVer = $options{'outver'};
+	} else {
+	    print STDERR "Invalid outver given, or less than 1.4. Ignored.\n";
+	}
+    }
     if (defined $options{'-outver'}) {
         if ($options{'-outver'} >= 1.4) {
 	    $self->{'pdf'}->{' version'} = $outVer = $options{'-outver'};
@@ -328,12 +372,23 @@ sub new {
 	    print STDERR "Invalid -outver given, or less than 1.4. Ignored.\n";
 	}
     }
+    if (defined $options{'msgver'}) {
+        if ($options{'msgver'} == 0 || $options{'msgver'} == 1) {
+            $msgVer = $options{'msgver'};
+        } else {
+            print STDERR "Invalid msgver given, not 0 or 1. Ignored.\n";
+        }
+    }
     if (defined $options{'-msgver'}) {
         if ($options{'-msgver'} == 0 || $options{'-msgver'} == 1) {
             $msgVer = $options{'-msgver'};
         } else {
             print STDERR "Invalid -msgver given, not 0 or 1. Ignored.\n";
         }
+    }
+    if ($options{'file'}) {
+        $self->{'pdf'}->create_file($options{'file'});
+        $self->{'partial_save'} = 1;
     }
     if ($options{'-file'}) {
         $self->{'pdf'}->create_file($options{'-file'});
@@ -349,57 +404,6 @@ sub new {
     return $self;
 } # end of new()
 
-=item $pdf = PDF::Builder->open($pdf_file, %options)
-
-=item $pdf = PDF::Builder->open($pdf_file)
-
-Opens an existing PDF file. See C<new()> for options.
-
-B<Example:>
-
-    $pdf = PDF::Builder->open('our/old.pdf');
-    ...
-    $pdf->saveas('our/new.pdf');
-
-    $pdf = PDF::Builder->open('our/to/be/updated.pdf');
-    ...
-    $pdf->update();
-
-=cut
-
-sub open {  ## no critic
-    my ($class, $file, %options) = @_;
-    croak "File '$file' does not exist" unless -f $file;
-    croak "File '$file' is not readable" unless -r $file;
-
-    my $content;
-    my $scalar_fh = FileHandle->new();
-    CORE::open($scalar_fh, '+<', \$content) or die "Can't begin scalar IO";
-    binmode $scalar_fh, ':raw';
-
-    my $disk_fh = FileHandle->new();
-    CORE::open($disk_fh, '<', $file) or die "Can't open $file for reading: $!";
-    binmode $disk_fh, ':raw';
-    $disk_fh->seek(0, 0);
-    my $data;
-    while (not $disk_fh->eof()) {
-        $disk_fh->read($data, 512);
-        $scalar_fh->print($data);
-    }
-    # check if final %%EOF lacks a carriage return on the end (add one)
-    if ($data =~ m/%%EOF$/) {
-       #print "open() says missing final EOF\n";
-        $scalar_fh->print("\n");
-    }
-    $disk_fh->close();
-    $scalar_fh->seek(0, 0);
-
-    my $self = $class->from_string($content, %options);
-    $self->{'pdf'}->{' fname'} = $file;
-
-    return $self;
-} # end of open()
-
 # when outputting a PDF feature, verCheckOutput(n, 'feature name') returns TRUE 
 # if n > $pdf->{' version'), plus a warning message. It returns FALSE otherwise.
 #
@@ -407,7 +411,7 @@ sub open {  ## no critic
 #
 #  PDF::Builder->verCheckOutput(1.6, "portzebie with foo-dangle");
 #
-#  if -msgver defaults to 1, a message will be output if the output PDF version 
+#  if msgver defaults to 1, a message will be output if the output PDF version 
 #  has to be increased to 1.6 in order to use the "portzebie" feature
 #
 # this is still somewhat experimental, and as experience is gained, the code 
@@ -461,18 +465,174 @@ sub verCheckInput {
     }
 }
 
-=item $pdf = PDF::Builder->from_string($pdf_string, %options)
+=item $pdf->default_page_size($size); # Set
 
-=item $pdf = PDF::Builder->from_string($pdf_string)
+=item @rectangle = $pdf->default_page_size() # Get
+
+Set the default physical size for pages in the PDF.  If called without
+arguments, return the coordinates of the rectangle describing the default
+physical page size.
+
+See L<PDF::Builder::Page/"Page Sizes"> for possible values.
+
+=cut
+
+sub default_page_size {
+    my $self = shift();
+
+    # Set
+    if (@_) {
+        return $self->default_page_boundaries(media => @_);
+    }
+
+    # Get
+    my $boundaries = $self->default_page_boundaries();
+    return @{$boundaries->{'media'}};
+}
+
+=item $pdf->default_page_boundaries(%boundaries); # Set
+
+=item %boundaries = $pdf->default_page_boundaries(); # Get
+
+Set default prepress page boundaries for pages in the PDF.  If called without
+arguments, returns the coordinates of the rectangles describing each of the
+supported page boundaries.
+
+See the equivalent C<page_boundaries> method in L<PDF::Builder::Page> for 
+details.
+
+=cut
+
+# Called by PDF::Builder::Page::boundaries via the default_page_* methods below
+sub _bounding_box {
+    my $self = shift();
+    my $type = shift();
+
+    # Get
+    unless (scalar @_) {
+        unless ($self->{'pages'}->{$type}) {
+            return if $type eq 'MediaBox';
+
+            # Use defaults per PDF 1.7 section 14.11.2 Page Boundaries
+            return $self->_bounding_box('MediaBox') if $type eq 'CropBox';
+            return $self->_bounding_box('CropBox');
+        }
+        return map { $_->val() } $self->{'pages'}->{$type}->elements();
+    }
+
+    # Set
+    $self->{'pages'}->{$type} = PDFArray(map { PDFNum(float($_)) } @_);
+    return $self;
+}
+
+sub default_page_boundaries {
+    return PDF::Builder::Page::boundaries(@_);
+}
+
+# Deprecated; use default_page_size or default_page_boundaries
+#sub mediabox {
+#    my $self = shift();
+#    return $self->_bounding_box('MediaBox') unless @_;
+#    return $self->_bounding_box('MediaBox', page_size(@_));
+#}
+
+# Deprecated; use default_page_boundaries
+#sub cropbox {
+#    my $self = shift();
+#    return $self->_bounding_box('CropBox') unless @_;
+#    return $self->_bounding_box('CropBox', page_size(@_));
+#}
+
+# Deprecated; use default_page_boundaries
+#sub bleedbox {
+#    my $self = shift();
+#    return $self->_bounding_box('BleedBox') unless @_;
+#    return $self->_bounding_box('BleedBox', page_size(@_));
+#}
+
+# Deprecated; use default_page_boundaries
+#sub trimbox {
+#    my $self = shift();
+#    return $self->_bounding_box('TrimBox') unless @_;
+#    return $self->_bounding_box('TrimBox', page_size(@_));
+#}
+
+# Deprecated; use default_page_boundaries
+#sub artbox {
+#    my $self = shift();
+#    return $self->_bounding_box('ArtBox') unless @_;
+#    return $self->_bounding_box('ArtBox', page_size(@_));
+#}
+
+=back
+
+=head1 INPUT/OUTPUT METHODS
+
+=over
+
+=item $pdf = PDF::Builder->open($pdf_file, %options)
+
+Opens an existing PDF file. See C<new()> for options.
+
+B<Example:>
+
+    $pdf = PDF::Builder->open('our/old.pdf');
+    ...
+    $pdf->saveas('our/new.pdf');
+
+    $pdf = PDF::Builder->open('our/to/be/updated.pdf');
+    ...
+    $pdf->update();
+
+=cut
+
+sub open {  ## no critic
+    my ($class, $file, %options) = @_;
+    croak "File '$file' does not exist" unless -f $file;
+    croak "File '$file' is not readable" unless -r $file;
+
+    my $content;
+    my $scalar_fh = FileHandle->new();
+    CORE::open($scalar_fh, '+<', \$content) or die "Can't begin scalar IO";
+    binmode $scalar_fh, ':raw';
+
+    my $disk_fh = FileHandle->new();
+    CORE::open($disk_fh, '<', $file) or die "Can't open $file for reading: $!";
+    binmode $disk_fh, ':raw';
+    $disk_fh->seek(0, 0);
+    my $data;
+    while (not $disk_fh->eof()) {
+        $disk_fh->read($data, 512);
+        $scalar_fh->print($data);
+    }
+    # check if final %%EOF lacks a carriage return on the end (add one)
+    if ($data =~ m/%%EOF$/) {
+       #print "open() says missing final EOF\n";
+        $scalar_fh->print("\n");
+    }
+    $disk_fh->close();
+    $scalar_fh->seek(0, 0);
+
+    my $self = $class->from_string($content, %options);
+    $self->{'pdf'}->{' fname'} = $file;
+
+    return $self;
+} # end of open()
+
+=item $pdf = PDF::Builder->from_string($pdf_string, %options)
 
 Opens a PDF contained in a string. See C<new()> for other options.
 
 =over
 
-=item -diags => 1
+=item diags => 1
 
 Display warnings when non-conforming PDF structure is found, and fix up
 where possible. See L<PDF::Builder::Basic::PDF::File> for more information.
+
+B<alternate option name:> -diags
+
+This is simply the older version, kept for compatibility with old code.
 
 =back
 
@@ -498,6 +658,7 @@ advisable to use C<from_string> in new work.
 =cut
 
 sub open_scalar { return from_string(@_); } ## no critic
+sub openScalar { return from_string(@_); } ## no critic
 
 sub from_string {
     my ($class, $content, %options) = @_;
@@ -564,14 +725,25 @@ sub from_string {
     $self->{'catalog'} = $self->{'pdf'}->{'Root'};
     weaken $self->{'catalog'};
     $self->{'opened_scalar'} = 1;
-    if (exists $options{'-compress'}) {
-      $self->{'forcecompress'} = $options{'-compress'};
+    if (exists $options{'compress'}) {
+      $self->{'forcecompress'} = $options{'compress'};
       # at this point, no validation of given value! none/flate (0/1).
       # note that >0 is often used as equivalent to 'flate'
+    } elsif (exists $options{'-compress'}) {
+      $self->{'forcecompress'} = $options{'-compress'};
+      # alternate name
     } else {
       $self->{'forcecompress'} = 'flate';
       # code should also allow integers 0 (= 'none') and >0 (= 'flate') 
       # for compatibility with old usage where forcecompress is directly set. 
+    }
+    if (exists $options{'diaglevel'}) {
+      $self->{'diaglevel'} = $options{'diaglevel'};
+      if ($self->{'diaglevel'} < 0 || $self->{'diaglevel'} > 5) {
+        $self->{'diaglevel'} = 2;
+      }
+    } else {
+      $self->{'diaglevel'} = 2;
     }
     if (exists $options{'-diaglevel'}) {
       $self->{'diaglevel'} = $options{'-diaglevel'};
@@ -587,12 +759,1013 @@ sub from_string {
     return $self;
 } # end of from_string()
 
+=item $string = $pdf->to_string()
+
+Return the document as a string and remove the object structure from memory.
+
+B<Caution:> Although the object C<$pdf> will still exist, it is no longer
+usable for any purpose after invoking this method! You will receive error
+messages about "can't call method new_obj on an undefined value".
+
+B<Example:>
+
+    $pdf = PDF::Builder->new();
+    ...
+    print $pdf->to_string();
+
+B<alternate name:> stringify
+
+C<to_string> was formerly known as C<stringify>, and this older name is still
+valid as an alternative to C<to_string>. It is I<possible> that C<stringify>
+will be deprecated and then removed some time in the future, so it may be
+advisable to use C<to_string> in new work.
+
+=cut
+
+# Maintainer's note: The object is being destroyed because it contains
+# circular references that would otherwise result in memory not being
+# freed if the object merely goes out of scope.  If possible, the
+# circular references should be eliminated so that to_string doesn't
+# need to be destructive. See t/circular-references.t.
+#
+# I've opted not to just require a separate call to release() because
+# it would likely introduce memory leaks in many existing programs
+# that use this module.
+# - Steve S. (see bug RT 81530)
+
+sub stringify { return to_string(@_); } ## no critic
+
+sub to_string {
+    my $self = shift();
+
+    my $string = '';
+    # is only set to 1 (within from_string()), otherwise is undef
+    if ($self->{'opened_scalar'}) { 
+        $self->{'pdf'}->append_file();
+        $string = ${$self->{'content_ref'}};
+    } else {
+        my $fh = FileHandle->new();
+        # we should be writing to the STRING $str
+        CORE::open($fh, '>', \$string) || die "Can't begin scalar IO";
+        $self->{'pdf'}->out_file($fh);
+        $fh->close();
+    }
+
+    # This can be eliminated once we're confident that circular references are
+    # no longer an issue. See t/circular-references.t
+    $self->end();
+
+    return $string;
+}
+
+=item $pdf->finishobjects(@objects)
+
+Force objects to be written to file if possible.
+
+B<Example:>
+
+    $pdf = PDF::Builder->new(file => 'our/new.pdf');
+    ...
+    $pdf->finishobjects($page, $gfx, $txt);
+    ...
+    $pdf->save();
+
+B<Note:> this method is now considered obsolete, and may be deprecated. It
+allows for objects to be written to disk in advance of finally
+saving and closing the file.  Otherwise, it's no different than just calling
+C<save()> when all changes have been made.  There's no memory advantage since
+C<ship_out> doesn't remove objects from memory.
+
+=cut
+
+# obsolete, use save instead
+#
+# This method allows for objects to be written to disk in advance of finally
+# saving and closing the file.  Otherwise, it's no different than just calling
+# save when all changes have been made.  There's no memory advantage since
+# ship_out doesn't remove objects from memory.
+sub finishobjects {
+    my ($self, @objs) = @_;
+
+    if ($self->{'opened_scalar'}) {
+        die "invalid method invocation: no file, use 'saveas' instead.";
+    } elsif ($self->{'partial_save'}) {
+        $self->{'pdf'}->ship_out(@objs);
+    } else {
+        die "invalid method invocation: no file, use 'saveas' instead.";
+    }
+
+    return;
+}
+
+sub _proc_pages {
+    my ($pdf, $object) = @_;
+
+    if (defined $object->{'Resources'}) {
+        eval {
+            $object->{'Resources'}->realise();
+        };
+    }
+
+    my @pages;
+    $pdf->{' apipagecount'} ||= 0;
+    foreach my $page ($object->{'Kids'}->elements()) {
+        $page->realise();
+        if ($page->{'Type'}->val() eq 'Pages') {
+            push @pages, _proc_pages($pdf, $page);
+        }
+        else {
+            $pdf->{' apipagecount'}++;
+            $page->{' pnum'} = $pdf->{' apipagecount'};
+            if (defined $page->{'Resources'}) {
+                eval {
+                    $page->{'Resources'}->realise();
+                };
+            }
+            push @pages, $page;
+        }
+    }
+
+    return @pages;
+} # end of _proc_pages()
+
+=item $pdf->update()
+
+Saves a previously opened document.
+
+B<Example:>
+
+    $pdf = PDF::Builder->open('our/to/be/updated.pdf');
+    ...
+    $pdf->update();
+
+B<Note:> it is considered better to simply C<save()> the file, rather than
+calling C<update()>. They end up doing the same thing, anyway. This method
+may be deprecated in the future.
+
+=cut
+
+# obsolete, use save instead
+sub update {
+    my $self = shift();
+    $self->saveas($self->{'pdf'}->{' fname'});
+    return;
+}
+
+=item $pdf->saveas($file)
+
+Save the document to $file and remove the object structure from memory.
+
+B<Caution:> Although the object C<$pdf> will still exist, it is no longer
+usable for any purpose after invoking this method! You will receive error
+messages about "can't call method new_obj on an undefined value".
+
+B<Example:>
+
+    $pdf = PDF::Builder->new();
+    ...
+    $pdf->saveas('our/new.pdf');
+
+=cut
+
+sub saveas {
+    my ($self, $file) = @_;
+
+    if ($self->{'opened_scalar'}) {
+        $self->{'pdf'}->append_file();
+        my $fh;
+        CORE::open($fh, '>', $file) or die "Can't open $file for writing: $!";
+        binmode($fh, ':raw');
+        print $fh ${$self->{'content_ref'}};
+        CORE::close($fh);
+    } elsif ($self->{'partial_save'}) {
+        $self->{'pdf'}->close_file();
+    } else {
+        $self->{'pdf'}->out_file($file);
+    }
+
+    $self->end();
+    return;
+}
+
+=item $pdf->save()
+
+=item $pdf->save(filename)
+
+Save the document to an already-defined file (or filename) and 
+remove the object structure from memory.
+Optionally, a new filename may be given.
+
+B<Caution:> Although the object C<$pdf> will still exist, it is no longer
+usable for any purpose after invoking this method! You will receive error
+messages about "can't call method new_obj on an undefined value".
+
+B<Example:>
+
+    $pdf = PDF::Builder->new(file => 'file_to_output');
+    ...
+    $pdf->save();
+
+B<Note:> now that C<save()> can take a filename as an argument, it effectively
+is interchangeable with C<saveas()>. This is strictly for compatibility with
+recent changes to PDF::API2. Unlike PDF::API2, we are not deprecating
+the C<saveas()> method, because in user interfaces, "save" normally means that
+the current filename is known and is to be used, while "saveas" normally means
+that (whether or not there is a current filename) a new filename is to be used.
+
+=cut
+
+sub save {
+    my ($self, $file) = @_;
+
+    if (defined $file) {
+	return $self->saveas($file);
+    }
+
+    # NOTE: the current PDF::API2 version is quite different, but this may be
+    # a consequence of merging save() and saveas(). Let's give this unchanged
+    # version a try.
+    if      ($self->{'opened_scalar'}) {
+        die "Invalid method invocation: use 'saveas' instead of 'save'.";
+    } elsif ($self->{'partial_save'}) {
+        $self->{'pdf'}->close_file();
+    } else {
+        die "Invalid method invocation: use 'saveas' instead of 'save'.";
+    }
+
+    $self->end();
+    return;
+}
+
+=item $pdf->close();
+
+Close an open file (if relevant) and remove the object structure from memory.
+
+PDF::API2 contains circular references, so this call is necessary in
+long-running processes to keep from running out of memory.
+
+This will be called automatically when you save or stringify a PDF.
+You should only need to call it explicitly if you are reading PDF
+files and not writing them.
+
+=cut
+
+# Deprecated (renamed)
+sub release { return $_[0]->close() }
+#sub end     { return $_[0]->close() }
+
+=item $pdf->end()
+
+Remove the object structure from memory. PDF::Builder contains circular
+references, so this call is necessary in long-running processes to
+keep from running out of memory.
+
+This will be called automatically when you save or to_string a PDF.
+You should only need to call it explicitly if you are reading PDF
+files and not writing them.
+
+=cut
+
+sub end {
+    my $self = shift();
+    $self->{'pdf'}->release() if defined $self->{'pdf'};
+
+    foreach my $key (keys %$self) {
+        $self->{$key} = undef;
+        delete $self->{$key};
+    }
+
+    return;
+}
+
+sub close {
+    my $self = shift();
+    $self->{'pdf'}->release() if defined $self->{'pdf'};
+
+    foreach my $key (keys %$self) {
+        $self->{$key} = undef;
+        delete $self->{$key};
+    }
+
+    return;
+}
+
+=back
+
+=head1 METADATA METHODS
+
+=over
+
+=item $title = $pdf->title();
+
+=item $pdf = $pdf->title($title);
+
+Get/set/clear the document's title.
+
+=cut
+
+sub title {
+    my $self = shift();
+    return $self->info_metadata('Title', @_);
+}
+
+=item $author = $pdf->author();
+
+=item $pdf = $pdf->author($author);
+
+Get/set/clear the name of the person who created the document.
+
+=cut
+
+sub author {
+    my $self = shift();
+    return $self->info_metadata('Author', @_);
+}
+
+=item $subject = $pdf->subject();
+
+=item $pdf = $pdf->subject($subject);
+
+Get/set/clear the subject of the document.
+
+=cut
+
+sub subject {
+    my $self = shift();
+    return $self->info_metadata('Subject', @_);
+}
+
+=item $keywords = $pdf->keywords();
+
+=item $pdf = $pdf->keywords($keywords);
+
+Get/set/clear a space-separated string of keywords associated with the document.
+
+=cut
+
+sub keywords {
+    my $self = shift();
+    return $self->info_metadata('Keywords', @_);
+}
+
+=item $creator = $pdf->creator();
+
+=item $pdf = $pdf->creator($creator);
+
+Get/set/clear the name of the product that created the document prior to its
+conversion to PDF.
+
+=cut
+
+sub creator {
+    my $self = shift();
+    return $self->info_metadata('Creator', @_);
+}
+
+=item $producer = $pdf->producer();
+
+=item $pdf = $pdf->producer($producer);
+
+Get/set/clear the name of the product that converted the original document to
+PDF.
+
+PDF::Builder fills in this field when creating a PDF.
+
+=cut
+
+sub producer {
+    my $self = shift();
+    return $self->info_metadata('Producer', @_);
+}
+
+=item $date = $pdf->created();
+
+=item $pdf = $pdf->created($date);
+
+Get/set/clear the document's creation date.
+
+The date format is C<D:YYYYMMDDHHmmSSOHH'mm>, where C<D:> is a static prefix
+identifying the string as a PDF date.  The date may be truncated at any point
+after the year.  C<O> is one of C<+>, C<->, or C<Z>, with the following C<HH'mm>
+representing an offset from UTC.
+
+When setting the date, C<D:> will be prepended automatically if omitted.
+
+=cut
+
+sub created {
+    my $self = shift();
+    return $self->info_metadata('CreationDate', @_);
+}
+
+=item $date = $pdf->modified();
+
+=item $pdf = $pdf->modified($date);
+
+Get/set/clear the document's modification date.  The date format is as described
+in C<created> above.
+
+=cut
+
+sub modified {
+    my $self = shift();
+    return $self->info_metadata('ModDate', @_);
+}
+
+sub _is_date {
+    my $value = shift();
+
+    # PDF 1.7 section 7.9.4 describes the required date format.  Other than the
+    # D: prefix and the year, all components are optional but must be present if
+    # a later component is present.  No provision is made in the specification
+    # for leap seconds, etc.
+    return unless $value =~ /^D:([0-9]{4})        # D:YYYY (required)
+                             (?:([01][0-9])       # Month (01-12)
+                             (?:([0123][0-9])     # Day (01-31)
+                             (?:([012][0-9])      # Hour (00-23)
+                             (?:([012345][0-9])   # Minute (00-59)
+                             (?:([012345][0-9])   # Second (00-59)
+                             (?:([Z+-])           # UT Offset Direction
+                             (?:([012][0-9])      # UT Offset Hours
+                             (?:\'([012345][0-9]) # UT Offset Minutes
+                             )?)?)?)?)?)?)?)?$/x;
+    my ($year, $month, $day, $hour, $minute, $second, $od, $oh, $om)
+        = ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+
+    # Do some basic validation to catch accidental date formatting issues.
+    # Complete date validation is out of scope.
+    if (defined $month) {
+        return unless $month >= 1 and $month <= 12;
+    }
+    if (defined $day) {
+        return unless $day >= 1 and $day <= 31;
+    }
+    if (defined $hour) {
+        return unless $hour <= 23;
+    }
+    if (defined $minute) {
+        return unless $minute <= 59;
+    }
+    if (defined $second) {
+        return unless $second <= 59;
+    }
+    if (defined $od) {
+        return if $od eq 'Z' and defined($oh);
+    }
+    if (defined $oh) {
+        return unless $oh <= 23;
+    }
+    if (defined $om) {
+        return unless $om <= 59;
+    }
+
+    return 1;
+}
+
+=item %info = $pdf->info_metadata(); # Get all keys and values
+
+=item $value = $pdf->info_metadata($key); # Get the value of one key
+
+=item $pdf = $pdf->info_metadata($key, $value); # Set the value of one key
+
+Get/set/clear a key in the document's information dictionary.  The standard keys
+(title, author, etc.) have their own accessors, so this is primarily intended
+for interacting with custom metadata.
+
+Pass C<undef> as the value in order to remove the key from the dictionary.
+
+=cut
+
+sub info_metadata {
+    my $self = shift();
+    my $field = shift();
+
+    # Return a hash of the Info table if called without arguments
+    unless (defined $field) {
+        return unless exists $self->{'pdf'}->{'Info'};
+        $self->{'pdf'}->{'Info'}->realise();
+        my %info;
+        foreach my $key (keys %{$self->{'pdf'}->{'Info'}}) {
+            next if $key =~ /^ /;
+            next unless defined $self->{'pdf'}->{'Info'}->{$key};
+            $info{$key} = $self->{'pdf'}->{'Info'}->{$key}->val();
+        }
+        return %info;
+    }
+
+    # Set
+    if (@_) {
+        my $value = shift();
+        $value = undef if defined($value) and not length($value);
+
+        if ($field eq 'CreationDate' or $field eq 'ModDate') {
+            if (defined ($value)) {
+                $value = 'D:' . $value unless $value =~ /^D:/;
+                croak "Invalid date string: $value" unless _is_date($value);
+            }
+        }
+
+        unless (exists $self->{'pdf'}->{'Info'}) {
+            return $self unless defined $value;
+            $self->{'pdf'}->{'Info'} = PDFDict();
+            $self->{'pdf'}->new_obj($self->{'pdf'}->{'Info'});
+        }
+        else {
+            $self->{'pdf'}->{'Info'}->realise();
+        }
+
+        if (defined $value) {
+            $self->{'pdf'}->{'Info'}->{$field} = PDFStr($value);
+        }
+        else {
+            delete $self->{'pdf'}->{'Info'}->{$field};
+        }
+
+        return $self;
+    }
+
+    # Get
+    return unless $self->{'pdf'}->{'Info'};
+    $self->{'pdf'}->{'Info'}->realise();
+    return unless $self->{'pdf'}->{'Info'}->{$field};
+    return $self->{'pdf'}->{'Info'}->{$field}->val();
+}
+
+=item %infohash = $pdf->info(%infohash)
+
+Gets/sets the info structure of the document.
+
+See L<PDF::Builder::Docs/info Example> section for an example of the use
+of this method.
+
+B<Note:> this method is still available, for compatibility purposes. It is
+better to use individual accessors or C<info_metadata> instead.
+
+=cut
+
+sub info {
+    my ($self, %opt) = @_;
+
+    if (not defined($self->{'pdf'}->{'Info'})) {
+        $self->{'pdf'}->{'Info'} = PDFDict();
+        $self->{'pdf'}->new_obj($self->{'pdf'}->{'Info'});
+    } else {
+        $self->{'pdf'}->{'Info'}->realise();
+    }
+
+    # Maintenance Note: Since we're not shifting at the beginning of
+    # this sub, this "if" will always be true
+    if (scalar @_) {
+        foreach my $k (@{$self->{'infoMeta'}}) {
+            next unless defined $opt{$k};
+            $self->{'pdf'}->{'Info'}->{$k} = PDFString($opt{$k} || 'NONE', 'm');
+        }
+        $self->{'pdf'}->out_obj($self->{'pdf'}->{'Info'});
+    }
+
+    if (defined $self->{'pdf'}->{'Info'}) {
+        %opt = ();
+        foreach my $k (@{$self->{'infoMeta'}}) {
+            next unless defined $self->{'pdf'}->{'Info'}->{$k};
+            $opt{$k} = $self->{'pdf'}->{'Info'}->{$k}->val();
+            if ((unpack('n', $opt{$k}) == 0xfffe) or (unpack('n', $opt{$k}) == 0xfeff)) {
+                $opt{$k} = decode('UTF-16', $self->{'pdf'}->{'Info'}->{$k}->val());
+            }
+        }
+    }
+
+    return %opt;
+} # end of info()
+
+=item @metadata_attributes = $pdf->infoMetaAttributes(@metadata_attributes)
+
+Gets/sets the supported info-structure tags.
+
+B<Example:>
+
+    @attributes = $pdf->infoMetaAttributes;
+    print "Supported Attributes: @attr\n";
+
+    @attributes = $pdf->infoMetaAttributes('CustomField1');
+    print "Supported Attributes: @attributes\n";
+
+B<Note:> this method is still available for compatibility purposes, but the
+use of C<info_metadata> instead is encouraged.
+
+=cut
+
+sub infoMetaAttributes {
+    my ($self, @attr) = @_;
+
+    if (scalar @attr) {
+        my %at = map { $_ => 1 } @{$self->{'infoMeta'}}, @attr;
+        @{$self->{'infoMeta'}} = keys %at;
+    }
+
+    return @{$self->{'infoMeta'}};
+}
+
+=item $xml = $pdf->xml_metadata();
+
+=item $pdf = $pdf->xml_metadata($xml);
+
+Get/set the document's XML metadata stream.
+
+=cut
+
+sub xml_metadata {
+    my ($self, $value) = @_;
+
+    if (not defined($self->{'catalog'}->{'Metadata'})) {
+        $self->{'catalog'}->{'Metadata'} = PDFDict();
+        $self->{'catalog'}->{'Metadata'}->{'Type'} = PDFName('Metadata');
+        $self->{'catalog'}->{'Metadata'}->{'Subtype'} = PDFName('XML');
+        $self->{'pdf'}->new_obj($self->{'catalog'}->{'Metadata'});
+    }
+    else {
+        $self->{'catalog'}->{'Metadata'}->realise();
+        $self->{'catalog'}->{'Metadata'}->{' stream'} = unfilter($self->{'catalog'}->{'Metadata'}->{'Filter'}, $self->{'catalog'}->{'Metadata'}->{' stream'});
+        delete $self->{'catalog'}->{'Metadata'}->{' nofilt'};
+        delete $self->{'catalog'}->{'Metadata'}->{'Filter'};
+    }
+
+    my $md = $self->{'catalog'}->{'Metadata'};
+
+    if (defined $value) {
+        $md->{' stream'} = $value;
+        delete $md->{'Filter'};
+        delete $md->{' nofilt'};
+        $self->{'pdf'}->out_obj($md);
+        $self->{'pdf'}->out_obj($self->{'catalog'});
+    }
+
+    return $md->{' stream'};
+}
+
+=item $xml = $pdf->xmpMetadata()
+
+=item $pdf->xmpMetadata($xml)
+
+Gets/sets the XMP XML data stream.
+
+See L<PDF::Builder::Docs/XMP XML example> section for an example of the use
+of this method.
+
+This method is considered B<obsolete>. Use C<xml_metadata> instead.
+
+=cut
+
+sub xmpMetadata {
+    my ($self, $value) = @_;
+
+    if (not defined($self->{'catalog'}->{'Metadata'})) {
+        $self->{'catalog'}->{'Metadata'} = PDFDict();
+        $self->{'catalog'}->{'Metadata'}->{'Type'} = PDFName('Metadata');
+        $self->{'catalog'}->{'Metadata'}->{'Subtype'} = PDFName('XML');
+        $self->{'pdf'}->new_obj($self->{'catalog'}->{'Metadata'});
+    } else {
+        $self->{'catalog'}->{'Metadata'}->realise();
+        $self->{'catalog'}->{'Metadata'}->{' stream'} = 
+            unfilter($self->{'catalog'}->{'Metadata'}->{'Filter'}, 
+                     $self->{'catalog'}->{'Metadata'}->{' stream'});
+        delete $self->{'catalog'}->{'Metadata'}->{' nofilt'};
+        delete $self->{'catalog'}->{'Metadata'}->{'Filter'};
+    }
+
+    my $md = $self->{'catalog'}->{'Metadata'};
+
+    if (defined $value) {
+        $md->{' stream'} = $value;
+        delete $md->{'Filter'};
+        delete $md->{' nofilt'};
+        $self->{'pdf'}->out_obj($md);
+        $self->{'pdf'}->out_obj($self->{'catalog'});
+    }
+
+    return $md->{' stream'};
+} # end of xmpMetadata()
+
+=item $val = $pdf->default($parameter)
+
+=item $pdf->default($parameter, $value)
+
+Gets/sets the default value for a behavior of PDF::Builder.
+
+B<Supported Parameters:>
+
+=over
+
+=item nounrotate
+
+prohibits Builder from rotating imported/opened page to re-create a
+default pdf-context.
+
+=item pageencaps
+
+enables Builder's adding save/restore commands upon importing/opening
+pages to preserve graphics-state for modification.
+
+=item copyannots
+
+enables importing of annotations (B<*EXPERIMENTAL*>).
+
+=back
+
+B<CAUTION:> Perl::Critic (tools/1_pc.pl) has started flagging the name 
+"default" as a reserved keyword in higher Perl versions. Use with caution, and
+be aware that this name I<may> have to be changed in the future.
+
+=cut
+
+sub default {
+    my ($self, $parameter, $value) = @_;
+
+    # Parameter names may consist of lowercase letters, numbers, and underscores
+    $parameter = lc $parameter;
+    $parameter =~ s/[^a-z\d_]//g;
+
+    my $previous_value = $self->{$parameter};
+    if (defined $value) {
+        $self->{$parameter} = $value;
+    }
+
+    return $previous_value;
+}
+
+=item $version = $pdf->version($new_version)
+
+Get/set the PDF version (e.g. 1.4). 
+
+For compatibility with earlier releases, if no decimal point is given, assume
+"1." precedes the number given.
+
+A warning message is given if you attempt to I<decrease> the PDF version, as you
+might have already read in a higher level file, or used a higher level feature.
+
+=cut
+
+sub version {
+    my $self = shift();
+    if (scalar @_) {
+        my $version = shift();
+	if ($version =~ m/^\d+$/) { $version = "1.$version"; }  # no x.? assume it's 1.something
+        croak "Invalid version $version" unless $version =~ /^(\d+\.\d+)$/;
+	if ($outVer > $1) { 
+	    print "Warning: call to self->version() to LOWER the output PDF version number!\n";
+	}
+        $self->{'pdf'}->{' version'} = $outVer = $1;
+    }
+
+    return $self->{'pdf'}->{' version'};
+}
+
+=item $bool = $pdf->is_encrypted()
+
+Checks if the previously opened PDF is encrypted.
+
+B<alternate name:> isEncrypted
+
+This is the older name; it is kept for compatibility.
+
+=cut
+
+sub isEncrypted { return is_encrypted(@_); } ## no critic
+
+sub is_encrypted {
+    my $self = shift();
+    return defined($self->{'pdf'}->{'Encrypt'}) ? 1 : 0;
+}
+
+=back
+
+=head1 INTERACTIVE FEATURE METHODS
+
+=over
+
+=item $otls = $pdf->outline()
+
+Creates (if needed) and returns the document's outline tree, which is also known
+as its bookmarks or the table of contents, depending on the PDF reader.
+
+To examine or modify the outline tree, see L<PDF::Builder::Outlines>.
+
+B<alternate name:> outlines
+
+This is the older name; it is kept for compatibility.
+
+=cut
+
+sub outlines { return outline(@_); } ## no critic
+
+sub outline {
+    my $self = shift();
+
+    require PDF::Builder::Outlines;
+    my $obj = $self->{'pdf'}->{'Root'}->{'Outlines'};
+    if ($obj) {
+        bless $obj, 'PDF::Builder::Outlines';
+        $obj->{' api'} = $self;
+        weaken $obj->{' api'};
+    } else {
+	$obj = PDF::Builder::Outlines->new($self);
+
+	$self->{'pdf'}->{'Root'}->{'Outlines'} = $obj;
+        $self->{'pdf'}->new_obj($obj) unless $obj->is_obj($self->{'pdf'});
+        $self->{'pdf'}->out_obj($obj);
+        $self->{'pdf'}->out_obj($self->{'pdf'}->{'Root'});
+    }
+    return $obj;
+}
+
+=item $pdf = $pdf->open_action($page, $location, @args);
+
+Set the destination in the PDF that should be displayed when the document is
+opened.
+
+C<$page> may be either a page number or a page object.  The other parameters are
+as described in L<PDF::Builder::NamedDestination>.
+
+=cut
+
+sub open_action {
+    my ($self, $page, @args) = @_;
+
+    # $page can be either a page number or a page object
+    $page = PDFNum($page) unless ref($page);
+
+    require PDF::Builder::NamedDestination;
+    my $array = PDF::Builder::NamedDestination::_destination($page, @args);
+    $self->{'catalog'}->{'OpenAction'} = $array;
+    $self->{'pdf'}->out_obj($self->{'catalog'});
+    return $self;
+}
+
+=item $layout = $pdf->page_layout();
+
+=item $pdf = $pdf->page_layout($layout);
+
+Get/set the page layout that should be used when the PDF is opened.
+
+C<$layout> is one of the following:
+
+=over
+
+=item single_page (or undef)
+
+Display one page at a time.
+
+=item one_column
+
+Display the pages in one column (a.k.a. continuous).
+
+=item two_column_left
+
+Display the pages in two columns, with odd-numbered pages on the left.
+
+=item two_column_right
+
+Display the pages in two columns, with odd-numbered pages on the right.
+
+=item two_page_left
+
+Display two pages at a time, with odd-numbered pages on the left.
+
+=item two_page_right
+
+Display two pages at a time, with odd-numbered pages on the right.
+
+=back
+
+=cut
+
+sub page_layout {
+    my $self = shift();
+
+    unless (@_) {
+        return 'single_page' unless $self->{'catalog'}->{'PageLayout'};
+        my $layout = $self->{'catalog'}->{'PageLayout'}->val();
+        return 'single_page' if $layout eq 'SinglePage';
+        return 'one_column' if $layout eq 'OneColumn';
+        return 'two_column_left' if $layout eq 'TwoColumnLeft';
+        return 'two_column_right' if $layout eq 'TwoColumnRight';
+        return 'two_page_left'  if $layout eq 'TwoPageLeft';
+        return 'two_page_right' if $layout eq 'TwoPageRight';
+        warn "Unknown page layout: $layout";
+        return $layout;
+    }
+
+    my $name = shift() // 'single_page';
+    my $layout = ($name eq 'single_page'      ? 'SinglePage'     :
+                  $name eq 'one_column'       ? 'OneColumn'      :
+                  $name eq 'two_column_left'  ? 'TwoColumnLeft'  :
+                  $name eq 'two_column_right' ? 'TwoColumnRight' :
+                  $name eq 'two_page_left'    ? 'TwoPageLeft'    :
+                  $name eq 'two_page_right'   ? 'TwoPageRight'   : '');
+
+    croak "Invalid page layout: $name" unless $layout;
+    $self->{'catalog'}->{'PageMode'} = PDFName($layout);
+    $self->{'pdf'}->out_obj($self->{'catalog'});
+    return $self;
+}
+
+=item $mode = $pdf->page_mode(); # Get
+
+=item $pdf = $pdf->page_mode($mode); # Set
+
+Get/set the page mode, which describes how the PDF should be displayed when
+opened.
+
+C<$mode> is one of the following:
+
+=over
+
+=item none (or undef)
+
+Neither outlines nor thumbnails should be displayed.
+
+=item outlines
+
+Show the document outline.
+
+=item thumbnails
+
+Show the page thumbnails.
+
+=item full_screen
+
+Open in full-screen mode, with no menu bar, window controls, or any other window
+visible.
+
+=item optional_content
+
+Show the optional content group panel.
+
+=item attachments
+
+Show the attachments panel.
+
+=back
+
+=cut
+
+sub page_mode {
+    my $self = shift();
+
+    unless (@_) {
+        return 'none' unless $self->{'catalog'}->{'PageMode'};
+        my $mode = $self->{'catalog'}->{'PageMode'}->val();
+        return 'none'             if $mode eq 'UseNone';
+        return 'outlines'         if $mode eq 'UseOutlines';
+        return 'thumbnails'       if $mode eq 'UseThumbs';
+        return 'full_screen'      if $mode eq 'FullScreen';
+        return 'optional_content' if $mode eq 'UseOC';
+        return 'attachments'      if $mode eq 'UseAttachments';
+        warn "Unknown page mode: $mode";
+        return $mode;
+    }
+
+    my $name = shift() // 'none';
+    my $mode = ($name eq 'none'             ? 'UseNone'        :
+                $name eq 'outlines'         ? 'UseOutlines'    :
+                $name eq 'thumbnails'       ? 'UseThumbs'      :
+                $name eq 'full_screen'      ? 'FullScreen'     :
+                $name eq 'optional_content' ? 'UseOC'          :
+                $name eq 'attachments'      ? 'UseAttachments' : '');
+
+    croak "Invalid page mode: $name" unless $mode;
+    $self->{'catalog'}->{'PageMode'} = PDFName($mode);
+    $self->{'pdf'}->out_obj($self->{'catalog'});
+    return $self;
+}
+
+=item %preferences = $pdf->viewer_preferences(); # Get
+
+=item $pdf = $pdf->viewer_preferences(%preferences); # Set
+
+Get or set PDF viewer preferences, as described in
+L<PDF::Builder::ViewerPreferences>.
+
+=cut
+
+sub viewer_preferences {
+    my $self = shift();
+    require PDF::Builder::ViewerPreferences;
+    my $prefs = PDF::Builder::ViewerPreferences->new($self);
+    unless (@_) {
+        return $prefs->get_preferences();
+    }
+    return $prefs->set_preferences(@_);
+}
+
 =item $pdf->preferences(%options)
 
 Controls viewing preferences for the PDF, including the B<Page Mode>, 
 B<Page Layout>, B<Viewer>, and B<Initial Page> Options. See 
 L<PDF::Builder::Docs/Preferences - set user display preferences> for details on all these 
 option groups.
+
+B<Note:> the various preferences have been split out into their own methods.
+It is preferred that you use these specific methods.
 
 =cut
 
@@ -705,379 +1878,7 @@ sub preferences {
     return $self;
 }  # end of preferences()
 
-=item $val = $pdf->default($parameter)
-
-=item $pdf->default($parameter, $value)
-
-Gets/sets the default value for a behavior of PDF::Builder.
-
-B<Supported Parameters:>
-
-=over
-
-=item nounrotate
-
-prohibits Builder from rotating imported/opened page to re-create a
-default pdf-context.
-
-=item pageencaps
-
-enables Builder's adding save/restore commands upon importing/opening
-pages to preserve graphics-state for modification.
-
-=item copyannots
-
-enables importing of annotations (B<*EXPERIMENTAL*>).
-
-=back
-
-B<CAUTION:> Perl::Critic (tools/1_pc.pl) has started flagging the name 
-"default" as a reserved keyword in higher Perl versions. Use with caution, and
-be aware that this name I<may> have to be changed in the future.
-
-=cut
-
-sub default {
-    my ($self, $parameter, $value) = @_;
-
-    # Parameter names may consist of lowercase letters, numbers, and underscores
-    $parameter = lc $parameter;
-    $parameter =~ s/[^a-z\d_]//g;
-
-    my $previous_value = $self->{$parameter};
-    if (defined $value) {
-        $self->{$parameter} = $value;
-    }
-
-    return $previous_value;
-}
-
-=item $version = $pdf->version($new_version)
-
-=item $version = $pdf->version()
-
-Get/set the PDF version (e.g. 1.4). 
-
-For compatibility with earlier releases, if no decimal point is given, assume
-"1." precedes the number given.
-
-A warning message is given if you attempt to I<decrease> the PDF version, as you
-might have already read in a higher level file, or used a higher level feature.
-
-=cut
-
-sub version {
-    my $self = shift();
-    if (scalar @_) {
-        my $version = shift();
-	if ($version =~ m/^\d+$/) { $version = "1.$version"; }  # no x.? assume it's 1.something
-        croak "Invalid version $version" unless $version =~ /^(\d+\.\d+)$/;
-	if ($outVer > $1) { 
-	    print "Warning: call to self->version() to LOWER the output PDF version number!\n";
-	}
-        $self->{'pdf'}->{' version'} = $outVer = $1;
-    }
-
-    return $self->{'pdf'}->{' version'};
-}
-
-=item $bool = $pdf->isEncrypted()
-
-Checks if the previously opened PDF is encrypted.
-
-=cut
-
-sub isEncrypted {
-    my $self = shift();
-    return defined($self->{'pdf'}->{'Encrypt'}) ? 1 : 0;
-}
-
-=item %infohash = $pdf->info(%infohash)
-
-Gets/sets the info structure of the document.
-
-See L<PDF::Builder::Docs/info Example> section for an example of the use
-of this method.
-
-=cut
-
-sub info {
-    my ($self, %opt) = @_;
-
-    if (not defined($self->{'pdf'}->{'Info'})) {
-        $self->{'pdf'}->{'Info'} = PDFDict();
-        $self->{'pdf'}->new_obj($self->{'pdf'}->{'Info'});
-    } else {
-        $self->{'pdf'}->{'Info'}->realise();
-    }
-
-    # Maintenance Note: Since we're not shifting at the beginning of
-    # this sub, this "if" will always be true
-    if (scalar @_) {
-        foreach my $k (@{$self->{'infoMeta'}}) {
-            next unless defined $opt{$k};
-            $self->{'pdf'}->{'Info'}->{$k} = PDFString($opt{$k} || 'NONE', 'm');
-        }
-        $self->{'pdf'}->out_obj($self->{'pdf'}->{'Info'});
-    }
-
-    if (defined $self->{'pdf'}->{'Info'}) {
-        %opt = ();
-        foreach my $k (@{$self->{'infoMeta'}}) {
-            next unless defined $self->{'pdf'}->{'Info'}->{$k};
-            $opt{$k} = $self->{'pdf'}->{'Info'}->{$k}->val();
-            if ((unpack('n', $opt{$k}) == 0xfffe) or (unpack('n', $opt{$k}) == 0xfeff)) {
-                $opt{$k} = decode('UTF-16', $self->{'pdf'}->{'Info'}->{$k}->val());
-            }
-        }
-    }
-
-    return %opt;
-} # end of info()
-
-=item @metadata_attributes = $pdf->infoMetaAttributes(@metadata_attributes)
-
-Gets/sets the supported info-structure tags.
-
-B<Example:>
-
-    @attributes = $pdf->infoMetaAttributes;
-    print "Supported Attributes: @attr\n";
-
-    @attributes = $pdf->infoMetaAttributes('CustomField1');
-    print "Supported Attributes: @attributes\n";
-
-=cut
-
-sub infoMetaAttributes {
-    my ($self, @attr) = @_;
-
-    if (scalar @attr) {
-        my %at = map { $_ => 1 } @{$self->{'infoMeta'}}, @attr;
-        @{$self->{'infoMeta'}} = keys %at;
-    }
-
-    return @{$self->{'infoMeta'}};
-}
-
-=item $xml = $pdf->xmpMetadata($xml)
-
-Gets/sets the XMP XML data stream.
-
-See L<PDF::Builder::Docs/XMP XML example> section for an example of the use
-of this method.
-
-=cut
-
-sub xmpMetadata {
-    my ($self, $value) = @_;
-
-    if (not defined($self->{'catalog'}->{'Metadata'})) {
-        $self->{'catalog'}->{'Metadata'} = PDFDict();
-        $self->{'catalog'}->{'Metadata'}->{'Type'} = PDFName('Metadata');
-        $self->{'catalog'}->{'Metadata'}->{'Subtype'} = PDFName('XML');
-        $self->{'pdf'}->new_obj($self->{'catalog'}->{'Metadata'});
-    } else {
-        $self->{'catalog'}->{'Metadata'}->realise();
-        $self->{'catalog'}->{'Metadata'}->{' stream'} = 
-            unfilter($self->{'catalog'}->{'Metadata'}->{'Filter'}, 
-                     $self->{'catalog'}->{'Metadata'}->{' stream'});
-        delete $self->{'catalog'}->{'Metadata'}->{' nofilt'};
-        delete $self->{'catalog'}->{'Metadata'}->{'Filter'};
-    }
-
-    my $md = $self->{'catalog'}->{'Metadata'};
-
-    if (defined $value) {
-        $md->{' stream'} = $value;
-        delete $md->{'Filter'};
-        delete $md->{' nofilt'};
-        $self->{'pdf'}->out_obj($md);
-        $self->{'pdf'}->out_obj($self->{'catalog'});
-    }
-
-    return $md->{' stream'};
-} # end of xmpMetadata()
-
-=item $pdf->pageLabel($index, $options)
-
-Sets page label options, for the page-selection slider thumb (I<not> the
-outline/bookmarks). At this time, there is no method to automatically
-synchronize a page's label with the outline/bookmarks, or to somewhere on the
-printed page.
-
-Note that many PDF Readers ignore these settings, and (at most) simply give
-you the physical page number 1, 2, 3,... instead of the page label specified 
-here.
-
-B<Supported Options:>
-
-=over
-
-=item -style
-
-B<Roman> (I,II,III,...), B<roman> (i,ii,iii,...), B<decimal> (1,2,3,...), 
-B<Alpha> (A,B,C,...), B<alpha> (a,b,c,...), or B<nocounter>. This is the 
-styling of the counter part of the label (unless C<nocounter>, in which case 
-there is no counter output).
-
-=item -start
-
-(Re)start numbering the I<counter> at given page number (this is a decimal 
-integer, I<not> the styled counter). By default it starts at 1, and B<resets>
-to 1 at each call to C<pageLabel()>! You need to explicitly give C<-start> if 
-you want to I<continue> counting at the current page number when you call
-C<pageLabel()>, whether or not you are changing the format.
-
-Also note that the counter starts at physical page B<1>, while the page 
-C<$index> number in the C<pageLabel()> call (as well as the PDF PageLabels 
-dictionary) starts at logical page (index) B<0>.
-
-=item -prefix
-
-Text prefix for numbering, such as an Appendix letter B<B->. If C<-style> is 
-I<nocounter>, just this text is used, otherwise a styled counter will be 
-appended. If C<-style> is omitted, remember that it will default to a decimal 
-number, which will be appended to the prefix.
-
-According to the Adobe/ISO PDF specification, a prefix of 'Content' has a 
-special meaning, in that any /S counter is ignored and only that text is used. 
-However, this appears to be ignored (use a style of I<nocounter> to suppress
-the counter).
-
-=back
-
-B<Example:>
-
-    # Start with lowercase Roman Numerals at the 1st page, starting with i (1)
-    $pdf->pageLabel(0, {
-        -style => 'roman',
-    });
-
-    # Switch to Arabic (decimal) at the 5th page, starting with 1
-    $pdf->pageLabel(4, {
-        -style => 'decimal',
-    });
-
-    # invalid style at the 25th page, should just continue 
-    # with decimal at the current counter
-    $pdf->pageLabel(24, {
-        -style => 'glorp',  # fail over to decimal
-	-start => 21,  # necessary, otherwise would restart at 1
-    });
-
-    # No page label at the 31st and 32nd pages. Note that this could be
-    # confusing to the person viewing the PDF, but may be appropriate if
-    # the page itself has no numbering.
-    $pdf->pageLabel(30, {
-        -style => 'nocounter',
-    });
-
-    # Numbering for Appendix A at the 33rd page, A-1, A-2,...
-    $pdf->pageLabel(32, {
-        -start => 1,  # unnecessary
-        -prefix => 'A-'
-    });
-
-    # Numbering for Appendix B at the 37th page, B-1, B-2,...
-    $pdf->pageLabel( 36, {
-        -prefix => 'B-'
-    });
-
-    # Numbering for the Index at the 41st page, Index I, Index II,...
-    $pdf->pageLabel(40, {
-        -style => 'Roman',
-        -start => 1,  # unnecessary
-        -prefix => 'Index '  # note trailing space
-    });
-
-    # Unnumbered 'Index' at the 45th page, Index, Index,...
-    $pdf->pageLabel(40, {
-        -style => 'nocounter',
-        -prefix => 'Index '
-    });
-
-=cut
-
-sub pageLabel {
-    my $self = shift();
-
-    $self->{'catalog'}->{'PageLabels'} ||= PDFDict();
-    $self->{'catalog'}->{'PageLabels'}->{'Nums'} ||= PDFArray();
-
-    my $nums = $self->{'catalog'}->{'PageLabels'}->{'Nums'};
-    while (scalar @_) {
-        my $index = shift();
-        my $opts = shift();
-
-        $nums->add_elements(PDFNum($index));
-
-        my $d = PDFDict();
-        if (defined $opts->{'-style'}) {
-	    if ($opts->{'-style'} ne 'nocounter') {
-		# defaults to decimal if unrecogized style given
-                $d->{'S'} = PDFName($opts->{'-style'} eq 'Roman' ? 'R' :
-                                    $opts->{'-style'} eq 'roman' ? 'r' :
-                                    $opts->{'-style'} eq 'Alpha' ? 'A' :
-                                    $opts->{'-style'} eq 'alpha' ? 'a' : 'D');
-	    } else {
-		# for nocounter (no styled counter), do not create /S entry
-	    }
-        } else {
-	    # default to decimal counter if no -style given
-            $d->{'S'} = PDFName('D');
-        }
-
-        if (defined $opts->{'-prefix'}) {
-	    # 'Content' supposedly treated differently
-            $d->{'P'} = PDFString($opts->{'-prefix'}, 's');
-        }
-
-        if (defined $opts->{'-start'}) {
-            $d->{'St'} = PDFNum($opts->{'-start'});
-        }
-
-        $nums->add_elements($d);
-    }
-
-    return;
-} # end of pageLabel()
-
-=item $pdf->finishobjects(@objects)
-
-Force objects to be written to file if possible.
-
-B<Example:>
-
-    $pdf = PDF::Builder->new(-file => 'our/new.pdf');
-    ...
-    $pdf->finishobjects($page, $gfx, $txt);
-    ...
-    $pdf->save();
-
-B<Note:> this method is now considered obsolete, and may be deprecated. It
-allows for objects to be written to disk in advance of finally
-saving and closing the file.  Otherwise, it's no different than just calling
-C<save()> when all changes have been made.  There's no memory advantage since
-C<ship_out> doesn't remove objects from memory.
-
-=cut
-
-sub finishobjects {
-    my ($self, @objs) = @_;
-
-    if ($self->{'opened_scalar'}) {
-        die "invalid method invocation: no file, use 'saveas' instead.";
-    } elsif ($self->{'partial_save'}) {
-        $self->{'pdf'}->ship_out(@objs);
-    } else {
-        die "invalid method invocation: no file, use 'saveas' instead.";
-    }
-
-    return;
-}
-
-sub _proc_pages {
+sub proc_pages {
     my ($pdf, $object) = @_;
 
     if (defined $object->{'Resources'}) {
@@ -1091,7 +1892,7 @@ sub _proc_pages {
     foreach my $page ($object->{'Kids'}->elements()) {
         $page->realise();
         if ($page->{'Type'}->val() eq 'Pages') {
-            push @pages, _proc_pages($pdf, $page);
+            push @pages, proc_pages($pdf, $page);
         }
         else {
             $pdf->{' apipagecount'}++;
@@ -1106,204 +1907,6 @@ sub _proc_pages {
     }
 
     return @pages;
-} # end of _proc_pages()
-
-=item $pdf->update()
-
-Saves a previously opened document.
-
-B<Example:>
-
-    $pdf = PDF::Builder->open('our/to/be/updated.pdf');
-    ...
-    $pdf->update();
-
-B<Note:> it is considered better to simply C<save()> the file, rather than
-calling C<update()>. They end up doing the same thing, anyway. This method
-may be deprecated in the future.
-
-=cut
-
-sub update {
-    my $self = shift();
-    $self->saveas($self->{'pdf'}->{' fname'});
-    return;
-}
-
-=item $pdf->saveas($file)
-
-Save the document to $file and remove the object structure from memory.
-
-B<Caution:> Although the object C<$pdf> will still exist, it is no longer
-usable for any purpose after invoking this method! You will receive error
-messages about "can't call method new_obj on an undefined value".
-
-B<Example:>
-
-    $pdf = PDF::Builder->new();
-    ...
-    $pdf->saveas('our/new.pdf');
-
-=cut
-
-sub saveas {
-    my ($self, $file) = @_;
-
-    if ($self->{'opened_scalar'}) {
-        $self->{'pdf'}->append_file();
-        my $fh;
-        CORE::open($fh, '>', $file) or die "Can't open $file for writing: $!";
-        binmode($fh, ':raw');
-        print $fh ${$self->{'content_ref'}};
-        CORE::close($fh);
-    } elsif ($self->{'partial_save'}) {
-        $self->{'pdf'}->close_file();
-    } else {
-        $self->{'pdf'}->out_file($file);
-    }
-
-    $self->end();
-    return;
-}
-
-=item $pdf->save()
-
-=item $pdf->save(filename)
-
-Save the document to an already-defined file (or filename) and 
-remove the object structure from memory.
-Optionally, a new filename may be given.
-
-B<Caution:> Although the object C<$pdf> will still exist, it is no longer
-usable for any purpose after invoking this method! You will receive error
-messages about "can't call method new_obj on an undefined value".
-
-B<Example:>
-
-    $pdf = PDF::Builder->new(-file => 'file_to_output');
-    ...
-    $pdf->save();
-
-B<Note:> now that C<save()> can take a filename as an argument, it effectively
-is interchangeable with C<saveas()>. This is strictly for compatibility with
-recent changes to PDF::API2. Unlike PDF::API2, we are not deprecating
-the C<saveas()> method, because in user interfaces, "save" normally means that
-the current filename is known and is to be used, while "saveas" normally means
-that (whether or not there is a current filename) a new filename is to be used.
-
-=cut
-
-sub save {
-    my ($self, $file) = @_;
-
-    if (defined $file) {
-	return $self->saveas($file);
-    }
-
-    # NOTE: the current PDF::API2 version is quite different, but this may be
-    # a consequence of merging save() and saveas(). Let's give this unchanged
-    # version a try.
-    if      ($self->{'opened_scalar'}) {
-        die "Invalid method invocation: use 'saveas' instead of 'save'.";
-    } elsif ($self->{'partial_save'}) {
-        $self->{'pdf'}->close_file();
-    } else {
-        die "Invalid method invocation: use 'saveas' instead of 'save'.";
-    }
-
-    $self->end();
-    return;
-}
-
-=item $string = $pdf->to_string()
-
-Return the document as a string and remove the object structure from memory.
-
-B<Caution:> Although the object C<$pdf> will still exist, it is no longer
-usable for any purpose after invoking this method! You will receive error
-messages about "can't call method new_obj on an undefined value".
-
-B<Example:>
-
-    $pdf = PDF::Builder->new();
-    ...
-    print $pdf->to_string();
-
-B<alternate name:> stringify
-
-C<to_string> was formerly known as C<stringify>, and this older name is still
-valid as an alternative to C<to_string>. It is I<possible> that C<stringify>
-will be deprecated and then removed some time in the future, so it may be
-advisable to use C<to_string> in new work.
-
-=cut
-
-# Maintainer's note: The object is being destroyed because it contains
-# circular references that would otherwise result in memory not being
-# freed if the object merely goes out of scope.  If possible, the
-# circular references should be eliminated so that to_string doesn't
-# need to be destructive. See t/circular-references.t.
-#
-# I've opted not to just require a separate call to release() because
-# it would likely introduce memory leaks in many existing programs
-# that use this module.
-# - Steve S. (see bug RT 81530)
-
-sub stringify { return to_string(@_); } ## no critic
-
-sub to_string {
-    my $self = shift();
-
-    my $string = '';
-    # is only set to 1 (within from_string()), otherwise is undef
-    if ($self->{'opened_scalar'}) { 
-        $self->{'pdf'}->append_file();
-        $string = ${$self->{'content_ref'}};
-    } else {
-        my $fh = FileHandle->new();
-        # we should be writing to the STRING $str
-        CORE::open($fh, '>', \$string) || die "Can't begin scalar IO";
-        $self->{'pdf'}->out_file($fh);
-        $fh->close();
-    }
-
-    # This can be eliminated once we're confident that circular references are
-    # no longer an issue. See t/circular-references.t
-    $self->end();
-
-    return $string;
-}
-
-# there IS a release() method defined and documented in Basic/PDF/File.pm
-# it's not clear whether this release is just an internal (rename to _release)
-sub release {
-    my $self = shift();
-    $self->end();
-    return;
-}
-
-=item $pdf->end()
-
-Remove the object structure from memory. PDF::Builder contains circular
-references, so this call is necessary in long-running processes to
-keep from running out of memory.
-
-This will be called automatically when you save or to_string a PDF.
-You should only need to call it explicitly if you are reading PDF
-files and not writing them.
-
-=cut
-
-sub end {
-    my $self = shift();
-    $self->{'pdf'}->release() if defined $self->{'pdf'};
-
-    foreach my $key (keys %$self) {
-        $self->{$key} = undef;
-        delete $self->{$key};
-    }
-
-    return;
 }
 
 =back
@@ -1385,7 +1988,14 @@ B<Example:>
     $page = $pdf->open_page(-1);  # returns the last page
     $page = $pdf->open_page(999); # returns undef
 
+B<alternate name:> openpage
+
+This is the older name; it is kept for compatibility until after June 2023
+(deprecated, as previously announced).
+
 =cut
+
+sub openpage { return open_page(@_); } ## no critic
 
 sub open_page {
     my $self = shift();
@@ -1477,176 +2087,6 @@ sub open_page {
     return $page;
 } # end of open_page()
 
-=item $page = $pdf->openpage($page_number)
-
-B<Deprecated.> Will be removed on or after June, 2023. Use C<open_page> call
-instead.
-
-=cut
-
-sub openpage { return open_page(@_); } ## no critic
-
-# internal utility
-
-sub _walk_obj {
-    my ($object_cache, $source_pdf, $target_pdf, $source_object, @keys) = @_;
-
-    if (ref($source_object) =~ /Objind$/) {
-        $source_object->realise();
-    }
-
-    return $object_cache->{scalar $source_object} if defined $object_cache->{scalar $source_object};
-   #die "infinite loop while copying objects" if $source_object->{' copied'};
-
-    my $target_object = $source_object->copy($source_pdf); ## thanks to: yaheath // Fri, 17 Sep 2004
-
-   #$source_object->{' copied'} = 1;
-    $target_pdf->new_obj($target_object) if $source_object->is_obj($source_pdf);
-
-    $object_cache->{scalar $source_object} = $target_object;
-
-    if (ref($source_object) =~ /Array$/) {
-        $target_object->{' val'} = [];
-        foreach my $k ($source_object->elements()) {
-            $k->realise() if ref($k) =~ /Objind$/;
-            $target_object->add_elements(_walk_obj($object_cache, $source_pdf, $target_pdf, $k));
-        }
-    } elsif (ref($source_object) =~ /Dict$/) {
-        @keys = keys(%$target_object) unless scalar @keys;
-        foreach my $k (@keys) {
-            next if $k =~ /^ /;
-            next unless defined $source_object->{$k};
-            $target_object->{$k} = _walk_obj($object_cache, $source_pdf, $target_pdf, $source_object->{$k});
-        }
-        if ($source_object->{' stream'}) {
-            if ($target_object->{'Filter'}) {
-                $target_object->{' nofilt'} = 1;
-            } else {
-                delete $target_object->{' nofilt'};
-                $target_object->{'Filter'} = PDFArray(PDFName('FlateDecode'));
-            }
-            $target_object->{' stream'} = $source_object->{' stream'};
-        }
-    }
-    delete $target_object->{' streamloc'};
-    delete $target_object->{' streamsrc'};
-
-    return $target_object;
-} # end of _walk_obj()
-
-=item $xoform = $pdf->importPageIntoForm($source_pdf, $source_page_number)
-
-Returns a Form XObject created by extracting the specified page from 
-$source_pdf.
-
-This is useful if you want to transpose the imported page somewhat
-differently onto a page (e.g. two-up, four-up, etc.).
-
-If $source_page_number is 0 or -1, it will return the last page in the
-document.
-
-B<Example:>
-
-    $pdf = PDF::Builder->new();
-    $old = PDF::Builder->open('our/old.pdf');
-    $page = $pdf->page();
-    $gfx = $page->gfx();
-
-    # Import Page 2 from the old PDF
-    $xo = $pdf->importPageIntoForm($old, 2);
-
-    # Add it to the new PDF's first page at 1/2 scale
-    $gfx->formimage($xo, 0, 0, 0.5);
-
-    $pdf->saveas('our/new.pdf');
-
-B<Note:> You can only import a page from an existing PDF file.
-
-=cut
-
-sub importPageIntoForm {
-    my ($self, $s_pdf, $s_idx) = @_;
-    $s_idx ||= 0;
-
-    unless (ref($s_pdf) and $s_pdf->isa('PDF::Builder')) {
-        die "Invalid usage: first argument must be PDF::Builder instance, not: " . ref($s_pdf);
-    }
-
-    my ($s_page, $xo);
-
-    $xo = $self->xo_form();
-
-    if (ref($s_idx) eq 'PDF::Builder::Page') {
-        $s_page = $s_idx;
-    } else {
-        $s_page = $s_pdf->open_page($s_idx);
-	die "Unable to open page '$s_idx' in source PDF" unless defined $s_page;
-    }
-
-    $self->{'apiimportcache'} ||= {};
-    $self->{'apiimportcache'}->{$s_pdf} ||= {};
-
-    # This should never get past MediaBox, since it's a required object.
-    foreach my $k (qw(MediaBox ArtBox TrimBox BleedBox CropBox)) {
-       #next unless defined $s_page->{$k};
-       #my $box = _walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, 
-       #   $self->{'pdf'}, $s_page->{$k});
-        next unless defined $s_page->find_prop($k);
-        my $box = _walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, 
-            $self->{'pdf'}, $s_page->find_prop($k));
-        $xo->bbox(map { $_->val() } $box->elements());
-        last;
-    }
-    $xo->bbox(0,0, 612,792) unless defined $xo->{'BBox'}; # US Letter default
-
-    foreach my $k (qw(Resources)) {
-        $s_page->{$k} = $s_page->find_prop($k);
-        next unless defined $s_page->{$k};
-        $s_page->{$k}->realise() if ref($s_page->{$k}) =~ /Objind$/;
-
-        foreach my $sk (qw(XObject ExtGState Font ProcSet Properties ColorSpace Pattern Shading)) {
-            next unless defined $s_page->{$k}->{$sk};
-            $s_page->{$k}->{$sk}->realise() if ref($s_page->{$k}->{$sk}) =~ /Objind$/;
-            foreach my $ssk (keys %{$s_page->{$k}->{$sk}}) {
-                next if $ssk =~ /^ /;
-                $xo->resource($sk, $ssk, _walk_obj($self->{'apiimportcache'}->{$s_pdf}, 
-                              $s_pdf->{'pdf'}, $self->{'pdf'}, $s_page->{$k}->{$sk}->{$ssk}));
-            }
-        }
-    }
-
-    # create a whole content stream
-    ## technically it is possible to submit an unfinished
-    ## (e.g., newly created) source-page, but that's nonsense,
-    ## so we expect a page fixed by open_page and die otherwise
-    unless ($s_page->{' opened'}) {
-        croak join(' ',
-		   "Pages may only be imported from a complete PDF.",
-		   "Save and reopen the source PDF object first.");
-    }
-
-    if (defined $s_page->{'Contents'}) {
-        $s_page->fixcontents();
-
-        $xo->{' stream'} = '';
-        # open_page pages only contain one stream
-        my ($k) = $s_page->{'Contents'}->elements();
-        $k->realise();
-        if ($k->{' nofilt'}) {
-            # we have a finished stream here, so we unfilter
-            $xo->add('q', unfilter($k->{'Filter'}, $k->{' stream'}), 'Q');
-        } else {
-            # stream is an unfinished/unfiltered content
-            # so we just copy it and add the required "qQ"
-            $xo->add('q', $k->{' stream'}, 'Q');
-        }
-        $xo->compressFlate() if $self->{'forcecompress'} eq 'flate' ||
-	                        $self->{'forcecompress'} =~ m/^[1-9]\d*$/;
-    }
-
-    return $xo;
-} # end of importPageIntoForm()
-
 =item $page = $pdf->import_page($source_pdf)
 
 =item $page = $pdf->import_page($source_pdf, $source_page_number)
@@ -1683,7 +2123,8 @@ B<Note:> You can only import a page from an existing PDF file.
 
 =cut
 
-# importpage() renamed to import_page()
+# removed years ago, but is still in API2, so for code compatibility...
+sub importpage{ return import_page(@_); } ## no critic
 
 sub import_page {
     my ($self, $s_pdf, $s_idx, $t_idx) = @_;
@@ -1807,16 +2248,356 @@ sub import_page {
     return $t_page;
 } # end of import_page()
 
-=item $count = $pdf->pages()
+=item $xoform = $pdf->embed_page($source_pdf, $source_page_number)
 
-Returns the number of pages in the document.
+Returns a Form XObject created by extracting the specified page from 
+C<$source_pdf>.
+
+This is useful if you want to transpose the imported page somewhat
+differently onto a page (e.g. two-up, four-up, etc.).
+
+If C<$source_page_number> is 0 or -1, it will return the last page in the
+document.
+
+B<Example:>
+
+    $pdf = PDF::Builder->new();
+    $old = PDF::Builder->open('our/old.pdf');
+    $page = $pdf->page();
+    $gfx = $page->gfx();
+
+    # Import Page 2 from the old PDF
+    $xo = $pdf->embed_page($old, 2);
+
+    # Add it to the new PDF's first page at 1/2 scale
+    $gfx->formimage($xo, 0, 0, 0.5);
+
+    $pdf->save('our/new.pdf');
+
+B<Note:> You can only import a page from an existing PDF file.
+
+B<alternate name:> importPageIntoForm
+
+This is the older name; it is kept for compatibility.
 
 =cut
 
-sub pages {
+sub importPageIntoForm { return embed_page(@_); } ## no critic
+
+sub embed_page {
+    my ($self, $s_pdf, $s_idx) = @_;
+    $s_idx ||= 0;
+
+    unless (ref($s_pdf) and $s_pdf->isa('PDF::Builder')) {
+        die "Invalid usage: first argument must be PDF::Builder instance, not: " . ref($s_pdf);
+    }
+
+    my ($s_page, $xo);
+
+    $xo = $self->xo_form();
+
+    if (ref($s_idx) eq 'PDF::Builder::Page') {
+        $s_page = $s_idx;
+    } else {
+        $s_page = $s_pdf->open_page($s_idx);
+	die "Unable to open page '$s_idx' in source PDF" unless defined $s_page;
+    }
+
+    $self->{'apiimportcache'} ||= {};
+    $self->{'apiimportcache'}->{$s_pdf} ||= {};
+
+    # This should never get past MediaBox, since it's a required object.
+    foreach my $k (qw(MediaBox ArtBox TrimBox BleedBox CropBox)) {
+       #next unless defined $s_page->{$k};
+       #my $box = _walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, 
+       #   $self->{'pdf'}, $s_page->{$k});
+        next unless defined $s_page->find_prop($k);
+        my $box = _walk_obj($self->{'apiimportcache'}->{$s_pdf}, $s_pdf->{'pdf'}, 
+            $self->{'pdf'}, $s_page->find_prop($k));
+        $xo->bbox(map { $_->val() } $box->elements());
+        last;
+    }
+    $xo->bbox(0,0, 612,792) unless defined $xo->{'BBox'}; # US Letter default
+
+    foreach my $k (qw(Resources)) {
+        $s_page->{$k} = $s_page->find_prop($k);
+        next unless defined $s_page->{$k};
+        $s_page->{$k}->realise() if ref($s_page->{$k}) =~ /Objind$/;
+
+        foreach my $sk (qw(XObject ExtGState Font ProcSet Properties ColorSpace Pattern Shading)) {
+            next unless defined $s_page->{$k}->{$sk};
+            $s_page->{$k}->{$sk}->realise() if ref($s_page->{$k}->{$sk}) =~ /Objind$/;
+            foreach my $ssk (keys %{$s_page->{$k}->{$sk}}) {
+                next if $ssk =~ /^ /;
+                $xo->resource($sk, $ssk, _walk_obj($self->{'apiimportcache'}->{$s_pdf}, 
+                              $s_pdf->{'pdf'}, $self->{'pdf'}, $s_page->{$k}->{$sk}->{$ssk}));
+            }
+        }
+    }
+
+    # create a whole content stream
+    ## technically it is possible to submit an unfinished
+    ## (e.g., newly created) source-page, but that's nonsense,
+    ## so we expect a page fixed by open_page and die otherwise
+    unless ($s_page->{' opened'}) {
+        croak join(' ',
+		   "Pages may only be imported from a complete PDF.",
+		   "Save and reopen the source PDF object first.");
+    }
+
+    if (defined $s_page->{'Contents'}) {
+        $s_page->fixcontents();
+
+        $xo->{' stream'} = '';
+        # open_page pages only contain one stream
+        my ($k) = $s_page->{'Contents'}->elements();
+        $k->realise();
+        if ($k->{' nofilt'}) {
+            # we have a finished stream here, so we unfilter
+            $xo->add('q', unfilter($k->{'Filter'}, $k->{' stream'}), 'Q');
+        } else {
+            # stream is an unfinished/unfiltered content
+            # so we just copy it and add the required "qQ"
+            $xo->add('q', $k->{' stream'}, 'Q');
+        }
+        $xo->compressFlate() if $self->{'forcecompress'} eq 'flate' ||
+	                        $self->{'forcecompress'} =~ m/^[1-9]\d*$/;
+    }
+
+    return $xo;
+} # end of embed_page()
+
+# internal utility used by embed_page and import_page
+
+sub _walk_obj {
+    my ($object_cache, $source_pdf, $target_pdf, $source_object, @keys) = @_;
+
+    if (ref($source_object) =~ /Objind$/) {
+        $source_object->realise();
+    }
+
+    return $object_cache->{scalar $source_object} if defined $object_cache->{scalar $source_object};
+   #die "infinite loop while copying objects" if $source_object->{' copied'};
+
+    my $target_object = $source_object->copy($source_pdf); ## thanks to: yaheath // Fri, 17 Sep 2004
+
+   #$source_object->{' copied'} = 1;
+    $target_pdf->new_obj($target_object) if $source_object->is_obj($source_pdf);
+
+    $object_cache->{scalar $source_object} = $target_object;
+
+    if (ref($source_object) =~ /Array$/) {
+        $target_object->{' val'} = [];
+        foreach my $k ($source_object->elements()) {
+            $k->realise() if ref($k) =~ /Objind$/;
+            $target_object->add_elements(_walk_obj($object_cache, $source_pdf, $target_pdf, $k));
+        }
+    } elsif (ref($source_object) =~ /Dict$/) {
+        @keys = keys(%$target_object) unless scalar @keys;
+        foreach my $k (@keys) {
+            next if $k =~ /^ /;
+            next unless defined $source_object->{$k};
+            $target_object->{$k} = _walk_obj($object_cache, $source_pdf, $target_pdf, $source_object->{$k});
+        }
+        if ($source_object->{' stream'}) {
+            if ($target_object->{'Filter'}) {
+                $target_object->{' nofilt'} = 1;
+            } else {
+                delete $target_object->{' nofilt'};
+                $target_object->{'Filter'} = PDFArray(PDFName('FlateDecode'));
+            }
+            $target_object->{' stream'} = $source_object->{' stream'};
+        }
+    }
+    delete $target_object->{' streamloc'};
+    delete $target_object->{' streamsrc'};
+
+    return $target_object;
+} # end of _walk_obj()
+
+=item $count = $pdf->page_count()
+
+Returns the number of pages in the document.
+
+B<alternate name:> pages
+
+This is the old name; it is kept for compatibility.
+
+=cut
+
+sub pages { return page_count(@_); } ## no critic
+
+sub page_count {
     my $self = shift();
     return scalar @{$self->{'pagestack'}};
 }
+
+=item $pdf->page_labels($index, $options)
+
+Sets page label options, for the page-selection slider thumb (I<not> the
+outline/bookmarks). At this time, there is no method to automatically
+synchronize a page's label with the outline/bookmarks, or to somewhere on the
+printed page.
+
+Note that many PDF Readers ignore these settings, and (at most) simply give
+you the physical page number 1, 2, 3,... instead of the page label specified 
+here.
+
+B<Supported Options:>
+
+=over
+
+=item style
+
+B<Roman> (I,II,III,...), B<roman> (i,ii,iii,...), B<decimal> (1,2,3,...), 
+B<Alpha> (A,B,C,...), B<alpha> (a,b,c,...), or B<nocounter>. This is the 
+styling of the counter part of the label (unless C<nocounter>, in which case 
+there is no counter output).
+
+=item start
+
+(Re)start numbering the I<counter> at given page number (this is a decimal 
+integer, I<not> the styled counter). By default it starts at 1, and B<resets>
+to 1 at each call to C<page_labels()>! You need to explicitly give C<start> if 
+you want to I<continue> counting at the current page number when you call
+C<page_labels()>, whether or not you are changing the format.
+
+Also note that the counter starts at physical page B<1>, while the page 
+C<$index> number in the C<page_labels()> call (as well as the PDF PageLabels 
+dictionary) starts at logical page (index) B<0>.
+
+=item prefix
+
+Text prefix for numbering, such as an Appendix letter B<B->. If C<style> is 
+I<nocounter>, just this text is used, otherwise a styled counter will be 
+appended. If C<style> is omitted, remember that it will default to a decimal 
+number, which will be appended to the prefix.
+
+According to the Adobe/ISO PDF specification, a prefix of 'Content' has a 
+special meaning, in that any /S counter is ignored and only that text is used. 
+However, this appears to be ignored (use a style of I<nocounter> to suppress
+the counter).
+
+=back
+
+B<Example:>
+
+    # Start with lowercase Roman Numerals at the 1st page, starting with i (1)
+    $pdf->page_labels(0, {
+        style => 'roman',
+    });
+
+    # Switch to Arabic (decimal) at the 5th page, starting with 1
+    $pdf->page_labels(4, {
+        style => 'decimal',
+    });
+
+    # invalid style at the 25th page, should just continue 
+    # with decimal at the current counter
+    $pdf->page_labels(24, {
+        style => 'glorp',  # fail over to decimal
+	start => 21,  # necessary, otherwise would restart at 1
+    });
+
+    # No page label at the 31st and 32nd pages. Note that this could be
+    # confusing to the person viewing the PDF, but may be appropriate if
+    # the page itself has no numbering.
+    $pdf->page_labels(30, {
+        style => 'nocounter',
+    });
+
+    # Numbering for Appendix A at the 33rd page, A-1, A-2,...
+    $pdf->page_labels(32, {
+        start => 1,  # unnecessary
+        prefix => 'A-'
+    });
+
+    # Numbering for Appendix B at the 37th page, B-1, B-2,...
+    $pdf->page_labels( 36, {
+        prefix => 'B-'
+    });
+
+    # Numbering for the Index at the 41st page, Index I, Index II,...
+    $pdf->page_labels(40, {
+        style => 'Roman',
+        start => 1,  # unnecessary
+        prefix => 'Index '  # note trailing space
+    });
+
+    # Unnumbered 'Index' at the 45th page, Index, Index,...
+    $pdf->page_labels(40, {
+        style => 'nocounter',
+        prefix => 'Index '
+    });
+
+B<alternate name:> pageLabel
+
+B<alternate option names:> -style, -start, -prefix
+
+These are the old names; they are kept for compatibility.
+
+=cut
+
+sub page_labels {
+    my $self = shift();
+
+    $self->{'catalog'}->{'PageLabels'} ||= PDFDict();
+    $self->{'catalog'}->{'PageLabels'}->{'Nums'} ||= PDFArray();
+
+    my $nums = $self->{'catalog'}->{'PageLabels'}->{'Nums'};
+    while (scalar @_) {
+        my $index = shift();
+        my $opts = shift();
+
+        $nums->add_elements(PDFNum($index));
+
+        my $d = PDFDict();
+        if (defined $opts->{'style'}) {
+	    if ($opts->{'style'} ne 'nocounter') {
+		# defaults to decimal if unrecogized style given
+                $d->{'S'} = PDFName($opts->{'style'} eq 'Roman' ? 'R' :
+                                    $opts->{'style'} eq 'roman' ? 'r' :
+                                    $opts->{'style'} eq 'Alpha' ? 'A' :
+                                    $opts->{'style'} eq 'alpha' ? 'a' : 'D');
+	    } else {
+		# for nocounter (no styled counter), do not create /S entry
+	    }
+        } elsif (defined $opts->{'-style'}) {
+	    if ($opts->{'-style'} ne 'nocounter') {
+		# defaults to decimal if unrecogized style given
+                $d->{'S'} = PDFName($opts->{'-style'} eq 'Roman' ? 'R' :
+                                    $opts->{'-style'} eq 'roman' ? 'r' :
+                                    $opts->{'-style'} eq 'Alpha' ? 'A' :
+                                    $opts->{'-style'} eq 'alpha' ? 'a' : 'D');
+	    } else {
+		# for nocounter (no styled counter), do not create /S entry
+	    }
+        } else {
+	    # default to decimal counter if no style given
+            $d->{'S'} = PDFName('D');
+        }
+
+        if (defined $opts->{'prefix'}) {
+	    # 'Content' supposedly treated differently
+            $d->{'P'} = PDFString($opts->{'prefix'}, 's');
+        }
+        if (defined $opts->{'-prefix'}) {
+	    # 'Content' supposedly treated differently
+            $d->{'P'} = PDFString($opts->{'-prefix'}, 's');
+        }
+
+        if (defined $opts->{'start'}) {
+            $d->{'St'} = PDFNum($opts->{'start'});
+        }
+        if (defined $opts->{'-start'}) {
+            $d->{'St'} = PDFNum($opts->{'-start'});
+        }
+
+        $nums->add_elements($d);
+    }
+
+    return;
+} # end of page_labels()
 
 # set global User Unit scale factor (default 1.0)
 
@@ -2059,12 +2840,13 @@ sub artbox {
 
 =head1 FONT METHODS
 
+=over
+
 =item $font = $pdf->corefont($fontname, %options)
 
-=item $font = $pdf->corefont($fontname)
-
 Returns a new Adobe core font object. For details, 
-see L<PDF::Builder::Docs/Core Fonts>.
+see L<PDF::Builder::Docs/Core Fonts>. Note that this is an Adobe-standard
+corefont I<name>, and not a file name.
 
 See also L<PDF::Builder::Resource::Font::CoreFont>.
 
@@ -2082,8 +2864,6 @@ sub corefont {
 }
 
 =item $font = $pdf->psfont($ps_file, %options)
-
-=item $font = $pdf->psfont($ps_file)
 
 Returns a new Adobe Type1 ("PostScript") font object.
 For details, see L<PDF::Builder::Docs/PS Fonts>.
@@ -2111,8 +2891,6 @@ sub psfont {
 
 =item $font = $pdf->ttfont($ttf_file, %options)
 
-=item $font = $pdf->ttfont($ttf_file)
-
 Returns a new TrueType (or OpenType) font object.
 For details, see L<PDF::Builder::Docs/TrueType Fonts>.
 
@@ -2139,8 +2917,6 @@ sub ttfont {
 
 =item $font = $pdf->bdfont($bdf_file, @options)
 
-=item $font = $pdf->bdfont($bdf_file)
-
 Returns a new BDF (bitmapped distribution format) font object, based on the 
 specified Adobe BDF file.
 
@@ -2161,8 +2937,6 @@ sub bdfont {
 }
 
 =item $font = $pdf->cjkfont($cjkname, %options)
-
-=item $font = $pdf->cjkfont($cjkname)
 
 Returns a new CJK font object. These are TrueType-like fonts for East Asian
 languages (Chinese, Japanese, Korean).
@@ -2193,8 +2967,8 @@ sub cjkfont {
 
 =item my $font = $pdf->font($name, %options)
 
-Add a font to the PDF.  Returns the font object, to be used by
-L<PDF::API2::Content>.
+A convenience function to add a font to the PDF without having to specify the
+format. Returns the font object, to be used by L<PDF::Builder::Content>.
 
 The font C<$name> is either the name of one of the 
 L<standard 14 fonts|PDF::Builder::Resource::Font::CoreFont/"STANDARD FONTS"> 
@@ -2298,6 +3072,18 @@ sub font {
     }
 }
 
+=item @directories = PDF::Builder->font_path()
+
+Return the list of directories that will be searched (in order) in addition to
+the current directory when you add a font to a PDF without including the full
+path to the font file.
+
+=cut
+
+sub font_path {
+    return @font_path;
+}
+
 =item @directories = PDF::Builder::add_to_font_path('/my/fonts', '/path/to/fonts', ...)
 
 Adds one or more directories to the list of paths to be searched for font files.
@@ -2322,7 +3108,7 @@ sub add_to_font_path {
     return @font_path;
 }
 
-=item @directories = PDF::API2->set_font_path('/my/fonts', '/path/to/fonts');
+=item @directories = PDF::Builder->set_font_path('/my/fonts', '/path/to/fonts');
 
 Replace the existing font search path. This should only be necessary if you
 need to remove a directory from the path for some reason, or if you need to
@@ -2360,8 +3146,6 @@ sub _findFont {
 }
 
 =item $font = $pdf->synfont($basefont, %options)
-
-=item $font = $pdf->synfont($basefont)
 
 Returns a new synthetic font object. These are modifications to a core (or 
 PS/T1 or TTF/OTF) font, where the font may be replaced by a Type1 or Type3 
@@ -2401,8 +3185,6 @@ sub synfont {
 
 =item $font = $pdf->unifont(@fontspecs, %options)
 
-=item $font = $pdf->unifont(@fontspecs)
-
 Returns a new uni-font object, based on the specified fonts and options.
 
 B<BEWARE:> This is not a true PDF-object, but a virtual/abstract font definition!
@@ -2436,9 +3218,109 @@ sub unifont {
 
 =over
 
-=item $jpeg = $pdf->image_jpeg($file, %options)
+=item $object = $pdf->image($file, %options);
 
-=item $jpeg = $pdf->image_jpeg($file)
+A convenience function to attempt to determine the image type, and import a 
+file of that type and return an object that can be placed as part of a page's 
+content:
+
+    my $pdf = PDF::Builder->new();
+    my $page = $pdf->page();
+
+    my $image = $pdf->image('/path/to/image.jpg');
+    $page->object($image, 100, 100);
+
+    $pdf->save('sample.pdf');
+
+C<$file> may be either a file name, a filehandle, or a L<GD::Image> object.
+
+See L<PDF::API2::Content/"place"> for details about placing images on a page
+once they're imported.
+
+The image format is normally detected automatically based on the file's
+extension.  If passed a filehandle, image formats GIF, JPEG, and PNG will be
+detected based on the file's header. Unfortunately, at this time, other image
+formats cannot be automatically detected.
+
+If the file has an atypical extension or the filehandle is for a different kind
+of image, you can set the C<format> option to one of the supported types:
+C<gif>, C<jpeg>, C<png>, C<pnm>, or C<tiff>.
+
+Note: PNG images that include an alpha (transparency) channel go through a
+relatively slow process of splitting the image into separate RGB and alpha
+components as is required by images in PDFs. If you're having performance
+issues, install Image::PNG::Libpng to speed this process up by
+an order of magnitude; either module will be used automatically if available.
+See L<image_png> for details.
+
+=cut
+
+sub image {
+    my ($self, $file, %options) = @_;
+
+    my $format = lc($options{'format'} // '');
+
+    if (ref($file) eq 'GD::Image') {
+        return image_gd($file, %options);
+    }
+    elsif (ref($file)) {
+        $format ||= _detect_image_format($file);
+    }
+    unless (ref($file)) {
+        $format ||= ($file =~ /\.jpe?g$/i   ? 'jpeg' :
+                     $file =~ /\.png$/i     ? 'png'  :
+                     $file =~ /\.gif$/i     ? 'gif'  :
+                     $file =~ /\.tiff?$/i   ? 'tiff' :
+                     $file =~ /\.p[bgp]m$/i ? 'pnm'  : '');
+    }
+
+    if ($format eq 'jpeg') {
+        return $self->image_jpeg($file, %options);
+    }
+    elsif ($format eq 'png') {
+        return $self->image_png($file, %options);
+    }
+    elsif ($format eq 'gif') {
+        return $self->image_gif($file, %options);
+    }
+    elsif ($format eq 'tiff') {
+        return $self->image_tiff($file, %options);
+    }
+    elsif ($format eq 'pnm') {
+        return $self->image_pnm($file, %options);
+    }
+    elsif ($format) {
+        croak "Unrecognized image format: $format";
+    }
+    elsif (ref($file)) {
+        croak "Unspecified image format";
+    }
+    elsif ($file =~ /(\..*)$/) {
+        croak "Unrecognized image extension: $1";
+    }
+    else {
+        croak "Unrecognized image: $file";
+    }
+}
+
+# if passed a filehandle, attempt to read the format header to determine type
+sub _detect_image_format {
+    my $fh = shift();
+    $fh->seek(0, 0);
+    binmode $fh, ':raw';
+
+    my $test;
+    my $bytes_read = $fh->read($test, 8);
+    $fh->seek(0, 0);
+    return unless $bytes_read and $bytes_read == 8;
+
+    return 'gif'  if $test =~ /^GIF\d\d[a-z]/;
+    return 'jpeg' if $test =~ /^\xFF\xD8\xFF/;
+    return 'png'  if $test =~ /^\x89PNG\x0D\x0A\x1A\x0A/;
+    return;
+}
+
+=item $jpeg = $pdf->image_jpeg($file, %options)
 
 Imports and returns a new JPEG image object. C<$file> may be either a filename 
 or a filehandle.
@@ -2460,8 +3342,6 @@ sub image_jpeg {
 }
 
 =item $tiff = $pdf->image_tiff($file, %options)
-
-=item $tiff = $pdf->image_tiff($file)
 
 Imports and returns a new TIFF image object. C<$file> may be either a filename 
 or a filehandle.
@@ -2553,8 +3433,6 @@ sub LA_GT {
 
 =item $pnm = $pdf->image_pnm($file, %options)
 
-=item $pnm = $pdf->image_pnm($file)
-
 Imports and returns a new PNM image object. C<$file> may be either a filename 
 or a filehandle.
 
@@ -2567,7 +3445,7 @@ and C<examples/Content.pl> for some examples of placing an image on a page
 sub image_pnm {
     my ($self, $file, %opts) = @_;
 
-    $opts{'-compress'} //= $self->{'forcecompress'};
+    $opts{'compress'} //= $self->{'forcecompress'};
 
     require PDF::Builder::Resource::XObject::Image::PNM;
     my $obj = PDF::Builder::Resource::XObject::Image::PNM->new($self->{'pdf'}, $file, %opts);
@@ -2578,8 +3456,6 @@ sub image_pnm {
 }
 
 =item $png = $pdf->image_png($file, %options) 
-
-=item $png = $pdf->image_png($file)
 
 Imports and returns a new PNG image object. C<$file> may be either 
 a filename or a filehandle.
@@ -2671,8 +3547,6 @@ sub LA_IPL {
 
 =item $gif = $pdf->image_gif($file, %options)
 
-=item $gif = $pdf->image_gif($file)
-
 Imports and returns a new GIF image object. C<$file> may be either a filename 
 or a filehandle.
 
@@ -2693,8 +3567,6 @@ sub image_gif {
 }
 
 =item $gdf = $pdf->image_gd($gd_object, %options)
-
-=item $gdf = $pdf->image_gd($gd_object)
 
 Imports and returns a new image object from Image::GD.
 
@@ -2720,6 +3592,116 @@ sub image_gd {
 
 =over
 
+Colorspaces can be added to a PDF to either specifically control the output
+color on a particular device (spot colors, device colors) or to save space by
+limiting the available colors to a defined color palette (web-safe palette, ACT
+file).
+
+Once added to the PDF, they can be used in place of regular hex codes or named
+colors:
+
+    my $pdf = PDF::API2->new();
+    my $page = $pdf->page();
+    my $content = $page->graphics();
+
+    # Add colorspaces for a spot color and the web-safe color palette
+    my $spot = $pdf->colorspace('spot', 'PANTONE Red 032 C', '#EF3340');
+    my $web = $pdf->colorspace('web');
+
+    # Fill using the spot color with 100% coverage
+    $content->fill_color($spot, 1.0);
+
+    # Stroke using the first color of the web-safe palette
+    $content->stroke_color($web, 0);
+
+    # Add a rectangle to the page
+    $content->rectangle(100, 100, 200, 200);
+    $content->paint();
+
+    $pdf->save('sample.pdf');
+
+The following types of colorspaces are supported
+
+=over
+
+=item $spot = $pdf->colorspace('spot', $tint, $alt_color);
+
+Spot colors are used to instruct a device (usually a printer) to use or emulate
+a particular ink color (C<$tint>) for parts of the document.  An C<$alt_color>
+is provided for devices (e.g. PDF viewers) that don't know how to produce the
+named color.  It can either be an approximation of the color in RGB, CMYK, or
+HSV formats, or a wildly different color (e.g. 100% magenta, C<%0F00>) to make
+it clear if the spot color isn't being used as expected.
+
+=item $web = $pdf->colorspace('web');
+
+The web-safe color palette is a historical collection of colors that was used
+when many display devices only supported 256 colors.
+
+=item $act = $pdf->colorspace('act', $filename);
+
+An Adobe Color Table (ACT) file provides a custom palette of colors that can be
+referenced by PDF graphics and text drawing commands.
+
+=item $devicen = $pdf->colorspace('device', @colorspaces);
+
+A device-specific colorspace allows for precise color output on a given device
+(typically a printing press), bypassing the normal color interpretation
+performed by raster image processors (RIPs).
+
+Device colorspaces are also needed if you want to blend spot colors:
+
+    my $pdf = PDF::API2->new();
+    my $page = $pdf->page();
+    my $content = $page->graphics();
+
+    # Create a two-color device colorspace
+    my $yellow = $pdf->colorspace('spot', 'Yellow', '%00F0');
+    my $spot = $pdf->colorspace('spot', 'PANTONE Red 032 C', '#EF3340');
+    my $device = $pdf->colorspace('device', $yellow, $spot);
+
+    # Fill using a blend of 25% yellow and 75% spot color
+    $content->fill_color($device, 0.25, 0.75);
+
+    # Stroke using 100% spot color
+    $content->stroke_color($device, 0, 1);
+
+    # Add a rectangle to the page
+    $content->rectangle(100, 100, 200, 200);
+    $content->paint();
+
+    $pdf->save('sample.pdf');
+
+=back
+
+=cut
+
+sub colorspace {
+    my $self = shift();
+    my $type = shift();
+
+    if      ($type eq 'act') {
+        my $file = shift();
+        return $self->colorspace_act($file);
+    } elsif ($type eq 'web') {
+        return $self->colorspace_web();
+    } elsif ($type eq 'hue') {
+        # This type is undocumented until either a reference can be found for
+        # this being a standard palette like the web color palette, or POD is
+        # added to the Hue colorspace class that describes how to use it.
+        return $self->colorspace_hue();
+    } elsif ($type eq 'spot') {
+        my $name = shift();
+        my $alt_color = shift();
+        return $self->colorspace_separation($name, $alt_color);
+    } elsif ($type eq 'device') {
+        my @colors = @_;
+        return $self->colorspace_devicen(\@colors);
+    } else {
+        croak "Unrecognized or unsupported colorspace: $type";
+    }
+}
+
 =item $cs = $pdf->colorspace_act($file)
 
 Returns a new colorspace object based on an Adobe Color Table file.
@@ -2729,14 +3711,12 @@ reference to the file format's specification.
 
 =cut
 
-# =item $cs = $pdf->colorspace_act($file, %options)   no current options
-
 sub colorspace_act {
     my ($self, $file, %opts) = @_;
 
     require PDF::Builder::Resource::ColorSpace::Indexed::ACTFile;
     my $obj = PDF::Builder::Resource::ColorSpace::Indexed::ACTFile->new($self->{'pdf'}, $file);
-    $self->{'pdf'}->out_obj($self->{'pages'});
+   #$self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
 }
@@ -2756,7 +3736,7 @@ sub colorspace_web {
     require PDF::Builder::Resource::ColorSpace::Indexed::WebColor;
     my $obj = PDF::Builder::Resource::ColorSpace::Indexed::WebColor->new($self->{'pdf'});
 
-    $self->{'pdf'}->out_obj($self->{'pages'});
+   #$self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
 }
@@ -2777,7 +3757,7 @@ sub colorspace_hue {
 
     require PDF::Builder::Resource::ColorSpace::Indexed::Hue;
     my $obj = PDF::Builder::Resource::ColorSpace::Indexed::Hue->new($self->{'pdf'});
-    $self->{'pdf'}->out_obj($self->{'pages'});
+   #$self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
 }
@@ -2803,7 +3783,7 @@ sub colorspace_separation {
 
     require PDF::Builder::Resource::ColorSpace::Separation;
     my $obj = PDF::Builder::Resource::ColorSpace::Separation->new($self->{'pdf'}, pdfkey(), $tint, @clr);
-    $self->{'pdf'}->out_obj($self->{'pages'});
+   #$self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
 }
@@ -2836,7 +3816,7 @@ sub colorspace_devicen {
 
     require PDF::Builder::Resource::ColorSpace::DeviceN;
     my $obj = PDF::Builder::Resource::ColorSpace::DeviceN->new($self->{'pdf'}, pdfkey(), $clrs, $samples);
-    $self->{'pdf'}->out_obj($self->{'pages'});
+   #$self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
 }
@@ -2844,6 +3824,8 @@ sub colorspace_devicen {
 =back
 
 =head1 BARCODE METHODS
+
+=over
 
 These are glue routines to the actual barcode rendering routines found
 elsewhere.
@@ -2955,8 +3937,6 @@ sub egstate {
 
 =item $obj = $pdf->pattern(%options)
 
-=item $obj = $pdf->pattern()
-
 Returns a new pattern object.
 
 =cut
@@ -2972,8 +3952,6 @@ sub pattern {
 
 =item $obj = $pdf->shading(%options)
 
-=item $obj = $pdf->shading()
-
 Returns a new shading object.
 
 =cut
@@ -2984,32 +3962,6 @@ sub shading {
     my $obj = PDF::Builder::Resource::Shading->new($self->{'pdf'}, undef, %options);
     $self->{'pdf'}->out_obj($self->{'pages'});
 
-    return $obj;
-}
-
-=item $otls = $pdf->outlines()
-
-Returns a new or existing outlines object.
-
-=cut
-
-sub outlines {
-    my $self = shift();
-
-    require PDF::Builder::Outlines;
-    my $obj = $self->{'pdf'}->{'Root'}->{'Outlines'};
-    if ($obj) {
-        bless $obj, 'PDF::Builder::Outlines';
-        $obj->{' api'} = $self;
-        weaken $obj->{' api'};
-    } else {
-	$obj = PDF::Builder::Outlines->new($self);
-
-	$self->{'pdf'}->{'Root'}->{'Outlines'} = $obj;
-        $self->{'pdf'}->new_obj($obj) unless $obj->is_obj($self->{'pdf'});
-        $self->{'pdf'}->out_obj($obj);
-        $self->{'pdf'}->out_obj($self->{'pdf'}->{'Root'});
-    }
     return $obj;
 }
 
@@ -3050,6 +4002,10 @@ sub named_destination {
 
     return $obj;
 } # end of named_destination()
+
+=back
+
+=cut
 
 # ==================================================
 # input: level of checking, PDF as a string
@@ -3362,7 +4318,3 @@ sub IntegrityCheck {
 1;
 
 __END__
-
-=back
-
-=cut
