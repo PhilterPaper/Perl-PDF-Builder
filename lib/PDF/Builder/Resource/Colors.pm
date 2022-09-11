@@ -4,11 +4,16 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '2.029'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 =head1 NAME
 
 PDF::Builder::Resource::Colors - translate color names into RGB settings
+
+=head1 SYNOPSIS
+
+This list is an amalgamation of the X11, SGML, and (X)HTML 
+color specification sets.
 
 =cut
 

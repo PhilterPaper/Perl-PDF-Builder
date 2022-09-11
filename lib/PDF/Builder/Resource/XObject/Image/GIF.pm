@@ -46,18 +46,18 @@ depth).
 
 =over
 
-=item -notrans
+=item notrans
 
-When defined and not 0, C<-notrans> suppresses the use of transparency if such
+When defined and not 0, C<notrans> suppresses the use of transparency if such
 is defined in the GIF file.
 
-=item -name => 'string'
+=item name => 'string'
 
 This is the name you can give for the GIF image object. The default is Gxnnnn.
 
-=item -multi
+=item multi
 
-When defined and not 0, C<-multi> continues processing past the end of the 
+When defined and not 0, C<multi> continues processing past the end of the 
 first Image Block. The old behavior, which is now the default, is to stop 
 processing at the end of the first Image Block.
 
@@ -164,10 +164,15 @@ sub deGIF {
 
 sub new {
     my ($class, $pdf, $file, %opts) = @_;
+    # copy dashed option names to preferred undashed names
+    if (defined $opts{'-notrans'} && !defined $opts{'notrans'}) { $opts{'notrans'} = delete($opts{'-notrans'}); }
+    if (defined $opts{'-name'} && !defined $opts{'name'}) { $opts{'name'} = delete($opts{'-name'}); }
+    if (defined $opts{'-multi'} && !defined $opts{'multi'}) { $opts{'multi'} = delete($opts{'-multi'}); }
+    if (defined $opts{'-compress'} && !defined $opts{'compress'}) { $opts{'compress'} = delete($opts{'-compress'}); }
 
     my ($name, $compress);
-    if (exists $opts{'-name'}) { $name = $opts{'-name'}; }
-   #if (exists $opts{'-compress'}) { $compress = $opts{'-compress'}; }
+    if (exists $opts{'name'}) { $name = $opts{'name'}; }
+   #if (exists $opts{'compress'}) { $compress = $opts{'compress'}; }
 
     my $self;
 
@@ -278,7 +283,7 @@ sub new {
             # old (and current default) behavior is to quit processing at the
 	    # end of the first Image Block. This means that any other blocks,
 	    # including the Trailer, will not be processed.
-	    if (!$opts{'-multi'}) { last; }
+	    if (!$opts{'multi'}) { last; }
 
         } elsif ($sep == 0x3b) {
 	    # trailer (EOF) equals ASCII semicolon (;)
@@ -301,7 +306,7 @@ sub new {
                     $len = unpack('C', $buf);
                 }
                 my ($cFlags, $delay, $transIndex) = unpack('CvC', $stream);
-                if (($cFlags & 0x01) && !$opts{'-notrans'}) {
+                if (($cFlags & 0x01) && !$opts{'notrans'}) {
                     $self->{'Mask'} = PDFArray(PDFNum($transIndex), 
 			                       PDFNum($transIndex));
                 }

@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use Encode qw(:all);
 
@@ -28,7 +28,7 @@ Returns a cid-font object, base class for all CID-based fonts.
 =cut
 
 sub new {
-    my ($class, $pdf, $name, @opts) = @_;
+    my ($class, $pdf, $name, %opts) = @_;
 
     $class = ref($class) if ref($class);
     my $self = $class->SUPER::new($pdf, $name);
@@ -55,7 +55,8 @@ sub new {
 }
 
 sub glyphByCId { 
-    return $_[0]->data()->{'g2n'}->[$_[1]]; 
+    my ($self, $gid) = @_;
+    return $self->data()->{'g2n'}->[$gid]; 
 }
 
 sub uniByCId { 
@@ -66,21 +67,22 @@ sub uniByCId {
     return $uni;
 }
 
-# note that cidByUni has been seen returning 'undef' in some cases. be sure
-# to handle this!
+# TBD note that cidByUni has been seen returning 'undef' in some cases. 
+# be sure to handle this!
 sub cidByUni { 
-    return $_[0]->data()->{'u2g'}->{$_[1]}; 
+    my ($self, $gid) = @_;
+    return $self->data()->{'u2g'}->{$gid}; 
 }
 
 sub cidByEnc { 
-    return $_[0]->data()->{'e2g'}->[$_[1]]; 
+    my ($self, $gid) = @_;
+    return $self->data()->{'e2g'}->[$gid]; 
 }
 
 sub wxByCId {
     my ($self, $g) = @_;
 
     my $w;
-
     my $widths = $self->data()->{'wx'};
 
     if      (ref($widths) eq 'ARRAY' && defined $widths->[$g]) {
@@ -95,16 +97,17 @@ sub wxByCId {
 }
 
 sub wxByUni { 
-    return $_[0]->wxByCId($_[0]->data()->{'u2g'}->{$_[1]}); 
+    my ($self, $gid) = @_;
+    return $self->wxByCId($self->data()->{'u2g'}->{$gid}); 
 }
 
 sub wxByEnc { 
-    return $_[0]->wxByCId($_[0]->data()->{'e2g'}->[$_[1]]); 
+    my ($self, $gid) = @_;
+    return $self->wxByCId($self->data()->{'e2g'}->[$gid]); 
 }
 
 sub width {
     my ($self, $text) = @_;
-
     return $self->width_cid($self->cidsByStr($text));
 }
 
@@ -190,13 +193,11 @@ sub cidsByUtf {
 
 sub textByStr {
     my ($self, $text) =  @_;
-
     return $self->text_cid($self->cidsByStr($text));
 }
 
 sub textByStrKern {
     my ($self, $text, $size, $indent) = @_;
-
     return $self->text_cid_kern($self->cidsByStr($text), $size, $indent);
 }
 

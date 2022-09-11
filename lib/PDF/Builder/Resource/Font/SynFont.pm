@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use Math::Trig;    # CAUTION: deg2rad(0) = deg2rad(360) = 0!
 use Unicode::UCD 'charinfo';
@@ -14,87 +14,149 @@ use Unicode::UCD 'charinfo';
 use PDF::Builder::Util;
 use PDF::Builder::Basic::PDF::Utils;
 
+# for noncompatible options, consider '-entry_point' = 'synfont' or 
+# 'synthetic_font' to be picked up and processed correctly per entry point
+ 
 =head1 NAME
 
 PDF::Builder::Resource::Font::SynFont - Module for creating temporary synthetic Fonts.
 
 =head1 SYNOPSIS
 
+This module permits you to create a "new" font (loaded temporarily, but not 
+permanently stored) based on an existing font, where you can modify certain 
+attributes in the original font, such as: 
+
+    * slant/obliqueness 
+    * extra weight/boldness (by drawing glyph outlines at various line 
+      thicknesses, rather than just filling enclosed areas)
+    * condense/expand (narrower or wider characters)
+    * extra space between characters
+    * small caps (synthesized, not using any provided with a font)
+    * change the encoding
+
     $pdf = PDF::Builder->new();
-    $cft = $pdf->corefont('Times-Roman');  # ttfont, etc. also works
-    $sft = $pdf->synfont($cft, -condense => .75);  # condense by 25%
+    $cft = $pdf->font('Times-Roman');  # corefont, ttfont, etc. also works
+    $sft = $pdf->synfont($cft, 'condense' => .75);  # condense by 25%
 
 This works for I<corefonts>, I<PS fonts>, and I<TTF/OTF fonts>; but does not
 work for I<CJK fonts> or I<bitmapped fonts>.
 See also L<PDF::Builder::Docs/Synthetic Fonts>.
 
+B<Alternate name:> C<synthetic_font>
+
+This is for compatibility with recent changes to PDF::API2.
+
 =head1 METHODS
 
-=over 4
+=over
 
-=cut
-
-=item $font = PDF::Builder::Resource::Font::SynFont->new($pdf, $fontobj, %options)
+=item $font = PDF::Builder::Resource::Font::SynFont->new($pdf, $fontobj, %opts)
 
 Returns a synfont object.
 
-=cut
+Valid options %opts are:
 
-=pod
-
-Valid %options are:
-
-I<-encode>
+I<encode>
 ... changes the encoding of the font from its default.
 See I<Perl's Encode> for the supported values. B<Warning:> only single byte
 encodings are supported. Multibyte encodings such as UTF-8 are invalid.
 
-I<-pdfname>
+I<pdfname>
 ... changes the reference-name of the font from its default.
 The reference-name is normally generated automatically and can be
 retrieved via $pdfname=$font->name().
 
-I<-condense>
+B<Alternate name:> C<name> (for PDF::API2 compatibility)
+
+I<condense>
 ... condense/expand factor (0.1-0.9 = condense, 1 = normal, 1.1+ = expand).
 It's the multiplier for character widths vs. normal.
 
-I<-oblique>
+B<Alternate names:> C<hscale> and C<slant> (for PDF::API2 compatibility) 
+
+The I<slant> option is a deprecated name in both PDF::Builder and PDF::API2.
+Its value is the same as I<condense> value (1 = normal, unchanged scale).
+For the I<hscale> option, the value is percentage (%), with 100 being normal,
+and other values 100 times the I<condense> value. 
+B<Use only one (at most) of these three option names.>
+
+I<oblique>
 ... italic angle (+/-) in degrees, where the character box is skewed. While 
 it's unlikely that anyone will want to slant characters at +/-360 degrees, they 
 should be aware that these will be treated as an angle of 0 degrees (deg2rad() 
 wraps around). 0 degrees of italic slant (obliqueness) is the default.
 
-I<-bold>
+B<Alternate name:> C<angle> (for PDF::API2 compatibility)
+
+B<Use only one (at most) of these two option names.>
+
+I<bold>
 ... embolding factor (0.1+, bold=1, heavy=2, ...). It is additional outline
 B<thickness> (B<linewidth>), which expands the character (glyph) outwards (as
 well as shrinking unfilled enclosed areas such as bowls and counters). 
 Normally, the glyph's outline is not drawn (it is only filled); this adds
-a thick outline.
+a thick outline. The units are in 1/100ths of a text unit.
 
-I<-space>
+If used with the C<synthetic_font> alternate entry name, the unit is 1/1000th
+of a text unit, so you will need a value 10 times larger than with the 
+C<synfont> entry to get the same effect
+
+I<space>
 ... additional charspacing in em (0-1000).
 
-I<-caps>
+I<caps>
 ... create synthetic small-caps. 0 = no, 1 = yes. These are capitals of 
-lowercase letters, at 80% height and 88% width.
+lowercase letters, at 80% height and 88% width. Note that this is guaranteed
+to cover ASCII lowercase letters only -- single byte encoded accented 
+characters I<usually> work, but we can make no promises on accented characters 
+in general, as well as ligatures!
+
+B<Alternate name:> C<smallcaps> (for PDF::API2 compatibility) 
+
+B<Use only one (at most) of these two option names.>
 
 =back
 
 =cut
 
-sub new
-{
-    my ($class, $pdf, $font, @opts) = @_;
+sub new {
+    my ($class, $pdf, $font, %opts) = @_;
+    # copy dashed named options to preferred undashed names
+    if (defined $opts{'-encode'} && !defined $opts{'encode'}) { $opts{'encode'} = delete($opts{'-encode'}); }
+    if (defined $opts{'-pdfname'} && !defined $opts{'pdfname'}) { $opts{'pdfname'} = delete($opts{'-pdfname'}); }
+        if (defined $opts{'-name'} && !defined $opts{'name'}) { $opts{'name'} = delete($opts{'-name'}); }
+    if (defined $opts{'-condense'} && !defined $opts{'condense'}) { $opts{'condense'} = delete($opts{'-condense'}); }
+        if (defined $opts{'-slant'} && !defined $opts{'slant'}) { $opts{'slant'} = delete($opts{'-slant'}); }
+        if (defined $opts{'-hscale'} && !defined $opts{'hscale'}) { $opts{'hscale'} = delete($opts{'-hscale'}); }
+    if (defined $opts{'-oblique'} && !defined $opts{'oblique'}) { $opts{'oblique'} = delete($opts{'-oblique'}); }
+        if (defined $opts{'-angle'} && !defined $opts{'angle'}) { $opts{'angle'} = delete($opts{'-angle'}); }
+    if (defined $opts{'-bold'} && !defined $opts{'bold'}) { $opts{'bold'} = delete($opts{'-bold'}); }
+    if (defined $opts{'-space'} && !defined $opts{'space'}) { $opts{'space'} = delete($opts{'-space'}); }
+    if (defined $opts{'-caps'} && !defined $opts{'caps'}) { $opts{'caps'} = delete($opts{'-caps'}); }
+        if (defined $opts{'-smallcaps'} && !defined $opts{'smallcaps'}) { $opts{'smallcaps'} = delete($opts{'-smallcaps'}); }
+
+    my $entry = "synfont";  # synfont or synthetic_font
+    if (defined $opts{'-entry_point'}) { $entry = $opts{'-entry_point'}; }
+
+    # deal with simple aliases
+    if (defined $opts{'slant'} && !defined $opts{'condense'}) { $opts{'condense'} = delete($opts{'slant'}); }
+    if (defined $opts{'angle'} && !defined $opts{'oblique'}) { $opts{'oblique'} = delete($opts{'angle'}); }
+    if (defined $opts{'smallcaps'} && !defined $opts{'caps'}) { $opts{'caps'} = delete($opts{'smallcaps'}); }
+    if (defined $opts{'name'} && !defined $opts{'pdfname'}) { $opts{'pdfname'} = delete($opts{'name'}); }
+    # deal with semi-aliases
+    if (defined $opts{'hscale'} && !defined $opts{'condense'}) { $opts{'condense'} = delete($opts{'hscale'})/100; }
+    # deal with entry point differences
+    if (defined $opts{'bold'} && $entry eq 'synthetic_font') { $opts{'bold'} /= 10; }
 
     my ($self);
-    my %opts = @opts;
     my $first = 1;
     my $last = 255;
-    my $cond = $opts{'-condense'} || 1;
-    my $oblique = $opts{'-oblique'} || 0;
-    my $space = $opts{'-space'} || '0';
-    my $bold = ($opts{'-bold'} || 0)*10; # convert to em
-   #   -caps
+    my $cond = $opts{'condense'} || 1;
+    my $oblique = $opts{'oblique'} || 0;
+    my $space = $opts{'space'} || '0';
+    my $bold = ($opts{'bold'} || 0)*10; # convert to em
+   #   caps
 
     # 5 elements apparently not used anywhere
    #$self->{' cond'} = $cond;
@@ -103,20 +165,21 @@ sub new
    #$self->{' boldmove'} = 0.001;
    #$self->{' space'} = $space;
     # only available in TT fonts. besides, multibyte encodings not supported
-    if (defined $opts{'-encode'}) {
-        if ($opts{'-encode'} =~ m/^utf/i) {
-	    die "Invalid multibyte encoding for synfont: $opts{'-encode'}\n";
+    if (defined $opts{'encode'}) {
+        if ($opts{'encode'} =~ m/^utf/i) {
+	    die "Invalid multibyte encoding for synfont: $opts{'encode'}\n";
 	    # TBD probably more multibyte encodings to check
         }
-        $font->encodeByName($opts{'-encode'});
+        $font->encodeByName($opts{'encode'});
     }
 
     $class = ref $class if ref $class;
     $self = $class->SUPER::new($pdf,
-        pdfkey()
-        .('+' . $font->name())
-        .($opts{'-caps'} ? '+Caps' : '')
-        .($opts{'-pdfname'} ? '+'.$opts{'-pdfname'} : '')
+   #    pdfkey()
+   #    .('+' . $font->name())
+   #    .($opts{'caps'} ? '+Caps' : '')
+   #    .($opts{'pdfname'} ? '+'.$opts{'pdfname'} : '')
+        $opts{'pdfname'}? $opts{'pdfname'}: 'Syn' . $font->name() . pdfkey()
     );
     $pdf->new_obj($self) unless $self->is_obj($pdf);
     $self->{' font'} = $font;
@@ -153,15 +216,16 @@ sub new
     $self->{'Subtype'} = PDFName('Type3');
     $self->{'FirstChar'} = PDFNum($first);
     $self->{'LastChar'} = PDFNum($last);
-    $self->{'FontMatrix'} = PDFArray(map { PDFNum($_) } ( 0.001, 0, 0, 0.001, 0, 0 ) );
-    $self->{'FontBBox'} = PDFArray(map { PDFNum($_) } $self->fontbbox() );
+    $self->{'FontMatrix'} = PDFArray(map { PDFNum($_) } (0.001, 0, 0, 0.001, 0, 0));
+    $self->{'FontBBox'} = PDFArray(map { PDFNum($_) } $self->fontbbox());
 
     my $procs = PDFDict();
     $pdf->new_obj($procs);
     $self->{'CharProcs'} = $procs;
 
     $self->{'Resources'} = PDFDict();
-    $self->{'Resources'}->{'ProcSet'} = PDFArray(map { PDFName($_) } qw[ PDF Text ImageB ImageC ImageI ]);
+    $self->{'Resources'}->{'ProcSet'} = PDFArray(map { PDFName($_) } 
+	                                qw(PDF Text ImageB ImageC ImageI));
     my $xo = PDFDict();
     $self->{'Resources'}->{'Font'} = $xo;
     $self->{'Resources'}->{'Font'}->{'FSN'} = $font;
@@ -189,7 +253,7 @@ sub new
         $self->{'Encoding'} = $font->{'Encoding'};
     }
 
-    my @widths = ();
+    my @widths;
     foreach my $w ($first .. $last) {
 	# $w is the "standard encoding" (similar to Windows-1252) PDF 
 	# single byte encoding. first 32 .notdef, 255 = U+00FF ydieresis
@@ -218,7 +282,7 @@ sub new
         # Small Caps
 	#
         # Most Unicode characters simply don't appear in the synthetic
-	# font, which is limited to 255 "standard" encoding points. -encode
+	# font, which is limited to 255 "standard" encoding points. encode
 	# still will be single byte.
 	#
 	# SynFont seems to have trouble with some accented characters, even
@@ -236,7 +300,7 @@ sub new
 	# set proper width for multi-letter replacements.
 	#
 	my $hasUpper = 0; # if no small caps, still need to output something
-        if ($opts{'-caps'}) {
+        if ($opts{'caps'}) {
 	    # not all characters have an 'upper' equivalent code point. Some
 	    # have U+0000 (dummy entry).
 	    my $ch;
@@ -336,27 +400,24 @@ sub new
     $data->{'n2u'} = {};
 
     foreach my $n (reverse 0 .. 255) {
-        $data->{'n2c'}->{$data->{'char'}->[$n] || '.notdef'} = 
-	  $n unless defined $data->{'n2c'}->{$data->{'char'}->[$n] || '.notdef'};
-        $data->{'n2e'}->{$data->{'e2n'}->[$n] || '.notdef'} =
-	  $n unless defined $data->{'n2e'}->{$data->{'e2n'}->[$n] || '.notdef'};
+        $data->{'n2c'}->{$data->{'char'}->[$n] // '.notdef'} //= $n;
+        $data->{'n2e'}->{$data->{'e2n'}->[$n] // '.notdef'} //= $n;
 
-        $data->{'n2u'}->{$data->{'e2n'}->[$n] || '.notdef'} =
-	  $data->{'e2u'}->[$n] unless defined $data->{'n2u'}->{$data->{'e2n'}->[$n] || '.notdef'};
-        $data->{'n2u'}->{$data->{'char'}->[$n] || '.notdef'} =
-	  $data->{'uni'}->[$n] unless defined $data->{'n2u'}->{$data->{'char'}->[$n] || '.notdef'};
+        $data->{'n2u'}->{$data->{'e2n'}->[$n] // '.notdef'} //= $data->{'e2u'}->[$n];
+        $data->{'n2u'}->{$data->{'char'}->[$n] // '.notdef'} //= $data->{'uni'}->[$n];
 
-        $data->{'u2c'}->{$data->{'uni'}->[$n]} =
-	  $n unless defined $data->{'u2c'}->{$data->{'uni'}->[$n]};
-        $data->{'u2e'}->{$data->{'e2u'}->[$n]} =
-	  $n unless defined $data->{'u2e'}->{$data->{'e2u'}->[$n]};
-
-	my $value = $data->{'e2n'}->[$n];
-        $data->{'u2n'}->{$data->{'e2u'}->[$n]} =
-	  ($value || '.notdef') unless defined $data->{'u2n'}->{$data->{'e2u'}->[$n]};
-	$value = $data->{'char'}->[$n];
-        $data->{'u2n'}->{$data->{'uni'}->[$n]} =
-	  ($value || '.notdef') unless defined $data->{'u2n'}->{$data->{'uni'}->[$n]};
+ 	if (defined $data->{'uni'}->[$n]) {
+            $data->{'u2c'}->{$data->{'uni'}->[$n]} //= $n
+	}
+	if (defined $data->{'e2u'}->[$n]) {
+            $data->{'u2e'}->{$data->{'e2u'}->[$n]} //= $n;
+	    my $value = $data->{'e2n'}->[$n] // '.notdef';
+            $data->{'u2n'}->{$data->{'e2u'}->[$n]} //= $value;
+	}
+ 	if (defined $data->{'uni'}->[$n]) {
+	    my $value = $data->{'char'}->[$n] // '.notdef';
+            $data->{'u2n'}->{$data->{'uni'}->[$n]} //= $value;
+	}
     }
 
     return $self;

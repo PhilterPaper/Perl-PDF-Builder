@@ -31,13 +31,13 @@ Returns a TIFF-image object.
 
 If the Graphics::TIFF package is installed, the TIFF_GT library will be used
 instead of the TIFF library. In such a case, use of the TIFF library may be 
-forced via the C<-nouseGT> flag (see Builder documentation for C<image_tiff()>).
+forced via the C<nouseGT> flag (see Builder documentation for C<image_tiff()>).
 
 Options:
 
 =over
 
-=item -name => 'string'
+=item 'name' => 'string'
 
 This is the name you can give for the TIFF image object. The default is Ixnnnn.
 
@@ -47,10 +47,14 @@ This is the name you can give for the TIFF image object. The default is Ixnnnn.
 
 sub new {
     my ($class, $pdf, $file, %opts) = @_;
+    # copy dashed option names to preferred undashed names
+    if (defined $opts{'-nouseGT'} && !defined $opts{'nouseGT'}) { $opts{'nouseGT'} = delete($opts{'-nouseGT'}); }
+    if (defined $opts{'-name'} && !defined $opts{'name'}) { $opts{'name'} = delete($opts{'-name'}); }
+    if (defined $opts{'-compress'} && !defined $opts{'compress'}) { $opts{'compress'} = delete($opts{'-compress'}); }
 
     my ($name, $compress);
-    if (exists $opts{'-name'}) { $name = $opts{'-name'}; }
-   #if (exists $opts{'-compress'}) { $compress = $opts{'-compress'}; }
+    if (exists $opts{'name'}) { $name = $opts{'name'}; }
+   #if (exists $opts{'compress'}) { $compress = $opts{'compress'}; }
 
     my $self;
 
@@ -90,7 +94,7 @@ sub new {
 =item  $mode = $tif->usesLib()
 
 Returns 1 if Graphics::TIFF installed and used, 0 if not installed, or -1 if
-installed but not used (-nouseGT option given to C<image_tiff>).
+installed but not used (nouseGT option given to C<image_tiff>).
 
 B<Caution:> this method can only be used I<after> the image object has been
 created. It can't tell you whether Graphics::TIFF is available in

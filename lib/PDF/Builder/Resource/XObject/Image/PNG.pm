@@ -38,18 +38,18 @@ defaults to PxAAA.
 
 If the Image::PNG::Libpng package is installed, the PNG_IPL library will be
 used instead of the PNG library. In such a case, use of the PNG library may be
-forced via the C<-nouseIPL> flag (see Builder documentation for C<image_png()>).
+forced via the C<nouseIPL> flag (see Builder documentation for C<image_png()>).
 
 B<opts:>
 
 =over
 
-=item -notrans => 1
+=item 'notrans' => 1
 
 No transparency -- ignore tRNS chunk if provided, ignore Alpha channel
 if provided.
 
-=item -name => 'string'
+=item 'name' => 'string'
 
 This is the name you can give for the PNG image object. The default is Pxnnnn.
 
@@ -60,31 +60,31 @@ This is the name you can give for the PNG image object. The default is Pxnnnn.
    (0) Gray scale of depth 1, 2, 4, or 8 bits per pixel (2, 4, 16, or 256 
        gray levels). 16 bpp is not currently supported (a PNG with 16 bpp 
        is a fatal error). Full transparency (of one 8-bit gray value) via 
-       the tRNS chunk is allowed, unless the -notrans option specifies 
+       the tRNS chunk is allowed, unless the notrans option specifies 
        that it be ignored.
 
    (2) RGB 24-bit truecolor with 8 bits per sample (16.7 million colors). 
        16 bps is not currently supported (a PNG with 16 bps is a fatal 
        error). Full transparency (of one 3x8-bit RGB color value) via the 
-       tRNS chunk is allowed, unless the -notrans option specifies that it 
+       tRNS chunk is allowed, unless the notrans option specifies that it 
        be ignored.
 
    (3) Palette color with 1, 2, 4, or 8 bits per pixel (2, 4, 16, or 256
        color table/palette entries). 16 bpp is not currently supported by 
        PNG or PDF. Partial transparency (8-bit Alpha) for each palette 
-       entry via the tRNS chunk is allowed, unless the -notrans option 
+       entry via the tRNS chunk is allowed, unless the notrans option 
        specifies that it be ignored (all entries fully opaque).
 
    (4) Gray scale of depth 8 bits per pixel plus 8-bit Alpha channel (256
        gray levels and 256 levels of transparency). 16 bpp is not 
        currently supported (a PNG with 16 bpp is a fatal error). The Alpha 
-       channel is ignored if the -notrans option is given. The tRNS chunk 
+       channel is ignored if the notrans option is given. The tRNS chunk 
        is not permitted.
 
    (6) RGB 24-bit truecolor with 8 bits per sample (16.7 million colors) 
        plus 8-bit Alpha channel (256 levels of transparency). 16 bps is not 
        currently supported (a PNG with 16 bps is a fatal error). The Alpha 
-       channel is ignored if the -notrans option is given. The tRNS chunk 
+       channel is ignored if the notrans option is given. The tRNS chunk 
        is not permitted.
 
 In all cases, 16 bits per sample are not implemented. A fatal error will be
@@ -109,10 +109,15 @@ unsupported methods.
 
 sub new {
     my ($class, $pdf, $file, %opts) = @_;
+    # copy dashed option names to preferred undashed names
+    if (defined $opts{'-nouseIPL'} && !defined $opts{'nouseIPL'}) { $opts{'nouseIPL'} = delete($opts{'-nouseIPL'}); }
+    if (defined $opts{'-notrans'} && !defined $opts{'notrans'}) { $opts{'notrans'} = delete($opts{'-notrans'}); }
+    if (defined $opts{'-name'} && !defined $opts{'name'}) { $opts{'name'} = delete($opts{'-name'}); }
+    if (defined $opts{'-compress'} && !defined $opts{'compress'}) { $opts{'compress'} = delete($opts{'-compress'}); }
 
     my ($name, $compress);
-    if (exists $opts{'-name'}) { $name = $opts{'-name'}; }
-   #if (exists $opts{'-compress'}) { $compress = $opts{'-compress'}; }
+    if (exists $opts{'name'}) { $name = $opts{'name'}; }
+   #if (exists $opts{'compress'}) { $compress = $opts{'compress'}; }
 
     my $self;
 
@@ -184,7 +189,7 @@ sub new {
             $dict->{'BitsPerComponent'} = PDFNum($bpc);
             $dict->{'Colors'} = PDFNum(1);
             $dict->{'Columns'} = PDFNum($w);
-            if (defined $trns && !$opts{'-notrans'}) {
+            if (defined $trns && !$opts{'notrans'}) {
                 my $m = mMax(unpack('n*', $trns));
                 my $n = mMin(unpack('n*', $trns));
                 $self->{'Mask'} = PDFArray(PDFNum($n), PDFNum($m));
@@ -204,7 +209,7 @@ sub new {
             $dict->{'BitsPerComponent'} = PDFNum($bpc);
             $dict->{'Colors'} = PDFNum(3);
             $dict->{'Columns'} = PDFNum($w);
-            if (defined $trns && !$opts{'-notrans'}) {
+            if (defined $trns && !$opts{'notrans'}) {
                 my @v = unpack('n*', $trns);
                 my (@cr,@cg,@cb, $m, $n);
                 while (scalar @v > 0) {
@@ -244,7 +249,7 @@ sub new {
             $dict->{'BitsPerComponent'} = PDFNum($bpc);
             $dict->{'Colors'} = PDFNum(1);
             $dict->{'Columns'} = PDFNum($w);
-            if (defined $trns && !$opts{'-notrans'}) {
+            if (defined $trns && !$opts{'notrans'}) {
                 $trns .= "\xFF" x 256; # pad out with opaque entries to
 		                       # ensure at least 256 entries available
                 $dict = PDFDict();
@@ -293,7 +298,7 @@ sub new {
             $dict->{'Columns'} = PDFNum($w);
 
             $dict = PDFDict();
-            unless ($opts{'-notrans'}) {
+            unless ($opts{'notrans'}) {
                 $pdf->new_obj($dict);
                 $dict->{'Type'} = PDFName('XObject');
                 $dict->{'Subtype'} = PDFName('Image');
@@ -313,9 +318,9 @@ sub new {
 	    #delete $self->{' stream'};
 	    $dict->{' stream'} = '';
 	    $self->{' stream'} = '';
-	    # dict->stream is the outer dict if -notrans, and the Alpha data
+	    # dict->stream is the outer dict if notrans, and the Alpha data
 	    #   moved to it is simply unused
-	    # dict->stream is the inner dict (created if !-notrans), and the
+	    # dict->stream is the inner dict (created if !notrans), and the
 	    #   Alpha data moved to it becomes the SMask
 	    # rebuild self->stream from the gray data in clearstream
             foreach my $n (0 .. $h*$w-1) {
@@ -339,7 +344,7 @@ sub new {
             $dict->{'Columns'} = PDFNum($w);
 
             $dict = PDFDict();
-            unless ($opts{'-notrans'}) {
+            unless ($opts{'notrans'}) {
                 $pdf->new_obj($dict);
                 $dict->{'Type'} = PDFName('XObject');
                 $dict->{'Subtype'} = PDFName('Image');
@@ -361,9 +366,9 @@ sub new {
 	    $self->{' stream'} = '';
 	    # as with cs=4, create SMask of Alpha entry for each pixel. this
 	    # time, separating Alpha from RGB triplet and put in dict->stream
-	    # dict->stream is the outer dict if -notrans, and the Alpha data
+	    # dict->stream is the outer dict if notrans, and the Alpha data
 	    #   moved to it is simply unused
-	    # dict->stream is the inner dict (created if !-notrans), and the
+	    # dict->stream is the inner dict (created if !notrans), and the
 	    #   Alpha data moved to it becomes the SMask
 	    # rebuild self->stream from the RGB data in clearstream 1/3 smaller
             foreach my $n (0 .. ($h*$w)-1) {
@@ -387,7 +392,7 @@ sub new {
 =item  $mode = $png->usesLib()
 
 Returns 1 if Image::PNG::Libpng installed and used, 0 if not installed, or -1 
-if installed but not used (-nouseIPL option given to C<image_png>).
+if installed but not used (nouseIPL option given to C<image_png>).
 
 B<Caution:> this method can only be used I<after> the image object has been
 created. It can't tell you whether Image::PNG::Libpng is available in
