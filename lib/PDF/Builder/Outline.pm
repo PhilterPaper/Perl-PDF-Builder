@@ -19,10 +19,10 @@ PDF::Builder::Outline - Manage PDF outlines (a.k.a. I<bookmarks>)
 =head1 SYNOPSIS
 
     # Get/create the top-level outline tree
-    my $outline = $pdf->outline();
+    my $outlines = $pdf->outline();
 
     # Add an entry
-    my $item = $outline->outline();
+    my $item = $outlines->outline();
     $item->title('First Page');
     $item->destination($pdf->open_page(1)); # or dest(...)
 
@@ -50,7 +50,11 @@ sub new {
     return $self;
 }
 
+=back
+
 =head2 Examine the Outline Tree
+
+=over
 
 =item $boolean = $outline->has_children()
 
@@ -195,7 +199,11 @@ sub next {
     return $self->{'Next'};
 }
 
+=back
+
 =head2 Modify the Outline Tree
+
+=over 
 
 =item $child_outline = $parent_outline->outline()
 
@@ -209,10 +217,10 @@ sub outline {
 
     my $child = PDF::Builder::Outline->new($self->{' api'}, $self);
     $self->{' children'} //= [];
-    if (@{ $self->{' children'} }) {
-        $child->prev($self->{' children'}->[-1]);
-        $self->{' children'}->[-1]->next($child);
-    }
+    # it's not clear whether self->{children} will change by prev() call,
+    # so leave as done in PDF::API2
+    $child->prev($self->{' children'}->[-1]) if @{ $self->{' children'} };
+    $self->{' children'}->[-1]->next($child) if @{ $self->{' children'} };
     push @{$self->{' children'}}, $child;
     $self->{' api'}->{'pdf'}->new_obj($child) 
         unless $child->is_obj($self->{' api'}->{'pdf'});
@@ -229,7 +237,7 @@ Add an outline item immediately following the current item.
 sub insert_after {
     my $self = shift();
 
-    my $sibling = PDF::API2::Outline->new($self->{' api'}, $self->parent());
+    my $sibling = PDF::Builder::Outline->new($self->{' api'}, $self->parent());
     $sibling->next($self->next());
     $self->next->prev($sibling) if $self->next();
     $self->next($sibling);
@@ -250,7 +258,7 @@ Add an outline item immediately preceding the current item.
 sub insert_before {
     my $self = shift();
 
-    my $sibling = PDF::API2::Outline->new($self->{' api'}, $self->parent());
+    my $sibling = PDF::Builder::Outline->new($self->{' api'}, $self->parent());
     $sibling->prev($self->prev());
     $self->prev->next($sibling) if $self->prev();
     $self->prev($sibling);
@@ -359,7 +367,11 @@ sub closed {
     return $self;
 }
 
+=back
+
 =head2 Set Outline Attributes
+
+=over
 
 =item $title = $outline->title() # Get
 
@@ -384,90 +396,16 @@ sub title {
     return $self;
 }
 
-#=item $outline->title($text)  # older version
-#
-#Set the title of the outline.
-#
-#=cut
-#
-#sub title {
-#    my ($self, $text) = @_;
-#    $self->{'Title'} = PDFString($text, 'o');
-#    return $self;
-#}
-
 =item $outline->dest($page_object, %position)
 
 =item $outline->dest($page_object)
 
 Sets the destination page and optional position of the outline.
 
-%position can be any of the following:
+%position can be any of those listed in L<PDF::Builder::Docs/Page Fit Options>.
 
-=over
-
-=item -fit => 1
-
-Display the page designated by C<$page>, with its contents magnified just enough
-to fit the entire page within the window both horizontally and vertically. If 
-the required horizontal and vertical magnification factors are different, use 
-the smaller of the two, centering the page within the window in the other 
-dimension.
-
-=item -fith => $top
-
-Display the page designated by C<$page>, with the vertical coordinate C<$top> 
-positioned at the top edge of the window and the contents of the page magnified 
-just enough to fit the entire width of the page within the window.
-
-=item -fitv => $left
-
-Display the page designated by C<$page>, with the horizontal coordinate C<$left>
-positioned at the left edge of the window and the contents of the page magnified
-just enough to fit the entire height of the page within the window.
-
-=item -fitr => [$left, $bottom, $right, $top]
-
-Display the page designated by C<$page>, with its contents magnified just enough
-to fit the rectangle specified by the coordinates C<$left>, C<$bottom>, 
-C<$right>, and C<$top> entirely within the window both horizontally and 
-vertically. If the required horizontal and vertical magnification factors are 
-different, use the smaller of the two, centering the rectangle within the window
-in the other dimension.
-
-=item -fitb => 1
-
-Display the page designated by C<$page>, with its contents magnified just
-enough to fit its bounding box entirely within the window both horizontally and
-vertically. If the required horizontal and vertical magnification factors are
-different, use the smaller of the two, centering the bounding box within the
-window in the other dimension.
-
-=item -fitbh => $top
-
-Display the page designated by C<$page>, with the vertical coordinate C<$top>
-positioned at the top edge of the window and the contents of the page magnified
-just enough to fit the entire width of its bounding box within the window.
-
-=item -fitbv => $left
-
-Display the page designated by C<$page>, with the horizontal coordinate C<$left>
-positioned at the left edge of the window and the contents of the page
-magnified just enough to fit the entire height of its bounding box within the
-window.
-
-=item -xyz => [$left, $top, $zoom]
-
-Display the page designated by C<$page>, with the coordinates C<[$left, $top]> 
-positioned at the top-left corner of the window and the contents of the page 
-magnified by the factor C<$zoom>. A zero (0) value for any of the parameters 
-C<$left>, C<$top>, or C<$zoom> specifies that the current value of that 
-parameter is to be retained unchanged.
-
-This is the B<default> fit setting, with position (left and top) and zoom
+"xyz" is the B<default> fit setting, with position (left and top) and zoom
 the same as the calling page's.
-
-=back
 
 =item $outline->dest($name, %position)
 
@@ -491,33 +429,42 @@ sub dest {
     return $self;
 }
 
-# process destination, including position setting, with default of -xyz undef*3
+# process destination, including position setting, with default of xyz undef*3
  
 sub _fit {
     my ($self, $destination, %position) = @_;
+    # copy dashed names over to preferred non-dashed names
+    if (defined $position{'-fit'} && !defined $position{'fit'}) { $position{'fit'} = delete($position{'-fit'}); }
+    if (defined $position{'-fith'} && !defined $position{'fith'}) { $position{'fith'} = delete($position{'-fith'}); }
+    if (defined $position{'-fitb'} && !defined $position{'fitb'}) { $position{'fitb'} = delete($position{'-fitb'}); }
+    if (defined $position{'-fitbh'} && !defined $position{'fitbh'}) { $position{'fitbh'} = delete($position{'-fitbh'}); }
+    if (defined $position{'-fitv'} && !defined $position{'fitv'}) { $position{'fitv'} = delete($position{'-fitv'}); }
+    if (defined $position{'-fitbv'} && !defined $position{'fitbv'}) { $position{'fitbv'} = delete($position{'-fitbv'}); }
+    if (defined $position{'-fitr'} && !defined $position{'fitr'}) { $position{'fitr'} = delete($position{'-fitr'}); }
+    if (defined $position{'-xyz'} && !defined $position{'xyz'}) { $position{'xyz'} = delete($position{'-xyz'}); }
 
-    if      (defined $position{'-fit'}) {
+    if      (defined $position{'fit'}) {
         $self->{'Dest'} = PDFArray($destination, PDFName('Fit'));
-    } elsif (defined $position{'-fith'}) {
-        $self->{'Dest'} = PDFArray($destination, PDFName('FitH'), PDFNum($position{'-fith'}));
-    } elsif (defined $position{'-fitb'}) {
+    } elsif (defined $position{'fith'}) {
+        $self->{'Dest'} = PDFArray($destination, PDFName('FitH'), PDFNum($position{'fith'}));
+    } elsif (defined $position{'fitb'}) {
         $self->{'Dest'} = PDFArray($destination, PDFName('FitB'));
-    } elsif (defined $position{'-fitbh'}) {
-        $self->{'Dest'} = PDFArray($destination, PDFName('FitBH'), PDFNum($position{'-fitbh'}));
-    } elsif (defined $position{'-fitv'}) {
-        $self->{'Dest'} = PDFArray($destination, PDFName('FitV'), PDFNum($position{'-fitv'}));
-    } elsif (defined $position{'-fitbv'}) {
-        $self->{'Dest'} = PDFArray($destination, PDFName('FitBV'), PDFNum($position{'-fitbv'}));
-    } elsif (defined $position{'-fitr'}) {
-        croak "Insufficient parameters to -fitr => []) " unless scalar @{$position{'-fitr'}} == 4;
-        $self->{'Dest'} = PDFArray($destination, PDFName('FitR'), map {PDFNum($_)} @{$position{'-fitr'}});
-    } elsif (defined $position{'-xyz'}) {
-        croak "Insufficient parameters to -xyz => []) " unless scalar @{$position{'-xyz'}} == 3;
-        $self->{'Dest'} = PDFArray($destination, PDFName('XYZ'), map {defined $_? PDFNum($_): PDFNull()} @{$position{'-xyz'}});
+    } elsif (defined $position{'fitbh'}) {
+        $self->{'Dest'} = PDFArray($destination, PDFName('FitBH'), PDFNum($position{'fitbh'}));
+    } elsif (defined $position{'fitv'}) {
+        $self->{'Dest'} = PDFArray($destination, PDFName('FitV'), PDFNum($position{'fitv'}));
+    } elsif (defined $position{'fitbv'}) {
+        $self->{'Dest'} = PDFArray($destination, PDFName('FitBV'), PDFNum($position{'fitbv'}));
+    } elsif (defined $position{'fitr'}) {
+        croak "Insufficient parameters to fitr => []) " unless scalar @{$position{'fitr'}} == 4;
+        $self->{'Dest'} = PDFArray($destination, PDFName('FitR'), map {PDFNum($_)} @{$position{'fitr'}});
+    } elsif (defined $position{'xyz'}) {
+        croak "Insufficient parameters to xyz => []) " unless scalar @{$position{'xyz'}} == 3;
+        $self->{'Dest'} = PDFArray($destination, PDFName('XYZ'), map {defined $_? PDFNum($_): PDFNull()} @{$position{'xyz'}});
     } else {
         # no "fit" option found. use default.
-        $position{'-xyz'} = [undef,undef,undef];
-        $self->{'Dest'} = PDFArray($destination, PDFName('XYZ'), map {defined $_? PDFNum($_): PDFNull()} @{$position{'-xyz'}});
+        $position{'xyz'} = [undef,undef,undef];
+        $self->{'Dest'} = PDFArray($destination, PDFName('XYZ'), map {defined $_? PDFNum($_): PDFNull()} @{$position{'xyz'}});
     }
 
     return $self;
@@ -526,7 +473,7 @@ sub _fit {
 =item $outline = $outline->destination($destination, $location, @args)
 
 Set the destination page and optional position of the outline.  C<$location> and
-C<@args> are as defined in L<PDF::API2::NamedDestination/"destination">.
+C<@args> are as defined in L<PDF::Builder::NamedDestination/"destination">.
 
 C<$destination> can optionally be the name of a named destination defined
 elsewhere.
@@ -559,13 +506,17 @@ sub destination {
     return $self;
 }
 
+=back
+
 =head2 Destination targets
+
+=over
 
 =item $outline->uri($url)
 
 Defines the outline as launch-url with url C<$url>, typically a web page.
 
-B<alternative method:> url
+B<Alternate name:> C<url>
 
 Either C<uri> or C<url> may be used; C<uri> is for compatibility with PDF::API2.
 
@@ -589,7 +540,7 @@ sub uri {
 Defines the outline as launch-file with filepath C<$file>. This is typically
 a local application or file.
 
-B<alternative method:> file
+B<Alternate name:> C<file>
 
 Either C<launch> or C<file> may be used; C<launch> is for compatibility with PDF::API2.
 
@@ -616,10 +567,11 @@ Defines the destination of the outline as a PDF-file with filepath
 C<$pdffile>, on page C<$pagenum> (default 0), and position C<%position> 
 (same as dest()).
 
-B<alternative methods:> pdf_file, pdfile
+B<Alternate names:> C<pdf_file> and C<pdfile>
 
-Either C<pdf> or C<pdf_file> (or the older C<pdfile>) may be used; C<pdf> is for compatibility with PDF::API2. B<Note> that PDF::API2 now uses a string name for
-the location, and an array of dimensions, etc., rather than the old hash
+Either C<pdf> or C<pdf_file> (or the older C<pdfile>) may be used; C<pdf> is 
+for compatibility with PDF::API2. B<Note> that PDF::API2 now uses a string name 
+for the location, and an array of dimensions, etc., rather than the old hash
 element name => dimensions (as still used here in PDF::Builder).
 
 =cut
@@ -638,10 +590,6 @@ sub pdf {
     
     return $self;
 }
-
-=back
-
-=cut
 
 # internal routine
 sub fix_outline {
@@ -678,5 +626,9 @@ sub outobjdeep {
     $self->fix_outline();
     return $self->SUPER::outobjdeep(@_);
 }
+
+=back
+
+=cut
 
 1;

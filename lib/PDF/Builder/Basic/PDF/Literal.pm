@@ -7,13 +7,11 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Filter;
 use PDF::Builder::Basic::PDF::Name;
 use Scalar::Util qw(blessed);
-
-#no warnings qw[ deprecated recursion uninitialized ];
 
 =head1 NAME
 

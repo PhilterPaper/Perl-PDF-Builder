@@ -21,7 +21,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -223,28 +223,28 @@ C<%options> may include
 
 =over
 
-=item -diags => 1
+=item diags => 1
 
-If C<-diags> is set to 1, various warning messages will be given if a 
+If C<diags> is set to 1, various warning messages will be given if a 
 suspicious PDF structure is found, and some fixup may be attempted. There is
 no guarantee that any fixup will change the PDF to legitimate, or that there 
 won't be other problems found further down the line. If this flag is I<not>
 given, and a structural problem is found, it is fairly likely that errors (and
 even a program B<crash>) may happen further along. If you experience crashes 
-when reading in a PDF file, try running with C<-diags> and see what is reported.
+when reading in a PDF file, try running with C<diags> and see what is reported.
 
 There are many PDF files out "in the wild" which, while failing to conform to
 Adobe's standards, appear to be tolerated by PDF Readers. Thus, Builder will no
 longer fail on them, but merely comment on their existence.
 
-=back
-
 =cut
 
 sub open {
     my ($class, $filename, $update, %options) = @_;
+    # copy dashed option names to preferred undashed names
+    if (defined $options{'-diags'} && !defined $options{'diags'}) { $options{'diags'} = delete($options{'-diags'}); }
     my ($fh, $buffer);
-    $options{'-diags'} = 0 if not defined $options{'-diags'}; # default
+    $options{'diags'} = 0 if not defined $options{'diags'}; # default
 
     my $comment = ''; # any comment jammed into the PDF header
     my $self = $class->_new();
@@ -269,7 +269,7 @@ sub open {
     $fh->seek(0, 0);            # go to start of file
     $fh->read($buffer, 255);
     unless ($buffer =~ m/^\%PDF\-(\d+\.\d+)(.*?)$cr/mo) {
-        die "$filename does not contain a PDF version";
+        die "$filename does not contain a valid PDF version number";
     }
     $self->{' version'} = $1;
     # can't run verCheckInput() yet, as full ' version' not set
@@ -289,7 +289,7 @@ sub open {
     	last if $buffer =~ m/startxref($cr|\s*)\d+($cr|\s*)\%\%eof.*?/i;
     }
     unless ($buffer =~ m/startxref[^\d]+([0-9]+)($cr|\s*)\%\%eof.*?/i) {
-	if ($options{'-diags'} == 1) {
+	if ($options{'diags'} == 1) {
             warn "Malformed PDF file $filename"; #orig 'die'
         }
     }
@@ -304,7 +304,183 @@ sub open {
     return $self;
 } # end of open()
 
-=head2 $p->release()
+=item $p->version($version, %opts) # Set (also returns newly set version)
+
+=item $ver = $p->version() # Get
+
+Gets/sets the PDF version (e.g., 1.5). Setting sets both the header and
+trailer versions. Getting returns the higher of header and trailer versions.
+
+For compatibility with earlier releases, if no decimal point is given, assume
+"1." precedes the number given.
+
+A warning message is given if you attempt to I<decrease> the PDF version, as you
+might have already read in a higher level file, or used a higher level feature.
+This message is suppressed if the 'silent' option is given with any value.
+
+=cut
+
+sub version {
+    my $self = shift();
+
+    # current version is the higher of trailer and header versions
+    my $header_version = $self->header_version();
+    my $trailer_version = $self->trailer_version();
+    my $old_version = (defined $trailer_version && 
+	               $trailer_version > $header_version)?
+                $trailer_version: $header_version;
+
+    if (@_) {  # Set, possibly with options
+        my $version = shift();
+	my %opts = @_;
+	# copy dashed option names to preferred undashed names
+	if (defined $opts{'-silent'} && !defined $opts{'silent'}) { $opts{'silent'} = delete($opts{'-silent'}); }
+	
+	# 1.x and 2.x versions allowed
+	if ($version =~ m/^\d+$/) { $version = "1.$version"; }  # no x.? assume it's 1.something
+	# check if well formed 1.x and 2.x
+        if ($version !~ /^[12]\.[0-9]+$/) {
+            croak "Invalid version '$version' ignored" unless defined $opts{'silent'};
+            return $old_version;
+	}
+
+ 	if ($old_version > $version) { 
+ 	    croak "Warning: call to header_version() to LOWER the output PDF version number!" unless defined $opts{'silent'};
+ 	}
+ 
+	# have already squawked about any problems with $version
+        $self->header_version($version, 'silent'=>1);
+       #if ($version >= 1.4) {  # min 1.4 level
+        $self->trailer_version($version, 'silent'=>1);
+       #}
+       #else {
+       #    delete $self->{'Root'}->{'Version'};
+       #    $self->out_obj($self->{'Root'});
+       #}
+        return $version;
+    }
+
+    # Get
+    return $old_version;
+}
+
+=item $p->header_version($version, %opts) # Set (also returns newly set version)
+
+=item $version = $p->header_version() # Get
+
+Gets/sets the PDF version stored in the file header.
+
+For compatibility with earlier releases, if no decimal point is given, assume
+"1." precedes the number given.
+
+A warning message is given if you attempt to I<decrease> the PDF version, as you
+might have already read in a higher level file, or used a higher level feature.
+This message is suppressed if the 'silent' option is given with any value.
+
+=cut
+
+sub header_version {
+    my $self = shift();
+
+    # current (header) version 
+    my $old_version = $self->{' version'};
+
+    if (@_) { # Set, permits versions 1.x and 2.x
+        my $version = shift();
+	my %opts = @_;
+	# copy dashed option names to preferred undashed names
+	if (defined $opts{'-silent'} && !defined $opts{'silent'}) { $opts{'silent'} = delete($opts{'-silent'}); }
+	
+	# 1.x and 2.x versions allowed
+	if ($version =~ m/^\d+$/) { $version = "1.$version"; }  # no x.? assume it's 1.something
+	# check if well formed 1.x and 2.x
+        if ($version !~ /^[12]\.[0-9]+$/) {
+            croak "Invalid header_version '$version' ignored" unless defined $opts{'silent'};
+            return $old_version;
+	}
+
+ 	if ($old_version > $version) { 
+ 	    croak "Warning: call to header_version() to LOWER the output PDF version number!" unless defined $opts{'silent'};
+ 	}
+ 
+	$self->{' version'} = $version;
+        return $version;
+    }
+
+    # Get
+    return $old_version;
+}
+
+=item $p->trailer_version($version, %opts) # Set (also returns newly set version)
+
+=item $version = $p->trailer_version() # Get
+
+Gets/sets the PDF version stored in the document catalog.
+
+Note that the minimum PDF level for a trailer version is 1.4. It is not
+permitted to set a PDF level of 1.3 or lower. An existing PDF (read in) of
+1.3 or below returns undefined.
+
+For compatibility with earlier releases, if no decimal point is given, assume
+"1." precedes the number given.
+
+A warning message is given if you attempt to I<decrease> the PDF version, as you
+might have already read in a higher level file, or used a higher level feature.
+This message is suppressed if the 'silent' option is given with any value.
+
+=cut
+
+sub trailer_version {
+    my $self = shift();
+
+    my $old_version = undef;
+    if ($self->{'Root'}->{'Version'}) {
+        $self->{'Root'}->{'Version'}->realise();
+        $old_version = $self->{'Root'}->{'Version'}->val();
+    }
+
+    if (@_) { # Set, allows versions 1.x and 2.x
+        my $version = shift();
+	my %opts = @_;
+	# copy dashed option names to preferred undashed names
+	if (defined $opts{'-silent'} && !defined $opts{'silent'}) { $opts{'silent'} = delete($opts{'-silent'}); }
+	
+	# 1.x and 2.x versions allowed
+	if ($version =~ m/^\d+$/) { $version = "1.$version"; }  # no x.? assume it's 1.something
+	# check if well formed 1.x and 2.x
+        if ($version !~ /^[12]\.[0-9]+$/) {
+            croak "Invalid trailer_version '$version' ignored" unless defined $opts{'silent'};
+            return $old_version;
+	}
+
+ 	if (defined $old_version && $old_version > $version) { 
+ 	    croak "Warning: call to trailer_version() to LOWER the output PDF version number!" unless defined $opts{'silent'};
+ 	}
+ 
+        $self->{'Root'}->{'Version'} = PDFName($version);
+        $self->out_obj($self->{'Root'});
+        return $version;
+    }
+
+    # Get
+    return $old_version;
+}
+
+=item $prev_version = $p->require_version($version)
+
+Ensures that the PDF version is at least C<$version>. 
+Silently sets the version to the higher level.
+
+=cut
+
+sub require_version {
+    my ($self, $min_version) = @_;
+    my $current_version = $self->version();
+    $self->version($min_version) if $current_version < $min_version;
+    return $current_version;
+}
+
+=item $p->release()
 
 Releases ALL of the memory used by the PDF document and all of its
 component objects.  After calling this method, do B<NOT> expect to
@@ -360,7 +536,7 @@ sub release {
     return;
 } # end of release()
 
-=head2 $p->append_file()
+=item $p->append_file()
 
 Appends the objects for output to the read file and then appends the 
 appropriate table.
@@ -405,7 +581,7 @@ sub append_file {
     return;
 } # end of append_file()
 
-=head2 $p->out_file($fname)
+=item $p->out_file($fname)
 
 Writes a PDF file to a file of the given filename, based on the current list of
 objects to be output. It creates the trailer dictionary based on information
@@ -424,7 +600,7 @@ sub out_file {
     return $self;
 }
 
-=head2 $p->create_file($fname)
+=item $p->create_file($fname)
 
 Creates a new output file (no check is made of an existing open file) of
 the given filename or IO object. Note: make sure that C<< $p->{' version'} >>
@@ -445,7 +621,7 @@ sub create_file {
     }
 
     $self->{' OUTFILE'} = $fh;
-    $fh->print('%PDF-' . ($self->{' version'} || '1.4') . "\n");
+    $fh->print('%PDF-' . ($self->{' version'} // '1.4') . "\n");
     $fh->print("%\xC6\xCD\xCD\xB5\n");   # and some binary stuff in a comment.
 
     # PDF spec requires 4 or more "binary" bytes (128 or higher value) in a
@@ -458,7 +634,7 @@ sub create_file {
     return $self;
 }
 
-=head2 $p->close_file()
+=item $p->close_file()
 
 Closes up the open file for output, by outputting the trailer, etc.
 
@@ -494,7 +670,7 @@ sub close_file {
     return $self;
 } # end of close_file()
 
-=head2 ($value, $str) = $p->readval($str, %opts)
+=item ($value, $str) = $p->readval($str, %opts)
 
 Reads a PDF value from the current position in the file. If C<$str> is too 
 short, read some more from the current location in the file until the whole 
@@ -738,7 +914,7 @@ sub readval {
     return ($result, $str);
 } # end of readval()
 
-=head2 $ref = $p->read_obj($objind, %opts)
+=item $ref = $p->read_obj($objind, %opts)
 
 Given an indirect object reference, locate it and read the object returning
 the read in object.
@@ -754,7 +930,7 @@ sub read_obj {
     return $objind;
 }
 
-=head2 $ref = $p->read_objnum($num, $gen, %opts)
+=item $ref = $p->read_objnum($num, $gen, %opts)
 
 Returns a fully read object of given number and generation in this file
 
@@ -834,7 +1010,7 @@ sub read_objnum {
     return $object;
 } # end of read_objnum()
 
-=head2 $objind = $p->new_obj($obj)
+=item $objind = $p->new_obj($obj)
 
 Creates a new, free object reference based on free space in the cross reference 
 chain. If nothing is free, then think up a new number. If C<$obj>, then turns 
@@ -892,7 +1068,7 @@ sub new_obj {
     }
 }
 
-=head2 $p->out_obj($obj)
+=item $p->out_obj($obj)
 
 Indicates that the given object reference should appear in the output xref
 table whether with data or freed.
@@ -915,7 +1091,7 @@ sub out_obj {
     return $obj;
 }
 
-=head2 $p->free_obj($obj)
+=item $p->free_obj($obj)
 
 Marks an object reference for output as being freed.
 
@@ -931,7 +1107,7 @@ sub free_obj {
     return;
 }
 
-=head2 $p->remove_obj($objind)
+=item $p->remove_obj($objind)
 
 Removes the object from all places where we might remember it.
 
@@ -952,9 +1128,9 @@ sub remove_obj {
     return $self;
 }
 
-=head2 $p->ship_out(@objects)
+=item $p->ship_out(@objects)
 
-=head2 $p->ship_out()
+=item $p->ship_out()
 
 Ships the given objects (or all objects for output if C<@objects> is empty) to
 the currently open output file (assuming there is one). Freed objects are not
@@ -1005,7 +1181,7 @@ sub ship_out {
     return $self;
 } # end of ship_out()
 
-=head2 $p->copy($outpdf, \&filter)
+=item $p->copy($outpdf, \&filter)
 
 Iterates over every object in the file reading the object, calling C<filter> 
 with the object, and outputting the result. If C<filter> is not defined, 
@@ -1057,13 +1233,17 @@ sub copy {
     return $self;
 } # end of copy()
 
+=back
+
 =head1 PRIVATE METHODS & FUNCTIONS
 
 The following methods and functions are considered B<private> to this class. 
 This does not mean you cannot use them if you have a need, just that they 
 aren't really designed for users of this class.
 
-=head2 $offset = $p->locate_obj($num, $gen)
+=over
+
+=item $offset = $p->locate_obj($num, $gen)
 
 Returns a file offset to the object asked for by following the chain of cross
 reference tables until it finds the one you want.
@@ -1090,7 +1270,7 @@ sub locate_obj {
     return;
 }
 
-=head2 update($fh, $str, $instream)
+=item update($fh, $str, $instream)
 
 Keeps reading C<$fh> for more data to ensure that C<$str> has at least a line 
 full for C<readval> to work on. At this point we also take the opportunity to 
@@ -1127,7 +1307,7 @@ sub update {
     return $str;
 } # end of update()
 
-=head2 $objind = $p->test_obj($num, $gen)
+=item $objind = $p->test_obj($num, $gen)
 
 Tests the cache to see whether an object reference (which may or may not have
 been getobj()ed) has been cached. Returns it if it has.
@@ -1140,7 +1320,7 @@ sub test_obj {
     return $self->{' objcache'}{$num, $gen};
 }
 
-=head2 $p->add_obj($objind)
+=item $p->add_obj($objind)
 
 Adds the given object to the internal object cache.
 
@@ -1155,7 +1335,7 @@ sub add_obj {
     return $obj;
 }
 
-=head2 $tdict = $p->readxrtr($xpos, %options)
+=item $tdict = $p->readxrtr($xpos, %options)
 
 Recursive function which reads each of the cross-reference and trailer tables
 in turn until there are no more.
@@ -1220,6 +1400,9 @@ sub _unpack_xref_stream {
 sub readxrtr {
     my ($self, $xpos, %options) = @_;
     # $xpos SHOULD be pointing to "xref" keyword
+    # copy dashed option names to preferred undashed names
+    if (defined $options{'-diags'} && !defined $options{'diags'}) { $options{'diags'} = delete($options{'-diags'}); }
+
     my ($tdict, $buf, $xmin, $xnum, $xdiff);
 
     my $fh = $self->{' INFILE'};
@@ -1254,7 +1437,7 @@ sub readxrtr {
             $subsection_count++;
             # go back and warn if other than single space separating numbers
             unless ($old_buf =~ /^[0-9]+ [0-9]+$cr/) {  #orig 'warn'
-		if ($options{'-diags'} == 1) {
+		if ($options{'diags'} == 1) {
                     # See PDF 1.7 section 7.5.4: Cross-Reference Table
                     warn "Malformed xref: subsection header needs a single\n" .
                          "ASCII space between the numbers and no extra spaces.\n";
@@ -1265,7 +1448,7 @@ sub readxrtr {
             # in case xnum == 0 is permitted (or used and tolerated by readers),
             #   skip over entry reads and go to next subsection
             if ($xnum < 1) { 
-                if ($options{'-diags'} == 1) { 
+                if ($options{'diags'} == 1) { 
                     warn "Xref subsection has 0 entries. Skipped.\n";
 		}
                 $xrefListEmpty = 1;
@@ -1279,7 +1462,7 @@ sub readxrtr {
             if ($buf =~ m/^(.*?)$cr/) {
                 $entry_size = length($1) + 2;
 	    }
-            if ($entry_size != 20 && $options{'-diags'} == 1) {
+            if ($entry_size != 20 && $options{'diags'} == 1) {
                 warn "Xref entries supposed to be 20 bytes long, are $entry_size.\n";
             }
             $xdiff = length($buf);
@@ -1297,7 +1480,7 @@ sub readxrtr {
                     $entry_format_error) {
                     # format OK or have already reported format problem
                 } else {
-		    if ($options{'-diags'} == 1) {
+		    if ($options{'diags'} == 1) {
                         warn "Xref entry readable, but doesn't meet PDF spec.\n";
                     }
                     $entry_format_error++;
@@ -1311,12 +1494,12 @@ sub readxrtr {
                 # $3 = flag (n = object in use, f = free)
                 # buf reduced by entry just processed
                 if (exists $xlist->{$xmin}) {
-                    if ($options{'-diags'} == 1) {
+                    if ($options{'diags'} == 1) {
                         warn "Duplicate object number $xmin in xref table ignored.\n";
 		    }
                 } else {
                     $xlist->{$xmin} = [$1, $2, $3];
-                    if ($xmin == 0 && $subsection_count > 1 && $options{'-diags'} == 1) {
+                    if ($xmin == 0 && $subsection_count > 1 && $options{'diags'} == 1) {
                         warn "Xref object 0 entry not in first subsection.\n";
                     }
                 }
@@ -1344,7 +1527,7 @@ sub readxrtr {
                     $xlist->{'1'}[2] eq 'f') {
                     # object 1 appears to be the free list head, so shift
                     #   down all objects
-		    if ($options{'-diags'} == 1) {
+		    if ($options{'diags'} == 1) {
                         warn "xref appears to be mislabeled starting with 1. Shift down all elements.\n";
 		    }
                     my $next = 1;
@@ -1357,13 +1540,13 @@ sub readxrtr {
                 } else {
                     # if object 1 does not appear to be a free list head, 
                     #   insert a new object 0
-		    if ($options{'-diags'} == 1) {
+		    if ($options{'diags'} == 1) {
                         warn "Xref appears to be missing object 0. Insert a new one.\n";
 		    }
                     $xlist->{'0'} = [0, 65535, 'f'];
                 }
             } else {
-		if ($options{'-diags'} == 1) {
+		if ($options{'diags'} == 1) {
                     warn "Malformed cross reference list in PDF file $self->{' fname'} -- no object 0 (free list head)\n";
 		}
                 $xlist->{'0'} = [0, 65535, 'f'];
@@ -1375,32 +1558,32 @@ sub readxrtr {
         foreach (sort {$a <=> $b} keys %{ $xlist }) {
             # if 'f' flag, is in free list
             if      ($xlist->{$_}[2] eq 'f') {
-                if ($xlist->{$_}[1] <= 0 && $options{'-diags'} == 1) {
+                if ($xlist->{$_}[1] <= 0 && $options{'diags'} == 1) {
                     warn "Xref free list entry $_ with bad next generation number.\n";
                 } else {
                     push @free_list, $_; # should be in numeric order (0 first)
                 }
             } elsif ($xlist->{$_}[2] eq 'n') {
-                if ($xlist->{$_}[0] <= 0 && $options{'-diags'} == 1) {
+                if ($xlist->{$_}[0] <= 0 && $options{'diags'} == 1) {
                     warn "Xref active object $_ entry with bad length ".($xlist->{$_}[1])."\n";
                 }
-                if ($xlist->{$_}[1] < 0 && $options{'-diags'} == 1) {
+                if ($xlist->{$_}[1] < 0 && $options{'diags'} == 1) {
                     warn "Xref active object $_ entry with bad generation number ".($xlist->{$_}[1])."\n";
                 }
             } else {
-		if ($options{'-diags'} == 1) {
+		if ($options{'diags'} == 1) {
                     warn "Xref entry has flag that is not 'f' or 'n'.\n";
 	        }
             }
         } # go through xlist and build free_list and check entries
         # traverse free list and check that "next object" is also in free list
         my $next_free = 0;  # object 0 should always be in free list
-        if ($xlist->{'0'}[1] != 65535 && $options{'-diags'} == 1) {
+        if ($xlist->{'0'}[1] != 65535 && $options{'diags'} == 1) {
             warn "Object 0 next generation is not 65535.\n";
         }
         do {
             if ($xlist->{$next_free}[2] ne 'f') {
-                if ($options{'-diags'} == 1) {
+                if ($options{'diags'} == 1) {
                     warn "Corrupted free object list: next=$next_free is not a free object.\n";
 		}
                 $next_free = 0; # force end of free list
@@ -1410,12 +1593,12 @@ sub readxrtr {
             # remove this entry from free list array
             splice(@free_list, index(@free_list, $next_free), 1);
         } while ($next_free && exists $xlist->{$next_free});
-        if (scalar @free_list && $options{'-diags'} == 1) {
+        if (scalar @free_list && $options{'diags'} == 1) {
             warn "Corrupted xref list: object(s) @free_list marked as free, but are not in free chain.\n";
         }
 
         # done with cross reference table, so go on to trailer
-        if ($buf !~ /^\s*trailer\b/i && $options{'-diags'} == 1) {  #orig 'die'
+        if ($buf !~ /^\s*trailer\b/i && $options{'diags'} == 1) {  #orig 'die'
             warn "Malformed trailer in PDF file $self->{' fname'} at " . ($fh->tell() - length($buf));
         }
 
@@ -1425,13 +1608,12 @@ sub readxrtr {
 
     } elsif ($buf =~ m/^(\d+)\s+(\d+)\s+obj/i) {
         my ($xref_obj, $xref_gen) = ($1, $2);
-
-	PDF::Builder->verCheckOutput(1.5, "importing cross-reference stream");
+	$PDF::Builder::global_pdf->verCheckOutput(1.5, "importing cross-reference stream");
         # XRef streams
         ($tdict, $buf) = $self->readval($buf);
 
         unless ($tdict->{' stream'}) {
-	    if ($options{'-diags'} == 1) {
+	    if ($options{'diags'} == 1) {
                 warn "Malformed XRefStm at $xref_obj $xref_gen obj in PDF file $self->{' fname'}";
 	    }
         }
@@ -1469,7 +1651,7 @@ sub readxrtr {
                 }
 
                 $cols[0] = 1 unless defined $cols[0];
-                if ($cols[0] > 2 && $options{'-diags'} == 1) {
+                if ($cols[0] > 2 && $options{'diags'} == 1) {
                     warn "Invalid XRefStm entry type ($cols[0]) at $xref_obj $xref_gen obj";
                 }
 
@@ -1483,7 +1665,7 @@ sub readxrtr {
         }
 
     } else {  #orig 'die'
-	if ($options{'-diags'} == 1) {
+	if ($options{'diags'} == 1) {
             warn "Malformed xref in PDF file $self->{' fname'}";
 	}
     }
@@ -1501,9 +1683,9 @@ sub readxrtr {
     return $tdict;
 } # end of readxrtr()
 
-=head2 $p->out_trailer($tdict, $update)
+=item $p->out_trailer($tdict, $update)
 
-=head2 $p->out_trailer($tdict)
+=item $p->out_trailer($tdict)
 
 Outputs the body and trailer for a PDF file by outputting all the objects in
 the ' outlist' and then outputting a xref table for those objects and any
@@ -1652,7 +1834,7 @@ sub out_trailer {
     return;
 } # end of out_trailer()
 
-=head2 PDF::Builder::Basic::PDF::File->_new()
+=item PDF::Builder::Basic::PDF::File->_new()
 
 Creates a very empty PDF file object (used by new() and open())
 
@@ -1673,6 +1855,8 @@ sub _new {
 }
 
 1;
+
+=back
 
 =head1 AUTHOR
 

@@ -2,7 +2,6 @@ package PDF::Builder;
 
 use strict;
 use warnings;
-#no warnings qw[ deprecated recursion uninitialized ];
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
@@ -10,7 +9,7 @@ our $VERSION = '3.024'; # VERSION
 our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 # updated during CPAN build
-my $GrTFversion = 16;    # minimum version of Graphics::TIFF   will be 17
+my $GrTFversion = 19;    # minimum version of Graphics::TIFF  at least 16
 my $LpngVersion = 0.57;  # minimum version of Image::PNG::Libpng
 
 use Carp;
@@ -33,6 +32,7 @@ use PDF::Builder::Resource::Shading;
 
 use PDF::Builder::NamedDestination;
 
+use List::Util qw(max);
 use Scalar::Util qw(weaken);
 
 my @font_path = __PACKAGE__->set_font_path(
@@ -49,6 +49,7 @@ our @MSG_COUNT = (0,  # [0] Graphics::TIFF not installed
 our $outVer = 1.4; # desired PDF version for output, bump up w/ warning on read or feature output
 our $msgVer = 1;   # 0=don't, 1=do issue message when PDF output version is bumped up
 our $myself;       # holds self->pdf
+our $global_pdf;   # holds self ($pdf)
 
 =head1 NAME
 
@@ -71,12 +72,12 @@ PDF::Builder - Facilitates the creation and modification of PDF files
     $page = $pdf->open_page($page_number);
 
     # Set the page size
-    $page->size('Letter');  # or mediabox()
+    $page->size('Letter');  # or mediabox('Letter')
 
     # Add a built-in font to the PDF
-    $font = $pdf->corefont('Helvetica-Bold');
+    $font = $pdf->font('Helvetica-Bold'); # or corefont('Helvetica-Bold')
 
-    # Add an external TTF font to the PDF
+    # Add an external TrueType (TTF) font to the PDF
     $font = $pdf->font('/path/to/font.ttf');  # or ttfont() in this case
 
     # Add some text to the page
@@ -90,7 +91,7 @@ PDF::Builder - Facilitates the creation and modification of PDF files
 
 =head1 SOME SPECIAL NOTES
 
-See the file README (in downloadable package and on CPAN) for a summary of 
+See the file README.md (in downloadable package and on CPAN) for a summary of 
 prerequisites and tools needed to install PDF::Builder, both mandatory and 
 optional.
 
@@ -122,7 +123,7 @@ PDF::Builder is mostly PDF 1.4-compliant, but there I<are> complications you
 should be aware of. Please read L<PDF::Builder::Docs/PDF Versions Supported>
 for details.
 
-=head2 SUPPORTED PERL VERSIONS
+=head2 SUPPORTED PERL VERSIONS (BACKWARDS COMPATIBILITY GOALS)
 
 PDF::Builder intends to support all major Perl versions that were released in
 the past six years, plus one, in order to continue working for the life of
@@ -137,9 +138,36 @@ version of Perl released I<before> 2012-06-05 is 5.16.
 
 The intent is to avoid expending unnecessary effort in supporting very old
 (obsolete) versions of Perl.
+
+=head3 Anticipated Support Cutoff Dates
+
+=over
+
+=item * 5.24 current minimum supported version, until next PDF::Builder release after 30 May, 2023
+
+=item * 5.26 future minimum supported version, until next PDF::Builder release after 23 June, 2024
+
+=item * 5.28 future minimum supported version, until next PDF::Builder release after 22 May, 2025
+
+=item * 5.30 future minimum supported version, until next PDF::Builder release after 20 June, 2026
+
+=item * 5.32 future minimum supported version, until next PDF::Builder release after 20 May, 2027
+
+=item * 5.34 future minimum supported version, until next PDF::Builder release after 28 May, 2028
+
+=back
+
 If you need to use this module on a server with an extremely out-of-date version
 of Perl, consider using either plenv or Perlbrew to run a newer version of Perl
 without needing admin privileges.
+
+On the other hand, any feature in PDF::Builder should continue to work 
+unchanged for the life of most long-term-stable (LTS) server distributions.
+Their lifetime is usually about six (6) years. Note that this does B<not>
+constitute a statement of warranty, but that we I<intend> to try to keep any
+particular release of PDF::Builder working for a period of years. Of course,
+it helps if you periodically update your Perl installation to something
+released in the recent past.
 
 =head2 KNOWN ISSUES
 
@@ -215,7 +243,7 @@ PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 
 =over
 
-=item $pdf = PDF::Builder->new(%options)
+=item $pdf = PDF::Builder->new(%opts)
 
 Creates a new PDF object. 
 
@@ -231,19 +259,11 @@ possible memory requirements later on (the file is opened immediately for
 writing, rather than waiting until the C<save>). The C<file> may also be
 a filehandle.
 
-B<alternate option name:> -file
-
-This is simply the older version, kept for compatibility with old code.
-
 =item compress
 
 The 'compress' option can be
 given to specify stream compression: default is 'flate', 'none' (or 0) is no
 compression. No other compression methods are currently supported.
-
-B<alternate option name:> -compress
-
-This is simply the older version, kept for compatibility with old code.
 
 =item outver
 
@@ -252,10 +272,6 @@ allowed feature version (attempts to use anything higher will give a warning).
 If an existing PDF with a higher version is read in, C<outver> will be 
 increased to that version, with a warning.
 
-B<alternate option name:> -outver
-
-This is simply the older version, kept for compatibility with old code.
-
 =item msgver
 
 The 'msgver' option value of 1 (default) gives a warning message if the 
@@ -263,20 +279,12 @@ The 'msgver' option value of 1 (default) gives a warning message if the
 being read in, or a higher level feature was requested. A value of 0 
 suppresses the warning message.
 
-B<alternate option name:> -msgver
-
-This is simply the older version, kept for compatibility with old code.
-
 =item diaglevel
 
 The 'diaglevel' option can be
 given to specify the level of diagnostics given by IntegrityCheck(). The
 default is level 2 (errors and warnings). 
 See L<PDF::Builder::Docs/IntegrityCheck> for more information.
-
-B<alternate option name:> -diaglevel
-
-This is simply the older version, kept for compatibility with old code.
 
 =back
 
@@ -300,7 +308,13 @@ B<Example:>
 =cut
 
 sub new {
-    my ($class, %options) = @_;
+    my ($class, %opts) = @_;
+    # copy dashed option names to preferred undashed names
+    if (defined $opts{'-compress'} && !defined $opts{'compress'}) { $opts{'compress'} = delete($opts{'-compress'}); }
+    if (defined $opts{'-diaglevel'} && !defined $opts{'diaglevel'}) { $opts{'diaglevel'} = delete($opts{'-diaglevel'}); }
+    if (defined $opts{'-outver'} && !defined $opts{'outver'}) { $opts{'outver'} = delete($opts{'-outver'}); }
+    if (defined $opts{'-msgver'} && !defined $opts{'msgver'}) { $opts{'msgver'} = delete($opts{'-msgver'}); }
+    if (defined $opts{'-file'} && !defined $opts{'file'}) { $opts{'file'} = delete($opts{'-file'}); }
 
     my $self = {};
     bless $self, $class;
@@ -322,22 +336,19 @@ sub new {
     $self->{'pagestack'} = [];
 
     $self->{'pdf'}->{' userUnit'} = 1.0; # default global User Unit
-    $self->mediabox('letter');  # default to US Letter 8.5in x 11in 
+    $self->mediabox('letter');  # PDF defaults to US Letter 8.5in x 11in 
 
-    if      (exists $options{'compress'}) {
-      $self->{'forcecompress'} = $options{'compress'};
+    if      (exists $opts{'compress'}) {
+      $self->{'forcecompress'} = $opts{'compress'};
       # at this point, no validation of given value! none/flate (0/1).
       # note that >0 is often used as equivalent to 'flate'
-    } elsif (exists $options{'-compress'}) {
-      $self->{'forcecompress'} = $options{'-compress'};
-      # alternate name
     } else {
       $self->{'forcecompress'} = 'flate';
       # code should also allow integers 0 (= 'none') and >0 (= 'flate') 
       # for compatibility with old usage where forcecompress is directly set. 
     }
-    if (exists $options{'diaglevel'}) {
-	my $diaglevel = $options{'diaglevel'};
+    if (exists $opts{'diaglevel'}) {
+	my $diaglevel = $opts{'diaglevel'};
 	if ($diaglevel < 0 || $diaglevel > 5) {
 	    print "diaglevel must be in range 0-5. using 2\n";
 	    $diaglevel = 2;
@@ -346,124 +357,38 @@ sub new {
     } else {
 	$self->{'diaglevel'} = 2; # default: errors and warnings
     }
-    if (exists $options{'-diaglevel'}) {
-	my $diaglevel = $options{'-diaglevel'};
-	if ($diaglevel < 0 || $diaglevel > 5) {
-	    print "-diaglevel must be in range 0-5. using 2\n";
-	    $diaglevel = 2;
-	}
-	$self->{'diaglevel'} = $diaglevel;
-    } else {
-	$self->{'diaglevel'} = 2; # default: errors and warnings
-    }
 
-    $self->preferences(%options);
-    if (defined $options{'outver'}) {
-        if ($options{'outver'} >= 1.4) {
-	    $self->{'pdf'}->{' version'} = $outVer = $options{'outver'};
+    $self->preferences(%opts);
+    if (defined $opts{'outver'}) {
+        if ($opts{'outver'} >= 1.4) {
+	    $self->{'pdf'}->{' version'} = $opts{'outver'};
 	} else {
 	    print STDERR "Invalid outver given, or less than 1.4. Ignored.\n";
 	}
     }
-    if (defined $options{'-outver'}) {
-        if ($options{'-outver'} >= 1.4) {
-	    $self->{'pdf'}->{' version'} = $outVer = $options{'-outver'};
-	} else {
-	    print STDERR "Invalid -outver given, or less than 1.4. Ignored.\n";
-	}
-    }
-    if (defined $options{'msgver'}) {
-        if ($options{'msgver'} == 0 || $options{'msgver'} == 1) {
-            $msgVer = $options{'msgver'};
+    if (defined $opts{'msgver'}) {
+        if ($opts{'msgver'} == 0 || $opts{'msgver'} == 1) {
+            $msgVer = $opts{'msgver'};
         } else {
             print STDERR "Invalid msgver given, not 0 or 1. Ignored.\n";
         }
     }
-    if (defined $options{'-msgver'}) {
-        if ($options{'-msgver'} == 0 || $options{'-msgver'} == 1) {
-            $msgVer = $options{'-msgver'};
-        } else {
-            print STDERR "Invalid -msgver given, not 0 or 1. Ignored.\n";
-        }
-    }
-    if ($options{'file'}) {
-        $self->{'pdf'}->create_file($options{'file'});
+    if ($opts{'file'}) {
+        $self->{'pdf'}->create_file($opts{'file'});
         $self->{'partial_save'} = 1;
     }
-    if ($options{'-file'}) {
-        $self->{'pdf'}->create_file($options{'-file'});
-        $self->{'partial_save'} = 1;
-    }
-    $self->{'infoMeta'} = [qw(Author CreationDate ModDate Creator Producer Title Subject Keywords)];
+    # used by info and infoMetaAttributes but not by their replacements
+    $self->{'infoMeta'} = [qw(Author CreationDate ModDate Creator Producer 
+	                      Title Subject Keywords)];
 
-    my $version = eval { $PDF::Builder::VERSION } || '(Unreleased Version)';
+    my $version = eval { $PDF::Builder::VERSION } || '(Development Version)';
    #$self->info('Producer' => "PDF::Builder $version [$^O]");
     $self->info('Producer' => "PDF::Builder $version [see ".
                 "https://github.com/PhilterPaper/Perl-PDF-Builder/blob/master/INFO/SUPPORT]");
 
+    $global_pdf = $self;
     return $self;
 } # end of new()
-
-# when outputting a PDF feature, verCheckOutput(n, 'feature name') returns TRUE 
-# if n > $pdf->{' version'), plus a warning message. It returns FALSE otherwise.
-#
-#  a typical use:
-#
-#  PDF::Builder->verCheckOutput(1.6, "portzebie with foo-dangle");
-#
-#  if msgver defaults to 1, a message will be output if the output PDF version 
-#  has to be increased to 1.6 in order to use the "portzebie" feature
-#
-# this is still somewhat experimental, and as experience is gained, the code 
-# might have to be modified.
-#
-sub verCheckOutput {
-    my ($dummy, $PDFver, $featureName) = @_;  # $self will be this package's
-
-    # check if feature required PDF version is higher than planned output
-    # ' version' should be the same as $outVer
-    if ($PDFver > $outVer) {
-        if ($msgVer) {
-	    print "PDF version of requested feature '$featureName'\n  is higher than outVer ".
-              "of $outVer (outVer reset to $PDFver)\n";
-	}
-        $outVer = $myself->{' version'} = $PDFver;
-        return 1;
-    } else {
-        return 0;
-    }
-}
-# when reading in a PDF, verCheckInput(n) gives a warning message if n (the PDF 
-# version just read in) > outVer, and resets outVer to n. return TRUE if 
-# outVer changed, FALSE otherwise. outVer is used instead of 
-# $pdf->{' version'} because the latter is often overwritten by a file read 
-# operation.
-#
-# this is still somewhat experimental, and as experience is gained, the code 
-# might have to be modified.
-#
-#    WARNING: just because the PDF output version has been increased does NOT 
-#    guarantee that any particular content will be handled correctly! There are 
-#    many known cases of PDF 1.5 and up files being read in, that have content 
-#    that PDF::Builder does not handle correctly, corrupting the resulting PDF. 
-#    Pay attention to run-time warning messages that the PDF output level has 
-#    been increased due to a PDF file being read in, and check the resulting 
-#    file carefully.
-
-sub verCheckInput {
-    my ($self, $PDFver) = @_;
-
-    # warning message and bump up outVer if read-in PDF level higher
-    if ($PDFver > $outVer) {
-        if ($msgVer) {
-	    print "PDF version just read in is higher than outVer of $outVer (outVer reset to $PDFver)\n";
-	}
-        $outVer = $self->{'pdf'}->{' version'} = $PDFver;
-        return 1;
-    } else {
-        return 0;
-    }
-}
 
 =item $pdf->default_page_size($size); # Set
 
@@ -473,7 +398,10 @@ Set the default physical size for pages in the PDF.  If called without
 arguments, return the coordinates of the rectangle describing the default
 physical page size.
 
-See L<PDF::Builder::Page/"Page Sizes"> for possible values.
+This is essentially an alternate method of defining the C<mediabox()> call,
+and added for compatibility with PDF::API2.
+
+See L<PDF::Builder::Page/Page Sizes> for possible values.
 
 =cut
 
@@ -530,6 +458,7 @@ sub default_page_boundaries {
 }
 
 # Deprecated; use default_page_size or default_page_boundaries
+# alternate implementations of media, crop, etc. boxes
 #sub mediabox {
 #    my $self = shift();
 #    return $self->_bounding_box('MediaBox') unless @_;
@@ -570,7 +499,7 @@ sub default_page_boundaries {
 
 =over
 
-=item $pdf = PDF::Builder->open($pdf_file, %options)
+=item $pdf = PDF::Builder->open($pdf_file, %opts)
 
 Opens an existing PDF file. See C<new()> for options.
 
@@ -587,7 +516,7 @@ B<Example:>
 =cut
 
 sub open {  ## no critic
-    my ($class, $file, %options) = @_;
+    my ($class, $file, %opts) = @_;
     croak "File '$file' does not exist" unless -f $file;
     croak "File '$file' is not readable" unless -r $file;
 
@@ -613,13 +542,13 @@ sub open {  ## no critic
     $disk_fh->close();
     $scalar_fh->seek(0, 0);
 
-    my $self = $class->from_string($content, %options);
+    my $self = $class->from_string($content, %opts);
     $self->{'pdf'}->{' fname'} = $file;
 
     return $self;
 } # end of open()
 
-=item $pdf = PDF::Builder->from_string($pdf_string, %options)
+=item $pdf = PDF::Builder->from_string($pdf_string, %opts)
 
 Opens a PDF contained in a string. See C<new()> for other options.
 
@@ -629,10 +558,6 @@ Opens a PDF contained in a string. See C<new()> for other options.
 
 Display warnings when non-conforming PDF structure is found, and fix up
 where possible. See L<PDF::Builder::Basic::PDF::File> for more information.
-
-B<alternate option name:> -diags
-
-This is simply the older version, kept for compatibility with old code.
 
 =back
 
@@ -647,7 +572,7 @@ B<Example:>
     ...
     $pdf->saveas('our/new.pdf');
 
-B<alternate name:> open_scalar
+B<Alternate name:> C<open_scalar>
 
 C<from_string> was formerly known as C<open_scalar> (and even before that,
 as C<openScalar>), and this older name is still
@@ -661,12 +586,16 @@ sub open_scalar { return from_string(@_); } ## no critic
 sub openScalar { return from_string(@_); } ## no critic
 
 sub from_string {
-    my ($class, $content, %options) = @_;
+    my ($class, $content, %opts) = @_;
+    # copy dashed option names to preferred undashed names
+    if (defined $opts{'-diags'} && !defined $opts{'diags'}) { $opts{'diags'} = delete($opts{'-diags'}); }
+    if (defined $opts{'-compress'} && !defined $opts{'compress'}) { $opts{'compress'} = delete($opts{'-compress'}); }
+    if (defined $opts{'-diaglevel'} && !defined $opts{'diaglevel'}) { $opts{'diaglevel'} = delete($opts{'-diaglevel'}); }
 
     my $self = {};
     bless $self, $class;
-    foreach my $parameter (keys %options) {
-        $self->default($parameter, $options{$parameter});
+    foreach my $parameter (keys %opts) {
+        $self->default($parameter, $opts{$parameter});
     }
 
     $self->{'content_ref'} = \$content;
@@ -700,7 +629,7 @@ sub from_string {
 		    $newVer = substr($newVer, 0, length($currentVer));
 		} 
 	        substr($content, $pos+5, length($newVer)) = $newVer;
-		$outVer = $newVer;
+		$self->version($newVer);
             }
 	}
     }
@@ -709,7 +638,7 @@ sub from_string {
     CORE::open($fh, '+<', \$content) or die "Can't begin scalar IO";
 
     # this would replace any existing self->pdf with a new one
-    $self->{'pdf'} = PDF::Builder::Basic::PDF::File->open($fh, 1, %options);
+    $self->{'pdf'} = PDF::Builder::Basic::PDF::File->open($fh, 1, %opts);
     $self->{'pdf'}->{'Root'}->realise();
     $self->{'pages'} = $self->{'pdf'}->{'Root'}->{'Pages'}->realise();
     weaken $self->{'pages'};
@@ -725,28 +654,17 @@ sub from_string {
     $self->{'catalog'} = $self->{'pdf'}->{'Root'};
     weaken $self->{'catalog'};
     $self->{'opened_scalar'} = 1;
-    if (exists $options{'compress'}) {
-      $self->{'forcecompress'} = $options{'compress'};
+    if (exists $opts{'compress'}) {
+      $self->{'forcecompress'} = $opts{'compress'};
       # at this point, no validation of given value! none/flate (0/1).
       # note that >0 is often used as equivalent to 'flate'
-    } elsif (exists $options{'-compress'}) {
-      $self->{'forcecompress'} = $options{'-compress'};
-      # alternate name
     } else {
       $self->{'forcecompress'} = 'flate';
       # code should also allow integers 0 (= 'none') and >0 (= 'flate') 
       # for compatibility with old usage where forcecompress is directly set. 
     }
-    if (exists $options{'diaglevel'}) {
-      $self->{'diaglevel'} = $options{'diaglevel'};
-      if ($self->{'diaglevel'} < 0 || $self->{'diaglevel'} > 5) {
-        $self->{'diaglevel'} = 2;
-      }
-    } else {
-      $self->{'diaglevel'} = 2;
-    }
-    if (exists $options{'-diaglevel'}) {
-      $self->{'diaglevel'} = $options{'-diaglevel'};
+    if (exists $opts{'diaglevel'}) {
+      $self->{'diaglevel'} = $opts{'diaglevel'};
       if ($self->{'diaglevel'} < 0 || $self->{'diaglevel'} > 5) {
         $self->{'diaglevel'} = 2;
       }
@@ -773,7 +691,7 @@ B<Example:>
     ...
     print $pdf->to_string();
 
-B<alternate name:> stringify
+B<Alternate name:> C<stringify>
 
 C<to_string> was formerly known as C<stringify>, and this older name is still
 valid as an alternative to C<to_string>. It is I<possible> that C<stringify>
@@ -1008,11 +926,9 @@ This will be called automatically when you save or stringify a PDF.
 You should only need to call it explicitly if you are reading PDF
 files and not writing them.
 
-=cut
+B<Alternate names:> C<release> and C<end>
 
-# Deprecated (renamed)
-sub release { return $_[0]->close() }
-#sub end     { return $_[0]->close() }
+=cut
 
 =item $pdf->end()
 
@@ -1024,19 +940,15 @@ This will be called automatically when you save or to_string a PDF.
 You should only need to call it explicitly if you are reading PDF
 files and not writing them.
 
+This (and I<release>) are older and now deprecated names formerly used in 
+PDF::API2 and PDF::Builder. You should try to avoid having to explicitly
+call them.
+
 =cut
 
-sub end {
-    my $self = shift();
-    $self->{'pdf'}->release() if defined $self->{'pdf'};
-
-    foreach my $key (keys %$self) {
-        $self->{$key} = undef;
-        delete $self->{$key};
-    }
-
-    return;
-}
+# Deprecated (renamed)
+sub release { return $_[0]->close(); }
+sub end     { return $_[0]->close(); }
 
 sub close {
     my $self = shift();
@@ -1052,7 +964,7 @@ sub close {
 
 =back
 
-=head1 METADATA METHODS
+=head2 METADATA METHODS
 
 =over
 
@@ -1291,6 +1203,8 @@ sub info_metadata {
     return $self->{'pdf'}->{'Info'}->{$field}->val();
 }
 
+=item %infohash = $pdf->info()
+
 =item %infohash = $pdf->info(%infohash)
 
 Gets/sets the info structure of the document.
@@ -1337,6 +1251,8 @@ sub info {
     return %opt;
 } # end of info()
 
+=item @metadata_attributes = $pdf->infoMetaAttributes()
+
 =item @metadata_attributes = $pdf->infoMetaAttributes(@metadata_attributes)
 
 Gets/sets the supported info-structure tags.
@@ -1369,7 +1285,7 @@ sub infoMetaAttributes {
 
 =item $pdf = $pdf->xml_metadata($xml);
 
-Get/set the document's XML metadata stream.
+Gets/sets the document's XML metadata stream.
 
 =cut
 
@@ -1402,9 +1318,9 @@ sub xml_metadata {
     return $md->{' stream'};
 }
 
-=item $xml = $pdf->xmpMetadata()
+=item $xml = $pdf->xmpMetadata()  # Get
 
-=item $pdf->xmpMetadata($xml)
+=item $xml = $pdf->xmpMetadata($xml)  # Set (also returns $xml value)
 
 Gets/sets the XMP XML data stream.
 
@@ -1418,32 +1334,15 @@ This method is considered B<obsolete>. Use C<xml_metadata> instead.
 sub xmpMetadata {
     my ($self, $value) = @_;
 
-    if (not defined($self->{'catalog'}->{'Metadata'})) {
-        $self->{'catalog'}->{'Metadata'} = PDFDict();
-        $self->{'catalog'}->{'Metadata'}->{'Type'} = PDFName('Metadata');
-        $self->{'catalog'}->{'Metadata'}->{'Subtype'} = PDFName('XML');
-        $self->{'pdf'}->new_obj($self->{'catalog'}->{'Metadata'});
-    } else {
-        $self->{'catalog'}->{'Metadata'}->realise();
-        $self->{'catalog'}->{'Metadata'}->{' stream'} = 
-            unfilter($self->{'catalog'}->{'Metadata'}->{'Filter'}, 
-                     $self->{'catalog'}->{'Metadata'}->{' stream'});
-        delete $self->{'catalog'}->{'Metadata'}->{' nofilt'};
-        delete $self->{'catalog'}->{'Metadata'}->{'Filter'};
+    if (@_) {  # Set
+        my $value = shift();
+        $self->xml_metadata($value);
+        return $value;
     }
 
-    my $md = $self->{'catalog'}->{'Metadata'};
-
-    if (defined $value) {
-        $md->{' stream'} = $value;
-        delete $md->{'Filter'};
-        delete $md->{' nofilt'};
-        $self->{'pdf'}->out_obj($md);
-        $self->{'pdf'}->out_obj($self->{'catalog'});
-    }
-
-    return $md->{' stream'};
-} # end of xmpMetadata()
+    # Get
+    return $self->xml_metadata();
+} 
 
 =item $val = $pdf->default($parameter)
 
@@ -1492,40 +1391,96 @@ sub default {
     return $previous_value;
 }
 
-=item $version = $pdf->version($new_version)
+=item $version = $pdf->version() # Get
 
-Get/set the PDF version (e.g. 1.4). 
+=item $version = $pdf->version($version) # Set (also returns newly set version)
 
+Gets/sets the PDF version (e.g., 1.5). 
 For compatibility with earlier releases, if no decimal point is given, assume
 "1." precedes the number given.
 
 A warning message is given if you attempt to I<decrease> the PDF version, as you
 might have already read in a higher level file, or used a higher level feature.
 
+See L<PDF::Builder::Basic::PDF::File> for additional information on the
+C<version> method.
+
 =cut
 
 sub version {
-    my $self = shift();
-    if (scalar @_) {
-        my $version = shift();
-	if ($version =~ m/^\d+$/) { $version = "1.$version"; }  # no x.? assume it's 1.something
-        croak "Invalid version $version" unless $version =~ /^(\d+\.\d+)$/;
-	if ($outVer > $1) { 
-	    print "Warning: call to self->version() to LOWER the output PDF version number!\n";
-	}
-        $self->{'pdf'}->{' version'} = $outVer = $1;
-    }
+    my $self = shift();  # includes any %opts
 
-    return $self->{'pdf'}->{' version'};
+    return $self->{'pdf'}->version(@_); # just pass it over to the "real" one
+}
+
+# when outputting a PDF feature, verCheckOutput(n, 'feature name') returns TRUE 
+# if n > $pdf->{' version'), plus a warning message. It returns FALSE otherwise.
+#
+#  a typical use:
+#
+#  $PDF::Builder::global_pdf->verCheckOutput(1.6, "portzebie with foo-dangle");
+#
+#  if msgver defaults to 1, a message will be output if the output PDF version 
+#  has to be increased to 1.6 in order to use the "portzebie" feature
+#
+# this is still somewhat experimental, and as experience is gained, the code 
+# might have to be modified.
+#
+sub verCheckOutput {
+    my ($self, $PDFver, $featureName) = @_;
+
+    # check if feature required PDF version is higher than planned output
+    my $version = $self->version(); # current version
+    if ($PDFver > $version) {
+        if ($msgVer) {
+	    print "PDF version of requested feature '$featureName' is higher\n".                  "  than current output version $version ".
+                  "(version reset to $PDFver)\n";
+	}
+        $self->version($PDFver);
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+# when reading in a PDF, verCheckInput(n) gives a warning message if n (the PDF 
+# version just read in) > version, and resets version to n. return TRUE if 
+# version changed, FALSE otherwise.
+#
+# this is still somewhat experimental, and as experience is gained, the code 
+# might have to be modified.
+#
+#    WARNING: just because the PDF output version has been increased does NOT 
+#    guarantee that any particular content will be handled correctly! There are 
+#    many known cases of PDF 1.5 and up files being read in, that have content 
+#    that PDF::Builder does not handle correctly, corrupting the resulting PDF. 
+#    Pay attention to run-time warning messages that the PDF output level has 
+#    been increased due to a PDF file being read in, and check the resulting 
+#    file carefully.
+
+sub verCheckInput {
+    my ($self, $PDFver) = @_;
+
+    my $version = $self->version();
+    # warning message and bump up version if read-in PDF level higher
+    if ($PDFver > $version) {
+        if ($msgVer) {
+	    print "PDF version just read in is higher than version of $version (version reset to $PDFver)\n";
+	}
+        $self->version($PDFver);
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 =item $bool = $pdf->is_encrypted()
 
 Checks if the previously opened PDF is encrypted.
 
-B<alternate name:> isEncrypted
+B<Alternate name:> C<isEncrypted>
 
-This is the older name; it is kept for compatibility.
+This is the older name; it is kept for compatibility with PDF::API2.
 
 =cut
 
@@ -1544,12 +1499,13 @@ sub is_encrypted {
 
 =item $otls = $pdf->outline()
 
-Creates (if needed) and returns the document's outline tree, which is also known
-as its bookmarks or the table of contents, depending on the PDF reader.
+Creates (if needed) and returns the document's 'outline' tree, which is also 
+known as its 'bookmarks' or the 'table of contents', depending on the 
+PDF reader being used.
 
 To examine or modify the outline tree, see L<PDF::Builder::Outlines>.
 
-B<alternate name:> outlines
+B<Alternate name:> C<outlines>
 
 This is the older name; it is kept for compatibility.
 
@@ -1563,6 +1519,7 @@ sub outline {
     require PDF::Builder::Outlines;
     my $obj = $self->{'pdf'}->{'Root'}->{'Outlines'};
     if ($obj) {
+	$obj->realise();
         bless $obj, 'PDF::Builder::Outlines';
         $obj->{' api'} = $self;
         weaken $obj->{' api'};
@@ -1585,6 +1542,9 @@ opened.
 C<$page> may be either a page number or a page object.  The other parameters are
 as described in L<PDF::Builder::NamedDestination>.
 
+This has been split out from C<preferences()> for compatibility with PDF::API2.
+It also can both set (assign) and get (query) the settings used.
+
 =cut
 
 sub open_action {
@@ -1604,7 +1564,7 @@ sub open_action {
 
 =item $pdf = $pdf->page_layout($layout);
 
-Get/set the page layout that should be used when the PDF is opened.
+Gets/sets the page layout that should be used when the PDF is opened.
 
 C<$layout> is one of the following:
 
@@ -1635,6 +1595,9 @@ Display two pages at a time, with odd-numbered pages on the left.
 Display two pages at a time, with odd-numbered pages on the right.
 
 =back
+
+This has been split out from C<preferences()> for compatibility with PDF::API2.
+It also can both set (assign) and get (query) the settings used.
 
 =cut
 
@@ -1672,7 +1635,7 @@ sub page_layout {
 
 =item $pdf = $pdf->page_mode($mode); # Set
 
-Get/set the page mode, which describes how the PDF should be displayed when
+Gets/sets the page mode, which describes how the PDF should be displayed when
 opened.
 
 C<$mode> is one of the following:
@@ -1705,6 +1668,9 @@ Show the optional content group panel.
 Show the attachments panel.
 
 =back
+
+This has been split out from C<preferences()> for compatibility with PDF::API2.
+It also can both set (assign) and get (query) the settings used.
 
 =cut
 
@@ -1742,8 +1708,11 @@ sub page_mode {
 
 =item $pdf = $pdf->viewer_preferences(%preferences); # Set
 
-Get or set PDF viewer preferences, as described in
+Gets/sets PDF viewer preferences, as described in
 L<PDF::Builder::ViewerPreferences>.
+
+This has been split out from C<preferences()> for compatibility with PDF::API2.
+It also can both set (assign) and get (query) the settings used.
 
 =cut
 
@@ -1757,12 +1726,13 @@ sub viewer_preferences {
     return $prefs->set_preferences(@_);
 }
 
-=item $pdf->preferences(%options)
+=item $pdf->preferences(%opts)
 
 Controls viewing preferences for the PDF, including the B<Page Mode>, 
 B<Page Layout>, B<Viewer>, and B<Initial Page> Options. See 
-L<PDF::Builder::Docs/Preferences - set user display preferences> for details on all these 
-option groups.
+L<PDF::Builder::Docs/Preferences - set user display preferences> for details 
+on all these 
+option groups, and L<PDF::Builder::Docs/Page Fit Options> for page positioning.
 
 B<Note:> the various preferences have been split out into their own methods.
 It is preferred that you use these specific methods.
@@ -1770,27 +1740,61 @@ It is preferred that you use these specific methods.
 =cut
 
 sub preferences {
-    my ($self, %options) = @_;
+    my ($self, %opts) = @_;
+    # copy dashed option names to the preferred undashed format
+    # Page Mode Options
+    if (defined $opts{'-fullscreen'} && !defined $opts{'fullscreen'}) { $opts{'fullscreen'} = delete($opts{'-fullscreen'}); }
+    if (defined $opts{'-thumbs'} && !defined $opts{'thumbs'}) { $opts{'thumbs'} = delete($opts{'-thumbs'}); }
+    if (defined $opts{'-outlines'} && !defined $opts{'outlines'}) { $opts{'outlines'} = delete($opts{'-outlines'}); }
+    # Page Layout Options
+    if (defined $opts{'-singlepage'} && !defined $opts{'singlepage'}) { $opts{'singlepage'} = delete($opts{'-singlepage'}); }
+    if (defined $opts{'-onecolumn'} && !defined $opts{'onecolumn'}) { $opts{'onecolumn'} = delete($opts{'-onecolumn'}); }
+    if (defined $opts{'-twocolumnleft'} && !defined $opts{'twocolumnleft'}) { $opts{'twocolumnleft'} = delete($opts{'-twocolumnleft'}); }
+    if (defined $opts{'-twocolumnright'} && !defined $opts{'twocolumnright'}) { $opts{'twocolumnright'} = delete($opts{'-twocolumnright'}); }
+    # Viewer Preferences
+    if (defined $opts{'-hidetoolbar'} && !defined $opts{'hidetoolbar'}) { $opts{'hidetoolbar'} = delete($opts{'-hidetoolbar'}); }
+    if (defined $opts{'-hidemenubar'} && !defined $opts{'hidemenubar'}) { $opts{'hidemenubar'} = delete($opts{'-hidemenubar'}); }
+    if (defined $opts{'-hidewindowui'} && !defined $opts{'hidewindowui'}) { $opts{'hidewindowui'} = delete($opts{'-hidewindowui'}); }
+    if (defined $opts{'-fitwindow'} && !defined $opts{'fitwindow'}) { $opts{'fitwindow'} = delete($opts{'-fitwindow'}); }
+    if (defined $opts{'-centerwindow'} && !defined $opts{'centerwindow'}) { $opts{'centerwindow'} = delete($opts{'-centerwindow'}); }
+    if (defined $opts{'-displaytitle'} && !defined $opts{'displaytitle'}) { $opts{'displaytitle'} = delete($opts{'-displaytitle'}); }
+    if (defined $opts{'-righttoleft'} && !defined $opts{'righttoleft'}) { $opts{'righttoleft'} = delete($opts{'-righttoleft'}); }
+    if (defined $opts{'-afterfullscreenthumbs'} && !defined $opts{'afterfullscreenthumbs'}) { $opts{'afterfullscreenthumbs'} = delete($opts{'-afterfullscreenthumbs'}); }
+    if (defined $opts{'-afterfullscreenoutlines'} && !defined $opts{'afterfullscreenoutlines'}) { $opts{'afterfullscreenoutlines'} = delete($opts{'-afterfullscreenoutlines'}); }
+    if (defined $opts{'-printscalingnone'} && !defined $opts{'printscalingnone'}) { $opts{'printscalingnone'} = delete($opts{'-printscalingnone'}); }
+    if (defined $opts{'-simplex'} && !defined $opts{'simplex'}) { $opts{'simplex'} = delete($opts{'-simplex'}); }
+    if (defined $opts{'-duplexfliplongedge'} && !defined $opts{'duplexfliplongedge'}) { $opts{'duplexfliplongedge'} = delete($opts{'-duplexfliplongedge'}); }
+    if (defined $opts{'-duplexflipshortedge'} && !defined $opts{'duplexflipshortedge'}) { $opts{'duplexflipshortedge'} = delete($opts{'-duplexflipshortedge'}); }
+    # Open Action
+    if (defined $opts{'-firstpage'} && !defined $opts{'firstpage'}) { $opts{'firstpage'} = delete($opts{'-firstpage'}); }
+    if (defined $opts{'-fit'} && !defined $opts{'fit'}) { $opts{'fit'} = delete($opts{'-fit'}); }
+    if (defined $opts{'-fith'} && !defined $opts{'fith'}) { $opts{'fith'} = delete($opts{'-fith'}); }
+    if (defined $opts{'-fitb'} && !defined $opts{'fitb'}) { $opts{'fitb'} = delete($opts{'-fitb'}); }
+    if (defined $opts{'-fitbh'} && !defined $opts{'fitbh'}) { $opts{'fitbh'} = delete($opts{'-fitbh'}); }
+    if (defined $opts{'-fitv'} && !defined $opts{'fitv'}) { $opts{'fitv'} = delete($opts{'-fitv'}); }
+    if (defined $opts{'-fitbv'} && !defined $opts{'fitbv'}) { $opts{'fitbv'} = delete($opts{'-fitbv'}); }
+    if (defined $opts{'-fitr'} && !defined $opts{'fitr'}) { $opts{'fitr'} = delete($opts{'-fitr'}); }
+    if (defined $opts{'-xyz'} && !defined $opts{'xyz'}) { $opts{'xyz'} = delete($opts{'-xyz'}); }
 
     # Page Mode Options
-    if      ($options{'-fullscreen'}) {
+    if      ($opts{'fullscreen'}) {
         $self->{'catalog'}->{'PageMode'} = PDFName('FullScreen');
-    } elsif ($options{'-thumbs'}) {
+    } elsif ($opts{'thumbs'}) {
         $self->{'catalog'}->{'PageMode'} = PDFName('UseThumbs');
-    } elsif ($options{'-outlines'}) {
+    } elsif ($opts{'outlines'}) {
         $self->{'catalog'}->{'PageMode'} = PDFName('UseOutlines');
     } else {
         $self->{'catalog'}->{'PageMode'} = PDFName('UseNone');
     }
 
     # Page Layout Options
-    if      ($options{'-singlepage'}) {
+    if      ($opts{'singlepage'}) {
         $self->{'catalog'}->{'PageLayout'} = PDFName('SinglePage');
-    } elsif ($options{'-onecolumn'}) {
+    } elsif ($opts{'onecolumn'}) {
         $self->{'catalog'}->{'PageLayout'} = PDFName('OneColumn');
-    } elsif ($options{'-twocolumnleft'}) {
+    } elsif ($opts{'twocolumnleft'}) {
         $self->{'catalog'}->{'PageLayout'} = PDFName('TwoColumnLeft');
-    } elsif ($options{'-twocolumnright'}) {
+    } elsif ($opts{'twocolumnright'}) {
         $self->{'catalog'}->{'PageLayout'} = PDFName('TwoColumnRight');
     } else {
         $self->{'catalog'}->{'PageLayout'} = PDFName('SinglePage');
@@ -1800,77 +1804,87 @@ sub preferences {
     $self->{'catalog'}->{'ViewerPreferences'} ||= PDFDict();
     $self->{'catalog'}->{'ViewerPreferences'}->realise();
 
-    if ($options{'-hidetoolbar'}) {
+    if ($opts{'hidetoolbar'}) {
         $self->{'catalog'}->{'ViewerPreferences'}->{'HideToolbar'} = PDFBool(1);
     }
-    if ($options{'-hidemenubar'}) {
+    if ($opts{'hidemenubar'}) {
         $self->{'catalog'}->{'ViewerPreferences'}->{'HideMenubar'} = PDFBool(1);
     }
-    if ($options{'-hidewindowui'}) {
+    if ($opts{'hidewindowui'}) {
         $self->{'catalog'}->{'ViewerPreferences'}->{'HideWindowUI'} = PDFBool(1);
     }
-    if ($options{'-fitwindow'}) {
+    if ($opts{'fitwindow'}) {
         $self->{'catalog'}->{'ViewerPreferences'}->{'FitWindow'} = PDFBool(1);
     }
-    if ($options{'-centerwindow'}) {
+    if ($opts{'centerwindow'}) {
         $self->{'catalog'}->{'ViewerPreferences'}->{'CenterWindow'} = PDFBool(1);
     }
-    if ($options{'-displaytitle'}) {
+    if ($opts{'displaytitle'}) {
         $self->{'catalog'}->{'ViewerPreferences'}->{'DisplayDocTitle'} = PDFBool(1);
     }
-    if ($options{'-righttoleft'}) {
+    if ($opts{'righttoleft'}) {
         $self->{'catalog'}->{'ViewerPreferences'}->{'Direction'} = PDFName('R2L');
     }
 
-    if      ($options{'-afterfullscreenthumbs'}) {
+    if      ($opts{'afterfullscreenthumbs'}) {
         $self->{'catalog'}->{'ViewerPreferences'}->{'NonFullScreenPageMode'} = PDFName('UseThumbs');
-    } elsif ($options{'-afterfullscreenoutlines'}) {
+    } elsif ($opts{'afterfullscreenoutlines'}) {
         $self->{'catalog'}->{'ViewerPreferences'}->{'NonFullScreenPageMode'} = PDFName('UseOutlines');
     } else {
         $self->{'catalog'}->{'ViewerPreferences'}->{'NonFullScreenPageMode'} = PDFName('UseNone');
     }
 
-    if ($options{'-printscalingnone'}) {
+    if ($opts{'printscalingnone'}) {
         $self->{'catalog'}->{'ViewerPreferences'}->{'PrintScaling'} = PDFName('None');
     }
 
-    if      ($options{'-simplex'}) {
+    if      ($opts{'simplex'}) {
         $self->{'catalog'}->{'ViewerPreferences'}->{'Duplex'} = PDFName('Simplex');
-    } elsif ($options{'-duplexfliplongedge'}) {
+    } elsif ($opts{'duplexfliplongedge'}) {
         $self->{'catalog'}->{'ViewerPreferences'}->{'Duplex'} = PDFName('DuplexFlipLongEdge');
-    } elsif ($options{'-duplexflipshortedge'}) {
+    } elsif ($opts{'duplexflipshortedge'}) {
         $self->{'catalog'}->{'ViewerPreferences'}->{'Duplex'} = PDFName('DuplexFlipShortEdge');
     }
 
     # Open Action
-    if ($options{'-firstpage'}) {
-        my ($page, %args) = @{$options{'-firstpage'}};
-        $args{'-fit'} = 1 unless scalar keys %args;
+    if ($opts{'firstpage'}) {
+        my ($page, %args) = @{$opts{'firstpage'}};
+        $args{'fit'} = 1 unless scalar keys %args;
 
         # $page can be either a page number (which needs to be wrapped
         # in PDFNum) or a page object (which doesn't).
         $page = PDFNum($page) unless ref($page);
 
-        if      (defined $args{'-fit'}) {
+	# copy dashed args names to preferred undashed names
+	if (defined $args{'-fit'} && !defined $args{'fit'}) { $args{'fit'} = delete($args{'-fit'}); }
+	if (defined $args{'-fith'} && !defined $args{'fith'}) { $args{'fith'} = delete($args{'-fith'}); }
+	if (defined $args{'-fitb'} && !defined $args{'fitb'}) { $args{'fitb'} = delete($args{'-fitb'}); }
+	if (defined $args{'-fitbh'} && !defined $args{'fitbh'}) { $args{'fitbh'} = delete($args{'-fitbh'}); }
+	if (defined $args{'-fitv'} && !defined $args{'fitv'}) { $args{'fitv'} = delete($args{'-fitv'}); }
+	if (defined $args{'-fitbv'} && !defined $args{'fitbv'}) { $args{'fitbv'} = delete($args{'-fitbv'}); }
+	if (defined $args{'-fitr'} && !defined $args{'fitr'}) { $args{'fitr'} = delete($args{'-fitr'}); }
+	if (defined $args{'-xyz'} && !defined $args{'xyz'}) { $args{'xyz'} = delete($args{'-xyz'}); }
+	
+        if      (defined $args{'fit'}) {
             $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('Fit'));
-        } elsif (defined $args{'-fith'}) {
-            $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('FitH'), PDFNum($args{'-fith'}));
-        } elsif (defined $args{'-fitb'}) {
+        } elsif (defined $args{'fith'}) {
+            $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('FitH'), PDFNum($args{'fith'}));
+        } elsif (defined $args{'fitb'}) {
             $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('FitB'));
-        } elsif (defined $args{'-fitbh'}) {
-            $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('FitBH'), PDFNum($args{'-fitbh'}));
-        } elsif (defined $args{'-fitv'}) {
-            $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('FitV'), PDFNum($args{'-fitv'}));
-        } elsif (defined $args{'-fitbv'}) {
-            $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('FitBV'), PDFNum($args{'-fitbv'}));
-        } elsif (defined $args{'-fitr'}) {
-            croak 'insufficient parameters to -fitr => []' unless scalar @{$args{'-fitr'}} == 4;
+        } elsif (defined $args{'fitbh'}) {
+            $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('FitBH'), PDFNum($args{'fitbh'}));
+        } elsif (defined $args{'fitv'}) {
+            $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('FitV'), PDFNum($args{'fitv'}));
+        } elsif (defined $args{'fitbv'}) {
+            $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('FitBV'), PDFNum($args{'fitbv'}));
+        } elsif (defined $args{'fitr'}) {
+            croak 'insufficient parameters to fitr => []' unless scalar @{$args{'fitr'}} == 4;
             $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('FitR'), 
-                map { PDFNum($_) } @{$args{'-fitr'}});
-        } elsif (defined $args{'-xyz'}) {
-            croak 'insufficient parameters to -xyz => []' unless scalar @{$args{'-xyz'}} == 3;
+                map { PDFNum($_) } @{$args{'fitr'}});
+        } elsif (defined $args{'xyz'}) {
+            croak 'insufficient parameters to xyz => []' unless scalar @{$args{'xyz'}} == 3;
             $self->{'catalog'}->{'OpenAction'} = PDFArray($page, PDFName('XYZ'), 
-                map { PDFNum($_) } @{$args{'-xyz'}});
+                map { PDFNum($_) } @{$args{'xyz'}});
         }
     }
     $self->{'pdf'}->out_obj($self->{'catalog'});
@@ -1925,7 +1939,7 @@ will be inserted in that position, pushing existing pages back by 1 (e.g.,
 C<page(5)> would insert an empty page 5, with the old page 5 now page 6,
 etc.
 
-If $page_number is -1, the new page is inserted as the second-last page;
+If $page_number is -1, the new page is inserted as the second-to-last page;
 if $page_number is 0, the new page is inserted as the last page.
 
 B<Example:>
@@ -1988,7 +2002,7 @@ B<Example:>
     $page = $pdf->open_page(-1);  # returns the last page
     $page = $pdf->open_page(999); # returns undef
 
-B<alternate name:> openpage
+B<Alternate name:> C<openpage>
 
 This is the older name; it is kept for compatibility until after June 2023
 (deprecated, as previously announced).
@@ -2111,13 +2125,13 @@ existing page.
 
 B<Example:>
 
-    $pdf = PDF::Builder->new();
-    $old = PDF::Builder->open('our/old.pdf');
+    my $pdf = PDF::Builder->new();
+    my $source = PDF::Builder->open('source.pdf');
 
     # Add page 2 from the old PDF as page 1 of the new PDF
-    $page = $pdf->import_page($old, 2);
+    my $page = $pdf->import_page($source, 2);
 
-    $pdf->saveas('our/new.pdf');
+    $pdf->saveas('sample.pdf');
 
 B<Note:> You can only import a page from an existing PDF file.
 
@@ -2261,22 +2275,22 @@ document.
 
 B<Example:>
 
-    $pdf = PDF::Builder->new();
-    $old = PDF::Builder->open('our/old.pdf');
-    $page = $pdf->page();
-    $gfx = $page->gfx();
+    my $pdf = PDF::Builder->new();
+    my $source = PDF::Builder->open('source.pdf');
+    my $page = $pdf->page();
 
-    # Import Page 2 from the old PDF
-    $xo = $pdf->embed_page($old, 2);
+    # Import Page 2 from the source PDF
+    my $object = $pdf->embed_page($source, 2);
 
     # Add it to the new PDF's first page at 1/2 scale
-    $gfx->formimage($xo, 0, 0, 0.5);
+    my ($x, $y) = (0, 0);
+    $page->object($xo, $x, $y, 0.5);
 
-    $pdf->save('our/new.pdf');
+    $pdf->save('sample.pdf');
 
 B<Note:> You can only import a page from an existing PDF file.
 
-B<alternate name:> importPageIntoForm
+B<Alternate name:> C<importPageIntoForm>
 
 This is the older name; it is kept for compatibility.
 
@@ -2419,7 +2433,7 @@ sub _walk_obj {
 
 Returns the number of pages in the document.
 
-B<alternate name:> pages
+B<Alternate name:> C<pages>
 
 This is the old name; it is kept for compatibility.
 
@@ -2432,16 +2446,27 @@ sub page_count {
     return scalar @{$self->{'pagestack'}};
 }
 
-=item $pdf->page_labels($index, $options)
+=item $pdf->page_labels($page_number, $opts)
 
-Sets page label options, for the page-selection slider thumb (I<not> the
-outline/bookmarks). At this time, there is no method to automatically
-synchronize a page's label with the outline/bookmarks, or to somewhere on the
-printed page.
+Sets page label numbering format, for the Reader's page-selection slider thumb 
+(I<not> the outline/bookmarks). At this time, there is no method to 
+automatically synchronize a page's label with the outline/bookmarks, or to 
+somewhere on the printed page.
 
 Note that many PDF Readers ignore these settings, and (at most) simply give
 you the physical page number 1, 2, 3,... instead of the page label specified 
 here.
+
+    # Generate a 30-page PDF
+    my $pdf = PDF::Builder->new();
+    $pdf->page() for 1..30;
+
+    # Number pages i to v, 1 to 20, and A-1 to A-5, respectively
+    $pdf->page_labels(1, 'style' => 'roman');
+    $pdf->page_labels(6, 'style' => 'decimal');
+    $pdf->page_labels(26, 'style' => 'decimal', 'prefix' => 'A-');
+
+    $pdf->save('sample.pdf');
 
 B<Supported Options:>
 
@@ -2483,71 +2508,85 @@ the counter).
 B<Example:>
 
     # Start with lowercase Roman Numerals at the 1st page, starting with i (1)
-    $pdf->page_labels(0, {
-        style => 'roman',
-    });
+    $pdf->page_labels(0, 
+        'style' => 'roman',
+    );
 
     # Switch to Arabic (decimal) at the 5th page, starting with 1
-    $pdf->page_labels(4, {
-        style => 'decimal',
-    });
+    $pdf->page_labels(4, 
+        'style' => 'decimal',
+    );
 
     # invalid style at the 25th page, should just continue 
     # with decimal at the current counter
-    $pdf->page_labels(24, {
-        style => 'glorp',  # fail over to decimal
-	start => 21,  # necessary, otherwise would restart at 1
-    });
+    $pdf->page_labels(24, 
+        'style' => 'raman_noodles',  # fail over to decimal
+	   # note that PDF::API2 will see the 'r' and treat it as 'roman'
+	'start' => 21,  # necessary, otherwise would restart at 1
+    );
 
     # No page label at the 31st and 32nd pages. Note that this could be
     # confusing to the person viewing the PDF, but may be appropriate if
     # the page itself has no numbering.
-    $pdf->page_labels(30, {
-        style => 'nocounter',
-    });
+    $pdf->page_labels(30, 
+        'style' => 'nocounter',
+    );
 
     # Numbering for Appendix A at the 33rd page, A-1, A-2,...
-    $pdf->page_labels(32, {
-        start => 1,  # unnecessary
-        prefix => 'A-'
-    });
+    $pdf->page_labels(32, 
+        'start' => 1,  # unnecessary
+        'prefix' => 'A-'
+    );
 
     # Numbering for Appendix B at the 37th page, B-1, B-2,...
-    $pdf->page_labels( 36, {
-        prefix => 'B-'
-    });
+    $pdf->page_labels( 36, 
+        'prefix' => 'B-'
+    );
 
     # Numbering for the Index at the 41st page, Index I, Index II,...
-    $pdf->page_labels(40, {
-        style => 'Roman',
-        start => 1,  # unnecessary
-        prefix => 'Index '  # note trailing space
-    });
+    $pdf->page_labels(40, 
+        'style' => 'Roman',
+        'start' => 1,  # unnecessary
+        'prefix' => 'Index '  # note trailing space
+    );
 
     # Unnumbered 'Index' at the 45th page, Index, Index,...
-    $pdf->page_labels(40, {
-        style => 'nocounter',
-        prefix => 'Index '
-    });
+    $pdf->page_labels(40, 
+        'style' => 'nocounter',
+        'prefix' => 'Index '
+    );
 
-B<alternate name:> pageLabel
+B<Alternate name:> C<pageLabel>
 
-B<alternate option names:> -style, -start, -prefix
-
-These are the old names; they are kept for compatibility.
+This old method name is retained for compatibility with old user code.
+Note that with C<pageLabel>, you need to make the "options" list an anonymous
+hash by placing B<{ }> around the entire list, even if it has only one item
+in it.
 
 =cut
 
-sub page_labels {
+# in the new method, parameters are organized a bit differently than in the 
+# old pageLabel(). rather than an opts hashref, it is a hash.
+sub page_labels { 
+    my ($self, $page_number, %opts) = @_;
+    return pageLabel($self, $page_number, \%opts);
+}
+
+# actually, the old code
+sub pageLabel {
     my $self = shift();
 
     $self->{'catalog'}->{'PageLabels'} ||= PDFDict();
     $self->{'catalog'}->{'PageLabels'}->{'Nums'} ||= PDFArray();
 
     my $nums = $self->{'catalog'}->{'PageLabels'}->{'Nums'};
-    while (scalar @_) {
+    while (scalar @_) { # should we have only one trip through here?
         my $index = shift();
         my $opts = shift();
+        # copy dashed options to preferred undashed option names
+        if (defined $opts->{'-style'} && !defined $opts->{'style'}) { $opts->{'style'} = delete($opts->{'-style'}); }
+        if (defined $opts->{'-prefix'} && !defined $opts->{'prefix'}) { $opts->{'prefix'} = delete($opts->{'-prefix'}); }
+        if (defined $opts->{'-start'} && !defined $opts->{'start'}) { $opts->{'start'} = delete($opts->{'-start'}); }
 
         $nums->add_elements(PDFNum($index));
 
@@ -2562,16 +2601,6 @@ sub page_labels {
 	    } else {
 		# for nocounter (no styled counter), do not create /S entry
 	    }
-        } elsif (defined $opts->{'-style'}) {
-	    if ($opts->{'-style'} ne 'nocounter') {
-		# defaults to decimal if unrecogized style given
-                $d->{'S'} = PDFName($opts->{'-style'} eq 'Roman' ? 'R' :
-                                    $opts->{'-style'} eq 'roman' ? 'r' :
-                                    $opts->{'-style'} eq 'Alpha' ? 'A' :
-                                    $opts->{'-style'} eq 'alpha' ? 'a' : 'D');
-	    } else {
-		# for nocounter (no styled counter), do not create /S entry
-	    }
         } else {
 	    # default to decimal counter if no style given
             $d->{'S'} = PDFName('D');
@@ -2581,16 +2610,9 @@ sub page_labels {
 	    # 'Content' supposedly treated differently
             $d->{'P'} = PDFString($opts->{'prefix'}, 's');
         }
-        if (defined $opts->{'-prefix'}) {
-	    # 'Content' supposedly treated differently
-            $d->{'P'} = PDFString($opts->{'-prefix'}, 's');
-        }
 
         if (defined $opts->{'start'}) {
             $d->{'St'} = PDFNum($opts->{'start'});
-        }
-        if (defined $opts->{'-start'}) {
-            $d->{'St'} = PDFNum($opts->{'-start'});
         }
 
         $nums->add_elements($d);
@@ -2619,7 +2641,7 @@ sub userunit {
         $value = 1.0;
     }
 
-    PDF::Builder->verCheckOutput(1.6, "set User Unit");
+    $self->verCheckOutput(1.6, "set User Unit");
     $self->{'pdf'}->{' userUnit'} = float($value);
     $self->{'pages'}->{'UserUnit'} = PDFNum(float($value));
     if (defined $self->{'pages'}->{'MediaBox'}) { # should be default letter
@@ -2632,7 +2654,7 @@ sub userunit {
     return $self;
 }
 
-# utility to handle calling page_size, and name with or without -orient setting
+# utility to handle calling page_size, and name with or without 'orient' setting
 sub _bbox {
     my ($self, @corners) = @_;
 
@@ -2641,18 +2663,21 @@ sub _bbox {
     if (scalar @corners && $corners[0] =~ m/[a-z]/i) { $isName = 1; }
 
     if (scalar @corners == 3) {
-	    # name plus one option (-orient)
+	    # name plus one option (orient)
 	    my ($name, %opts) = @corners;
+	    # copy dashed name options to preferred undashed name
+	    if (defined $opts{'-orient'} && !defined $opts{'orient'}) { $opts{'orient'} = delete($opts{'-orient'}); }
+
 	    @corners = page_size(($name)); # now 4 numeric values
-	    if (defined $opts{'-orient'}) {
-	        if ($opts{'-orient'} =~ m/^l/i) { # 'landscape' or just 'l'
+	    if (defined $opts{'orient'}) {
+	        if ($opts{'orient'} =~ m/^l/i) { # 'landscape' or just 'l'
 		        # 0 0 W H -> 0 0 H W
 		        my $temp;
 		        $temp = $corners[2]; $corners[2] = $corners[3]; $corners[3] = $temp;
 	        }
 	    }
     } else {
-        # name without [-orient] option, or numeric coordinates given
+        # name without [orient] option, or numeric coordinates given
         @corners = page_size(@corners);
     }
 
@@ -2697,7 +2722,7 @@ sub _get_bbox {
 
 =item $pdf->mediabox($name)
 
-=item $pdf->mediabox($name, -orient => 'orientation')
+=item $pdf->mediabox($name, 'orient' => 'orientation')
 
 =item $pdf->mediabox($w,$h)
 
@@ -2726,7 +2751,7 @@ sub mediabox {
 
 =item $pdf->cropbox($name)
 
-=item $pdf->cropbox($name, -orient => 'orientation')
+=item $pdf->cropbox($name, 'orient' => 'orientation')
 
 =item $pdf->cropbox($w,$h)
 
@@ -2754,7 +2779,7 @@ sub cropbox {
 
 =item $pdf->bleedbox($name)
 
-=item $pdf->bleedbox($name, -orient => 'orientation')
+=item $pdf->bleedbox($name, 'orient' => 'orientation')
 
 =item $pdf->bleedbox($w,$h)
 
@@ -2782,7 +2807,7 @@ sub bleedbox {
 
 =item $pdf->trimbox($name)
 
-=item $pdf->trimbox($name, -orient => 'orientation')
+=item $pdf->trimbox($name, 'orient' => 'orientation')
 
 =item $pdf->trimbox($w,$h)
 
@@ -2810,7 +2835,7 @@ sub trimbox {
 
 =item $pdf->artbox($name)
 
-=item $pdf->artbox($name, -orient => 'orientation')
+=item $pdf->artbox($name, 'orient' => 'orientation')
 
 =item $pdf->artbox($w,$h)
 
@@ -2842,7 +2867,7 @@ sub artbox {
 
 =over
 
-=item $font = $pdf->corefont($fontname, %options)
+=item $font = $pdf->corefont($fontname, %opts)
 
 Returns a new Adobe core font object. For details, 
 see L<PDF::Builder::Docs/Core Fonts>. Note that this is an Adobe-standard
@@ -2854,16 +2879,18 @@ See also L<PDF::Builder::Resource::Font::CoreFont>.
 
 sub corefont {
     my ($self, $name, %opts) = @_;
+    # copy dashed name options to preferred undashed format
+    if (defined $opts{'-unicodemap'} && !defined $opts{'unicodemap'}) { $opts{'unicodemap'} = delete($opts{'-unicodemap'}); }
 
     require PDF::Builder::Resource::Font::CoreFont;
     my $obj = PDF::Builder::Resource::Font::CoreFont->new($self->{'pdf'}, $name, %opts);
     $self->{'pdf'}->out_obj($self->{'pages'});
-    $obj->tounicodemap() if $opts{'-unicodemap'}; # UTF-8 not usable
+    $obj->tounicodemap() if $opts{'unicodemap'}; # UTF-8 not usable
 
     return $obj;
 }
 
-=item $font = $pdf->psfont($ps_file, %options)
+=item $font = $pdf->psfont($ps_file, %opts)
 
 Returns a new Adobe Type1 ("PostScript") font object.
 For details, see L<PDF::Builder::Docs/PS Fonts>.
@@ -2874,8 +2901,12 @@ See also L<PDF::Builder::Resource::Font::Postscript>.
 
 sub psfont {
     my ($self, $psf, %opts) = @_;
+    # copy dashed name options to preferred undashed format
+    if (defined $opts{'-afmfile'} && !defined $opts{'afmfile'}) { $opts{'afmfile'} = delete($opts{'-afmfile'}); }
+    if (defined $opts{'-pfmfile'} && !defined $opts{'pfmfile'}) { $opts{'pfmfile'} = delete($opts{'-pfmfile'}); }
+    if (defined $opts{'-unicodemap'} && !defined $opts{'unicodemap'}) { $opts{'unicodemap'} = delete($opts{'-unicodemap'}); }
 
-    foreach my $o (qw(-afmfile -pfmfile)) {
+    foreach my $o (qw(afmfile pfmfile)) {
         next unless defined $opts{$o};
         $opts{$o} = _findFont($opts{$o});
     }
@@ -2884,12 +2915,12 @@ sub psfont {
     my $obj = PDF::Builder::Resource::Font::Postscript->new($self->{'pdf'}, $psf, %opts);
 
     $self->{'pdf'}->out_obj($self->{'pages'});
-    $obj->tounicodemap() if $opts{'-unicodemap'}; # UTF-8 not usable
+    $obj->tounicodemap() if $opts{'unicodemap'}; # UTF-8 not usable
 
     return $obj;
 }
 
-=item $font = $pdf->ttfont($ttf_file, %options)
+=item $font = $pdf->ttfont($ttf_file, %opts)
 
 Returns a new TrueType (or OpenType) font object.
 For details, see L<PDF::Builder::Docs/TrueType Fonts>.
@@ -2898,24 +2929,28 @@ For details, see L<PDF::Builder::Docs/TrueType Fonts>.
 
 sub ttfont {
     my ($self, $file, %opts) = @_;
+    # copy dashed name options to preferred undashed format
+    if (defined $opts{'-unicodemap'} && !defined $opts{'unicodemap'}) { $opts{'unicodemap'} = delete($opts{'-unicodemap'}); }
+    if (defined $opts{'-noembed'} && !defined $opts{'noembed'}) { $opts{'noembed'} = delete($opts{'-noembed'}); }
 
     # PDF::Builder doesn't set BaseEncoding for TrueType fonts, so text
     # isn't searchable unless a ToUnicode CMap is included.  Include
     # the ToUnicode CMap by default, but allow it to be disabled (for
-    # performance and file size reasons) by setting -unicodemap to 0.
-    $opts{'-unicodemap'} = 1 unless exists $opts{'-unicodemap'};
+    # performance and file size reasons) by setting 'unicodemap' to 0.
+    $opts{'unicodemap'} = 1 unless exists $opts{'unicodemap'};
+    $opts{'noembed'}    = 0 unless exists $opts{'noembed'};
 
     $file = _findFont($file);
     require PDF::Builder::Resource::CIDFont::TrueType;
     my $obj = PDF::Builder::Resource::CIDFont::TrueType->new($self->{'pdf'}, $file, %opts);
 
     $self->{'pdf'}->out_obj($self->{'pages'});
-    $obj->tounicodemap() if $opts{'-unicodemap'};
+    $obj->tounicodemap() if $opts{'unicodemap'};
 
     return $obj;
 }
 
-=item $font = $pdf->bdfont($bdf_file, @options)
+=item $font = $pdf->bdfont($bdf_file, @opts)
 
 Returns a new BDF (bitmapped distribution format) font object, based on the 
 specified Adobe BDF file.
@@ -2936,7 +2971,7 @@ sub bdfont {
     return $obj;
 }
 
-=item $font = $pdf->cjkfont($cjkname, %options)
+=item $font = $pdf->cjkfont($cjkname, %opts)
 
 Returns a new CJK font object. These are TrueType-like fonts for East Asian
 languages (Chinese, Japanese, Korean).
@@ -2944,10 +2979,15 @@ For details, see L<PDF::Builder::Docs/CJK Fonts>.
 
 B<NOTE:> C<cjkfont> is quite old and is not well supported. We recommend that
 you try using C<ttfont> (or another font routine, if not TTF/OTF) with the
-appropriate CJK font file. Most appear to be .ttf or .otf format. Support for
+appropriate CJK font file. Most appear to be .ttf or .otf format. PDFs created
+using C<cjkfont> may not be fully portable, and support for
 C<cjkfont> I<may> be dropped in a future release. We would appreciate hearing
 from you if you are successfully using C<cjkfont>, and are unable to use
 C<ttfont> instead.
+
+Among other things, C<cjkfont> selections are limited, as they require CMAP
+files; they may or may not subset correctly; and they can not be used as the
+base for synthetic fonts.
 
 See also L<PDF::Builder::Resource::CIDFont::CJKFont>
 
@@ -2955,24 +2995,28 @@ See also L<PDF::Builder::Resource::CIDFont::CJKFont>
 
 sub cjkfont {
     my ($self, $name, %opts) = @_;
+    # copy dashed name options to preferred undashed format
+    if (defined $opts{'-unicodemap'} && !defined $opts{'unicodemap'}) { $opts{'unicodemap'} = delete($opts{'-unicodemap'}); }
 
     require PDF::Builder::Resource::CIDFont::CJKFont;
     my $obj = PDF::Builder::Resource::CIDFont::CJKFont->new($self->{'pdf'}, $name, %opts);
 
     $self->{'pdf'}->out_obj($self->{'pages'});
-    $obj->tounicodemap() if $opts{'-unicodemap'};
+    $obj->tounicodemap() if $opts{'unicodemap'};
 
     return $obj;
 }
 
-=item my $font = $pdf->font($name, %options)
+=item $font = $pdf->font($name, %opts)
 
 A convenience function to add a font to the PDF without having to specify the
 format. Returns the font object, to be used by L<PDF::Builder::Content>.
 
-The font C<$name> is either the name of one of the 
-L<standard 14 fonts|PDF::Builder::Resource::Font::CoreFont/"STANDARD FONTS"> 
-(e.g., Helvetica) or the path to a font file.
+The font C<$name> is either the name of one of the standard 14 fonts 
+(L<PDF::Builder::Resource::Font::CoreFont/STANDARD FONTS>), such as
+Helvetica or the path to a font file.
+There are 15 additional core fonts on a Windows system.
+Note that the exact name of a core font needs to be given.
 The file extension (if path given) determines what type of font file it is.
 
     my $pdf = PDF::Builder->new();
@@ -2989,7 +3033,7 @@ The file extension (if path given) determines what type of font file it is.
     $content->font($font2, 12);
     $content->text('This is some sample text.');
 
-    $pdf->save('sample.pdf');
+    $pdf->saveas('sample.pdf');
 
 The path can be omitted if the font file is in the current directory or one of
 the directories returned by C<font_path>.
@@ -2997,36 +3041,36 @@ the directories returned by C<font_path>.
 TrueType (ttf/otf), Adobe PostScript Type 1 (pfa/pfb), and Adobe Glyph Bitmap
 Distribution Format (bdf) fonts are supported.
 
-The following C<%options> are available:
+The following options (C<%opts>) are available:
 
 =over
 
-=item * format
+=item format
 
 The font format is normally detected automatically based on the file's
 extension.  If you're using a font with an atypical extension, you can set
 C<format> to one of C<truetype> (TrueType or OpenType), C<type1> (PostScript
 Type 1), or C<bitmap> (Adobe Bitmap).
 
-=item * kerning
+=item dokern
 
 Kerning (automatic adjustment of space between pairs of characters) is enabled
 by default if the font includes this information.  Set this option to false to
 disable.
 
-=item * afm_file (PostScript Type 1 fonts only)
+=item afm_file (PostScript Type 1 fonts only)
 
 Specifies the location of the font metrics file.
 
-=item * pfm_file (PostScript Type 1 fonts only)
+=item pfm_file (PostScript Type 1 fonts only)
 
 Specifies the location of the printer font metrics file.  This option overrides
-the -encode option.
+the encode option.
 
-=item * embed (TrueType fonts only)
+=item embed (TrueType fonts only)
 
 Fonts are embedded in the PDF by default, which is required to ensure that they
-can be viewed properly on a device that doesn't have the font installed.  Set
+can be viewed properly on a device that doesn't have the font installed. Set
 this option to false to prevent the font from being embedded.
 
 =back
@@ -3034,35 +3078,43 @@ this option to false to prevent the font from being embedded.
 =cut
 
 sub font {
-    my ($self, $name, %options) = @_;
+    my ($self, $name, %opts) = @_;
+    # copy dashed name options to preferred undashed format
+    if (defined $opts{'-encode'} && !defined $opts{'encode'}) { $opts{'encode'} = delete($opts{'-encode'}); }
+    if (defined $opts{'-kerning'} && !defined $opts{'kerning'}) { $opts{'kerning'} = delete($opts{'-kerning'}); }
+    if (defined $opts{'-dokern'} && !defined $opts{'dokern'}) { $opts{'dokern'} = delete($opts{'-dokern'}); }
+    if (defined $opts{'-embed'} && !defined $opts{'embed'}) { $opts{'embed'} = delete($opts{'-embed'}); }
+    if (defined $opts{'-afmfile'} && !defined $opts{'afmfile'}) { $opts{'afmfile'} = delete($opts{'-afmfile'}); }
+    if (defined $opts{'-pfmfile'} && !defined $opts{'pfmfile'}) { $opts{'pfmfile'} = delete($opts{'-pfmfile'}); }
 
-    if (exists $options{'kerning'}) {
-        $options{'-dokern'} = delete $options{'kerning'};
+    if (exists $opts{'kerning'}) {
+        $opts{'dokern'} = delete $opts{'kerning'};
     }
+    $opts{'dokern'} //= 1; # kerning ON by default for font()
 
     require PDF::Builder::Resource::Font::CoreFont;
     if (PDF::Builder::Resource::Font::CoreFont->is_standard($name)) {
-        return $self->corefont($name, %options);
+        return $self->corefont($name, %opts);
     }
 
-    my $format = $options{'format'};
+    my $format = $opts{'format'};
     $format //= ($name =~ /\.[ot]tf$/i ? 'truetype' :
                  $name =~ /\.pf[ab]$/i ? 'type1'    :
                  $name =~ /\.bdf$/i    ? 'bitmap'   : '');
 
     if      ($format eq 'truetype') {
-        $options{'embed'} //= 1;
-        return $self->ttfont($name, %options);
+        $opts{'embed'} //= 1;
+        return $self->ttfont($name, %opts);
     } elsif ($format eq 'type1') {
-        if (exists $options{'afm_file'}) {
-            $options{'-afmfile'} = delete $options{'afm_file'};
+        if (exists $opts{'afm_file'}) {
+            $opts{'afmfile'} = delete $opts{'afm_file'};
         }
-        if (exists $options{'pfm_file'}) {
-            $options{'-pfmfile'} = delete $options{'pfm_file'};
+        if (exists $opts{'pfm_file'}) {
+            $opts{'pfmfile'} = delete $opts{'pfm_file'};
         }
-        return $self->psfont($name, %options);
+        return $self->psfont($name, %opts);
     } elsif ($format eq 'bitmap') {
-        return $self->bdfont($name, %options);
+        return $self->bdfont($name, %opts);
     } elsif ($format) {
         croak "Unrecognized font format: $format";
     } elsif ($name =~ /(\..*)$/) {
@@ -3090,7 +3142,7 @@ Adds one or more directories to the list of paths to be searched for font files.
 
 Returns the font search path.
 
-B<alternate name:> addFontDirs
+B<Alternate name:> C<addFontDirs>
 
 Prior to recent changes to PDF::API2, this method was addFontDirs(). This 
 method is still available, but may be deprecated some time in the future.
@@ -3145,7 +3197,7 @@ sub _findFont {
     return;
 }
 
-=item $font = $pdf->synfont($basefont, %options)
+=item $font = $pdf->synfont($basefont, %opts)
 
 Returns a new synthetic font object. These are modifications to a core (or 
 PS/T1 or TTF/OTF) font, where the font may be replaced by a Type1 or Type3 
@@ -3155,35 +3207,43 @@ For details, see L<PDF::Builder::Docs/Synthetic Fonts>.
 
 See also L<PDF::Builder::Resource::Font::SynFont>
 
-B<alternate name:> synthetic_font
+B<Alternate name:> C<synthetic_font>
 
 Prior to recent PDF::API2 changes, the routine to create modified fonts was
 "synfont". PDF::API2 has renamed it to "synthetic_font", which I don't like,
 but to maintain compatibility, "synthetic_font" is available as an alias.
 
+There are also some minor option differences (incompatibilities) 
+discussed in C<SynFont>, including the value of 'bold' between the two entry
+points.
+
 =cut
 
-sub synthetic_font { return synfont(@_); } ## no critic
+sub synthetic_font { return synfont(@_, '-entry_point'=>'synthetic_font'); } ## no critic
 
 sub synfont {
     my ($self, $font, %opts) = @_;
+    # copy dashed name options to preferred undashed format
+    if (defined $opts{'-unicodemap'} && !defined $opts{'unicodemap'}) { $opts{'unicodemap'} = delete($opts{'-unicodemap'}); }
+    # define entry point in options if synfont
+    if (!defined $opts{'-entry_point'}) { $opts{'-entry_point'} = 'synfont'; }
 
     # PDF::Builder doesn't set BaseEncoding for TrueType fonts, so text
     # isn't searchable unless a ToUnicode CMap is included.  Include
     # the ToUnicode CMap by default, but allow it to be disabled (for
-    # performance and file size reasons) by setting -unicodemap to 0.
-    $opts{'-unicodemap'} = 1 unless exists $opts{'-unicodemap'};
+    # performance and file size reasons) by setting unicodemap to 0.
+    $opts{'unicodemap'} = 1 unless exists $opts{'unicodemap'};
 
     require PDF::Builder::Resource::Font::SynFont;
     my $obj = PDF::Builder::Resource::Font::SynFont->new($self->{'pdf'}, $font, %opts);
 
     $self->{'pdf'}->out_obj($self->{'pages'});
-    $obj->tounicodemap() if $opts{'-unicodemap'};
+    $obj->tounicodemap() if $opts{'unicodemap'};
 
     return $obj;
 }
 
-=item $font = $pdf->unifont(@fontspecs, %options)
+=item $font = $pdf->unifont(@fontspecs, %opts)
 
 Returns a new uni-font object, based on the specified fonts and options.
 
@@ -3191,11 +3251,11 @@ B<BEWARE:> This is not a true PDF-object, but a virtual/abstract font definition
 
 See also L<PDF::Builder::Resource::UniFont>.
 
-Valid %options are:
+Valid options (C<%opts>) are:
 
 =over
 
-=item -encode
+=item encode
 
 Changes the encoding of the font from its default.
 
@@ -3203,8 +3263,14 @@ Changes the encoding of the font from its default.
 
 =cut
 
+# tentatively deprecated in PDF::API2. suggests using Unicode-supporting
+# TTF instead. see also Resource/UniFont.pm (POD removed to discourage use).
 sub unifont {
     my ($self, @opts) = @_;
+    # must leave opts as an array, rather than as a hash, so option fixup 
+    # needs to be done within new(). opts is not just options (hash), but
+    # also a variable-length array of refs, which doesn't take kindly to
+    # being hashified!
 
     require PDF::Builder::Resource::UniFont;
     my $obj = PDF::Builder::Resource::UniFont->new($self->{'pdf'}, @opts);
@@ -3218,7 +3284,7 @@ sub unifont {
 
 =over
 
-=item $object = $pdf->image($file, %options);
+=item $object = $pdf->image($file, %opts);
 
 A convenience function to attempt to determine the image type, and import a 
 file of that type and return an object that can be placed as part of a page's 
@@ -3232,62 +3298,78 @@ content:
 
     $pdf->save('sample.pdf');
 
-C<$file> may be either a file name, a filehandle, or a L<GD::Image> object.
+C<$file> may be either a file name, a filehandle, or a 
+L<PDF::Builder::Resource::XObject::Image::GD> object.
 
-See L<PDF::API2::Content/"place"> for details about placing images on a page
+B<Caution:> Do not confuse this C<image> ($pdf-E<gt>) with the image method 
+found in the graphics (gfx) class ($gfx-E<gt>), used to actually place a
+read-in or decoded image on the page!
+
+See L<PDF::Builder::Content/image> for details about placing images on a page
 once they're imported.
 
 The image format is normally detected automatically based on the file's
-extension.  If passed a filehandle, image formats GIF, JPEG, and PNG will be
+extension (.gif, .png, .tif/.tiff, .jpg/.jpeg, .pnm/.pbm/.pgm/.ppm). If passed 
+a filehandle, image formats GIF, JPEG, PNM, and PNG will be
 detected based on the file's header. Unfortunately, at this time, other image
-formats cannot be automatically detected.
+formats (TIFF and GD) cannot be automatically detected. (TIFF I<could> be, 
+except that C<image_tiff()> cannot use a filehandle anyway as input when using 
+the libtiff library, which is highly recommended.)
 
 If the file has an atypical extension or the filehandle is for a different kind
 of image, you can set the C<format> option to one of the supported types:
 C<gif>, C<jpeg>, C<png>, C<pnm>, or C<tiff>.
 
-Note: PNG images that include an alpha (transparency) channel go through a
+B<Note:> PNG images that include an alpha (transparency) channel go through a
 relatively slow process of splitting the image into separate RGB and alpha
 components as is required by images in PDFs. If you're having performance
 issues, install Image::PNG::Libpng to speed this process up by
 an order of magnitude; either module will be used automatically if available.
-See L<image_png> for details.
+See the C<image_png> method for details.
+
+B<Note:> TIFF image processing is very slow if using the pure Perl decoder.
+We highly recommend using the Graphics::TIFF library to improve performance.
+See the C<image_tiff> method for details.
 
 =cut
 
 sub image {
-    my ($self, $file, %options) = @_;
+    my ($self, $file, %opts) = @_;
 
-    my $format = lc($options{'format'} // '');
+    my $format = lc($opts{'format'} // '');
 
     if (ref($file) eq 'GD::Image') {
-        return image_gd($file, %options);
+        return image_gd($file, %opts);
     }
     elsif (ref($file)) {
         $format ||= _detect_image_format($file);
+	# JPEG, PNG, GIF, and P*M files can be detected
+	# TIFF files cannot currently be detected
+	# GD images are created on-the-fly and don't have files
     }
     unless (ref($file)) {
-        $format ||= ($file =~ /\.jpe?g$/i   ? 'jpeg' :
-                     $file =~ /\.png$/i     ? 'png'  :
-                     $file =~ /\.gif$/i     ? 'gif'  :
-                     $file =~ /\.tiff?$/i   ? 'tiff' :
-                     $file =~ /\.p[bgp]m$/i ? 'pnm'  : '');
+        $format ||= ($file =~ /\.jpe?g$/i    ? 'jpeg' :
+                     $file =~ /\.png$/i      ? 'png'  :
+                     $file =~ /\.gif$/i      ? 'gif'  :
+                     $file =~ /\.tiff?$/i    ? 'tiff' :
+                     $file =~ /\.p[bgpn]m$/i ? 'pnm'  : '');
+	# GD images are created on-the-fly and don't have files
     }
 
     if ($format eq 'jpeg') {
-        return $self->image_jpeg($file, %options);
+        return $self->image_jpeg($file, %opts);
     }
     elsif ($format eq 'png') {
-        return $self->image_png($file, %options);
+        return $self->image_png($file, %opts);
     }
     elsif ($format eq 'gif') {
-        return $self->image_gif($file, %options);
+        return $self->image_gif($file, %opts);
     }
     elsif ($format eq 'tiff') {
-        return $self->image_tiff($file, %options);
+        return $self->image_tiff($file, %opts);
     }
     elsif ($format eq 'pnm') {
-        return $self->image_pnm($file, %options);
+        return $self->image_pnm($file, %opts);
     }
     elsif ($format) {
         croak "Unrecognized image format: $format";
@@ -3317,10 +3399,13 @@ sub _detect_image_format {
     return 'gif'  if $test =~ /^GIF\d\d[a-z]/;
     return 'jpeg' if $test =~ /^\xFF\xD8\xFF/;
     return 'png'  if $test =~ /^\x89PNG\x0D\x0A\x1A\x0A/;
+    return 'pnm'  if $test =~ /^\s*P[1-6]/;
+    # potentially could handle TIFF, except that libtiff cannot accept
+    # a filehandle as input for image_tiff(). GD images do not have files.
     return;
 }
 
-=item $jpeg = $pdf->image_jpeg($file, %options)
+=item $jpeg = $pdf->image_jpeg($file, %opts)
 
 Imports and returns a new JPEG image object. C<$file> may be either a filename 
 or a filehandle.
@@ -3341,7 +3426,7 @@ sub image_jpeg {
     return $obj;
 }
 
-=item $tiff = $pdf->image_tiff($file, %options)
+=item $tiff = $pdf->image_tiff($file, %opts)
 
 Imports and returns a new TIFF image object. C<$file> may be either a filename 
 or a filehandle.
@@ -3360,12 +3445,15 @@ a filename when using this library.
 
 sub image_tiff {
     my ($self, $file, %opts) = @_;
+    # copy dashed name options to preferred undashed format
+    if (defined $opts{'-nouseGT'} && !defined $opts{'nouseGT'}) { $opts{'nouseGT'} = delete($opts{'-nouseGT'}); }
+    if (defined $opts{'-silent'} && !defined $opts{'silent'}) { $opts{'silent'} = delete($opts{'-silent'}); }
 
     my ($rc, $obj);
     $rc = $self->LA_GT();
     if ($rc) {
 	# Graphics::TIFF available
-	if (defined $opts{'-nouseGT'} && $opts{'-nouseGT'} == 1) {
+	if (defined $opts{'nouseGT'} && $opts{'nouseGT'} == 1) {
 	   $rc = -1;  # don't use it
 	}
     }
@@ -3381,12 +3469,12 @@ sub image_tiff {
         $self->{'pdf'}->out_obj($self->{'pages'});
 
 	if ($rc == 0 && $MSG_COUNT[0]++ == 0) {
-	    # give warning message once, unless silenced (-silent) or
+	    # give warning message once, unless silenced (silent) or
 	    # deliberately not using Graphics::TIFF (rc == -1)
-	    if (!defined $opts{'-silent'} || $opts{'-silent'} == 0) {
+	    if (!defined $opts{'silent'} || $opts{'silent'} == 0) {
 	        print STDERR "Your system does not have Graphics::TIFF installed, ".
                          "so some\nTIFF functions may not run correctly.\n";
-		# even if -silent only once, COUNT still incremented
+		# even if silent only once, COUNT still incremented
 	    }
 	}
     }
@@ -3431,7 +3519,7 @@ sub LA_GT {
     return $rc;
 }
 
-=item $pnm = $pdf->image_pnm($file, %options)
+=item $pnm = $pdf->image_pnm($file, %opts)
 
 Imports and returns a new PNM image object. C<$file> may be either a filename 
 or a filehandle.
@@ -3455,7 +3543,7 @@ sub image_pnm {
     return $obj;
 }
 
-=item $png = $pdf->image_png($file, %options) 
+=item $png = $pdf->image_png($file, %opts) 
 
 Imports and returns a new PNG image object. C<$file> may be either 
 a filename or a filehandle.
@@ -3475,12 +3563,15 @@ a filename when using this library.
 
 sub image_png {
     my ($self, $file, %opts) = @_;
+    # copy dashed name options to preferred undashed format
+    if (defined $opts{'-nouseIPL'} && !defined $opts{'nouseIPL'}) { $opts{'nouseIPL'} = delete($opts{'-nouseIPL'}); }
+    if (defined $opts{'-silent'} && !defined $opts{'silent'}) { $opts{'silent'} = delete($opts{'-silent'}); }
 
     my ($rc, $obj);
     $rc = $self->LA_IPL();
     if ($rc) {
         # Image::PNG::Libpng available
-        if (defined $opts{'-nouseIPL'} && $opts{'-nouseIPL'} == 1) {
+        if (defined $opts{'nouseIPL'} && $opts{'nouseIPL'} == 1) {
             $rc = -1;  # don't use it
         }
     }
@@ -3496,12 +3587,12 @@ sub image_png {
         $self->{'pdf'}->out_obj($self->{'pages'});
 
         if ($rc == 0 && $MSG_COUNT[1]++ == 0) {
-            # give warning message once, unless silenced (-silent) or
+            # give warning message once, unless silenced (silent) or
             # deliberately not using Image::PNG::Libpng (rc == -1)
-            if (!defined $opts{'-silent'} || $opts{'-silent'} == 0) {
+            if (!defined $opts{'silent'} || $opts{'silent'} == 0) {
                 print STDERR "Your system does not have Image::PNG::Libpng installed, ".
                              "so some\nPNG functions may not run correctly.\n";
-                # even if -silent only once, COUNT still incremented
+                # even if silent only once, COUNT still incremented
             }
         }
     }
@@ -3545,7 +3636,7 @@ sub LA_IPL {
     return $rc;
 }
 
-=item $gif = $pdf->image_gif($file, %options)
+=item $gif = $pdf->image_gif($file, %opts)
 
 Imports and returns a new GIF image object. C<$file> may be either a filename 
 or a filehandle.
@@ -3566,7 +3657,7 @@ sub image_gif {
     return $obj;
 }
 
-=item $gdf = $pdf->image_gd($gd_object, %options)
+=item $gdf = $pdf->image_gd($gd_object, %opts)
 
 Imports and returns a new image object from Image::GD.
 
@@ -3577,10 +3668,10 @@ and C<examples/Content.pl> for some examples of placing an image on a page
 =cut
 
 sub image_gd {
-    my ($self, $gd, %options) = @_;
+    my ($self, $gd, %opts) = @_;
 
     require PDF::Builder::Resource::XObject::Image::GD;
-    my $obj = PDF::Builder::Resource::XObject::Image::GD->new($self->{'pdf'}, $gd, %options);
+    my $obj = PDF::Builder::Resource::XObject::Image::GD->new($self->{'pdf'}, $gd, %opts);
     $self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
@@ -3592,6 +3683,8 @@ sub image_gd {
 
 =over
 
+=item $colorspace = $pdf->colorspace($type, @arguments)
+
 Colorspaces can be added to a PDF to either specifically control the output
 color on a particular device (spot colors, device colors) or to save space by
 limiting the available colors to a defined color palette (web-safe palette, ACT
@@ -3600,7 +3693,7 @@ file).
 Once added to the PDF, they can be used in place of regular hex codes or named
 colors:
 
-    my $pdf = PDF::API2->new();
+    my $pdf = PDF::Builder->new();
     my $page = $pdf->page();
     my $content = $page->graphics();
 
@@ -3624,26 +3717,34 @@ The following types of colorspaces are supported
 
 =over
 
-=item $spot = $pdf->colorspace('spot', $tint, $alt_color);
+=item spot
+
+    my $spot = $pdf->colorspace('spot', $tint, $alt_color);
 
 Spot colors are used to instruct a device (usually a printer) to use or emulate
-a particular ink color (C<$tint>) for parts of the document.  An C<$alt_color>
+a particular ink color (C<$tint>) for parts of the document. An C<$alt_color>
 is provided for devices (e.g. PDF viewers) that don't know how to produce the
-named color.  It can either be an approximation of the color in RGB, CMYK, or
+named color. It can either be an approximation of the color in RGB, CMYK, or
 HSV formats, or a wildly different color (e.g. 100% magenta, C<%0F00>) to make
 it clear if the spot color isn't being used as expected.
 
-=item $web = $pdf->colorspace('web');
+=item web
+
+    my $web = $pdf->colorspace('web');
 
 The web-safe color palette is a historical collection of colors that was used
 when many display devices only supported 256 colors.
 
-=item $act = $pdf->colorspace('act', $filename);
+=item act
+
+    my $act = $pdf->colorspace('act', $filename);
 
 An Adobe Color Table (ACT) file provides a custom palette of colors that can be
 referenced by PDF graphics and text drawing commands.
 
-=item $devicen = $pdf->colorspace('device', @colorspaces);
+=item device
+
+    my $devicen = $pdf->colorspace('device', @colorspaces);
 
 A device-specific colorspace allows for precise color output on a given device
 (typically a printing press), bypassing the normal color interpretation
@@ -3651,7 +3752,7 @@ performed by raster image processors (RIPs).
 
 Device colorspaces are also needed if you want to blend spot colors:
 
-    my $pdf = PDF::API2->new();
+    my $pdf = PDF::Builder->new();
     my $page = $pdf->page();
     my $content = $page->graphics();
 
@@ -3712,13 +3813,10 @@ reference to the file format's specification.
 =cut
 
 sub colorspace_act {
-    my ($self, $file, %opts) = @_;
+    my ($self, $file) = @_;
 
     require PDF::Builder::Resource::ColorSpace::Indexed::ACTFile;
-    my $obj = PDF::Builder::Resource::ColorSpace::Indexed::ACTFile->new($self->{'pdf'}, $file);
-   #$self->{'pdf'}->out_obj($self->{'pages'});
-
-    return $obj;
+    return PDF::Builder::Resource::ColorSpace::Indexed::ACTFile->new($self->{'pdf'}, $file);
 }
 
 =item $cs = $pdf->colorspace_web()
@@ -3727,18 +3825,11 @@ Returns a new colorspace-object based on the "web-safe" color palette.
 
 =cut
 
-# =item $cs = $pdf->colorspace_web($file, %options)   no current options
-# =item $cs = $pdf->colorspace_web($file)   no current file
-
 sub colorspace_web {
-    my ($self, $file, %opts) = @_;
+    my ($self) = @_;
 
     require PDF::Builder::Resource::ColorSpace::Indexed::WebColor;
-    my $obj = PDF::Builder::Resource::ColorSpace::Indexed::WebColor->new($self->{'pdf'});
-
-   #$self->{'pdf'}->out_obj($self->{'pages'});
-
-    return $obj;
+    return PDF::Builder::Resource::ColorSpace::Indexed::WebColor->new($self->{'pdf'});
 }
 
 =item $cs = $pdf->colorspace_hue()
@@ -3749,17 +3840,11 @@ See L<PDF::Builder::Resource::ColorSpace::Indexed::Hue> for an explanation.
 
 =cut
 
-# =item $cs = $pdf->colorspace_hue($file, %options)   no current options
-# =item $cs = $pdf->colorspace_hue($file)   no current file
-
 sub colorspace_hue {
-    my ($self, $file, %opts) = @_;
+    my ($self) = @_;
 
     require PDF::Builder::Resource::ColorSpace::Indexed::Hue;
-    my $obj = PDF::Builder::Resource::ColorSpace::Indexed::Hue->new($self->{'pdf'});
-   #$self->{'pdf'}->out_obj($self->{'pages'});
-
-    return $obj;
+    return PDF::Builder::Resource::ColorSpace::Indexed::Hue->new($self->{'pdf'});
 }
 
 =item $cs = $pdf->colorspace_separation($tint, $color)
@@ -3782,10 +3867,10 @@ sub colorspace_separation {
     my ($self, $tint, @clr) = @_;
 
     require PDF::Builder::Resource::ColorSpace::Separation;
-    my $obj = PDF::Builder::Resource::ColorSpace::Separation->new($self->{'pdf'}, pdfkey(), $tint, @clr);
-   #$self->{'pdf'}->out_obj($self->{'pages'});
-
-    return $obj;
+    return PDF::Builder::Resource::ColorSpace::Separation->new($self->{'pdf'}, 
+	                                                       pdfkey(), 
+							       $tint, 
+							       @clr);
 }
 
 =item $cs = $pdf->colorspace_devicen(\@tintCSx, $samples)
@@ -3815,10 +3900,10 @@ sub colorspace_devicen {
     $samples ||= 2;
 
     require PDF::Builder::Resource::ColorSpace::DeviceN;
-    my $obj = PDF::Builder::Resource::ColorSpace::DeviceN->new($self->{'pdf'}, pdfkey(), $clrs, $samples);
-   #$self->{'pdf'}->out_obj($self->{'pages'});
-
-    return $obj;
+    return PDF::Builder::Resource::ColorSpace::DeviceN->new($self->{'pdf'}, 
+	                                                    pdfkey(), 
+							    $clrs, 
+							    $samples);
 }
 
 =back
@@ -3832,72 +3917,77 @@ elsewhere.
 
 =over
 
-=item $bc = $pdf->xo_codabar(%options)
+=item $bc = $pdf->xo_codabar(%opts)
 
-=item $bc = $pdf->xo_code128(%options)
+=item $bc = $pdf->xo_code128(%opts)
 
-=item $bc = $pdf->xo_2of5int(%options)
+=item $bc = $pdf->xo_2of5int(%opts)
 
-=item $bc = $pdf->xo_3of9(%options)
+=item $bc = $pdf->xo_3of9(%opts)
 
-=item $bc = $pdf->xo_ean13(%options)
+=item $bc = $pdf->xo_ean13(%opts)
 
 Creates the specified barcode object as a form XObject.
 
 =cut
 
+# TBD PDF::API2 now has a convenience function to handle all the barcodes,
+# but still keeps all the existing barcodes
+#
 # TBD consider moving these to a BarCodes subdirectory, as the number of bar
 # code routines increases
 
 sub xo_code128 {
-    my ($self, @options) = @_;
+    my ($self, @opts) = @_;
 
     require PDF::Builder::Resource::XObject::Form::BarCode::code128;
-    my $obj = PDF::Builder::Resource::XObject::Form::BarCode::code128->new($self->{'pdf'}, @options);
+    my $obj = PDF::Builder::Resource::XObject::Form::BarCode::code128->new($self->{'pdf'}, @opts);
     $self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
 }
 
 sub xo_codabar {
-    my ($self, @options) = @_;
+    my ($self, @opts) = @_;
 
     require PDF::Builder::Resource::XObject::Form::BarCode::codabar;
-    my $obj = PDF::Builder::Resource::XObject::Form::BarCode::codabar->new($self->{'pdf'}, @options);
+    my $obj = PDF::Builder::Resource::XObject::Form::BarCode::codabar->new($self->{'pdf'}, @opts);
     $self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
 }
 
 sub xo_2of5int {
-    my ($self, @options) = @_;
+    my ($self, @opts) = @_;
 
     require PDF::Builder::Resource::XObject::Form::BarCode::int2of5;
-    my $obj = PDF::Builder::Resource::XObject::Form::BarCode::int2of5->new($self->{'pdf'}, @options);
+    my $obj = PDF::Builder::Resource::XObject::Form::BarCode::int2of5->new($self->{'pdf'}, @opts);
     $self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
 }
 
 sub xo_3of9 {
-    my ($self, @options) = @_;
+    my ($self, @opts) = @_;
 
     require PDF::Builder::Resource::XObject::Form::BarCode::code3of9;
-    my $obj = PDF::Builder::Resource::XObject::Form::BarCode::code3of9->new($self->{'pdf'}, @options);
+    my $obj = PDF::Builder::Resource::XObject::Form::BarCode::code3of9->new($self->{'pdf'}, @opts);
     $self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
 }
 
 sub xo_ean13 {
-    my ($self, @options) = @_;
+    my ($self, @opts) = @_;
 
     require PDF::Builder::Resource::XObject::Form::BarCode::ean13;
-    my $obj = PDF::Builder::Resource::XObject::Form::BarCode::ean13->new($self->{'pdf'}, @options);
+    my $obj = PDF::Builder::Resource::XObject::Form::BarCode::ean13->new($self->{'pdf'}, @opts);
     $self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
 }
+
+=back
 
 =back
 
@@ -3922,7 +4012,8 @@ sub xo_form {
 
 =item $egs = $pdf->egstate()
 
-Returns a new extended graphics state object.
+Returns a new extended graphics state object, as described
+in L<PDF::Builder::Resource::ExtGState>.
 
 =cut
 
@@ -3935,31 +4026,31 @@ sub egstate {
     return $obj;
 }
 
-=item $obj = $pdf->pattern(%options)
+=item $obj = $pdf->pattern(%opts)
 
 Returns a new pattern object.
 
 =cut
 
 sub pattern {
-    my ($self, %options) = @_;
+    my ($self, %opts) = @_;
 
-    my $obj = PDF::Builder::Resource::Pattern->new($self->{'pdf'}, undef, %options);
+    my $obj = PDF::Builder::Resource::Pattern->new($self->{'pdf'}, undef, %opts);
     $self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
 }
 
-=item $obj = $pdf->shading(%options)
+=item $obj = $pdf->shading(%opts)
 
 Returns a new shading object.
 
 =cut
 
 sub shading {
-    my ($self, %options) = @_;
+    my ($self, %opts) = @_;
 
-    my $obj = PDF::Builder::Resource::Shading->new($self->{'pdf'}, undef, %options);
+    my $obj = PDF::Builder::Resource::Shading->new($self->{'pdf'}, undef, %opts);
     $self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;

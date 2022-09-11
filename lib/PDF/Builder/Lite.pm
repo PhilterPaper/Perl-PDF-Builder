@@ -33,6 +33,16 @@ PDF::Builder::Lite - Lightweight PDF creation methods
     $font = $pdf->corefont('Times-Roman');
     $font = $pdf->ttfont('TimesNewRoman.ttf');
 
+=head1 DESCRIPTION
+
+This class is unmaintained (since 2007) and should not be used in new code. It
+combines many of the methods from L<PDF::Builder> and L<PDF::Builder::Content> 
+into a single class but isn't really otherwise any easier to use.
+
+There have been many improvements and clarifications made to the rest of the
+distribution that aren't reflected here, so the term "Lite" no longer applies.
+It remains solely for compatibility with existing legacy code.
+
 =head1 METHODS
 
 =over
@@ -110,7 +120,7 @@ sub saveas {
         return $self;
     }
     # is the following code ever reached? - Phil
-    $self->{'api'}->end();
+   #$self->{'api'}->end();
     foreach my $k (keys %{$self}) {
         if      (blessed($k) and $k->can('release')) {
             $k->release(1);
@@ -170,8 +180,8 @@ Returns a new Type1 (PS) font object.
 
 B<Examples:>
 
-    $font = $pdf->psfont('TimesRoman.pfa', -afmfile => 'TimesRoman.afm', -encode => 'latin1');
-    $font = $pdf->psfont('/fonts/Univers.pfb', -pfmfile => '/fonts/Univers.pfm', -encode => 'latin2');
+    $font = $pdf->psfont('TimesRoman.pfa', 'afmfile' => 'TimesRoman.afm', 'encode' => 'latin1');
+    $font = $pdf->psfont('/fonts/Univers.pfb', 'pfmfile' => '/fonts/Univers.pfm', 'encode' => 'latin2');
 
 =cut
 
@@ -402,10 +412,10 @@ Sets transformations (i.e., translate, rotate, scale, skew) in PDF-canonical ord
 B<Example:>
 
     $pdf->transform(
-        -translate => [$x,$y],
-        -rotate    => $rot,
-        -scale     => [$sx,$sy],
-        -skew      => [$sa,$sb],
+        'translate' => [$x,$y],
+        'rotate'    => $rot,
+        'scale'     => [$sx,$sy],
+        'skew'      => [$sa,$sb],
     )
 
 =cut
@@ -725,8 +735,8 @@ sub print {
     $self->textstart();
     $self->textfont($font, $size);
     $self->transform(
-        -translate=>[$x, $y],
-        -rotate=> $rot,
+        'translate' => [$x, $y],
+        'rotate' => $rot,
     );
     if      ($just==1) {
         $self->{'gfx'}->text_center($text);
@@ -747,6 +757,7 @@ __END__
 
 =head1 AUTHOR
 
-Alfred Reibenschuh
+This module was originally written by Alfred Reibenschuh. It has had some
+minor updates over time, but otherwise is mostly unchanged.
 
 =cut

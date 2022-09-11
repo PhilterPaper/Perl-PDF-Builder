@@ -24,6 +24,8 @@ PDF::Builder::ViewerPreferences - How the PDF should be displayed or printed
 
 =head1 METHODS
 
+This has been split out from C<preferences()> in L<PDF::Builder>.
+
 =over
 
 =cut

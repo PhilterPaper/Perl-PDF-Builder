@@ -11,7 +11,7 @@ use Encode qw(:all);
 # VERSION
 our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
-# TBD: do -rect and -border apply to Named Destinations (link, url, file)? 
+# TBD: do rect and border apply to Named Destinations (link, url, file)? 
 #      There is nothing to implement these options. Perhaps the code was copied 
 #      from Annotations and never cleaned up? Disable mention of these options 
 #      for now (in the POD). Only link handles the destination page fit option.
@@ -21,7 +21,7 @@ use PDF::Builder::Basic::PDF::Utils;
 
 =head1 NAME
 
-PDF::Builder::NamedDestination - Add named destination shortcuts to a PDF
+PDF::Builder::NamedDestination - Add named destinations (views) to a PDF
 
 =head1 METHODS
 
@@ -67,7 +67,7 @@ sub new_api {
     return $destination;
 }
 
-=item $dest->dest($page, $location, @args);
+=item $dest->dest($page, $location, @args)
 
 A destination (dest) is a particular view of a PDF, consisting of a page 
 object, the
@@ -82,84 +82,22 @@ location of the window on that page, and possible coordinate and zoom arguments.
     my $dest2 = PDF::Builder::NamedDestination->new($pdf);
     $dest->dest($pdf->open_page(2), 'fit' => 1);
 
-The following locations ($location) are available. They may be given with a 
-leading hyphen (dash), e.g., '-xyz', or without a hyphen (e.g., 'xyz').
-A recent change to PDF::API2 specifies locations I<without> the hyphens, so
-for compatibility we allow either.
+See L<PDF::Builder::Docs/Page Fit Options> for a listing of the available
+locations and their syntax.
 
-=over
-
-=item 'fit' => 1
-
-Display the page designated by C<$page>, with its contents magnified just enough
-to fit the entire page within the window both horizontally and vertically. If 
-the required horizontal and vertical magnification factors are different, use 
-the smaller of the two, centering the page within the window in the other 
-dimension.
-
-=item 'fith' => $top
-
-Display the page designated by C<$page>, with the vertical coordinate C<$top> 
-positioned at the top edge of the window and the contents of the page magnified 
-just enough to fit the entire width of the page within the window.
-
-=item 'fitv' => $left
-
-Display the page designated by C<$page>, with the horizontal coordinate C<$left>
-positioned at the left edge of the window and the contents of the page magnified
-just enough to fit the entire height of the page within the window.
-
-=item 'fitr' => [$left, $bottom, $right, $top]
-
-Display the page designated by C<$page>, with its contents magnified just enough
-to fit the rectangle specified by the coordinates C<$left>, C<$bottom>, 
-C<$right>, and C<$top> entirely within the window both horizontally and 
-vertically. If the required horizontal and vertical magnification factors are 
-different, use the smaller of the two, centering the rectangle within the window
-in the other dimension.
-
-=item 'fitb' => 1
-
-Display the page designated by C<$page>, with its contents magnified 
-just enough to fit its bounding box entirely within the window both horizontally
-and vertically. If the required horizontal and vertical magnification factors 
-are different, use the smaller of the two, centering the bounding box within the
-window in the other dimension.
-
-=item 'fitbh' => $top
-
-Display the page designated by C<$page>, with the vertical coordinate 
-C<$top> positioned at the top edge of the window and the contents of the page 
-magnified just enough to fit the entire width of its bounding box within the 
-window.
-
-=item 'fitbv' => $left
-
-Display the page designated by C<$page>, with the horizontal 
-coordinate C<$left> positioned at the left edge of the window and the contents 
-of the page magnified just enough to fit the entire height of its bounding box 
-within the window.
-
-=item 'xyz' => [$left, $top, $zoom]
-
-Display the page designated by page, with the coordinates C<[$left, $top]> 
-positioned at the top-left corner of the window and the contents of the page 
-magnified by the factor C<$zoom>. A zero (0) value for any of the parameters 
-C<$left>, C<$top>, or C<$zoom> specifies that the current value of that 
-parameter is to be retained unchanged.
-
-This is the B<default> fit setting, with position (left and top) and zoom
+"xyz" is the B<default> fit setting, with position (left and top) and zoom
 the same as the calling page's.
 
 =back
 
-B<alternate name:> destination
+B<Alternate name:> C<destination>
 
 This method was originally C<dest()>, which PDF::API2 renamed to 
 C<destination()>. We are keeping the original name, and for partial 
 compatibility, allow C<destination> as an alias. B<Note that> the old PDF::API2
 (and still, for PDF::Builder), uses a hash element for the location and 
-dimension/zoom information, while the new PDF::API2 uses a string and an array.
+dimension/zoom information, while the new PDF::API2 uses a string and an array 
+(I<not> supported in PDF::Builder).
 
 =cut
 
@@ -214,7 +152,6 @@ dimension/zoom information, while the new PDF::API2 uses a string and an array.
 sub destination { return dest(@_); } ## no critic
 
 # deprecated by PDF::API2, allowed here for compatibility
-# expand to make leading - (dash) optional
 sub dest {
     my $self = shift();
     my $page = shift();
@@ -241,75 +178,50 @@ sub dest {
 	# even number, presumably the %opts hash
 	%opts = @_;  # might be empty!
     }
+    # copy dashed names over to preferred non-dashed names
+    if (defined $opts{'-fit'} && !defined $opts{'fit'}) { $opts{'fit'} = delete($opts{'-fit'}); }
+    if (defined $opts{'-fith'} && !defined $opts{'fith'}) { $opts{'fith'} = delete($opts{'-fith'}); }
+    if (defined $opts{'-fitb'} && !defined $opts{'fitb'}) { $opts{'fitb'} = delete($opts{'-fitb'}); }
+    if (defined $opts{'-fitbh'} && !defined $opts{'fitbh'}) { $opts{'fitbh'} = delete($opts{'-fitbh'}); }
+    if (defined $opts{'-fitv'} && !defined $opts{'fitv'}) { $opts{'fitv'} = delete($opts{'-fitv'}); }
+    if (defined $opts{'-fitbv'} && !defined $opts{'fitbv'}) { $opts{'fitbv'} = delete($opts{'-fitbv'}); }
+    if (defined $opts{'-fitr'} && !defined $opts{'fitr'}) { $opts{'fitr'} = delete($opts{'-fitr'}); }
+    if (defined $opts{'-xyz'} && !defined $opts{'xyz'}) { $opts{'xyz'} = delete($opts{'-xyz'}); }
 
     if (ref($page)) {
 	# should be only one 'fit' hash value? other options in hash?
 	# TBD: check that single values are scalars, not ARRAYREFs?
-        if      (defined $opts{'-fit'} ||
-	         defined $opts{'fit'}) {  # 1 value, ignored
+	if      (defined $opts{'fit'}) {  # 1 value, ignored
             $self->{'D'} = PDFArray($page, PDFName('Fit'));
-        } elsif (defined $opts{'-fith'}) {  # 1 value
-	    croak "Expecting scalar value for -fith entry "
-	        unless ref($opts{'-fith'}) eq '';
-            $self->{'D'} = PDFArray($page, PDFName('FitH'), 
-		                    PDFNum($opts{'-fith'}));
         } elsif (defined $opts{ 'fith'}) {
 	    croak "Expecting scalar value for fith entry "
 	        unless ref($opts{'fith'}) eq '';
             $self->{'D'} = PDFArray($page, PDFName('FitH'), 
 		                    PDFNum($opts{'fith'}));
-        } elsif (defined $opts{'-fitb'} ||
-	         defined $opts{'fitb'}) {  # 1 value, ignored
+	} elsif (defined $opts{'fitb'}) {  # 1 value, ignored
             $self->{'D'} = PDFArray($page, PDFName('FitB'));
-        } elsif (defined $opts{'-fitbh'}) {  # 1 value
-	    croak "Expecting scalar value for -fitbh entry "
-	        unless ref($opts{'-fitbh'}) eq '';
-            $self->{'D'} = PDFArray($page, PDFName('FitBH'), 
-		                    PDFNum($opts{'-fitbh'}));
         } elsif (defined $opts{'fitbh'}) {
 	    croak "Expecting scalar value for fitbh entry "
 	        unless ref($opts{'fitbh'}) eq '';
             $self->{'D'} = PDFArray($page, PDFName('FitBH'),
 		                    PDFNum($opts{'fitbh'}));
-        } elsif (defined $opts{'-fitv'}) {  # 1 value
-	    croak "Expecting scalar value for -fitv entry "
-	        unless ref($opts{'-fitv'}) eq '';
-            $self->{'D'} = PDFArray($page, PDFName('FitV'), 
-		                    PDFNum($opts{'-fitv'}));
         } elsif (defined $opts{'fitv'}) {
 	    croak "Expecting scalar value for fitv entry "
 	        unless ref($opts{'fitv'}) eq '';
             $self->{'D'} = PDFArray($page, PDFName('FitV'), 
 		                    PDFNum($opts{'fitv'}));
-        } elsif (defined $opts{'-fitbv'}) {  # 1 value
-	    croak "Expecting scalar value for -fitbv entry "
-	        unless ref($opts{'-fitbv'}) eq '';
-            $self->{'D'} = PDFArray($page, PDFName('FitBV'), 
-		                    PDFNum($opts{'-fitbv'}));
         } elsif (defined $opts{'fitbv'}) {
 	    croak "Expecting scalar value for fitbv entry "
 	        unless ref($opts{'fitbv'}) eq '';
             $self->{'D'} = PDFArray($page, PDFName('FitBV'), 
 		                    PDFNum($opts{'fitbv'}));
-        } elsif (defined $opts{'-fitr'}) {  # anon array length 4
-            croak "Insufficient parameters to ->dest(page, -fitr => []) " 
-	        unless ref($opts{'-fitr'}) eq 'ARRAY' &&
-		       scalar @{$opts{'-fitr'}} == 4;
-            $self->{'D'} = PDFArray($page, PDFName('FitR'), 
-		                    map {PDFNum($_)} @{$opts{'-fitr'}});
-        } elsif (defined $opts{'fitr'}) {
+        } elsif (defined $opts{'fitr'}) {  # anon array length 4
             croak "Insufficient parameters to ->dest(page, fitr => []) " 
 	        unless ref($opts{'fitr'}) eq 'ARRAY' &&
 		       scalar @{$opts{'fitr'}} == 4;
             $self->{'D'} = PDFArray($page, PDFName('FitR'), 
 		                    map {PDFNum($_)} @{$opts{'fitr'}});
-        } elsif (defined $opts{'-xyz'}) {  # anon array length 3
-            croak "Insufficient parameters to ->dest(page, -xyz => []) " 
-	        unless ref($opts{'-xyz'}) eq 'ARRAY' &&
-		       scalar @{$opts{'-xyz'}} == 3;
-            $self->{'D'} = PDFArray($page, PDFName('XYZ'), 
-		map {defined $_ ? PDFNum($_) : PDFNull()} @{$opts{'-xyz'}});
-        } elsif (defined $opts{'xyz'}) {
+        } elsif (defined $opts{'xyz'}) {  # anon array length 3
             croak "Insufficient parameters to ->dest(page, xyz => []) " 
 	        unless ref($opts{'xyz'}) eq 'ARRAY' &&
 		       scalar @{$opts{'xyz'}} == 3;
@@ -328,14 +240,16 @@ sub dest {
 
 =head2 Target Destinations
 
-=item $dest->goto($page, $location, @args);
+=over
+
+=item $dest->goto($page, $location, @args)
 
 A go-to action changes the view to a specified destination (page, location, and
 magnification factor).
 
 Parameters are as described in C<destination>.
 
-B<alternate name:> link
+B<Alternate name:> C<link>
 
 Originally this method was C<link>, but recently PDF::API2 changed the name
 to C<goto>. "link" is retained for compatibility.
@@ -350,12 +264,12 @@ sub goto {
     return $self->dest(@_);
 }
 
-=item $dest->uri($page, $location, @args);
+=item $dest->uri($page, $location, @args)
 
 Defines the destination as launch-url with uri C<$url> and
 page-fit options %opts.
 
-B<alternate name:> url
+B<Alternate name:> C<url>
 
 Originally this method was C<url>, but recently PDF::API2 changed the name
 to C<uri>. "url" is retained for compatibility.
@@ -376,9 +290,9 @@ sub uri {
 =item $dest->launch($file, %opts)
 
 Defines the destination as launch-file with filepath C<$file> and
-page-fit options %opts.
+page-fit options %opts. The target application is run.
 
-B<alternate name:> file
+B<Alternate name:> C<file>
 
 Originally this method was C<file>, but recently PDF::API2 changed the name
 to C<launch>. "file" is retained for compatibility.
@@ -401,7 +315,7 @@ sub launch {
 Defines the destination as a PDF-file with filepath C<$pdf_file>, on page
 C<$pagenum>, and options %opts (same as dest()).
 
-B<alternate names:> pdf_file, pdfile
+B<Alternate names:> C<pdf_file> and C<pdfile>
 
 Originally this method was C<pdfile>, and had been earlier renamed to 
 C<pdf_file>, but recently PDF::API2 changed the name to C<pdf>. "pdfile" and 

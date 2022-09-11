@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '2.029'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 
@@ -23,6 +23,11 @@ sub new {
     $self->{'Type'} = PDFName('Outlines');
 
     return $self;
+}
+
+sub count {
+    my $self = shift();
+    return abs($self->SUPER::count());
 }
 
 1;
