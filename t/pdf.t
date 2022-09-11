@@ -35,14 +35,14 @@ like($string, qr/0 0 1 rg/,
 
 # Add a second page with a different page size
 
-$new = PDF::Builder->from_string($string, '-compress' => 'none');
+$new = PDF::Builder->from_string($string, 'compress' => 'none');
 my $page = $pdf->page();
 my $font = $pdf->corefont('Helvetica');
 $page->mediabox(0, 0, 72, 144);
 my $text = $page->text();
 $text->font($font, 12);
 $text->text('This is a test');
-$pdf = PDF::Builder->from_string($pdf->to_string()); # from_string in API2
+$pdf = PDF::Builder->from_string($pdf->to_string()); 
 $form = $new->importPageIntoForm($pdf, 2);
 #$form->{'-docompress'} = 0;  # not in API2 tests
 delete $form->{'Filter'};
@@ -57,39 +57,39 @@ like($string, qr/\(This is a test\)/,
 
 # Page Numbering
 
-$pdf = PDF::Builder->new('-compress' => 'none');
-$pdf->pageLabel(0, { -style => 'Roman' });
+$pdf = PDF::Builder->new('compress' => 'none');
+$pdf->pageLabel(0, { 'style' => 'Roman' });
 
 like($pdf->to_string(), qr{/PageLabels << /Nums \[ 0 << /S /R >> \] >>},
      q{Page Numbering: Upper-case Roman Numerals});
 
-$pdf = PDF::Builder->new('-compress' => 'none');
-$pdf->pageLabel(0, { -style => 'roman' });
+$pdf = PDF::Builder->new('compress' => 'none');
+$pdf->pageLabel(0, { 'style' => 'roman' });
 like($pdf->to_string(), qr{/PageLabels << /Nums \[ 0 << /S /r >> \] >>},
      q{Page Numbering: Upper-case Roman Numerals});
 
-$pdf = PDF::Builder->new('-compress' => 'none');
-$pdf->pageLabel(0, { -style => 'Alpha' });
+$pdf = PDF::Builder->new('compress' => 'none');
+$pdf->pageLabel(0, { 'style' => 'Alpha' });
 like($pdf->to_string(), qr{/PageLabels << /Nums \[ 0 << /S /A >> \] >>},
      q{Page Numbering: Upper-case Alphabet Characters});
 
-$pdf = PDF::Builder->new('-compress' => 'none');
-$pdf->pageLabel(0, { -style => 'alpha' });
+$pdf = PDF::Builder->new('compress' => 'none');
+$pdf->pageLabel(0, { 'style' => 'alpha' });
 like($pdf->to_string(), qr{/PageLabels << /Nums \[ 0 << /S /a >> \] >>},
      q{Page Numbering: Lower-case Alphabet Characters});
 
-$pdf = PDF::Builder->new('-compress' => 'none');
-$pdf->pageLabel(0, { -style => 'decimal' });
+$pdf = PDF::Builder->new('compress' => 'none');
+$pdf->pageLabel(0, { 'style' => 'decimal' });
 like($pdf->to_string(), qr{/PageLabels << /Nums \[ 0 << /S /D >> \] >>},
      q{Page Numbering: Decimal Characters});
 
-$pdf = PDF::Builder->new('-compress' => 'none');
-$pdf->pageLabel(0, { -start => 11 });
+$pdf = PDF::Builder->new('compress' => 'none');
+$pdf->pageLabel(0, { 'start' => 11 });
 like($pdf->to_string(), qr{/PageLabels << /Nums \[ 0 << /S /D /St 11 >> \] >>},
      q{Page Numbering: Decimal Characters (implicit), starting at 11});
 
-$pdf = PDF::Builder->new('-compress' => 'none');
-$pdf->pageLabel(0, { -prefix => 'Test' });
+$pdf = PDF::Builder->new('compress' => 'none');
+$pdf->pageLabel(0, { 'prefix' => 'Test' });
 like($pdf->to_string(), qr{/PageLabels << /Nums \[ 0 << /P \(Test\) /S /D >> \] >>},
      q{Page Numbering: Decimal Characters (implicit), with prefix});
 
@@ -97,7 +97,7 @@ like($pdf->to_string(), qr{/PageLabels << /Nums \[ 0 << /P \(Test\) /S /D >> \] 
 ## to_string
 ##
 
-$pdf = PDF::Builder->new('-compress' => 'none');
+$pdf = PDF::Builder->new('compress' => 'none');
 $gfx = $pdf->page()->gfx();
 $gfx->fillcolor('blue');
 
@@ -119,7 +119,7 @@ like($string, qr/0 0 1 rg/,
 ## (in response to bug 134993, introduced by 113516, not yet in PDF::Builder)
 ##
 
-$pdf = PDF::Builder->new(-compress => 'none');
+$pdf = PDF::Builder->new('compress' => 'none');
 $gfx = $pdf->page()->gfx();
 $gfx->fillcolor('blue');
 
@@ -127,12 +127,12 @@ $gfx->fillcolor('blue');
 print $fh $pdf->to_string();
 close $fh;
 
-$pdf = PDF::Builder->open($filename, -compress => 'none');
+$pdf = PDF::Builder->open($filename, 'compress' => 'none');
 $gfx = $pdf->page()->gfx();
 $gfx->fillcolor('red');
 $pdf->saveas($filename);
 
-$pdf = PDF::Builder->open($filename, -compress => 'none');
+$pdf = PDF::Builder->open($filename, 'compress' => 'none');
 $string = $pdf->to_string();
 like($string, qr/0 0 1 rg/,
      q{saveas($opened_filename) contains original content});

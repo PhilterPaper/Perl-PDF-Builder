@@ -124,6 +124,9 @@ my (@example_list, @example_results);
   push @example_list, "ShowFont.pl";
   push @example_results, "create examples/ShowFont.<type>.<font name>.pdf, showing multiple pages\n demonstrating the display of various encodings.\n";
  
+# push @example_list, "examples/Windows/027_winfont.pl";
+# push @example_results, "create examples/Windows/027_winfont.<type>.<font name>.pdf, showing multiple pages\n demonstrating the display of various encodings.\n";
+ 
 # run with perl examples/<file> [args]
 
 my %args;

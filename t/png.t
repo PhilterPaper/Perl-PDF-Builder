@@ -12,10 +12,10 @@ use PDF::Builder;
 
 # (1,2,3) Filename 
 
-my $pdf = PDF::Builder->new('-compress' => 'none');
+my $pdf = PDF::Builder->new('compress' => 'none');
 
-# -silent shuts off one-time warning for rest of run
-my $png = $pdf->image_png('t/resources/1x1.png', -silent => 1);
+# silent shuts off one-time warning for rest of run
+my $png = $pdf->image_png('t/resources/1x1.png', 'silent' => 1);
 if ($png->usesLib() == 1) {
     isa_ok($png, 'PDF::Builder::Resource::XObject::Image::PNG_IPL',
         q{$pdf->image_png(filename)});
@@ -54,7 +54,7 @@ my $rgba1_pdf_string = $pdf->to_string();
 # (5,6) RGBA PNG file Pure Perl
 
 $pdf = PDF::Builder->new();
-my $png2 = $pdf->image_png('t/resources/test-rgba.png', -nouseIPL=>1);
+my $png2 = $pdf->image_png('t/resources/test-rgba.png', 'nouseIPL'=>1);
 isa_ok($png2, 'PDF::Builder::Resource::XObject::Image::PNG',
        q{$pdf->image_png(filename), pure Perl});
 
@@ -72,13 +72,13 @@ is(substr($rgba1_pdf_string, 0, 512), substr($rgba2_pdf_string, 0, 512),
 $pdf = PDF::Builder->new();
 open my $fh, '<', 't/resources/1x1.png' or
     die "Can't open file t/resources/1x1.png";
-$png = $pdf->image_png($fh);
+$png = $pdf->image($fh);  # use convenience function on this one
 if ($png->usesLib() == 1) {
     isa_ok($png, 'PDF::Builder::Resource::XObject::Image::PNG_IPL',
-        q{$pdf->image_png(filehandle)});
+        q{$pdf->image(filehandle)});
 } else {
     isa_ok($png, 'PDF::Builder::Resource::XObject::Image::PNG',
-        q{$pdf->image_png(filehandle)});
+        q{$pdf->image(filehandle)});
 }
 
 is($png->width(), 1,

@@ -107,7 +107,7 @@ my $pngout = File::Spec->catfile($directory, 'out.png');
 # Note that GS installation MAY not permanently add GS to %Path% -- you
 #   may have to do this manually
 
-my ($convert, $gs);
+my ($convert, $gs, $convertX, $gsX);
 # ImageMagick pre-v7 has a "convert" utility.
 # On v7, this is called via "magick convert"
 # On Windows, be careful NOT to run "convert", as this is a HDD reformatter!
@@ -122,6 +122,7 @@ $convert = check_version($convert, '-version', 'ImageMagick ([0-9.]+)', '6.9.7')
 # (error) found
 #$convertX = exclude_version($convert, '-v', 'ImageMagick ([0-9.]+)', 
 #         ['8.0.4','100.0', ]);
+#$convertX = $convert;  # if want to keep tests changed, but not exclude
 
 # $convert undef if not installed, can't parse format, version too low
 # will skip "No ImageMagick"
@@ -140,8 +141,9 @@ if      (can_run("gswin64c")) {
 # check if reasonably recent version
 $gs = check_version($gs, '-v', 'Ghostscript ([0-9.]+)', '9.25.0');
 # use $gsX instead of $gs in selected tests if GS excluded version (error) found
-#$gsX = exclude_version($gs, '-v', 'Ghostscript ([0-9.]+)', 
-#         ['9.55.0','9.55.1', ]);
+$gsX = exclude_version($gs, '-v', 'Ghostscript ([0-9.]+)', 
+         ['9.56.0','9.56.1', ]);
+#$gsX = $gs;  # if want to keep tests changed, but not exclude
 
 # $convert undef if not installed, can't parse format, version too low
 # will skip "No Ghostscript"
@@ -258,7 +260,7 @@ is($example, $expected, 'multi-strip lzw (not converted to flate) with GT') or s
 # 13
 SKIP: {
     skip "Either ImageMagick, Ghostscript or Graphics::TIFF not available.", 1 unless
-        defined $convert and defined $gs and $has_GT;
+        defined $convert and defined $gsX and $has_GT;
 
 $width = 20;
 $height = 20;
@@ -337,7 +339,7 @@ is($example, $expected, 'single-strip lzw (not converted to flate) without GT') 
 
 SKIP: {
     skip "Either ImageMagick or Ghostscript not available.", 1 unless
-        defined $convert and defined $gs;
+        defined $convert and defined $gsX;
 
 # 16
 $width = 20;

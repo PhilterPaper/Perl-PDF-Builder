@@ -2,49 +2,42 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.024     2022-08-06  UNRELEASED
-
-*   see what's going on with ->transform(translate=>[ ]) vs ->translate()
-    possibly something new in API2 update. translate vs old -translate
-
-*   t/tiff.t  IF GhostScript problem unresolved by release date, go ahead and 
-      restrict Ghostscript 9.56.* in tests. This is a SEPARATE problem from 
-      GD's failure to build in CI (fix in but unreleased). ***************
-
-*   lib/PDF/Builder/Basic/PDF/File.pm
-     Per RT 136648, PDF::API2 fix to avoid unnecessary extra trailers 
-      (reported by Chris Papademetrious, fix by Vadim Repin from RT117184).
-     compare code after other changes in
+3.024     2022-09-12
 
     lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm
      "loca" table in TTF is optional, so to fix PDFAPI2#47, return from 
      subsetByCId() method early if no such table. According to PDFAPI2#37, it
      may be necessary to instruct ttfont() to NOT subset the font. Also, it
      appears that 'glyf' table may be missing in some fonts, so add check.
-*  check pdfapi2-47.pl once "position" implemented, to see if completely fixed
-   appears to be problem with incomplete embedded font (reported by Reader)
-   in PDFAPI2. pdfapi2-37 may be related.
+     Doesn't blow up any more, but problem #47 persists even with this fix.
 
-**  confirm build process is clean, especially all the new uses of version, 
-    plus new Perl 5.24 minimum
+    t/info.t (new), t/version.t (new), MANIFEST, tools/2_t-tests.pl
+     New t-tests per PDF::API2.
 
-*   t/info.t (new), t/version.t (new), MANIFEST, tools/2_t-tests.pl
-
-*   All "options" whose name begins with a dash (hyphen) "-" may now be given
+    All "options" whose name begins with a dash (hyphen) "-" may now be given
      without a dash. E.g., "-translate => [30,25]" may now be given as
-     "translate => [30,25]". This is in keeping with the new practices on
-     PDF::API2. The old (dashed) names are still valid, although they may be
-     deprecated in the future.
+     "translate => [30,25]", or "'translate' => [30,25]". This is in keeping 
+     with the new practices on PDF::API2. The old (dashed) names are still 
+     valid, although they may be deprecated in the future.
+
+    lib/PDF/Builder/Content.pm
+     advancewidth() adds alias text_width(), per PDF::API2 changes.
+
+    lib/PDF/Builder/Content.pm
+     Fix problems in position() and textpos() methods reported by J Vromans,
+      where the returned X coordinate was incorrect after being set twice.
+
+    lib/PDF/Builder.pm
+     New interfaces added for metadata query and set.
+
+    INFO/RoadMap  Add thoughts on an Environments package
 
     lib/PDF/Builder.pm, INFO/KNOWN_INCOMPAT
      Various changes to keep compatibility with latest PDF::API2, although
       not all old methods are deprecated. Some methods are added, some are
       renamed (alternate names added), and some may have minor changes or
-      extended functionality.
-
-      The only known incompatibility introduced is that PDF::API2 now uses
-      separate location name strings and arrays of dimension and zoom data,
-      rather than the old hash element (which PDF::Builder still uses).
+      extended functionality. See KNOWN_INCOMPAT for a description of these
+      minor differences.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/ViewerPreferences.pm (new), MANIFEST
      Per PDF::API2 change, split up function of $pdf->preferences into several
@@ -61,15 +54,41 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
     lib/PDF/Builder/Dict.pm
      Fix doubled $class (per PDF::API2 fix).
 
+    INFO/old/.travis.yml.HOLD
+     Remove per PDF::API2 removal of .travis.yml
+
+    lib/PDF/Builder/Content.pm
+     For linejoin()/line_join() and linecap()/line_cap(), allow alpha
+      strings ("miter" or "m", etc.) in addition to numeric values (0, etc.).
+      For PDF::API2 compatibility, many alternate method names exist now, such 
+      as line_join() in addition to linejoin().
+
+    lib/PDF/Builder/Resource/XObject/Form/BarCode.pm
+     Some minor fixes to improve spacing between bars and labels when both 
+      -lmzn and -fnsz are set and the font size is larger than -lmzn. Per
+      PDF::API2 change. The barcode() convenience function has not been
+      implemented.
+
+    lib/PDF/Builder.pm, t/gif.t, t/jpg.t, t/png.t
+     Add convenience image() method to simplify use of image_jpeg(), 
+      image_tiff(), image_pnm(), image_png(), image_gif(), and image_gd().
+      This is for PDF::API2 compatibility, and the original methods are
+      unchanged.
+
     lib/PDF/Builder.pm, t/font-ttf.t, font-type1.t
      Add convenience font() method to combine corefont(), ttfont(), psfont(),
       and bdfont(). This is for PDF::API2 compatibility, and the original
       methods are unchanged. Font search path changes: add font_path() and
       set_font_path() for base search paths for fonts. Rename addFontDirs()
-      to add_to_font_path() (keeping the old name around).
+      to add_to_font_path() (keeping the old name around). Note that, unlike
+      corefont(), font() requires the exact name of a standard core font.
+      Kerning defaults to "on" when using font(), unlike other font methods.
 
     lib/PDF/Builder/Page.pm, lib/PDF/Builder.pm
      Deprecate unneeded update() method. Per PDF::API2 changes.
+
+    lib/PDF/Builder.pm
+     Rename method end() to close(). close should be used for new work.
 
     lib/PDF/Builder.pm, t/deprecations.t, t/pdf.t, t/rt67767.t
      Rename method open_scalar() to from_string(). from_string() should be
@@ -81,7 +100,8 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
     lib/PDF/Builder.pm
      Permit the save(filename) method to be used as an alias for 
       saveas(filename). This is for compatibility with PDF::API2 changes 
-      combining save() and saveas().
+      combining save() and saveas(). Note that this is NOT good interface
+      design, to use 'save' for both purposes.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Lite.pm, t/annotate.t, t/barcode.t,
       t/bbox.t, t/circular-references.t, t/content.t, t/cs-webcolor.t, 
@@ -100,7 +120,12 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
     lib/PDF/Builder.pm
      Revise RT41971 fix per PDF::API2 change for outlines (no functional change)
 
-    lib/PDF/Resource/Font/SynFont.pm   code cleanup per PDF::API2
+    lib/PDF/Resource/Font/SynFont.pm   
+     Code cleanup per PDF::API2. This includes a number of renamed options
+      (old ones are still supported) and changed behavior for 'bold' if
+      coming through alternate name synthetic_font(). Read the documentation
+      for synfont/synthetic_font to ensure that you won't be tripped up by
+      any changes, or differences between the two.
 
     lib/PDF/Builder.pm  per PDF::API2 fix, messages if fail to open input PDF
 
@@ -115,7 +140,12 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
 
     t/tiff.t add exclude_version() function to exclude GhostScript or
       ImageMagick from all or selected uses, if your installed version
-      falls with a range of excluded version numbers.
+      falls with a range of excluded version numbers. This is to fix a problem
+      where certain GhostScript versions were built with a bad library.
+      Currently, the bad builds are believed to be limited to GhostScript 
+      9.56.0 and 9.56.1. If you have this version, two of the tests in tiff.t
+      (13 and 16, lzw+horizontal predictor, not converted to flate) will be
+      skipped with "GhostScript not found".
 
     META.json, META.yml, MANIFEST add "provides" entry to make package
       sites happier.

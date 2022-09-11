@@ -1,4 +1,4 @@
-Road Map for Future Development of PDF::Builder                   04 Jun 2022
+Road Map for Future Development of PDF::Builder                   20 Aug 2022
 
 In order to encourage others to contribute code and/or algorithms to the
 effort, I am publishing this road map of where I would like the product to go.
@@ -74,6 +74,11 @@ B. Unification of font support: including character set and encoding support
    have to be done to split the page internally into two or more sections, 
    each with their own embedded virtual font. Glyph widths would have to be 
    available for all characters.
+
+   Add: start a subfont with the ASCII set and empty top 128. Add new chars
+   to it (from x80 to xFF) as single byte glyphs (not matching any standard
+   encoding) and use this new subfont. When it fills up and more characters
+   are needed on a page, start another subfont.
 
 C. Improved documentation, possibly even a book giving detailed explanations
    and examples, as both a reference and a tutorial. Needless to say, there
@@ -428,3 +433,99 @@ L. (See B and H items above) Consider a $page->subpage(x, y, w, h, opts) to
    as PDF::Builder::Table, and can have arbitrary content in a table cell.
 
 =============================================================================
+III. A new architecture, in a new package
+
+These are things that would be useful in being able to handle page design
+in a higher-level manner. This would almost certainly be another package,
+such as PDF::Builder::Environments.
+
+A. Introduce the concept of environments, which take care of handling much of
+   the busy-work of laying out a page.
+
+   page -- including margins (define the work area); page numbering, outline,
+           and slider thumb consistent page numbers; headings/footings. also 
+           odd/even page layouts, odd-only, or single page (roll printer) layout
+     column(s) -- define single or multiple columns, not necessarily of
+                  rectangular outline or of the same width or height. lower
+                  level environments can modify the initial outline (eat
+                  away at it). balanced columns could be done
+       heading -- per column or per page, keep together along with first two
+                  lines of following paragraph
+       footnote -- per column or per page, grows up from the bottom and can
+                   spill to the next page. mostly for keeping track of the
+                   bottom of the usable area
+       margin note -- a minipage eating into a column and margin, limited to
+                      column height. must be defined before filling column
+       inset -- usually rectangular (but could be any shape) that eats into
+                the space for one or two columns
+       floats -- per column or per page, for images, etc., may float left or 
+                 right (but not cause a hole in the middle of a column)
+       table -- per column or per page, somewhat like PDF::Table, but probably 
+                only fixed width columns, and content fill left to author
+       list -- per column or per page; sl, ul, ol, dl; content fill left to
+               author
+     span all or selected columns
+       heading 
+       footnote
+       floats -- may be centered here
+       table
+       list
+
+   The idea is that you start an environment (either implicitly or explicitly)
+   and are responsible for all the content. At the start, you are told the
+   position of the upper left corner (not necessarily a baseline), the allowed
+   width, and the maximum height on this page. You fill in the content as you
+   wish. At the end, you close the environment. The current PDF::Builder is
+   only used for low-level stuff (primitives); the higher-level structure is
+   in this package.
+
+   The purpose is to allow you to put any kind of content anywhere, such as
+   another list within a list item, or another table within a table cell (as 
+   well as a table within a list or a list within a table cell). The current
+   PDF::Table severely limits your content to (currently) simple text of
+   constant font, font size, color, etc. It is up to you to obey the limits
+   of the extent of your content (no checks for overflow). Some environments
+   (e.g., insets) will eat into the real estate defined for their parents, so 
+   they will have to be fully defined and filled before you start filling 
+   their parents.
+
+   A table row would need to be defined (filled) before ink can be put down,
+   so there may also need to be a table row environment. To handle vertical
+   alignment, or decide where to split a row across a page break, the table
+   environment needs to know the height of each row. This may need a means of
+   tentatively writing a virtual row, moving part to a new page (or down their
+   cell) if necessary, and commanding that the ink be put down. It may even be
+   necessary to move the entire row to the next page (e.g., a cell's content
+   is an image). Note that a new page is handled by the top-level program, 
+   rather than having one automatically created -- unlike PDF::Table, 
+   permitting more control over the layout and appearance.
+
+   Balanced columns could be done. If the columns are purely rectangular (no
+   insets, floats, etc.) and of the same width (not necessarily the same 
+   height), we could fill in the same order as they are read and if not
+   completely filled, move already-formatted lines one at a time until 
+   balanced. Columns which do not meet these criteria would be more difficult. 
+   An estimate could be made of where to cut the columns by tracking the "area" 
+   used by the longer column(s), and redistributing it to the short column(s), 
+   then refilling the columns to the new height limit. This would be expensive, 
+   particularly if using Knuth-Plass paragraph shaping, as it might have to be 
+   done several times per page. Likewise, fixing widows and orphans by changing
+   leading would be much more expensive in non-rectangular columns.
+
+   Lists are vertical, and include unordered lists (you select marker), simple
+   lists (like unordered, but no marker), ordered list (decimal, lc roman,
+   UC Roman, lc alpha, UC Alpha) with selectable starting value (default 1).
+   For unordered and ordered lists, the marker is right justified in a 
+   specified width, with a specified gutter before the content (and specified 
+   prefix and suffix strings around the marker). The marker can be specified to 
+   be 'inside' or 'outside' the content (if inside, the content is indented). 
+   The content area coordinates are returned to the user, who fills it in with 
+   whatever they want, obeying the size limits and any indentation. Reasonable 
+   defaults can be used for all these settings. Definition lists would have 
+   the term(s) by default bold, and always break and indent for the content, 
+   or only if the term exceeds some maximum width. Again, the content is the 
+   responsibility of the user, so any kind of content can be given. Each list
+   item is handled separately, although a wrapper could be written to do
+   multiple items at once (simple text only).
+
+B. Before implementing any of "A", see how a RTL language should be handled.

@@ -19,7 +19,7 @@ SKIP: {
 
     my $img = $pdf->image_gd($gd);
     isa_ok($img, 'PDF::Builder::Resource::XObject::Image::GD',
-           q{$pdf->image_gif()});
+           q{$pdf->image_gd()});
 
     my $gfx = $pdf->page()->gfx();
     $gfx->image($img, 72, 144, 216, 288);

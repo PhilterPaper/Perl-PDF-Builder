@@ -7,13 +7,13 @@ use Test::More tests => 6;
 use PDF::Builder;
 use PDF::Builder::Basic::PDF::Array;
 
-my $pdf = PDF::Builder->new('-compress' => 'none');
+my $pdf = PDF::Builder->new('compress' => 'none');
 my $page = $pdf->page();
 
 # (1) Text annotation
 
 my $annotation = $page->annotation();
-$annotation->text('This is an annotation', -rect => [ 72, 144, 172, 244 ]);
+$annotation->text('This is an annotation', 'rect' => [ 72, 144, 172, 244 ]);
 
 my $string = $pdf->to_string();
 like($string,
@@ -88,11 +88,11 @@ $page->{'Annots'} = $array;
 $page->update();
 $string = $pdf->to_string();
 
-$pdf = PDF::Builder->open_scalar($string);
+$pdf = PDF::Builder->from_string($string);
 $page = $pdf->open_page(1);
 $annotation = $page->annotation();
 
-$annotation->text('This is an annotation', -rect => [ 72, 144, 172, 244 ]);
+$annotation->text('This is an annotation', 'rect' => [ 72, 144, 172, 244 ]);
 
 $string = $pdf->to_string();
 like($string,

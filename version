@@ -26,7 +26,7 @@ FONT_TTF           1.04
 
 # optional prerequisites
 # update Makefile.PL, META.*, Builder.pm, t/00-all-usable.t
-GRAPHICS_TIFF    16   # will be 17+ when TIFF changes go in
+GRAPHICS_TIFF    19   
 HARFBUZZ_SHAPER  0.024  # 0.026 is current release
 IMAGE_PNG_LIBPNG 0.57
 

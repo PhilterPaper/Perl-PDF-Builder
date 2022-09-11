@@ -14,8 +14,8 @@ my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 # -raw   show full output of each t-test run
 # -noOK  exclude "ok" lines so can easily spot error lines  DEFAULT
 
- # add after filter-lzwdecode
- # filter-ccittfaxdecode
+ # add after filter-lzwdecode when new TIFF code finished
+ #   filter-ccittfaxdecode
 my @test_list = qw(
  00-all-usable
  01-basic
@@ -29,6 +29,7 @@ my @test_list = qw(
  circular-references
  cmap
  content
+ content-deprecated
  cs-webcolor
  deprecations
  extgstate
