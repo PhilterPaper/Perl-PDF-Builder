@@ -99,7 +99,8 @@ my %WriteMakefileArgs =
     # recommends (optional prereqs) goes here
     # if remove or comment out any, also do so in META.json and META.yml
     "recommends" => {
-      "Graphics::TIFF" => 16,  # will be 17 when TIFF changes go in
+      # fast TIFF image processing.
+      "Graphics::TIFF" => 16,  # will be 19 when TIFF changes go in
       # advanced/fast PNG image processing.
       "Image::PNG::Libpng" => 0.57,
       # text shaping for Latin script ligatures and kerning, and for 

@@ -76,11 +76,11 @@ sub new {
         $self->{'BaseFont'} = PDFName($self->fontname());
     }
 
-    if ($opts{'encode'} =~ m/^utf/i) {
+    if (defined $opts{'encode'} && $opts{'encode'} =~ m/^utf/i) {
 	die "Invalid multibyte encoding for psfont: $opts{'encode'}\n";
 	# probably more encodings to check
     }
-    $self->encodeByData($opts{'encode'});
+    $self->encodeByData($opts{'encode'});  # undef arg OK
 
     $self->{'-nocomps'} = 1 if $opts{'nocomps'};
     $self->{'-dokern'} = 1 if $opts{'dokern'};

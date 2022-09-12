@@ -7,7 +7,7 @@ VERSION 3.024
 #   of Perl" (NOT "Latest releases in each branch of Perl"!) and subtract 
 #   6 years to get date of oldest release, and then go one release before that. 
 #   Would be nice to read cpan First Release and figure out min Perl version.
-PERL_V_DOT   5.24.0  # dist.ini, .travis.yml
+#PERL_V_DOT   5.24.0  # dist.ini, .travis.yml
 # update Makefile.PL, META.*
 PERL_V       5.024000
 
