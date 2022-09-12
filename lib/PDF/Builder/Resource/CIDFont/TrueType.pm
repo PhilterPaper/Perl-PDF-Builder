@@ -22,8 +22,6 @@ PDF::Builder::Resource::CIDFont::TrueType - TrueType font support
 
 =item $font = PDF::Builder::Resource::CIDFont::TrueType->new($pdf, $file, %options)
 
-=item $font = PDF::Builder::Resource::CIDFont::TrueType->new($pdf, $file)
-
 Returns a font object.
 
 Defined Options:

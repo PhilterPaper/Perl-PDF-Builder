@@ -509,8 +509,8 @@ Hosken's Text::PDF via the Text::PDF::API wrapper.
 In 2009, Otto Hirr started the PDF::API3 fork, but it never went anywhere.
 In 2011, PDF::API2 maintenance was taken over by Steve Simms. 
 In 2017, PDF::Builder was forked by Phil M. Perry, who desired a more aggressive
-schedule of new features and bug fixes than Simms was providing, although some of 
-his work has been ported from PDF::API2.
+schedule of new features and bug fixes than Simms was providing, although some 
+of Simms's work I<has> been ported from PDF::API2.
 
 According to "pdfapi2_for_fun_and_profit_APW2005.pdf" (on 
 http://pdfapi2.sourceforge.net, an unmaintained site), the history of PDF::API2

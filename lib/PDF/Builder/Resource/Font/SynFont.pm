@@ -53,24 +53,30 @@ This is for compatibility with recent changes to PDF::API2.
 
 =item $font = PDF::Builder::Resource::Font::SynFont->new($pdf, $fontobj, %opts)
 
-Returns a synfont object.
+Returns a synfont object. C<$fontobj> is a normal font object read in from
+a file, and C<$font> is the modified output.
 
 Valid options %opts are:
 
-I<encode>
-... changes the encoding of the font from its default.
+=over
+
+=item I<encode>
+
+Changes the encoding of the font from its default.
 See I<Perl's Encode> for the supported values. B<Warning:> only single byte
 encodings are supported. Multibyte encodings such as UTF-8 are invalid.
 
-I<pdfname>
-... changes the reference-name of the font from its default.
+=item I<pdfname>
+
+Changes the reference-name of the font from its default.
 The reference-name is normally generated automatically and can be
 retrieved via $pdfname=$font->name().
 
 B<Alternate name:> C<name> (for PDF::API2 compatibility)
 
-I<condense>
-... condense/expand factor (0.1-0.9 = condense, 1 = normal, 1.1+ = expand).
+=item I<condense>
+
+Condense/expand factor (0.1-0.9 = condense, 1 = normal, 1.1+ = expand).
 It's the multiplier for character widths vs. normal.
 
 B<Alternate names:> C<hscale> and C<slant> (for PDF::API2 compatibility) 
@@ -81,8 +87,9 @@ For the I<hscale> option, the value is percentage (%), with 100 being normal,
 and other values 100 times the I<condense> value. 
 B<Use only one (at most) of these three option names.>
 
-I<oblique>
-... italic angle (+/-) in degrees, where the character box is skewed. While 
+=item I<oblique>
+
+Italic angle (+/-) in degrees, where the character box is skewed. While 
 it's unlikely that anyone will want to slant characters at +/-360 degrees, they 
 should be aware that these will be treated as an angle of 0 degrees (deg2rad() 
 wraps around). 0 degrees of italic slant (obliqueness) is the default.
@@ -91,8 +98,9 @@ B<Alternate name:> C<angle> (for PDF::API2 compatibility)
 
 B<Use only one (at most) of these two option names.>
 
-I<bold>
-... embolding factor (0.1+, bold=1, heavy=2, ...). It is additional outline
+=item I<bold>
+
+Embolding factor (0.1+, bold=1, heavy=2, ...). It is additional outline
 B<thickness> (B<linewidth>), which expands the character (glyph) outwards (as
 well as shrinking unfilled enclosed areas such as bowls and counters). 
 Normally, the glyph's outline is not drawn (it is only filled); this adds
@@ -102,11 +110,13 @@ If used with the C<synthetic_font> alternate entry name, the unit is 1/1000th
 of a text unit, so you will need a value 10 times larger than with the 
 C<synfont> entry to get the same effect
 
-I<space>
-... additional charspacing in em (0-1000).
+=item I<space>
 
-I<caps>
-... create synthetic small-caps. 0 = no, 1 = yes. These are capitals of 
+Additional charspacing in thousandths of an em.
+
+=item I<caps>
+
+Create synthetic small-caps. 0 = no, 1 = yes. These are capitals of 
 lowercase letters, at 80% height and 88% width. Note that this is guaranteed
 to cover ASCII lowercase letters only -- single byte encoded accented 
 characters I<usually> work, but we can make no promises on accented characters 
@@ -115,6 +125,8 @@ in general, as well as ligatures!
 B<Alternate name:> C<smallcaps> (for PDF::API2 compatibility) 
 
 B<Use only one (at most) of these two option names.>
+
+=back
 
 =back
 

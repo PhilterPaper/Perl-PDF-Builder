@@ -46,8 +46,6 @@ for body text!
 
 =item $font = PDF::Builder::Resource::Font::BdFont->new($pdf, $font, %options)
 
-=item $font = PDF::Builder::Resource::Font::BdFont->new($pdf, $font)
-
 Returns a BmpFont object.
 
 =cut
@@ -64,9 +62,15 @@ Returns a BmpFont object.
 
 Valid %options are:
 
-I<style> ... a value of 'block' (default) assembles a character from
+=over
+
+=item I<style> 
+
+A value of 'block' (default) assembles a character from
 contiguous square blocks. A value of 'dot' assembles a character from 
 overlapping filled circles, in the style of a dot matrix printer.
+
+=back
 
 =cut
 # style => 'image' doesn't seem to want to work (see examples/024_bdffonts
@@ -438,6 +442,6 @@ __END__
 
 =head1 AUTHOR
 
-alfred reibenschuh
+Alfred Reibenschuh, extensively rewritten by Phil Perry
 
 =cut

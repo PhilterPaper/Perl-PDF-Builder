@@ -39,9 +39,9 @@ sub new {
     return $self;
 }
 
-=item $name = $res->name($name)
+=item $name = $res->name($name) # Set
 
-=item $name = $res->name()
+=item $name = $res->name() # Get
 
 Returns or sets the Name of the resource.
 

@@ -22,10 +22,6 @@ PDF::Builder::Resource::XObject::Image::GD - support routines for Graphics Devel
 
 =item $res = PDF::Builder::Resource::XObject::Image::GD->new($pdf, $file, %opts)
 
-=item $res = PDF::Builder::Resource::XObject::Image::GD->new($pdf, $file)
-
-=back
-
 Options:
 
 =over
@@ -37,6 +33,8 @@ This is the name you can give for the GD image object. The default is Dxnnnn.
 =item 'lossless' => 1
 
 Use lossless compression.
+
+=back
 
 =back
 

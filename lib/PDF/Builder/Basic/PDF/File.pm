@@ -144,6 +144,8 @@ is in PDF, which contains the location of the previous cross-reference table.
 
 =head1 METHODS
 
+=over
+
 =cut
 
 use Scalar::Util qw(blessed weaken);
@@ -187,7 +189,7 @@ use PDF::Builder::Basic::PDF::Pages;
 use PDF::Builder::Basic::PDF::Null;
 use POSIX qw(ceil floor);
 
-=head2 PDF::Builder::Basic::PDF::File->new()
+=item PDF::Builder::Basic::PDF::File->new()
 
 Creates a new, empty file object which can act as the host to other PDF objects.
 Since there is no file associated with this object, it is assumed that the
@@ -209,7 +211,7 @@ sub new {
     return $self;
 }
 
-=head2 $p = PDF::Builder::Basic::PDF::File->open($filename, $update, %options)
+=item $p = PDF::Builder::Basic::PDF::File->open($filename, $update, %options)
 
 Opens the file and reads all the trailers and cross reference tables to build
 a complete directory of objects.
@@ -236,6 +238,8 @@ when reading in a PDF file, try running with C<diags> and see what is reported.
 There are many PDF files out "in the wild" which, while failing to conform to
 Adobe's standards, appear to be tolerated by PDF Readers. Thus, Builder will no
 longer fail on them, but merely comment on their existence.
+
+=back
 
 =cut
 
@@ -304,7 +308,7 @@ sub open {
     return $self;
 } # end of open()
 
-=item $p->version($version, %opts) # Set (also returns newly set version)
+=item $new_version = $p->version($version, %opts) # Set 
 
 =item $ver = $p->version() # Get
 
@@ -364,7 +368,7 @@ sub version {
     return $old_version;
 }
 
-=item $p->header_version($version, %opts) # Set (also returns newly set version)
+=item $new_version = $p->header_version($version, %opts) # Set
 
 =item $version = $p->header_version() # Get
 
@@ -411,7 +415,7 @@ sub header_version {
     return $old_version;
 }
 
-=item $p->trailer_version($version, %opts) # Set (also returns newly set version)
+=item $new_version = $p->trailer_version($version, %opts) # Set
 
 =item $version = $p->trailer_version() # Get
 

@@ -33,7 +33,6 @@ sub new {
 
     my ($self);
     my ($data);
-    $opts{'encode'} ||= 'asis';  # provide default encoding
 
     if (defined $opts{'afmfile'}) {
         $data = $class->readAFM($opts{'afmfile'});

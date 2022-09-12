@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 use PDF::Builder::Util qw(pdfkey);
 use PDF::Builder::Basic::PDF::Utils; # PDFName
@@ -47,9 +47,9 @@ sub new {
 # Note: new_api() removed in favor of new():
 #   new_api($api, ...)  replace with new($api->{'pdf'}, ...)
 
-=item $name = $resource->name()
+=item $name = $resource->name() # Get
 
-=item $resource->name($name)
+=item $resource->name($name) # Set
 
 Get or set the name of the resource.
 

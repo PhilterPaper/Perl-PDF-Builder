@@ -21,7 +21,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.022'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -29,7 +29,9 @@ PDF::Builder::Basic::PDF::Number - Numbers in PDF. Inherits from L<PDF::Builder:
 
 =head1 METHODS
 
-=head2 $n->convert($str)
+=over
+
+=item $n->convert($str)
 
 Converts a string from PDF to internal, by doing nothing
 
@@ -39,7 +41,7 @@ sub convert {
     return $_[1];
 }
 
-=head2 $n->as_pdf()
+=item $n->as_pdf()
 
 Converts a number to PDF format
 
@@ -48,5 +50,9 @@ Converts a number to PDF format
 sub as_pdf {
     return $_[0]->{'val'};
 }
+
+=back
+
+=cut
 
 1;

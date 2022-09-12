@@ -28,10 +28,6 @@ Inherits from L<PDF::Builder::Resource::XObject::Image>
 
 =item $res = PDF::Builder::Resource::XObject::Image::PNG->new($pdf, $file, %opts)
 
-=item $res = PDF::Builder::Resource::XObject::Image::PNG->new($pdf, $file)
-
-=back 
-
 Returns a PNG-image object. C<$pdf> is the PDF object being added to, C<$file>
 is the input PNG file, and the optional C<$name> of the new parent image object
 defaults to PxAAA.
@@ -54,6 +50,8 @@ if provided.
 This is the name you can give for the PNG image object. The default is Pxnnnn.
 
 =back
+
+=back 
 
 =head2 Supported PNG types
 

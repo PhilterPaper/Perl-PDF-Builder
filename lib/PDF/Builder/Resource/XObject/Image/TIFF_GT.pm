@@ -27,8 +27,6 @@ PDF::Builder::Resource::XObject::Image::TIFF_GT - TIFF image support
 
 =item  $res = PDF::Builder::Resource::XObject::Image::TIFF_GT->new($pdf, $file, %opts)
 
-=item  $res = PDF::Builder::Resource::XObject::Image::TIFF_GT->new($pdf, $file)
-
 Returns a TIFF-image object. C<$pdf> is the PDF object being added to, C<$file>
 is the input TIFF file, and the optional C<$name> of the new parent image object
 defaults to IxAAA.

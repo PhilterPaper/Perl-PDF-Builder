@@ -23,10 +23,6 @@ PDF::Builder::Resource::XObject::Image::JPEG - support routines for JPEG image l
 
 =item $res = PDF::Builder::Resource::XObject::Image::JPEG->new($pdf, $file, %opts)
 
-=item $res = PDF::Builder::Resource::XObject::Image::JPEG->new($pdf, $file)
-
-=back
-
 Options:
 
 =over
@@ -34,6 +30,8 @@ Options:
 =item 'name' => 'string'
 
 This is the name you can give for the JPEG image object. The default is Jxnnnn.
+
+=back
 
 =back
 

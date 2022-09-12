@@ -25,8 +25,6 @@ PDF::Builder::Resource::XObject::Image::TIFF - TIFF image support
 
 =item  $res = PDF::Builder::Resource::XObject::Image::TIFF->new($pdf, $file, %opts)
 
-=item  $res = PDF::Builder::Resource::XObject::Image::TIFF->new($pdf, $file)
-
 Returns a TIFF-image object.
 
 If the Graphics::TIFF package is installed, the TIFF_GT library will be used

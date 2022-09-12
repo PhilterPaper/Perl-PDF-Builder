@@ -28,10 +28,6 @@ PDF::Builder::Resource::XObject::Image::PNM - support routines for PNM (Portable
 
 =item $res = PDF::Builder::Resource::XObject::Image::PNM->new($pdf, $file, %opts)
 
-=item $res = PDF::Builder::Resource::XObject::Image::PNM->new($pdf, $file)
-
-=back
-
 Options:
 
 =over
@@ -45,6 +41,8 @@ This is the name you can give for the PNM image object. The default is Nxnnnn.
 This is the compression you can give for the PNM image object. Any value will
 cause the use of I<Flate> compression, otherwise (C<compress> not given),
 I<ASCIIHexDecode> is used.
+
+=back
 
 =back
 

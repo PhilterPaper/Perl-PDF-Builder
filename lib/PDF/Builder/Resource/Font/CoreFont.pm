@@ -42,15 +42,11 @@ PDF::Builder::Resource::Font::CoreFont - Module for using the 14 standard PDF bu
 
 =item $font = PDF::Builder::Resource::Font::CoreFont->new($pdf, $fontname, %options)
 
-=item $font = PDF::Builder::Resource::Font::CoreFont->new($pdf, $fontname)
-
 Returns a corefont object.
 
-=cut
-
-=pod
-
 Valid %options are:
+
+=over
 
 I<encode>
 ... changes the encoding of the font from its default.
@@ -63,25 +59,31 @@ retrieved via C<$pdfname=$font->name()>.
 
 =back
 
+=back
+
 =head2 Supported typefaces
 
 B<standard PDF types>
 
 =over
 
-=item helvetica helveticaoblique helveticabold helvetiaboldoblique
+=over
+
+=item * helvetica helveticaoblique helveticabold helvetiaboldoblique
 
 May have Arial substituted on some systems (e.g., Windows)
 
-=item courier courieroblique courierbold courierboldoblique
+=item * courier courieroblique courierbold courierboldoblique
 
 Fixed pitch, may have Courier New substituted on some systems (e.g., Windows)
 
-=item timesroman timesitalic timesbold timesbolditalic
+=item * timesroman timesitalic timesbold timesbolditalic
 
 May have Times New Roman substituted on some systems (e.g., Windows)
 
-=item symbol zapfdingbats
+=item * symbol zapfdingbats
+
+=back
 
 =back
 
@@ -89,17 +91,21 @@ B<Primarily Windows typefaces>
 
 =over
 
-=item georgia georgiaitalic georgiabold georgiabolditalic
+=over
 
-=item verdana verdanaitalic verdanabold verdanabolditalic
+=item * georgia georgiaitalic georgiabold georgiabolditalic
 
-=item trebuchet trebuchetitalic trebuchetbold trebuchetbolditalic
+=item * verdana verdanaitalic verdanabold verdanabolditalic
 
-=item bankgothic bankgothicitalic bankgothicbold bankgothicitalic
+=item * trebuchet trebuchetitalic trebuchetbold trebuchetbolditalic
+
+=item * bankgothic bankgothicitalic bankgothicbold bankgothicitalic
 
 Free versions of Bank Gothic are often only medium weight.
 
-=item webdings wingdings
+=item * webdings wingdings
+
+=back
 
 =back
 
