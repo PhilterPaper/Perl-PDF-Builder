@@ -8,6 +8,7 @@ VERSION 3.024
 #   6 years to get date of oldest release, and then go one release before that. 
 #   Would be nice to read cpan First Release and figure out min Perl version.
 #PERL_V_DOT   5.24.0  # dist.ini, .travis.yml
+#    two decimals seems to upset Perl when treating as a number, not string
 # update Makefile.PL, META.*
 PERL_V       5.024000
 
@@ -30,3 +31,8 @@ GRAPHICS_TIFF    19
 HARFBUZZ_SHAPER  0.024  # 0.026 is current release
 IMAGE_PNG_LIBPNG 0.57
 
+# problems seen with 3.024 build:
+#   META.* final version not seeing 'recommends' after install
+#   META.yml 'provides' list 'version' not updated
+#   corrupted Makefile.PL update around GT line
+#   tools/update_optionals.pl not updated correctly

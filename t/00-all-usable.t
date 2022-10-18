@@ -5,7 +5,7 @@ use strict;
 use Test::More;
 use File::Find;
 
-my $GrTFversion = 17;    # minimum version of Graphics::TIFF
+my $GrTFversion = 19;    # minimum version of Graphics::TIFF
 my $HBShaperVer = 0.024; # minimum version of HarfBuzz::Shaper
 my $LpngVersion = 0.57;  # minimum version of Image::PNG::Libpng
 

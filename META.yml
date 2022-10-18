@@ -20,7 +20,7 @@ no_index:
     - t
     - inc
 recommends:
-  Graphics::TIFF: '16'
+  Graphics::TIFF: '19'
   HarfBuzz::Shaper: '0.024'
   Image::PNG::Libpng: '0.57'
 requires:
@@ -31,330 +31,333 @@ resources:
   bugtracker: https://github.com/PhilterPaper/Perl-PDF-Builder/issues
   homepage: https://metacpan.org/pod/PDF::Builder
   repository: git://github.com/PhilterPaper/Perl-PDF-Builder.git
-version: '3.023'
+version: '3.024'
 x_serialization_backend: 'CPAN::Meta::YAML version 0.018'
 provides: 
   PDF::Builder :
     file: lib/PDF/Builder.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF :
     file: lib/PDF/Builder/Basic/PDF.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Filter::ASCII85Decode :
     file: lib/PDF/Builder/Basic/PDF/Filter/ASCII85Decode.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Filter::ASCIIHexDecode :
     file: lib/PDF/Builder/Basic/PDF/Filter/ASCIIHexDecode.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Filter::FlateDecode :
     file: lib/PDF/Builder/Basic/PDF/Filter/FlateDecode.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Filter::LZWDecode :
     file: lib/PDF/Builder/Basic/PDF/Filter/LZWDecode.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Filter::RunLengthDecode :
     file: lib/PDF/Builder/Basic/PDF/Filter/RunLengthDecode.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Array :
     file: lib/PDF/Builder/Basic/PDF/Array.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Bool :
     file: lib/PDF/Builder/Basic/PDF/Bool.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Dict :
     file: lib/PDF/Builder/Basic/PDF/Dict.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::File :
     file: lib/PDF/Builder/Basic/PDF/File.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Filter :
     file: lib/PDF/Builder/Basic/PDF/Filter.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Literal :
     file: lib/PDF/Builder/Basic/PDF/Literal.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Name :
     file: lib/PDF/Builder/Basic/PDF/Name.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Null :
     file: lib/PDF/Builder/Basic/PDF/Null.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Number :
     file: lib/PDF/Builder/Basic/PDF/Number.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Objind :
     file: lib/PDF/Builder/Basic/PDF/Objind.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Page :
     file: lib/PDF/Builder/Basic/PDF/Page.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Pages :
     file: lib/PDF/Builder/Basic/PDF/Pages.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::String :
     file: lib/PDF/Builder/Basic/PDF/String.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Basic::PDF::Utils :
     file: lib/PDF/Builder/Basic/PDF/Utils.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Content::Hyphenate_basic :
     file: lib/PDF/Builder/Content/Hyphenate_basic.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Content::Text :
     file: lib/PDF/Builder/Content/Text.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Content::  :
     file: lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::CIDFont::CJKFont :
     file: lib/PDF/Builder/Resource/CIDFont/CJKFont.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::CIDFont::TrueType :
     file: lib/PDF/Builder/Resource/CIDFont/TrueType.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::ColorSpace::Indexed::ACTFile :
     file: lib/PDF/Builder/Resource/ColorSpace/Indexed/ACTFile.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::ColorSpace::Indexed::Hue :
     file: lib/PDF/Builder/Resource/ColorSpace/Indexed/Hue.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::ColorSpace::Indexed::WebColor :
     file: lib/PDF/Builder/Resource/ColorSpace/Indexed/WebColor.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::ColorSpace::DeviceN :
     file: lib/PDF/Builder/Resource/ColorSpace/DeviceN.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::ColorSpace::Indexed :
     file: lib/PDF/Builder/Resource/ColorSpace/Indexed.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::ColorSpace::Separation :
     file: lib/PDF/Builder/Resource/ColorSpace/Separation.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::bankgothic :
     file: lib/PDF/Builder/Resource/Font/CoreFont/bankgothic.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::courier :
     file: lib/PDF/Builder/Resource/Font/CoreFont/courier.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::courierbold :
     file: lib/PDF/Builder/Resource/Font/CoreFont/courierbold.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::courierboldoblique :
     file: lib/PDF/Builder/Resource/Font/CoreFont/courierboldoblique.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::courieroblique :
     file: lib/PDF/Builder/Resource/Font/CoreFont/courieroblique.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::georgia :
     file: lib/PDF/Builder/Resource/Font/CoreFont/georgia.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::georgiabold :
     file: lib/PDF/Builder/Resource/Font/CoreFont/georgiabold.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::georgiabolditalic :
     file: lib/PDF/Builder/Resource/Font/CoreFont/georgiabolditalic.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::georgiaitalic :
     file: lib/PDF/Builder/Resource/Font/CoreFont/georgiaitalic.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::helvetica :
     file: lib/PDF/Builder/Resource/Font/CoreFont/helvetica.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::helveticabold :
     file: lib/PDF/Builder/Resource/Font/CoreFont/helveticabold.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::helveticaboldoblique :
     file: lib/PDF/Builder/Resource/Font/CoreFont/helveticaboldoblique.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::helveticaoblique :
     file: lib/PDF/Builder/Resource/Font/CoreFont/helveticaoblique.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::symbol :
     file: lib/PDF/Builder/Resource/Font/CoreFont/symbol.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::timesbold :
     file: lib/PDF/Builder/Resource/Font/CoreFont/timesbold.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::timesbolditalic :
     file: lib/PDF/Builder/Resource/Font/CoreFont/timesbolditalic.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::timesitalic :
     file: lib/PDF/Builder/Resource/Font/CoreFont/timesitalic.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::timesroman :
     file: lib/PDF/Builder/Resource/Font/CoreFont/timesroman.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::trebuchet :
     file: lib/PDF/Builder/Resource/Font/CoreFont/trebuchet.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::trebuchetbold :
     file: lib/PDF/Builder/Resource/Font/CoreFont/trebuchetbold.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::trebuchetbolditalic :
     file: lib/PDF/Builder/Resource/Font/CoreFont/trebuchetbolditalic.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::trebuchetitalic :
     file: lib/PDF/Builder/Resource/Font/CoreFont/trebuchetitalic.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::verdana :
     file: lib/PDF/Builder/Resource/Font/CoreFont/verdana.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::verdanabold :
     file: lib/PDF/Builder/Resource/Font/CoreFont/verdanabold.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::verdanabolditalic :
     file: lib/PDF/Builder/Resource/Font/CoreFont/verdanabolditalic.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::verdanaitalic :
     file: lib/PDF/Builder/Resource/Font/CoreFont/verdanaitalic.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::webdings :
     file: lib/PDF/Builder/Resource/Font/CoreFont/webdings.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::wingdings :
     file: lib/PDF/Builder/Resource/Font/CoreFont/wingdings.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont::zapfdingbats :
     file: lib/PDF/Builder/Resource/Font/CoreFont/zapfdingbats.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::BdFont :
     file: lib/PDF/Builder/Resource/Font/BdFont.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::CoreFont :
     file: lib/PDF/Builder/Resource/Font/CoreFont.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::Postscript :
     file: lib/PDF/Builder/Resource/Font/Postscript.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font::SynFont :
     file: lib/PDF/Builder/Resource/Font/SynFont.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Form::BarCode::codabar :
     file: lib/PDF/Builder/Resource/XObject/Form/BarCode/codabar.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Form::BarCode::code128 :
     file: lib/PDF/Builder/Resource/XObject/Form/BarCode/code128.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Form::BarCode::code3of9 :
     file: lib/PDF/Builder/Resource/XObject/Form/BarCode/code3of9.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Form::BarCode::ean13 :
     file: lib/PDF/Builder/Resource/XObject/Form/BarCode/ean13.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Form::BarCode::int2of5 :
     file: lib/PDF/Builder/Resource/XObject/Form/BarCode/int2of5.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Form::BarCode :
     file: lib/PDF/Builder/Resource/XObject/Form/BarCode.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Form::Hybrid :
     file: lib/PDF/Builder/Resource/XObject/Form/Hybrid.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Image::TIFF::File :
     file: lib/PDF/Builder/Resource/XObject/Image/TIFF/File.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Image::TIFF::File_GT :
     file: lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Image::GD :
     file: lib/PDF/Builder/Resource/XObject/Image/GD.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Image::GIF :
     file: lib/PDF/Builder/Resource/XObject/Image/GIF.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Image::JPEG :
     file: lib/PDF/Builder/Resource/XObject/Image/JPEG.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Image::PNG :
     file: lib/PDF/Builder/Resource/XObject/Image/PNG.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Image::PNG_IPL :
     file: lib/PDF/Builder/Resource/XObject/Image/PNG_IPL.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Image::PNM :
     file: lib/PDF/Builder/Resource/XObject/Image/PNM.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Image::TIFF :
     file: lib/PDF/Builder/Resource/XObject/Image/TIFF.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Image::TIFF_GT :
     file: lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Form :
     file: lib/PDF/Builder/Resource/XObject/Form.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject::Image :
     file: lib/PDF/Builder/Resource/XObject/Image.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::BaseFont :
     file: lib/PDF/Builder/Resource/BaseFont.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::CIDFont :
     file: lib/PDF/Builder/Resource/CIDFont.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Colors :
     file: lib/PDF/Builder/Resource/Colors.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::ColorSpace :
     file: lib/PDF/Builder/Resource/ColorSpace.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::ExtGState :
     file: lib/PDF/Builder/Resource/ExtGState.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Font :
     file: lib/PDF/Builder/Resource/Font.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Glyphs :
     file: lib/PDF/Builder/Resource/Glyphs.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::PaperSizes :
     file: lib/PDF/Builder/Resource/PaperSizes.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Pattern :
     file: lib/PDF/Builder/Resource/Pattern.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::Shading :
     file: lib/PDF/Builder/Resource/Shading.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::UniFont :
     file: lib/PDF/Builder/Resource/UniFont.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource::XObject :
     file: lib/PDF/Builder/Resource/XObject.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Annotation :
     file: lib/PDF/Builder/Annotation.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Content :
     file: lib/PDF/Builder/Content.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Docs :
     file: lib/PDF/Builder/Docs.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Lite :
     file: lib/PDF/Builder/Lite.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Matrix :
     file: lib/PDF/Builder/Matrix.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::NamedDestination :
     file: lib/PDF/Builder/NamedDestination.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Outline :
     file: lib/PDF/Builder/Outline.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Outlines :
     file: lib/PDF/Builder/Outlines.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Page :
     file: lib/PDF/Builder/Page.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Resource :
     file: lib/PDF/Builder/Resource.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::UniWrap :
     file: lib/PDF/Builder/UniWrap.pm
-    version: '3.023'
+    version: '3.024'
   PDF::Builder::Util :
     file: lib/PDF/Builder/Util.pm
-    version: '3.023'
+    version: '3.024'
+  PDF::Builder::ViewerPreferences :
+    file: lib/PDF/Builder/ViewerPreferences.pm
+    version: '3.024'

@@ -16,13 +16,13 @@ use strict;
 # t/00-all-usable.t and lib/PDF/Builder.pm, while also making use of the
 # optional prerequisites, do not need to exclude unused optionals.
 
-our $VERSION = '3.023'; # VERSION
+our $VERSION = '3.024'; # VERSION
 our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
 
 # master list of optional prerequisites:
 # make sure that any updates to patterns etc. keep the same order
 my %options = (
-	'1' => ["Graphics::TIFF",     "16"   ],
+	'1' => ["Graphics::TIFF",     "19"   ],
 	'2' => ["Image::PNG::Libpng", "0.57" ],
 	'3' => ["HarfBuzz::Shaper",   "0.024"],
               );

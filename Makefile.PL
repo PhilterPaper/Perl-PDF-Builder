@@ -100,7 +100,7 @@ my %WriteMakefileArgs =
     # if remove or comment out any, also do so in META.json and META.yml
     "recommends" => {
       # fast TIFF image processing.
-      "Graphics::TIFF" => 16,  # will be 19 when TIFF changes go in
+      "Graphics::TIFF" => 19, 
       # advanced/fast PNG image processing.
       "Image::PNG::Libpng" => 0.57,
       # text shaping for Latin script ligatures and kerning, and for 
@@ -127,7 +127,7 @@ print <<'END';
 The installation process will attempt to install or update several OPTIONAL
 prerequisite packages. If one or more should fail to install, Don't Panic
 -- you will still be able to run PDF::Builder, but may not be able to use 
-some advanced features. See the README file for more information.
+some advanced features. See the README.md file for more information.
 ===========================================================================
 END
 
