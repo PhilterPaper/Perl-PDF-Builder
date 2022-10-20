@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
 
 use Carp;
 use Encode qw(:all);
@@ -295,7 +295,7 @@ sub readcffstructs {
     push(@{$data->{'string'}}, { 'VAL' => 'Book' });
     push(@{$data->{'string'}}, { 'VAL' => 'Light' });
     push(@{$data->{'string'}}, { 'VAL' => 'Medium' });
-    ush(@{$data->{'string'}}, { 'VAL' => 'Regular' });
+    push(@{$data->{'string'}}, { 'VAL' => 'Regular' });
     push(@{$data->{'string'}}, { 'VAL' => 'Roman' });
     push(@{$data->{'string'}}, { 'VAL' => 'Semibold' });
 

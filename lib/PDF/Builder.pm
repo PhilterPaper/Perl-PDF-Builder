@@ -6,7 +6,7 @@ use warnings;
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
 our $VERSION = '3.024'; # VERSION
-our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
 
 # updated during CPAN build
 my $GrTFversion = 19;    # minimum version of Graphics::TIFF
@@ -32,6 +32,7 @@ use PDF::Builder::Resource::Pattern;
 use PDF::Builder::Resource::Shading;
 
 use PDF::Builder::NamedDestination;
+use PDF::Builder::FontManager;
 
 use List::Util qw(max);
 use Scalar::Util qw(weaken);
@@ -51,6 +52,8 @@ our $outVer = 1.4; # desired PDF version for output, bump up w/ warning on read 
 our $msgVer = 1;   # 0=don't, 1=do issue message when PDF output version is bumped up
 our $myself;       # holds self->pdf
 our $global_pdf;   # holds self ($pdf)
+
+require PDF::Builder::FontManager;
 
 =head1 NAME
 
@@ -388,6 +391,10 @@ sub new {
                 "https://github.com/PhilterPaper/Perl-PDF-Builder/blob/master/INFO/SUPPORT]");
 
     $global_pdf = $self;
+    # initialize Font Manager
+    require PDF::Builder::FontManager;
+    $self->{' FM'} = PDF::Builder::FontManager->new($self);  
+
     return $self;
 } # end of new()
 
@@ -3277,6 +3284,96 @@ sub unifont {
     my $obj = PDF::Builder::Resource::UniFont->new($self->{'pdf'}, @opts);
 
     return $obj;
+}
+
+=back
+
+=head2 Font Manager methods
+
+The Font Manager is automatically initialized.
+
+=over
+
+=item @list = $pdf->font_settings()  # Get
+
+=item $pdf->font_settings(%info)  # Set
+
+Change one or more default settings. 
+See L<PDF::Builder::FontManager>/font_settings for details.
+
+=back
+
+=cut
+
+sub font_settings {
+    my $self = shift;
+    return $self->{' FM'}->font_settings(@_);
+}
+
+=over
+
+=item $rc = $pdf->add_font_path("a directory path", %opts)
+
+Add a search path for Font Manager font entries.
+See L<PDF::Builder::FontManager>/add_font_path for details.
+
+=back
+
+=cut
+
+sub add_font_path {
+    my $self = shift;
+    return $self->{' FM'}->add_font_path(@_);
+}
+
+=over
+
+=item $rc = $pdf->add_font(%info)
+
+Add a font (face) definition to the Font Manager list.
+See L<PDF::Builder::FontManager>/add_font for details.
+
+=back
+
+=cut
+
+sub add_font {
+    my $self = shift;
+    return $self->{' FM'}->add_font(@_);
+}
+
+=over
+
+=item @current = $pdf->get_font()  # Get
+
+=item $font = $pdf->get_font(%info)  # Set
+
+Retrieve a ready-to-use font, or find out what the current one is.
+See L<PDF::Builder::FontManager>/get_font for details.
+
+=back
+
+=cut
+
+sub get_font {
+    my $self = shift;
+    return $self->{' FM'}->get_font(@_);
+}
+
+=over
+
+=item $pdf->dump_font_tables()
+
+Dump all known font information to STDOUT.
+See L<PDF::Builder::FontManager>/dump_font_tables for details.
+
+=back
+
+=cut
+
+sub dump_font_tables {
+    my $self = shift;
+    return $self->{' FM'}->dump_font_tables(@_);
 }
 
 =back

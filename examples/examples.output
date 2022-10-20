@@ -330,3 +330,5 @@ Rotated.pl  pp 1 and 4 portrait mode Lorem Ipsum text
 Boxes.pl  demonstrate interactions of PDF "boxes"
 
 ShowFont.pl   run without command line arguments to get help
+
+FontManager.pl  a short PDF to show off switching between fonts

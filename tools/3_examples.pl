@@ -124,6 +124,10 @@ my (@example_list, @example_results);
   push @example_list, "ShowFont.pl";
   push @example_results, "create examples/ShowFont.<type>.<font name>.pdf, showing multiple pages\n demonstrating the display of various encodings.\n";
  
+  # hard coded with a number of fonts you may need to change
+  push @example_list, "FontManager.pl";
+  push @example_results, "create examples/FontManager.pdf to demonstrate some switching between\n declared fonts within paragraphs.\n";
+
 # push @example_list, "examples/Windows/027_winfont.pl";
 # push @example_results, "create examples/Windows/027_winfont.<type>.<font name>.pdf, showing multiple pages\n demonstrating the display of various encodings.\n";
  
