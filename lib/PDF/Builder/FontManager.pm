@@ -648,6 +648,7 @@ sub _initialize_core {
 
     } # Windows additional core fonts
 
+    return;
 } # end of _initialize_core()
 
 =item @current = $pdf->get_font()  # Get
@@ -1028,6 +1029,8 @@ sub dump_font_tables {
     # lots of output once 'entry' points start getting filled!
    #use Data::Dumper;
    #print Dumper($self->{' font-list'});
+
+    return;
 } # end of dump_font_tables()
 
 1;

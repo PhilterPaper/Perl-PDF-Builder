@@ -2,13 +2,39 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.025     2022-10-20  UNRELEASED
+3.025     2022-10-26  UNRELEASED
 
+    lib/PDF/Builder.pm
+     Add checks to page() method to see if the application is attempting to 
+      add a new page number that is too negative (more than one before the
+      existing first page) or too positive (beyond the existing last page). 
+      The index value (page number) is clamped to be within possible values, 
+      with a warning. Ref: #190.
+
+    lib/PDF/Builder/Annotation-NamedDestination-Outline.pm,
+      lib/PDF/Builder.pm, t/named-destinations.t, t/042_links
+     Remove new PDF::API2-style location+args interfaces, as I don't like the
+      way they work, and that they are not backwards compatible with the old
+      methods. Unfortunately, this may break any application changed (or
+      recently written) to use the new PDF::API2 2.043 interfaces. If the
+      new location+args list notation were to be used, only if the number of
+      args was even could this be detected. An odd number of args, plus the
+      location string, would be indistinguishable from a hash list, one of 
+      which may follow (as options) the location+args list. Ref: #190.
+
+    ===== work sponsored by _________
     lib/PDF/Builder.pm, lib/PDF/Builder/FontManager.pm (new), example/README,
       examples/examples_output, examples/FontManager.pl (new), MANIFEST,
       tools/3_examples.pl
      Add a Font Manager to be able to select a font simply by giving the "face"
-      and whether bold and/or italics are to be used.
+      and whether bold and/or italics are to be used. The actual font setting
+      (with font size) is still done with $text->font($font, $size), but
+      instead of having to explicitly create (or reuse) a $font, that part is
+      all handled for you. It does not depend on any OS-provided font manager
+      libraries (such as Linux provides, but Windows does not). Except for
+      the core fonts, your application has to specify the base font and the
+      files to use for italic, bold, etc.
+    ===== end of sponsored work
 
     lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm
      Typo fixed.

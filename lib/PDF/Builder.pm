@@ -1542,31 +1542,33 @@ sub outline {
     return $obj;
 }
 
-=item $pdf = $pdf->open_action($page, $location, @args);
-
-Set the destination in the PDF that should be displayed when the document is
-opened.
-
-C<$page> may be either a page number or a page object.  The other parameters are
-as described in L<PDF::Builder::NamedDestination>.
-
-This has been split out from C<preferences()> for compatibility with PDF::API2.
-It also can both set (assign) and get (query) the settings used.
-
-=cut
-
-sub open_action {
-    my ($self, $page, @args) = @_;
-
-    # $page can be either a page number or a page object
-    $page = PDFNum($page) unless ref($page);
-
-    require PDF::Builder::NamedDestination;
-    my $array = PDF::Builder::NamedDestination::_destination($page, @args);
-    $self->{'catalog'}->{'OpenAction'} = $array;
-    $self->{'pdf'}->out_obj($self->{'catalog'});
-    return $self;
-}
+#=item $pdf = $pdf->open_action($page, $location, @args);
+#
+#Set the destination in the PDF that should be displayed when the document is
+#opened.
+#
+#C<$page> may be either a page number or a page object. The other parameters are
+#as described in L<PDF::Builder::NamedDestination>.
+#
+#This has been split out from C<preferences()> for compatibility with PDF::API2.
+#It also can both set (assign) and get (query) the settings used.
+#
+#=cut
+#
+#sub open_action {
+#    my ($self, $page, @args) = @_;
+#
+#    # $page can be either a page number or a page object
+#    $page = PDFNum($page) unless ref($page);
+#
+#    require PDF::Builder::NamedDestination;
+#   # PDF::API2 code incompatible with Builder!
+#   #my $array = PDF::Builder::NamedDestination::_destination($page, @args);
+#
+#    $self->{'catalog'}->{'OpenAction'} = $array;
+#    $self->{'pdf'}->out_obj($self->{'catalog'});
+#    return $self;
+#}
 
 =item $layout = $pdf->page_layout();
 
@@ -1749,6 +1751,7 @@ It is preferred that you use these specific methods.
 
 sub preferences {
     my ($self, %opts) = @_;
+
     # copy dashed option names to the preferred undashed format
     # Page Mode Options
     if (defined $opts{'-fullscreen'} && !defined $opts{'fullscreen'}) { $opts{'fullscreen'} = delete($opts{'-fullscreen'}); }
@@ -1972,21 +1975,39 @@ sub page {
     } else {
         $page = PDF::Builder::Page->new($self->{'pdf'}, $self->{'pages'}, $index-1);
     }
+
     $page->{' apipdf'} = $self->{'pdf'};
     $page->{' api'} = $self;
     weaken $page->{' apipdf'};
     weaken $page->{' api'};
     $self->{'pdf'}->out_obj($page);
     $self->{'pdf'}->out_obj($self->{'pages'});
-    if ($index == 0) {
+
+    # fix any bad $index value
+    my $pgs_size = @{$self->{'pagestack'}};
+    if      ($pgs_size == 0) { # empty page list, can only add at end
+	warn "page($index) on empty page stack is out of range, use page() or page(0)"
+	    if ($index != 0);
+	$index = 0;
+    } elsif ($pgs_size < -$index) { # index < 0
+        warn "page($index) out of range, set to page(1) (before first)";
+        $index = 1;
+    } elsif ($pgs_size < $index) { # index > 0
+        warn "page($index) out of range, set to page(0) (after last)";
+        $index = 0;
+    }
+
+    if      ($index == 0) {
         push @{$self->{'pagestack'}}, $page;
         weaken $self->{'pagestack'}->[-1];
     } elsif ($index < 0) {
+	# note that the new element's number is one less than $index,
+	# since we inserted _before_ $index value!
         splice @{$self->{'pagestack'}}, $index, 0, $page;
-        weaken $self->{'pagestack'}->[$index];
-    } else {
+        weaken $self->{'pagestack'}->[$index-1];
+    } else { # index > 0
         splice @{$self->{'pagestack'}}, $index-1, 0, $page;
-        weaken $self->{'pagestack'}->[$index - 1];
+        weaken $self->{'pagestack'}->[$index-1];
     }
 
     #   $page->{'Resources'}=$self->{'pages'}->{'Resources'};

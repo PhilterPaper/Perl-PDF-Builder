@@ -118,7 +118,7 @@ $target_width = $text->advancewidth("here");
 $annotation = $page->annotation();
 my $tgt_page = $pdf->openpage(1);  # target page 1
 # method 'link' is still usable
-$annotation->goto($tgt_page,
+$annotation->link($tgt_page,
 	         -rect => [$x-1, $y-5, $x+1+$target_width, $y-5+1+$font_size],
 		                         # clickable area
 		 -border => [0, 0, $border],    # show border
@@ -145,7 +145,7 @@ $target_width = $text->advancewidth("here");
 $annotation = $page->annotation();
 $tgt_page = $pdf->openpage(1);  # target page 1
 # method 'link' is still usable
-$annotation->goto($tgt_page,
+$annotation->link($tgt_page,
 	         -rect => [$x-1, $y-5, $x+1+$target_width, $y-5+1+$font_size],
 		                         # clickable area
 		 -border => [0, 0, $border],    # show border
