@@ -1636,7 +1636,7 @@ sub page_layout {
                   $name eq 'two_page_right'   ? 'TwoPageRight'   : '');
 
     croak "Invalid page layout: $name" unless $layout;
-    $self->{'catalog'}->{'PageMode'} = PDFName($layout);
+    $self->{'catalog'}->{'PageLayout'} = PDFName($layout);
     $self->{'pdf'}->out_obj($self->{'catalog'});
     return $self;
 }
@@ -2020,8 +2020,8 @@ Returns the L<PDF::Builder::Page> object of page $page_number.
 This is similar to C<< $page = $pdf->page() >>, except that C<$page> is 
 I<not> a new, empty page; but contains the contents of that existing page.
 
-If $page_number is 0 or -1, it will return the last page in the
-document.
+If C<$page_number> is 0, -1, or unspecified, 
+it will return the last page in the document.
 
 B<Example:>
 
@@ -2030,6 +2030,8 @@ B<Example:>
     $page = $pdf->open_page(99);  # returns the last page
     $page = $pdf->open_page(-1);  # returns the last page
     $page = $pdf->open_page(999); # returns undef
+    $page = $pdf->open_page(0);   # returns the last page
+    $page = $pdf->open_page();    # returns the last page
 
 B<Alternate name:> C<openpage>
 
