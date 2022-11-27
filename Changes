@@ -2,7 +2,12 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.025     2022-11-20  UNRELEASED
+3.025     2022-11-27  UNRELEASED
+
+    INFO/RoadMap, examples/020_corefonts
+     Add discussion of /StructTreeRoot, remove Bank Gothic examples from
+      core fonts (it appears to be just a partial alias for some other
+      sans-serif font).
 
     LICENSE   remove superfluous "59" from FSF address in license. From
       PDF::API2 #59.
