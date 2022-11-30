@@ -95,6 +95,8 @@ created earlier, the saved C<$font> will be returned.
 
 =head1 METHODS
 
+=over
+
 =item PDF::Builder::FontManager->new(%opts)
 
 This is called from Builder.pm's C<new()>. Currently there are no options
@@ -148,15 +150,18 @@ sub new {
 
 =item @list = $pdf->font_settings()  # Get
 
-Return a list (array) of the default font face name, the default generic
+=item $pdf->font_settings(%info)  # Set
+
+Get or set some information about fonts, particularly the fonts to be used for
+"generic" purposes.
+
+"Get" returns a list (array) of the default font face name, the default generic
 serif face, the default generic sans-serif face, the default generic constant
 width face, the default generic symbol face, and the default generic script
 (cursive) face. It is possible for an element to be undefined (e.g., the
 generic script face is C<undef>).
 
-=item $pdf->font_settings(%info)  # Set
-
-Change one or more default settings:
+"Set" changes one or more default settings:
 
     'font' => face to use for the default font face (initialized to Times)
     'serif' => face to use for the generic serif face (initialized to Times)
@@ -329,6 +334,13 @@ these 14 basic core fonts, but the precise actual file type may vary among
 installations, and substitutions may be made (so long as the metrics match).
 Currently, core fonts are limited to single byte encodings.
 
+On Windows systems, there are an additional 14 core fonts which are normally
+loaded. These are Georgia, Verdana, Trebuchet, Wingdings, and Webdings faces.
+Use caution if making use of these additional core fonts, as non-Windows
+systems may not include them without explicit manual installation of these
+fonts. These fonts may be safe to use if you know that all your PDF readers
+will be running on Windows systems.
+
 =item B<ttf>
 
 This is a TrueType (.ttf) or OpenType (.otf) font. Currently this is the only
@@ -381,12 +393,21 @@ explicitly loaded via C<add_font()>.
 This is a collection of any other settings, flags, etc. accepted by this
 particular font type. See the POD for C<corefont>, C<ttfont>, etc. (per
 I<type> for the allowable entries. An important one will be the encoding,
-which you will need to specify, if you use any characters beyond basic ASCII. 
+which you will need to specify, if you use any characters beyond basic ASCII.
+
 Currently, all fonts may use any single byte encoding you
-desire (the default is I<CP-1252>. Only TTF type fonts (which includes OTF 
-fonts) may currently specify a multibyte encoding such as I<utf8>. Needless
+desire (the default is I<CP-1252>). Only TTF type fonts (which includes OTF and 
+CJK fonts) may currently specify a multibyte encoding such as I<utf8>. Needless
 to say, the text data that you pass to text routines must conform to the given
-encoding.
+encoding. You are I<not> forced to use the same encoding for all defined fonts,
+but if you wish to mix-and-match encodings, it is up to you to define your
+text that uses the encoding specified for the particular font used!
+
+Note in particular when you use I<entities> that (if numeric) they are given 
+in the Unicode number. When out of the single byte range (x00-xFF), results are 
+unpredictable if you give an entity that does not fall within the encoding's
+range! Also check results for Unicode points within the range x80-xFF if you
+are using I<utf8> encoding.
 
 =item style => 'styling'
 
@@ -397,11 +418,11 @@ be useful to you for defining a generic style font.
 
 =item width => 'relative widths'
 
-Currently, B<proportional> and B<constant> (constant width) may be specified.
-It has no effect on how a font is loaded or used, but may be useful to you for
-defining a generic style font.
+Currently, B<proportional> (variable width) and B<constant> (constant width) 
+may be specified. It has no effect on how a font is loaded or used, but may be 
+useful to you for defining a generic style font.
 
-=item file => {anonymoous hash of source files}
+=item file => {anonymous hash of source files}
 
 This tells the Font Manager where to find the actual font file. For core fonts,
 it is the standard name, rather than a file (and remember, they are pre-loaded).
@@ -411,19 +432,19 @@ For all other types, it lists from one to four of the following variants:
 
 =item B<roman> => 'path to Roman'
 
-This specifies the "Roman" or "regular" variant of the font. Almost all 
+This specifies the "Roman" or "regular" posture variant of the font. Almost all 
 available fonts include a Roman (normal, upright posture) variant at normal 
 (medium) weight.
 
 =item B<italic> => 'path to Italic'
 
-This specifies the "Italic", "slanted", or "oblique" variant of the font. Most
-available fonts include an italic variant at normal (medium) weight.
+This specifies the "Italic", "slanted", or "oblique" posture variant of the 
+font. Most available fonts include an italic variant at normal (medium) weight.
 
 =item B<bold> => 'path to Bold'
 
-This specifies the "Bold" or "heavy" variant of the font. Most
-available fonts include a bold (heavy weight) variant with normal posture.
+This specifies the "Bold" or "heavy" variant of the font. Most available fonts 
+include a bold (heavy weight) variant with normal (Roman) posture.
 
 =item B<bold-italic> => 'path to BoldItalic'
 
@@ -638,18 +659,56 @@ sub _initialize_core {
     # there is also a Bank Gothic on my Windows system, but I'm not sure if I
     # loaded that one from some place, or it came with Windows. In either case,
     # I think it should be OK to provide the metrics (but not the font itself).
-    $self->add_font('face' => 'BankGothic', 'type' => 'core', 
-                'settings' => { 'encode' => $single }, 
-		'style' => 'sans-serif', 'width' => 'proportional',
-                'file' => {'roman' => 'BankGothic',
-                           'italic' => 'BankGothicItalic',
-                           'bold' => 'BankGothicBold',
-                           'bold-italic' => 'BankGothicBoldItalic'} );
+    #
+    # Bank Gothic is confusing... it only has regular and italic, and it 
+    # doesn't look anything like the examples shown on various font websites.
+    # I think some other sans-serif font is being substituted for it.
+#   $self->add_font('face' => 'BankGothic', 'type' => 'core', 
+#               'settings' => { 'encode' => $single }, 
+#	        'style' => 'sans-serif', 'width' => 'proportional',
+#               'file' => {'roman' => 'BankGothic',
+#                          'italic' => 'BankGothicItalic',
+#                         #'bold' => 'BankGothicBold',
+#                         #'bold-italic' => 'BankGothicBoldItalic'} 
+#                         } );
 
     } # Windows additional core fonts
 
     return;
 } # end of _initialize_core()
+
+## for some reason, this is uncallable from Content::Text
+## try to fix it... it belongs here and not in Text.pm
+#=over
+#
+#=item ($ascender, $descender, $d_leading) = $pdf->get_fv_extents($font_size, $leading)
+#
+#Get the I<current> font's vertical extents (points above and below the
+#baseline), scaled by font_size, and leading is added to the descender amount.
+#C<$descender> is the deepest glyph descender; C<$d_leading> is that plus the
+#leading.
+#
+#Note that the extents are the maximum values defined for this particular 
+#I<font>, and not what the particular text's ascenders and descenders are 
+#actually using.
+#
+#=cut
+#
+#sub get_fv_extents {
+#    my ($self, $font_size, $leading) = @_;
+#
+#    $leading = 1.0 if $leading <= 0; # actually, a bad value
+#    $leading++ if $leading < 1.0;    # might have been given as fractional
+#
+#    my $current = $self->{' current-font'}->{'face'};  # font name
+#    my $font = $self->get_font('face' => $current);    # font object realized
+#    # now it's loaded, if it wasn't already
+#    my $ascender  = $font->ascender()/1000*$font_size; # positive
+#    my $descender = $font->ascender()/1000*$font_size; # negative
+#
+#    # ascender is positive, descender is negative (above/below baseline)
+#    return ($ascender, $descender, $descender-($leading-1.0)*$font_size);
+#} # end of get_fv_extents()
 
 =item @current = $pdf->get_font()  # Get
 
@@ -674,7 +733,8 @@ there was an error.
 =item face => face name string
 
 This is the font family (face) name loaded up with the core fonts (e.g., Times),
-or by C<$pdf-E<gt>add_font()> calls. In addition, the I<default> face can be 
+or by C<$pdf-E<gt>add_font()> calls. In addition, the I<current> font face or
+the I<default> face can be 
 requested, the I<serif> generic serif face, the I<sans-serif> generic sans-serif
 face, the I<constant> generic constant width face, or the I<script> generic
 script (cursive) face (B<if defined>) may be requested.
@@ -733,9 +793,13 @@ sub get_font {
     my $current_index  = $self->{' current-font'}->{'index'};
     $index = -1;
     if (defined $info{'face'}) {
-	# face = default, serif, sans-serif, constant, script, symbol,
+	# face = current, default, serif, sans-serif, constant, script, symbol,
 	#   or actual path/name
-	if      ($info{'face'} eq 'default') {
+	if      ($info{'face'} eq 'current') {
+	    # not really a change, but to make sure some font is loaded!
+            $face_name = $self->{' current-font'}->{'face'};
+            $index     = $self->{' current-font'}->{'index'};
+        } elsif ($info{'face'} eq 'default') {
 	    # change selected font to the default face
             $face_name = $self->{' default-font'}->{'face'};
             $index     = $self->{' default-font'}->{'index'};
@@ -947,13 +1011,9 @@ sub _filepath {
     return @out_list;
 }
 
-=over
-
 =item $pdf->dump_font_tables()
 
 Print (to STDOUT) all the Font Manager font information on hand.
-
-=back
 
 =cut
 
@@ -1032,5 +1092,9 @@ sub dump_font_tables {
 
     return;
 } # end of dump_font_tables()
+
+=back
+
+=cut
 
 1;

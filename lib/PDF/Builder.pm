@@ -530,11 +530,11 @@ sub open {  ## no critic
 
     my $content;
     my $scalar_fh = FileHandle->new();
-    CORE::open($scalar_fh, '+<', \$content) or die "Can't begin scalar IO";
+    CORE::open($scalar_fh, '+<', \$content) or croak "Can't begin scalar IO";
     binmode $scalar_fh, ':raw';
 
     my $disk_fh = FileHandle->new();
-    CORE::open($disk_fh, '<', $file) or die "Can't open $file for reading: $!";
+    CORE::open($disk_fh, '<', $file) or croak "Can't open $file for reading: $!";
     binmode $disk_fh, ':raw';
     $disk_fh->seek(0, 0);
     my $data;
@@ -572,7 +572,7 @@ where possible. See L<PDF::Builder::Basic::PDF::File> for more information.
 B<Example:>
 
     # Read a PDF into a string, for the purpose of demonstration
-    open $fh, 'our/old.pdf' or die $@;
+    open $fh, 'our/old.pdf' or croak $@;
     undef $/;  # Read the whole file at once
     $pdf_string = <$fh>;
 
@@ -617,14 +617,14 @@ sub from_string {
     if (defined $newVer) {
 	my ($verStr, $currentVer, $pos);
 	$pos = index $content, "%PDF-";
-	if ($pos < 0) { die "no PDF version found in PDF input!\n"; }
+	if ($pos < 0) { croak "no PDF version found in PDF input!"; }
 	# assume major and minor PDF version numbers max 2 digits each for now
 	# (are 1 or 2 and 0-7 at this writing)
 	$verStr = substr($content, $pos, 10);
 	if ($verStr =~ m#^%PDF-(\d+)\.(\d+)#) {
 	    $currentVer = "$1.$2";
 	} else {
-	    die "unable to get PDF input's version number.\n";
+	    croak "unable to get PDF input's version number.";
         }
         if ($newVer > $currentVer) {
 	    if (length($newVer) > length($currentVer)) {
@@ -643,7 +643,7 @@ sub from_string {
     }
 
     my $fh;
-    CORE::open($fh, '+<', \$content) or die "Can't begin scalar IO";
+    CORE::open($fh, '+<', \$content) or croak "Can't begin scalar IO";
 
     # this would replace any existing self->pdf with a new one
     $self->{'pdf'} = PDF::Builder::Basic::PDF::File->open($fh, 1, %opts);
@@ -732,7 +732,7 @@ sub to_string {
     } else {
         my $fh = FileHandle->new();
         # we should be writing to the STRING $str
-        CORE::open($fh, '>', \$string) || die "Can't begin scalar IO";
+        CORE::open($fh, '>', \$string) || croak "Can't begin scalar IO";
         $self->{'pdf'}->out_file($fh);
         $fh->close();
     }
@@ -774,11 +774,11 @@ sub finishobjects {
     my ($self, @objs) = @_;
 
     if ($self->{'opened_scalar'}) {
-        die "invalid method invocation: no file, use 'saveas' instead.";
+        croak "invalid method invocation: no file, use 'saveas' instead.";
     } elsif ($self->{'partial_save'}) {
         $self->{'pdf'}->ship_out(@objs);
     } else {
-        die "invalid method invocation: no file, use 'saveas' instead.";
+        croak "invalid method invocation: no file, use 'saveas' instead.";
     }
 
     return;
@@ -860,7 +860,7 @@ sub saveas {
     if ($self->{'opened_scalar'}) {
         $self->{'pdf'}->append_file();
         my $fh;
-        CORE::open($fh, '>', $file) or die "Can't open $file for writing: $!";
+        CORE::open($fh, '>', $file) or croak "Can't open $file for writing: $!";
         binmode($fh, ':raw');
         print $fh ${$self->{'content_ref'}};
         CORE::close($fh);
@@ -912,11 +912,11 @@ sub save {
     # a consequence of merging save() and saveas(). Let's give this unchanged
     # version a try.
     if      ($self->{'opened_scalar'}) {
-        die "Invalid method invocation: use 'saveas' instead of 'save'.";
+        croak "Invalid method invocation: use 'saveas' instead of 'save'.";
     } elsif ($self->{'partial_save'}) {
         $self->{'pdf'}->close_file();
     } else {
-        die "Invalid method invocation: use 'saveas' instead of 'save'.";
+        croak "Invalid method invocation: use 'saveas' instead of 'save'.";
     }
 
     $self->end();
@@ -2179,14 +2179,14 @@ sub import_page {
     my ($s_page, $t_page);
 
     unless (ref($s_pdf) and $s_pdf->isa('PDF::Builder')) {
-        die "Invalid usage: first argument must be PDF::Builder instance, not: " . ref($s_pdf);
+        croak "Invalid usage: first argument must be PDF::Builder instance, not: " . ref($s_pdf);
     }
 
     if (ref($s_idx) eq 'PDF::Builder::Page') {
         $s_page = $s_idx;
     } else {
         $s_page = $s_pdf->open_page($s_idx);
-	die "Unable to open page '$s_idx' in source PDF" unless defined $s_page;
+	croak "Unable to open page '$s_idx' in source PDF" unless defined $s_page;
     }
 
     if (ref($t_idx) eq 'PDF::Builder::Page') {
@@ -2334,7 +2334,7 @@ sub embed_page {
     $s_idx ||= 0;
 
     unless (ref($s_pdf) and $s_pdf->isa('PDF::Builder')) {
-        die "Invalid usage: first argument must be PDF::Builder instance, not: " . ref($s_pdf);
+        croak "Invalid usage: first argument must be PDF::Builder instance, not: " . ref($s_pdf);
     }
 
     my ($s_page, $xo);
@@ -2345,7 +2345,7 @@ sub embed_page {
         $s_page = $s_idx;
     } else {
         $s_page = $s_pdf->open_page($s_idx);
-	die "Unable to open page '$s_idx' in source PDF" unless defined $s_page;
+	croak "Unable to open page '$s_idx' in source PDF" unless defined $s_page;
     }
 
     $self->{'apiimportcache'} ||= {};
@@ -2383,11 +2383,9 @@ sub embed_page {
     # create a whole content stream
     ## technically it is possible to submit an unfinished
     ## (e.g., newly created) source-page, but that's nonsense,
-    ## so we expect a page fixed by open_page and die otherwise
+    ## so we expect a page fixed by open_page and croak otherwise
     unless ($s_page->{' opened'}) {
-        croak join(' ',
-		   "Pages may only be imported from a complete PDF.",
-		   "Save and reopen the source PDF object first.");
+        croak "Pages may only be imported from a complete PDF. Save and reopen the source PDF object first.";
     }
 
     if (defined $s_page->{'Contents'}) {
@@ -2422,7 +2420,7 @@ sub _walk_obj {
     }
 
     return $object_cache->{scalar $source_object} if defined $object_cache->{scalar $source_object};
-   #die "infinite loop while copying objects" if $source_object->{' copied'};
+   #croak "infinite loop while copying objects" if $source_object->{' copied'};
 
     my $target_object = $source_object->copy($source_pdf); ## thanks to: yaheath // Fri, 17 Sep 2004
 
@@ -2914,6 +2912,14 @@ sub corefont {
     if (defined $opts{'-unicodemap'} && !defined $opts{'unicodemap'}) { $opts{'unicodemap'} = delete($opts{'-unicodemap'}); }
 
     require PDF::Builder::Resource::Font::CoreFont;
+    if (!PDF::Builder::Resource::Font::CoreFont->is_standard($name)) {
+        if ($name =~ /^Times$/i) {
+	    # Accept Times as an alias for Times-Roman to follow the pattern 
+	    # set by Courier and Helvetica
+	    carp "Times is not a standard font; substituting Times-Roman";
+            $name = 'Times-Roman';
+        }
+    }
     my $obj = PDF::Builder::Resource::Font::CoreFont->new($self->{'pdf'}, $name, %opts);
     $self->{'pdf'}->out_obj($self->{'pages'});
     $obj->tounicodemap() if $opts{'unicodemap'}; # UTF-8 not usable
@@ -3123,9 +3129,15 @@ sub font {
     }
     $opts{'dokern'} //= 1; # kerning ON by default for font()
 
+    # see if it's a plain core font first
     require PDF::Builder::Resource::Font::CoreFont;
     if (PDF::Builder::Resource::Font::CoreFont->is_standard($name)) {
         return $self->corefont($name, %opts);
+    } elsif ($name =~ /^Times$/i and not $opts{'format'}) {
+	# Accept Times as an alias for Times-Roman to follow the pattern set by
+	# Courier and Helvetica
+	carp "Times is not a standard font; substituting Times-Roman";
+        return $self->corefont('Times-Roman', %opts);
     }
 
     my $format = $opts{'format'};
