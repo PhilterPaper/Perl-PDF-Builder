@@ -4,15 +4,19 @@ use base 'PDF::Builder::Content';
 
 use strict;
 use warnings;
+use Carp;
+use List::Util qw(min max);
+ use Data::Dumper;
 
-# VERSION
-our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $VERSION = '3.024'; # VERSION
+our $LAST_UPDATE = '3.024_001'; # manually update whenever code is changed
 
 =head1 NAME
 
 PDF::Builder::Content::Text - additional specialized text-related formatting methods. Inherits from L<PDF::Builder::Content>
 
-B<Note:> If you have used some of these methods in PDF::API2 with a I<graphics> 
+B<Note:> If you have used some of these methods in PDF::Builder with a 
+I<graphics> 
 type object (e.g., $page->gfx()->method()), you may have to change to a I<text> 
 type object (e.g., $page->text()->method()).
 
@@ -26,6 +30,8 @@ sub new {
     $self->textstart();
     return $self;
 }
+
+=head2 Single Lines from a String
 
 =over
 
@@ -356,6 +362,28 @@ hyphen (U+2011) are ignored as split points.
 0: do I<not> split in camelCase between a lowercase letter and an
 uppercase letter, 1: I<OK to split> (B<default>)
 
+=item 'spRB' => value
+
+0: do I<not> split on a Required Blank (&nbsp;), is B<default>.
+1: I<OK to split on Required Blank.> Try to avoid this; it is a desperation 
+move!
+
+=item 'spFS' => value
+
+0: do I<not> split where it will I<just> fit (middle of word!), is B<default>.
+1: I<OK to split to just fit the available space.> Try to avoid this; it is a 
+super desperation move, and the split will probably make no linguistic sense!
+
+=item 'min_prefix' => value
+
+Minimum number of letters I<before> word split point (hyphenation point).
+The B<default> is 2.
+
+=item 'min_suffix' => value
+
+Minimum number of letters I<after> word split point (hyphenation point).
+The B<default> is 3.
+
 =back
 
 =head3 Methods
@@ -679,6 +707,8 @@ sub text_fill_justified {
     }
     return ($width, $ret);
 }
+
+=head2 Larger Text Segments
 
 =over
 
@@ -1062,6 +1092,1941 @@ sub textlabel {
         $self->textstate(%text_state);
     }
     return $wht;
+}
+
+=head2 Complex Column Output with Markup
+
+=over
+
+=item ($rc, $next_y, $unused) = $text->column($text, $grfx, $markup, $txt, %opts)
+
+This method fills out a column of text on a page, returning any unused portion
+that could not be fit, and where it left off on the page.
+
+Tag names, CSS entries, markup type, etc. are case-sensitive (usually 
+lower-case letters only). For example, you cannot give a <P> paragraph in
+HTML or a B<P> selector in CSS styling.
+
+B<$text> is the text context, so that various font and text-output operations
+may be performed.
+
+B<$grfx> is the graphics (gfx) context. It may be a dummy (e.g., undef) if
+I<no> graphics are to be drawn, but graphical items such as the column outline 
+('outline' option) or a horizontal rule (<hr> in HTML markup) require a valid
+graphics context.
+
+B<$markup> is information on what sort of I<markup> is being used to format
+and lay out the column's text:
+
+=over
+
+=item  'pre'
+
+The input material has already been processed and is already in the desired
+form. C<$txt> is an array reference to the list of hashes. This I<must> be used 
+when you are calling C<column()> a second (or later)
+time to output material left over from the first call. It may be used when
+the caller application has already processed the text, and other markup isn't
+being used.
+
+=item  'none'
+
+If I<none> is specified, there is no markup in use. At most, a blank line or
+a new text array element specifies a new paragraph, and that's it. C<$txt> may
+be a single string, or an array (list) of strings.
+
+The input B<txt> is a list (anonymous array reference) of strings, each 
+containing one or more paragraphs. A single string may also be given. An empty 
+line between paragraphs may be used to separate the paragraphs. Paragraphs may 
+not span array elements.  
+
+=item  'md1'
+
+This specifies a certain flavor of Markdown: 
+
+    * or _ italics, ** bold, *** bold+italic; 
+    bulleted list *, numbered list 1. 2. etc.; 
+    #, ## etc. headings and subheadings; 
+    [label](URL) external links 
+    ` (backticks) enclose a "code" section
+
+HTML may be mixed in as desired 
+(although not within "code" blocks marked by backticks). 
+Markdown will be converted into HTML, which will then be interpreted into PDF.
+
+The input B<txt> is a list (anonymous array reference) of strings, each 
+containing one or more paragraphs and other markup. A single string may also be 
+given. Per Markdown formatting, an empty line between paragraphs may be used to 
+separate the paragraphs. Separate array elements will first be glued together 
+into a single string before processing, permitting paragraphs to span array 
+elements if desired.  
+
+There are other flavors of Markdown, so other mdI<n> flavors may be defined 
+in the future.
+
+=item  'html'
+
+This specifies that a subset of HTML markup is used, along with some attributes
+and CSS. Currently, HTML tags 
+
+    'i'/'em' (italic), 'b'/'strong' (bold), 
+    'p' (paragraph, align. cont=>1 to suppress indent, margin-top),
+    'font' (font face->font-family, color, size->font-size), 
+    'span' (needs style attribute with CSS to do anything useful), 
+    'ul', 'ol', 'li' (bulleted, numbered lists, currently NO NESTING)), 
+    'img' (TBD, image, empty. hspace->margin-left/right, 
+           vspace->margin-top/bottom, width, height), 
+    'a' (anchor/link, href), 
+    'pre', 'code' (TBD, preformatted and code blocks),
+    'h1' through 'h6' (headings, align)
+    'hr' (TBD, horizontal rule, empty. align, size->linewidth, width)
+    'br' (TBD, line break, empty)
+    'sup', 'sub' (TBD superscript and subscript)
+
+are supported, along with limited CSS for color, font-size, font-family, etc. 
+E<lt>styleE<gt> tags may be placed in an optional E<lt>headE<gt> section, or
+within the E<lt>bodyE<gt>. In the latter case, style tags will be pulled out
+of the body and added (in order) on to the end of any style tag(s) defined in 
+a head section. Multiple style tags will be condensed into a single collection 
+(later definitions of equal precedence overriding earlier). These stylings will
+have global effect, as though they were defined in the head. As with normal CSS,
+the hierarchy of a given property (in decreasing precedence) is
+
+    appearance in a style= tag attribute
+    appearance in a tag attribute
+    appearance in a #IDname selector in a <style>
+    appearance in a .classname selector in a <style>
+    appearance in a tag name selector in a <style>
+
+Selectors are quite simple: a single tag name (e.g., B<body>),
+a single class, or a single ID. There are I<no> combinations (e.g., 
+C<p.abstract> or C<ol, ul>), hierarchies (e.g., C<ol E<gt> li>), specified 
+number of appearance, or other such complications as found in a browser's CSS. 
+Sorry!
+
+Supported CSS properties: font-family, font-size, font-style (normal/italic), 
+font-weight (normal/bold), margin-top/right/bottom/left, color (foreground
+color), line-height (as ratio of baseline-spacing to font-size), 
+display (inline/block),
+text-decoration (none, underline, TBD line-through, overline), text-indent.
+Sizes may be '%' (of font-size), or 'pt' (the default). TBD A margin-left or 
+-right may be 'auto' for centering purposes. More support is expected to be
+added over time.
+
+Numeric entities (decimal &#nnn; and hexadecimal
+&#xnnn;) are supported (named entities are planned for later support).
+
+The input B<txt> is a list (anonymous array reference) of strings, each 
+containing one or more paragraphs and other markup. A single string may also be 
+given. Per normal HTML practice, paragraph tags should be used to mark
+paragraphs. Separate array elements will first be glued together 
+into a single string before processing, permitting paragraphs to span array 
+elements if desired.  
+
+=back
+
+I<There are other markup languages out there, such as Pango, that might be
+supported in the future. It is very unlikely that TeX or LaTeX will be 
+supported, as they both already have excellent PDF output.>
+
+B<$txt> is the input text: a string, an array reference to multiple strings,
+or an array reference to hashes. See C<$markup> for details.
+
+B<%opts> Options -- a number of these are of course, mandatory.
+
+=over
+
+=item 'rect' => [x, y, width, height]
+
+This defines a column as a rectangular area of a given width and height (both
+in points) on the current page. I<In the future, it is expected that more
+elaborate non-rectangular areas will be definable, but for now, a simple
+rectangle is all that is permitted.> The column's upper left coordinate is
+C<x, y>.
+
+The top text baseline is assumed to be relative to the UL corner (based on the
+determined line height), and the column outline
+clips that baseline, as it does additional baselines down the page (interline
+spacing is C<leading> multiplied by the largest C<font_size> or image height
+needed on that line).
+
+_Currently, 'rect' is required, as it is the only column shape supported._
+
+=item 'relative' => [ x, y, scale(s) ]
+
+C<'relative'> defaults to C<[ 0, 0, 1, 1 ]>, and allows a column outline
+(currently only 'rect') to be either absolute or relative. C<x> and C<y> are
+added to each C<x,y> coordinate pair, I<after> scaling. Scaling values:
+
+=over
+
+=item (none)  The scaling defaults to 1 in both x and y dimensions (no change).
+
+=item scale (one value)  The scaling in both the x (width) and y (height)
+dimensions uses this value.
+
+=item scale_x, scale_y (two values)  There are two separate scaling factors
+for the x dimension (width) and y dimension (height).
+
+=back
+
+This permits a generically-shaped outline to be defined, scaled (perhaps
+not preserving the aspect ratio) and placed anywhere on the page. This could
+save you from having to define similarly-shaped columns from scratch multiple 
+times.
+If you want to define a relative outline, the lower left corner (whether or
+not it contains a point, and whether or not it's the first one listed) would 
+usually be C<0, 0>, to have scaling work as expected. In other works, your
+outline template should be in the lower left corner of the page.
+
+=item 'start_y' => $start_y
+
+If omitted, it is assumed that you want to start at the top of the defined
+column (the maximum C<y> value minus the maximum vertical extent of this line).
+If used, the normal value is the C<next_y> returned from the previous 
+C<column()> call. It is the deepest extent reached by the previous line (plus
+leading), and is the top-most point of the new first line of this C<column()>
+call.
+
+Note that the C<x> position will be determined by the column shape and size
+(the left-most point of the baseline), so there is no place to explicitly set 
+an C<x> position to start at.
+
+=item 'font_size' => $font_size
+
+This is the starting font size (in points) to be used. Over the course of
+the text, it may be modified by markup.
+
+=item 'leading' => $leading
+
+This is the leading I<ratio> used throughout the column text.
+The C<$x, $y> position through C<$x + width> is assumed to be the first
+text baseline. The next line down will be C<$y - $leading*$font_size>. If the
+font_size changes for any reason over the course of the column, the baseline
+spacing (leading * font_size) will also change. The B<default> leading ratio
+is 1.125 (12.5%).
+
+=item 'para' => [ $indent, $top-margin ]
+
+When starting a new paragraph, these are the default indentation (in points),
+and the extra vertical spacing for a top margin on a paragraph. The default is
+C<[ 1*$font_size, 0 ]>. Either may be overridden by the appropriate CSS 
+settings. An I<outdent> may be defined with a negative indentation value. 
+These apply to all C<$markup> types.
+
+=item 'outline' => "color string"
+
+You may optionaly request that the column be outlined in a given color, to aid
+in debugging fitting problems.
+
+=item 'color' => "color string"
+
+The color to draw the text (or rule or other graphic) in. The default is 
+black (#000000).
+
+=item 'substitute' => [ [ 'char or string', 'before', 'replace', 'after'],... ]
+
+TBD, not implemented yet.
+
+When a certain Unicode code point (character) or string is found, insert 
+I<before> text before the character, replace the character or string with
+I<replace> text, and insert I<after> text after the character. This may make
+it easier to insert HTML code (font, color, etc.) into Markdown text, if the
+desired settings and character can not be produced by your Markdown editor.
+This applies only to 'md1' markup. Multiple substitutions may be defined.
+If you want to leave the original character or string I<itself> unchanged, you
+should define the I<replace> text to be the same as C<'char or string'>.
+
+Example: to insert a red cross (X-out) and green tick (check) mark
+
+    'substitute' => [
+      [ '|cross|', '<font face="ZapfDingbats" color="red">', '8', '</font>' ],
+      [ '|tick|', '<font face="ZapfDingbats" color="green">', '4', '</font>' ],
+    ]
+
+should change C<|cross|> in Markdown text ('md1') to C<E<lt>font 
+face="ZapfDingbats" color="green"E<gt>8E<lt>/fontE<gt>> and similar for 
+C<|tick|>. This is done I<after> the Markdown is converted to HTML, so make 
+sure that your text (e.g., C<|tick|>) isn't something that Markdown will try to 
+interpret by itself!
+
+=back
+
+The Font Manager system is used to supply the requested fonts, so it is up to
+the application to pre-load the desired font information I<before> C<column()>
+is called. Any request to change the encoding within C<column()> will be
+ignored, as the fonts have already been specified for a specific encoding.
+Needless to say, the encoding used in creating the input text needs to match
+the specified font encoding.
+Absent any markup changing the font face or styling, whatever is defined by
+Font Manager as the I<current> (default) font will be what is used.
+
+If there is more text than can be accommodated by the column size, the unused
+portion is returned, with a return code of 1. It is an empty list if all the 
+text could be formatted, and the return code is 0.
+C<next_y> is the y coordinate where any additional text (C<column()> call) 
+could be added to a column (as C<start_y>) that wasn't completely filled.
+This would be at the starting point of a new column (i.e., the
+last paragraph is ended). Note that the application code should check if this
+position is too far down the page (in the bottom margin) and not blindly use
+it! Also, as 'md1' is first converted to HTML, any unused portion will be 
+returned as 'pre' markup, rather than Markdown or HTML. Be sure to specify 
+'pre' for any continuation of the column (with one or more additional 
+C<column()> calls), rather than 'none', 'md1', or 'html'.
+
+Line fitting (paragraph shaping) is currently quite primitive. Most words will
+not be split (hyphenated) except for a few language-independent cases 
+(camelCase, mixed alphanumeric, etc.). _It is planned to eventually add 
+Knuth-Plass paragraph shaping, along with proper language-dependent 
+hyphenation._
+
+Each change of font automatically supplies its maximum ascender and minimum
+descender, the B<extents> above and below the text line's baseline. Each block
+of text with a given face and variant, or change of font size, will be given
+the same I<vertical> extents -- the extents are font-wide, and not determined 
+on a per-glyph basis. So, unfortunately, a block of text "acemnorsuvwz" will 
+have the same vertical extents as a block of text "bdfghijklpqty". For a given
+line of text, the highest ascender and the lowest descender (plus leading) will
+be used to position the line at the appropriate distance below the previous 
+line (or the top of the column). No attempt is made to "fit" projections into
+recesses (jigsaw-puzzle like). If there is an inset into the side of a column,
+or it is otherwise not a straight vertical line,
+so long as the baseline fits within the column outline, no check is made 
+whether descenders or ascenders will fall outside the defined column (i.e., 
+project into the inset). We suggest that you try to keep font sizes fairly
+consistent, to keep reasonably consistent text vertical extents.
+
+=back
+
+=cut
+
+# TBD, future:
+#   arbitrary paragraph shapes (path)
+#   Knuth-Plass paragraph shaping (with proper hyphenation) 
+#   HarfBuzz::Shaper for ligatures, callout of specific glyphs (not entities), 
+#     RTL and non-Western language support. 
+#   <sc> preprocess: around runs of lowercase put <span style="font-size: 80%;
+#        expand: 110%"> and fold to UPPER CASE
+#   <pc> (Petite case) like <sc> but 1ex font-size, expand 120%
+
+sub column {
+    my ($self, $text, $grfx, $markup, $txt, %opts) = @_;
+    my $pdf = $self->{' api'}->{' FM'}->{' pdf'};
+
+    my $rc = 0; # so far, a normal call with input completely consumed
+    my $unused = undef;
+    # array[1] will be consolidated CSS from any <style> tags
+    my ($x, $y);
+
+    # fallback CSS properties, inserted at array[0]
+    my $default_css = _default_css(%opts); # per-tag properties
+#foreach (sort keys %$default_css) {
+#print STDERR "default_css entry $_ -> $default_css->{$_}\n";
+#}
+    # dump @mytext list within designated column @outline
+    # for now, the outline is a simple rectangle
+    my $outline_color = 'none';  # optional outline of the column
+    $outline_color = $opts{'outline'} if defined $opts{'outline'};
+
+    # define coordinates of column, currently just 'rect' rectangle, but
+    # in future could be very elaborate
+    my @outline = _get_column_outline($grfx, $outline_color, %opts);
+    my ($col_min_x, $col_min_y, $col_max_x, $col_max_y) = 
+        _get_col_extents(@outline);
+    my $start_y = $col_max_y; # default is a top of column
+    my $para = 1; # paragraph is at top of column, don't use margin-top
+    $start_y = $opts{'start_y'} if defined $opts{'start_y'};
+    if ($start_y != $col_max_y) { 
+	# para reset to 0 b/c not at top of column
+	$para = 0; # go ahead with any extra top margin
+    }
+
+    # what is the content of $text: string, array, or array of hashes?
+    # (or already set up, per 'pre' markup)
+    # break up text into array of hashes so we have one common input
+    my @mytext = _break_text($txt, $markup);
+print STDERR "after _break_text, mytext is\n"; print Dumper(@mytext);
+#_pause();
+    # add on defaults to front of list regardless of markup
+#foreach (@mytext) {
+#print STDERR "after _break_text(), mytext element\n";
+#foreach my $hashkey (sort keys %$_) {
+#print STDERR "$hashkey => '$_->{$hashkey}'\n";
+#}}
+#print STDERR "=============================\n";
+#print STDERR "default_css inserted as [0]:\n";
+#print STDERR Dumper($default_css);
+#print STDERR "===========================\n";
+    unshift @mytext, $default_css;
+print STDERR "after default_css added to front, mytext has ".(@mytext)." elements:\n";
+#_pause();
+
+    # each element of mytext is an anonymous hash, with members text=>text
+    # content, font_size, color, font, variants, etc.
+    #
+    # if markup=pre, it's already in final form (array of hashes)
+    # if none, separate out paragraphs into array of hashes
+    # if md1, convert to HTML (error if no converter)
+    # if html, need to interpret (error if no converter)
+    # finally, resulting array of hashes is interpreted and fit in column
+    my $font_size = 12; # basic default, override with font-size
+    if (defined $opts{'font_size'}) { $font_size=$opts{'font_size'}; }
+    my $leading = 1.125; # basic default, override with line-height
+    if (defined $opts{'leading'}) { $leading=$opts{'leading'}; }
+
+    # process style attributes, tag attributes, style tags, column() options,
+    # and fixed default attributes in that order to fill in each tag's
+    # attribute list. on exit from tag, set attributes to restore settings
+    _tag_attributes(@mytext);
+
+#print STDERR "call _output_text() with leading=$leading and font_size=$font_size\n";
+    ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $text, $grfx, $para, $font_size, $leading, @mytext);
+print STDERR "----back from _output_text with rc=$rc, start_y=$start_y, unused=".(@$unused)." elements\n";
+#_pause();
+
+#print STDERR "There are ".(scalar @mytext)." elements in mytext\n";
+#for (my $i = 0; $i < scalar(@mytext); $i++) {
+#    print STDERR "element $i: '$mytext[$i]->{'text'}'\n";
+#    my $attr = '   ';
+#    foreach (sort keys %{$mytext[$i]}) {
+#	if ($_ eq 'text') { next; }
+#	$attr .= " $_='$mytext[$i]->{$_}'";
+#    }
+#    if ($attr ne '   ') { print STDERR "$attr\n"; }
+#}
+
+    return ($rc, $start_y, $unused);
+} # end of column()
+
+# set up an element containing all the default settings, as well as those
+# passed in by column() parameters and options. this is generated once for
+# each call to column, in case any parameters or options change.
+sub _default_css {
+    my %opts = @_;
+
+    my %style;
+    $style{'tag'} = 'defaults';
+    $style{'text'} = '';
+
+    $style{'body'} = {};
+    $style{'p'} = {};
+    $style{'ol'} = {};
+    $style{'ul'} = {};
+    $style{'h1'} = {};
+    $style{'h2'} = {};
+    $style{'h3'} = {};
+    $style{'h4'} = {};
+    $style{'h5'} = {};
+    $style{'h6'} = {};
+    $style{'a'} = {};
+    $style{'i'} = {};
+    $style{'em'} = {};
+    $style{'b'} = {};
+    $style{'strong'} = {};
+
+    my $font_size = 12;
+    $font_size = $opts{'font_size'} if defined $opts{'font_size'};
+#print STDERR "font_size = $font_size\n";
+    $style{'body'}->{'font-size'} = $font_size."pt";
+
+    my $leading = 1.125;
+    $leading = $opts{'leading'} if defined $opts{'leading'};
+    $style{'body'}->{'line-height'} = $leading;
+
+    my $para = [ 1, 1*$font_size, 0 ]; 
+    # if font_size changes, change indentation
+    if (defined $opts{'para'}) {
+#print STDERR "para has value [ @{$opts{'para'}} ]\n";
+       #$para->[0]  # flag: 0 = <p> is normal top of paragraph (with indent
+       #    and margin), 1 = at top of column, so suppress extra top margin
+       #    (and reset once past this first line)
+        $para->[1] = $opts{'para'}->[0]; # indentation
+        $para->[2] = $opts{'para'}->[1]; # extra top margin
+    }
+    # $para flag determines whether these settings are used or ignored (=1, 
+    # we are at the top of a column, ignore text-indent and margin-top)
+print STDERR "&&&&&&&&&& paragraph text-indent=$para->[1] margin-top=$para->[2]\n";
+    $style{'p'}->{'text-indent'} = $para->[1];
+    $style{'p'}->{'margin-top'} = $para->[2];
+
+    my $color = 'black';  # text default color
+    $color = $opts{'color'} if defined $opts{'color'};
+    $style{'body'}->{'color'} = $color;
+
+    # now for fixed settings
+    $style{'body'}->{'font-family'} = 'current'; # face
+    $style{'body'}->{'font-weight'} = 'normal'; # bold
+    $style{'body'}->{'font-style'} = 'normal'; # italic
+   #$style{'body'}->{'font-variant'} = 'normal'; # small-caps
+    $style{'body'}->{'margin-top'} = '0'; 
+    $style{'body'}->{'margin-right'} = '0'; 
+    $style{'body'}->{'margin-bottom'} = '0'; 
+    $style{'body'}->{'margin-left'} = '0'; 
+    $style{'body'}->{'text-indent'} = '0'; 
+   #$style{'body'}->{'text-align'} = 'left'; # center, right
+   #$style{'body'}->{'text-transform'} = 'none'; # capitalize, uppercase, lowercase
+   #$style{'body'}->{'border-style'} = 'none'; # solid, dotted, dashed...
+   #$style{'body'}->{'border-width'} = '1pt'; 
+   #$style{'body'}->{'border-color'} = 'inherit'; 
+    $style{'body'}->{'text-decoration'} = 'none';
+    $style{'body'}->{'display'} = 'block'; 
+
+    $style{'a'}->{'text-decoration'} = 'underline'; # none, underline, overline, line-through
+    $style{'a'}->{'color'} = 'blue'; 
+    $style{'a'}->{'display'} = 'inline'; 
+
+    $style{'ul'}->{'list-style-position'} = 'outside'; # inside
+    $style{'ul'}->{'list-style-type'} = 'disc'; # circle, square
+    $style{'ul'}->{'display'} = 'block'; 
+    $style{'ul'}->{'margin-bottom'} = '50%'; 
+    $style{'ol'}->{'list-style-position'} = 'outside'; # inside
+    $style{'ol'}->{'list-style-type'} = 'decimal'; # lower-roman, upper-roman, lower-alpha, upper-alpha
+    $style{'ol'}->{'display'} = 'block'; 
+    $style{'ol'}->{'margin-bottom'} = '50%'; 
+    $style{'li'}->{'display'} = 'block';  # should inherit from ul or ol
+    $style{'li'}->{'margin-top'} = '50%'; 
+
+   #$style{'h6'}->{'text-transform'} = 'uppercase'; # heading this level CAPS
+    $style{'h6'}->{'font-weight'} = 'bold'; # all headings bold
+    $style{'h6'}->{'font-size'} = '75%'; # % of font-size
+    $style{'h6'}->{'margin-top'} = '200%'; # all headings same margins
+    $style{'h6'}->{'margin-bottom'} = '200%';
+    $style{'h6'}->{'display'} = 'block'; # block (start on new line)
+
+    $style{'h5'}->{'font-weight'} = 'bold';
+    $style{'h5'}->{'font-size'} = '85%';
+    $style{'h5'}->{'margin-top'} = '200%';
+    $style{'h5'}->{'margin-bottom'} = '200%';
+    $style{'h5'}->{'display'} = 'block';
+
+    $style{'h4'}->{'font-weight'} = 'bold';
+    $style{'h4'}->{'font-size'} = '100%';
+    $style{'h4'}->{'margin-top'} = '200%';
+    $style{'h4'}->{'margin-bottom'} = '200%';
+    $style{'h4'}->{'display'} = 'block';
+
+    $style{'h3'}->{'font-weight'} = 'bold';
+    $style{'h3'}->{'font-size'} = '115%';
+    $style{'h3'}->{'margin-top'} = '200%';
+    $style{'h3'}->{'margin-bottom'} = '200%';
+    $style{'h3'}->{'display'} = 'block';
+
+    $style{'h2'}->{'font-weight'} = 'bold';
+    $style{'h2'}->{'font-size'} = '150%';
+    $style{'h2'}->{'margin-top'} = '200%';
+    $style{'h2'}->{'margin-bottom'} = '200%';
+    $style{'h2'}->{'display'} = 'block';
+
+    $style{'h1'}->{'font-weight'} = 'bold';
+    $style{'h1'}->{'font-size'} = '200%';
+    $style{'h1'}->{'margin-top'} = '200%';
+    $style{'h1'}->{'margin-bottom'} = '200%';
+    $style{'h1'}->{'display'} = 'block';
+
+    $style{'i'}->{'font-style'} = 'italic';
+    $style{'i'}->{'display'} = 'inline';
+    $style{'b'}->{'font-weight'} = 'bold';
+    $style{'b'}->{'display'} = 'inline';
+    $style{'em'}->{'font-style'} = 'italic';
+    $style{'em'}->{'display'} = 'inline';
+    $style{'strong'}->{'font-weight'} = 'bold';
+    $style{'strong'}->{'display'} = 'inline';
+
+    return \%style;
+} # end of _default_css()
+
+# make sure each tag's attributes are proper property names 
+# consolidate attributes and style attribute (if any)
+# mark empty tags (no explicit end tag will be found)
+sub _tag_attributes {
+    my (@mytext) = @_;
+    
+#foreach (@mytext) {
+#print STDERR "mytext element: $_\n";
+#}
+    # start at [2], so defaults and styles skipped
+    for (my $el=2; $el < @mytext; $el++) {
+	if ($mytext[$el]->{'text'} eq '') { next; }
+
+        my $tag = $mytext[$el]->{'tag'};
+	if (!defined $tag) { next; }
+	if ($tag =~ m#^/#) { next; }
+
+	# we have a tag that might have one or more attributes that may
+	# need to be renamed as a CSS property
+	if ($tag eq 'font') {
+	    if (defined $mytext[$el]->{'face'}) {
+		$mytext[$el]->{'font-family'} = delete($mytext[$el]->{'face'});
+	    }
+	    if (defined $mytext[$el]->{'size'}) {
+		$mytext[$el]->{'font-size'} = delete($mytext[$el]->{'size'});
+		# note: some sizes may need to be converted to points
+	    }
+	}
+	if ($tag eq 'ol') {
+	    if (defined $mytext[$el]->{'type'}) {
+	        $mytext[$el]->{'list-style-type'} = delete($mytext[$el]->{'type'});
+	    }
+	}
+	if ($tag eq 'ul') {
+	    if (defined $mytext[$el]->{'type'}) {
+	        $mytext[$el]->{'list-style-type'} = delete($mytext[$el]->{'type'});
+	    }
+	}
+	if ($tag eq 'li') {
+	    if (defined $mytext[$el]->{'type'}) {
+	        $mytext[$el]->{'list-style-type'} = delete($mytext[$el]->{'type'});
+	    }
+	}
+	 
+	# process any style attribute and override attribute values
+	if (defined $mytext[$el]->{'style'}) {
+	    my $style_attr = _process_style_string({}, $mytext[$el]->{'style'});
+	    # hash of property_name => value pairs
+	    foreach (keys %$style_attr) {
+		# create or override any existing property by this name
+		$mytext[$el]->{$_} = $style_attr->{$_};
+	    }
+	}
+
+	# VOID elements (br, hr, img, area, base, col, embed, input,
+	# link, meta, source, track, wbr) do not have a separate end
+	# tag. also incude style and defaults in this list in case a stray 
+	# one shows up (does not have an end tag)
+	if ($tag eq 'br' || $tag eq 'hr' || $tag eq 'img' || $tag eq 'area' ||
+	    $tag eq 'base' || $tag eq 'col' || $tag eq 'embed' || 
+	    $tag eq 'input' || $tag eq 'link' || $tag eq 'meta' ||
+	    $tag eq 'source' || $tag eq 'track' || $tag eq 'wbr' ||
+            $tag eq 'defaults' || $tag eq 'style') {
+	    $mytext[$el]->{'empty_element'} = 1;
+        }
+    }
+    return;
+} # end of _tag_attributes()
+
+# the workhorse of the library: output text (modified by tags) in @mytext
+# for now, just output text, ignoring all tags (TBD)
+sub _output_text {
+    my ($start_y, $min_y, $outl, $pdf, $text, $grfx, $para, $font_size, 
+	$leading, @mytext) = @_;
+    my @outline = @$outl;
+#print STDERR "_output_text() called with font_size=$font_size and leading=$leading\n";
+
+#for (my $i=0; $i<@mytext; $i++) {
+#print STDERR "mytext[$i]:\n";
+#foreach (sort keys %{$mytext[$i]}) { 
+#print STDERR "  $_->'$mytext[$i]->{$_}' \n";
+#}}
+
+    # start_y is the lowest extent of the previous line, or the highest point
+    # of the column outline, and is where we start the next one. 
+    # min_y is the lowest y available within the column outline, outl.
+    # pdf is the pdf top-level object. 
+    # text is the text context. 
+    # para is a flag that we are at the top of a column (no margin-top added).
+    # font_size is the default font size to use.
+    # leading is the default leading ratio to use.
+    # mytext is the array of hashes containing tags, attributes, and text.
+      
+    my ($x,$y, $width, $endx); # current position of text
+    my ($asc, $desc, $desc_leading); 
+    my $next_y = $start_y;
+    # we loop to fill next line, starting with a y position baseline set when
+    #   encounter the next text, and know the font, font_size, and thus the
+    #   ascender/descender extents (which may grow). from that we can find
+    #   the next baseline (which could be moved downwards).
+    # we loop until we either run out of input text, or run out of column
+    my $need_line = 1; # need to start a new line? always 'yes' (1) on
+                       # call to column(). set to 'yes' if tag is for a block
+		       # level display (treat like a paragraph)
+    my $add_x = 0; # amount to add for indent
+    my $add_y = 0; # amount to drop for first line's top margin
+    my $start = 1; # counter for ordered lists
+
+    my $phrase='';
+    my $remainder='';
+    my $text_pre = ''; # things like li markers
+    my $vmargin = 0; # larger of adjoining bottom and top margins
+    my $current_prop = _init_current_prop(); # determine if a property has 
+    #           changed and PDF::Builder routines need calling
+    my @properties = ({}); # stack of properties from tags
+    _update_properties($properties[0], $mytext[0], 'body');
+    my $call_get_font = 0;
+
+    # mytext[0] should be default css values
+    # mytext[1] should be any <style> tags (consolidated)
+    # user input tags/text start at mytext[2]
+    for (my $el = 2; $el < scalar @mytext; $el++) {
+	# discard any empty elements
+	if (!keys %{$mytext[$el]}) { next; }
+print STDERR "at top of mytext loop el=$el, properties stack has ".@properties." elements, text = '$mytext[$el]->{'text'}'\n";
+print STDERR "properties stack:\n".Dumper(@properties) if @properties;
+#print STDERR "mytext array:\n".Dumper(@mytext);
+#print STDERR "current properties hash:\n".Dumper($current_prop);
+print STDERR "mytext has ".(@mytext)." elements, properties stack has ".(@properties)." elements\n";
+	
+	if ($mytext[$el]->{'text'} eq '') {
+            # ===================================== tags/end-tags
+	    # should be a tag or end-tag element defined
+	    my $tag = $mytext[$el]->{'tag'};
+#print STDERR "top of mytext loop, tag = '$tag'\n";
+
+	    if (substr($tag, 0, 1) ne '/') {
+	        # take care of 'beginning' tags. dup the top of the properties
+		# stack, update properties in the stack top element. note that
+		# current_prop usually isn't updated until the text is being
+		# processed. some tags need some special processing if they 
+		# do something that isn't just a property change
+
+	        # 1. dup the top of the properties stack for a new set of
+	        #   properties to be modified by attributes and CSS
+#print STDERR "dupe properties top. before ".@properties." after ";
+                push @properties, {};
+	        foreach (keys %{$properties[-2]}) {
+	            $properties[-1]->{$_} = $properties[-2]->{$_};
+	        }
+#print STDERR @properties." properties elements\n";
+	        # current_prop is still previous text's properties
+
+	        # 2. update properties top with element [0] (default CSS) 
+		#   per $tag
+	        _update_properties($properties[-1], $mytext[0], $tag);
+
+	        # 3. update properties top with element [1] (styles CSS)
+		#   per $tag
+	        _update_properties($properties[-1], $mytext[1], $tag);
+
+	        # 4. update properties top with element [1] per any .class
+		#   (styles CSS, which is only one with .class selectors)
+	        if (defined $mytext[$el]->{'class'}) {
+	            _update_properties($properties[-1], $mytext[1], 
+		                       '.'.$mytext[$el]->{'class'});
+	        }
+	    
+	        # 5. update properties top with element [1] per any #id
+		#   (styles CSS, which is only one with #id selectors)
+	        if (defined $mytext[$el]->{'id'}) {
+	            _update_properties($properties[-1], $mytext[1], 
+		                       '#'.$mytext[$el]->{'id'});
+	        }
+	    
+	        # 6. update properties top with any tag/style attributes.
+		#   these come from the tag itself: its attributes, 
+		#   overridden by any style attribute. these are the
+		#   highest priority properties.
+	        _update_properties($properties[-1], $mytext[$el]);
+	        
+	        if ($properties[-1]->{'display'} eq 'block') {
+		    $need_line = 1; 
+		    $start_y = $next_y;
+		    $add_x = $add_y = 0;
+	            # block display with a non-zero top margin... set skip.
+		    # this will set vmargin (overwriting any smaller
+		    #  bottom margin already set)
+		    if ($properties[-1]->{'margin-top'} ne '0') {
+			my $topm = _size2pt($properties[-1]->{'margin-top'},
+			                    $current_prop->{'font-size'});
+			if ($topm > $vmargin) { $vmargin = $topm; }
+		    }
+	        }
+		# handle specific kinds of tags' special processing
+	        $text_pre = ''; # marker for li
+	        if ($tag eq 'p') {
+                    # para=1 we're at top of column (no extra margin)
+		    # per $para (or default), drop down a line?, indent?
+		    # if CSS changed to display=inline for some reason, what to do?
+		    # no y change if at top of column, but still indent
+		    $add_x = $properties[-1]->{'text-indent'}; # indent by para indent amount
+print STDERR "---------------------------------------- para=$para, text-indent=$add_x\n";
+#print STDERR "  para: $para\n";
+		    if ($para) {
+		        # at top of column, so suppress extra space
+		        $add_y = 0; # no extra top margin if at column top
+		        $para = 0; # for rest of column, extra top margin
+		    } else {
+		        $add_y = $properties[-1]->{'margin-top'}; # extra top margin
+		    }
+	            # p with cont=>1 is continuation of paragraph in new column 
+	            # no indent and no top margin... just start a new line
+	            if (defined $mytext[$el]->{'cont'} && $mytext[$el]->{'cont'}) {
+                        $add_x = $add_y = 0;
+                    }
+print STDERR "p tag, para=$para, add_x=$add_x, add_y=$add_y\n";
+	        }
+	       #if ($tag eq 'i') { } 
+	       #if ($tag eq 'em') { }
+	       #if ($tag eq 'b') { }
+	       #if ($tag eq 'strong') { }
+	       #if ($tag eq 'font') { } face already renamed to font-family,
+	       #                        size already renamed to font-size, color
+	       #if ($tag eq 'span') { } needs style= or <style> to be useful
+	       # initially no nesting for lists. ul and ol just set up things;
+	       #   li actually does marker output and sets up paragraph for text
+	       #if ($tag eq 'ul') { } type already list-style-type
+	        if ($tag eq 'ol') { 
+	            $start = 1;
+	            if (defined $mytext[$el]->{'start'}) {
+	                $start = $mytext[$el]->{'start'};
+		    }
+	        }
+	        if ($tag eq 'li') {
+		    # paragraph, but label depends on parent (list-style-type)
+		    # type and value attributes can override parent list-style-type
+		    #   and start
+		    if (defined $mytext[$el]->{'value'}) {
+		        $start =  $mytext[$el]->{'value'}; # used only for ol
+		    }
+		    # for time-being, treat position of marker as 'outside' TBD
+		    # TBD temp put ' * ' in front if 'disc', ' N. ' if 'decimal'
+		    if ($properties[-1]->{'list-style-type'} ne 'decimal') {
+		        $text_pre = " * ";
+		    } else {
+		        $text_pre = " $start. ";
+		        $start++;
+		    }
+	        }
+	       #if ($tag eq 'img') { } TBD, hspace and vspace already margins,
+	       #                            width, height
+	       #if ($tag eq 'a') { } href. text may be decorated, needs to be 
+	       #                     outlined (find extents) for annotation->link
+	       #if ($tag eq 'pre') { } TBD
+	       #if ($tag eq 'code') { } TBD
+               # treat headings as paragraphs
+	       #if ($tag eq 'h1') { }  align
+	       #if ($tag eq 'h2') { }
+	       #if ($tag eq 'h3') { }
+	       #if ($tag eq 'h4') { }
+	       #if ($tag eq 'h5') { }
+	       #if ($tag eq 'h6') { }
+	       #if ($tag eq 'hr') { } TBD  align, size is linewidth, width
+	       #                      this actually draws something, not just setup
+	       #if ($tag eq 'br') { } TBD force new line
+	       #if ($tag eq 'sup') { } TBD
+	       #if ($tag eq 'sub') { } TBD
+    
+	       # tags maybe some time in the future TBD
+	       #if ($tag eq 'address') { } inline formatting
+	       #if ($tag eq 'article') { } discrete section
+	       #if ($tag eq 'aside') { } discrete section 
+	       #if ($tag eq 'base') { } 
+	       #if ($tag eq 'basefont') { } 
+	       #if ($tag eq 'big') { }  increase font size
+	       #if ($tag eq 'blockquote') { }  margins, font-size, leading
+	       # already taken care of head, body
+	       #if ($tag eq 'canvas') { } 
+	       #if ($tag eq 'caption') { } 
+	       #if ($tag eq 'center') { }  margin-left/right auto
+	       #if ($tag eq 'cite') { } quotes, face?
+	       #if ($tag eq 'dl') { }  similar to ul/li
+	       #if ($tag eq 'dt') { } 
+	       #if ($tag eq 'dd') { } 
+	       #if ($tag eq 'del') { } text-decoration=line-through
+	       #if ($tag eq 'div') { }  # requires width, height, left, etc.
+	       #if ($tag eq 'figure') { }
+	       #if ($tag eq 'figcap') { }
+	       #if ($tag eq 'footer') { } discrete section
+	       #if ($tag eq 'header') { } discrete section
+	       #if ($tag eq 'ins') { }  inline mark
+	       #if ($tag eq 'kbd') { }  inline mark
+	       #if ($tag eq 'mark') { }
+	       #if ($tag eq 'nav') { } discrete section
+	       #if ($tag eq 'nobr') { }
+	       #if ($tag eq 'q') { }  quotes around
+	       #if ($tag eq 's') { }  text-decoration=line-through
+	       #if ($tag eq 'samp') { }
+	       #if ($tag eq 'section') { } discrete section
+	       #if ($tag eq 'small') { } reduce font-size
+	       #if ($tag eq 'strike') { }  text-decoration=line-through
+	       #if ($tag eq 'summary') { } discrete section
+	       #if ($tag eq 'u') { }  text-decoration=underline
+	        if ($tag eq 'style') {
+		    # sometimes some stray empty style tags seem to come 
+		    # through...  can be ignored
+#print STDERR "*** Ignoring a stray <style> tag\n";
+	        }
+
+	        if (defined $mytext[$el]->{'empty_element'}) {
+	            # empty/void tag, no end tag, pop property stack
+		    # as this tag's actions have already been taken
+		    pop @properties;
+		    # no text as child of this tag, whatever it does, it has
+		    # to be completely handled in this section
+	        }
+
+		# end of handling starting tags <tag>
+
+	    } else {
+		# take care of 'end' tags. some end tags need some special 
+		# processing if they do something that isn't just a 
+		# property change. current_prop should be up to date.
+		$tag = substr($tag, 1); # discard /
+
+		# note that current_prop should be all up to date by the
+		# time you hit the end tag
+
+		# block display element end (including paragraphs)
+	        # start next material on new line
+	        if ($current_prop->{'display'} eq 'block') {
+		    $need_line = 1; 
+		    $start_y = $next_y;
+		    $add_x = $add_y = 0;
+	            # block display with a non-zero bottom margin... set skip
+		    if ($properties[-1]->{'margin-bottom'} ne '0') {
+			$vmargin = _size2pt($current_prop->{'margin-bottom'},
+			                    $current_prop->{'font-size'});
+		    }
+	        }
+
+		# last step is to pop the properties stack and remove this
+		# element, its start tag, and everything in-between. adjust 
+		# $el and loop again.
+		for (my $first = $el-1; $first>1; $first--) {
+print STDERR "end tag at mytext[$el], look at [$first] for matching $tag\n";
+		    # looking for a tag matching $tag
+		    if ($mytext[$first]->{'text'} eq '' &&
+			$mytext[$first]->{'tag'} eq $tag) {
+			# found it at $first
+			my $len = $el - $first + 1;
+print STDERR "  remove $len elements starting at mytext[$first], el from $el to ".($el-$len+1).", pop properties\n";
+			splice(@mytext, $first, $len);
+			$el -= $len; # end of loop will advance $el
+			pop @properties;
+			last;
+		    }
+                }
+		if (@mytext == 2) { last; } # have used up all input text!
+		# only default values and style element are left
+		next; # next mytext element s/b one after batch just removed
+               
+		# end of handling end tags </tag>
+	    }
+
+
+	    # end of tag processing
+
+	} else {
+            # ===================================== text to output
+	    # we should be at a new text entry ("phrase")
+
+	    # after tags processed, and property list (properties[-1]) updated,
+	    # typically at start of a text string (phrase) we will call PDF
+	    # updates such as fillcolor, get_font, etc. and at the same time
+	    # update current_prop to match.
+
+	    # what properties have changed and need PDF calls to update?
+	    $call_get_font = 0;
+#print STDERR "_tag_attributes() prop top font-family = '$properties[-1]->{'font-family'}'\n";
+#print STDERR "  current_prop font-family = '$current_prop->{'font-family'}'\n";
+	    if ($properties[-1]->{'font-family'} ne $current_prop->{'font-family'}) {
+		 $call_get_font = 1;
+		 $current_prop->{'font-family'} = $properties[-1]->{'font-family'};
+            }
+	    if ($properties[-1]->{'font-style'} ne $current_prop->{'font-style'}) {
+		 # normal or italic
+		 $call_get_font = 1;
+		 $current_prop->{'font-style'} = $properties[-1]->{'font-style'};
+            }
+	    if ($properties[-1]->{'font-weight'} ne $current_prop->{'font-weight'}) {
+		 # normal or bold
+		 $call_get_font = 1;
+		 $current_prop->{'font-weight'} = $properties[-1]->{'font-weight'};
+            }
+	    if ($properties[-1]->{'font-size'} ne $current_prop->{'font-size'}) {
+		 # don't want to trigger font call unless numeric value changed
+		 my $newval = _fs2pt($properties[-1]->{'font-size'}, 
+			             $current_prop->{'font-size'});
+		 if ($newval != $current_prop->{'font-size'}) {
+		     $call_get_font = 1;
+		     $current_prop->{'font-size'} = $newval;
+		 }
+            }
+	    if ($call_get_font) {
+print STDERR "calling get_font with face=>$current_prop->{'font-family'}, italic=>".(($current_prop->{'font-style'} eq 'normal')? 0: 1).", bold=>".(($current_prop->{'font-weight'} eq 'normal')? 0: 1).", and text->font with size=$current_prop->{'font-size'}.\n";
+                $text->font($pdf->get_font(
+		    'face' => $current_prop->{'font-family'}, 
+		    'italic' => ($current_prop->{'font-style'} eq 'normal')? 0: 1, 
+		    'bold' => ($current_prop->{'font-weight'} eq 'normal')? 0: 1, 
+		                          ), $current_prop->{'font-size'}); 
+	    }
+
+	    # don't know if color will be used for text or for graphics draw,
+	    # so set both
+	    if ($properties[-1]->{'color'} ne $current_prop->{'color'}) {
+		 $current_prop->{'color'} = $properties[-1]->{'color'};
+		 $text->fillcolor($current_prop->{'color'});
+		 $grfx->strokecolor($current_prop->{'color'});
+print STDERR "((((((((((setting color to $current_prop->{'color'}\n";
+            }
+
+	    # these properties don't get a PDF::Builder call
+	    # update text-indent, etc. of current_prop, even if we don't
+	    # call a Builder routine to set them in PDF, so we can always use
+	    # current_prop instead of switching between the two. current_prop
+	    # property lengths should always be in pts (no labeled dimensions).
+	    $current_prop->{'text-indent'} = _size2pt($properties[-1]->{'text-indent'}, $current_prop->{'font-size'});
+	    $current_prop->{'text-decoration'} = $properties[-1]->{'text-decoration'};
+	    $current_prop->{'margin-top'} = _size2pt($properties[-1]->{'margin-top'}, $current_prop->{'font-size'});
+	    $current_prop->{'margin-right'} = _size2pt($properties[-1]->{'margin-right'}, $current_prop->{'font-size'});
+	    $current_prop->{'margin-bottom'} = _size2pt($properties[-1]->{'margin-bottom'}, $current_prop->{'font-size'});
+	    $current_prop->{'margin-left'} = _size2pt($properties[-1]->{'margin-left'}, $current_prop->{'font-size'});
+	    # line-height is expected to be a multiplier to font-size, so
+	    # % or pts value would have to be converted back to ratio TBD
+	    $current_prop->{'line-height'} = $properties[-1]->{'line-height'};
+	    $current_prop->{'display'} = $properties[-1]->{'display'};
+	    $current_prop->{'list-style-position'} = $properties[-1]->{'list-style-position'};
+	    $current_prop->{'list-style-type'} = $properties[-1]->{'list-style-type'};
+	    # current_prop should now be up to date with properties[-1], and
+	    # any Builder calls have been made
+
+	    # vmargin is greater of any bottom margin and top margin above this
+	    # text. if vmargin nonzero, drop down by that amount
+	    if ($vmargin > 0) {
+	        $start_y -= $vmargin; # could be too low for a new line!
+	        $vmargin = 0;
+	    }
+
+	    # we're ready to roll, and output the actual text itself
+	    #
+	    # fill line from element $el at current x,y until will exceed endx
+	    # then get next baseline
+	    # if this phrase doesn't finish out the line, will start next
+	    # mytext element at the x,y it left off. otherwise, unused portion
+	    # of phrase (remainder) becomes the next element to process.
+	    $phrase = $mytext[$el]->{'text'}; # there should always be a text
+	    # text_pre was set in li tag processing
+	    $phrase = $text_pre.$phrase;
+	    $remainder = '';
+
+	    # for now, all whitespace convert to single blanks 
+	    # TBD blank preserve for <code> or <pre>
+	    $phrase =~ s/\s+/ /g;
+#print STDERR "top of mytext loop, phrase = '$phrase'\n";
+
+	    # a phrase may have multiple words. see if entire thing fits, and if
+	    # not, start trimming off right end (split into a new element)
+    
+            while ($phrase ne '') {
+print STDERR "top of phrase loop, phrase = '$phrase' and remainder = '$remainder'. need_line=$need_line\n";
+	        # one of four things to handle:
+	        # 1. entire phrase fits at x -- just write it out
+	        # 2. none of phrase fits at x (all went into remainder) --
+	        #    go to next line to check and write (not all may fit)
+	        # 3. phrase split into (shortened) phrase (that fits) and a
+	        #    remainder -- write out phrase, remainder to next line to
+	        #    check and write (not all may fit)
+		# 4. phrase consists of just one word, AND it's too long to
+		#    fit on the full line. it must be split somewhere to fit 
+		#    the line.
+
+		my $full_line = 0;
+	        # this is to force start of a new line at start_y?
+		# phrase still has content, and there may be remainder.
+		# don't forget to set the new start_y when need_line=1
+	        if ($need_line) {
+	            # first, set font (current, or something specified)
+		    if ($para) { # at top of column, font undefined
+	                $text->font($pdf->get_font('face'=>'current'), $font_size);
+		    }
+
+print STDERR "need a new line for '$phrase', with add_x=$add_x, add_y=$add_y, font_size=$font_size\n";
+	            # extents above and below the baseline (so far)?
+#print STDERR "call get_fv_extents with font_size=$font_size and leading=$leading\n";
+	            ($asc, $desc, $desc_leading) = 
+	                _get_fv_extents($pdf, $font_size, $leading);
+	            $next_y = $start_y - $add_y - $asc + $desc_leading;
+	            # did we go too low? will return -1 (start_x) and 
+		    #   remainder of input
+	            # don't include leading when seeing if line dips too low
+#print STDERR "  ran out of column for '$phrase'\n" if ($start_y - $asc + $desc < $min_y);
+	            if ($start_y - $add_y - $asc + $desc < $min_y) { last; }
+	            # start_y and next_y are vertical extent of this line 
+		    #   (so far)
+	            # y is the y value of the baseline (so far)
+	            $y = $start_y - $add_y - $asc;
+#print STDERR "  start_y=$start_y, asc=$asc, desc=$desc, desc_leading=$desc_leading, new y=$y, next_y=$next_y\n";
+
+	            # how tall is the line? need to set baseline. add_y is
+		    #   any paragraph top margin to drop further. note that this
+		    #   is just the starting point -- the line could get taller
+                    ($x,$y, $width) = _get_baseline($y, @outline);
+                    $endx = $x + $width;
+#print STDERR "  resulting baseline at x=$x, y=$y, of width $width\n";
+	            # at this point, we have established the next baseline 
+		    #   (x,y start and width/end x). fill this line.
+		    $x += $add_x; $add_x = 0; # indent
+		    $add_y = 0; # para top margin extra
+		    $need_line = 0;
+		    $full_line = 1;
+	        }
+    	
+		# have a phrase to attempt to add to output, and an
+		#   x,y to start it at (tentative if start of line)
+	        my $w = $text->advancewidth($phrase);
+
+	        if ($x + $w <= $endx) {
+print STDERR "  entire phrase '$phrase' of width=$w DOES fit at x=$x\n";
+	            # no worry, the entire phrase fits (case 1.)
+		    # TBD: only dummy at this point, as extents might increase, dropping baseline and perhaps changing linewidth
+print STDERR ">>>>>>>>>>    write $w wide '$phrase' at x=$x, y=$y\n";
+	            $text->translate($x,$y);
+	            $text->text($phrase); # only build up dry run list
+		                          # TBD with options (e.g., decorations)
+	            $x += $w;
+		    $full_line = 0;
+		    # change current property display to inline
+		    $current_prop->{'display'} = 'inline';
+
+	            # next element in mytext (try to fit on same line)
+		    $phrase = $remainder; # may be empty
+#print STDERR " after writing phrase, it is now '$phrase'\n";
+		    $remainder = '';
+		    # since will start a new line, trim leading w/s
+		    $phrase =~ s/^\s+//;  # might now be empty
+		    if ($phrase ne '') {
+			# phrase used up, but remainder for next line
+#print STDERR " will need another line to fit this '$phrase'\n";
+			$need_line = 1;
+			$start_y = $next_y;
+		    }
+		    next; # done with phrase loop if phrase empty
+
+	        } else {
+		    # existing line plus phrase is too long
+#print STDERR "  entire phrase '$phrase' does NOT fit\n";
+	            # entire phrase does NOT fit (case 2 or 3). start splitting 
+		    # up phrase, beginning with stripping space(s) off end
+
+                    if ($phrase =~ s/(\s+)$//) {
+		        # remove whitespace at end (line will end somewhere
+		        # within phrase, anyway)
+		        $remainder = $1.$remainder;
+#print STDERR "    I. phrase now '$phrase', remainder now '$remainder'\n";
+		    } else {
+#print STDERR "space on line too short (".($endx-$x).") to fit '$phrase' ($w), full_line=$full_line\n";
+	                # Is line too short to fit even the first word at the
+		        # beginning of the line? force split in word somewhere 
+			# so that it fits.
+	                my $word = $phrase;
+	                $word =~ s/^\s+//; # probably not necessary, but doesn't hurt
+	                $word =~ s/\s+$//;
+	                if ($full_line && index($word, ' ') == -1) {
+	                    my ($wordLeft, $wordRight);
+print STDERR "attempt to deal with single word at beginning of line, doesn't fit\n";
+                            # is a single word at the beginning of the line, 
+			    # and didn't fit
+                            require PDF::Builder::Content::Hyphenate_basic;
+                            ($wordLeft,$wordRight) = PDF::Builder::Content::Hyphenate_basic::splitWord($text, $word, $w);
+print STDERR "first attempt to split '$phrase' yields '$wordLeft' and '$wordRight'\n";
+			    if ($wordLeft eq '') {
+				# failed to split. try desperation move of
+				# splitting at Non Splitting SPace!
+                                ($wordLeft,$wordRight) = PDF::Builder::Content::Hyphenate_basic::splitWord($text, $word, $w, 'spRB'=>1);
+print STDERR "second attempt to split '$phrase' yields '$wordLeft' and '$wordRight'\n";
+				if ($wordLeft eq '') {
+	                            # super-desperation move... split to fit 
+				    # space! eventually with proper hyphenation
+				    # this probably will never be needed.
+                                    ($wordLeft,$wordRight) = PDF::Builder::Content::Hyphenate_basic::splitWord($text, $word, $endx-$x, 'spFS'=>1);
+#print STDERR "third attempt to split '$phrase' for width $w yields '$wordLeft' and '$wordRight'\n";
+				}
+			    }
+#print STDERR "++++----++++ original phrase '$phrase' and remainder '$remainder'"; 
+			    $phrase = $wordLeft; 
+			    $remainder = "$wordRight $remainder";
+#print STDERR " split into '$wordLeft' (length ";
+#print STDERR $text->advancewidth($phrase).") and '$wordRight', with remainder now '$remainder'\n";
+                            next; # re-try shortened phrase
+	                }
+    
+		        # phrase should end with non-whitespace if here. 
+			# try moving last word to remainder
+                        if ($phrase =~ s/(\S+)$//) {
+		            # remove word at end
+		            $remainder = $1.$remainder;
+#print STDERR "    II. phrase now '$phrase', remainder now '$remainder'\n";
+		        }
+		    }
+		    # at least part of text will end up on another line.
+	            # find current <p> and add cont=>1 to it to mark 
+		    # continuation in case we end up at end of column
+	            for (my $ptag=$el-1; $ptag>1; $ptag--) {
+		        if ($mytext[$ptag]->{'text'} ne '') { next; }
+		        if ($mytext[$ptag]->{'tag'} ne 'p') { next; }
+		        $mytext[$ptag]->{'cont'} = 1;
+		        last;
+	            }
+    
+		    if ($phrase eq '' && $remainder ne '') {
+			# entire phrase goes to next line
+#print STDERR " entire phrase needs to go to next line\n";
+			$need_line = 1;
+			$start_y = $next_y;
+			$add_x = $add_y = 0;
+			$phrase = $remainder;
+			$remainder = '';
+		    }
+		    next;
+	            
+		} # phrase did not fit (else)
+	        # end of entire phrase does NOT fit
+
+		# TBD somewhere around here output dry run text for real
+
+            } # end of while phrase has content loop
+	    # remainder should be '' at this point, phrase may have content
+	    # either ran out of phrase, or ran out of column
+
+	    if ($phrase eq '') {
+#print STDERR "end of phrase loop, phrase is empty, so go to next element\n";
+		# ran out of input text phrase, so process more elements
+		# but first, remove this text from mytext array so won't be
+		#   accidentally repeated
+		splice(@mytext, $el, 1);
+		$el--;
+		next;
+	    }
+	    # could get here if exited loop due to running out of column,
+	    # in which case, phrase has to be stuffed back into mytext
+#print STDERR "end of phrase loop, ran out of column with '$phrase' still left\n";
+	    $mytext[$el]->{'text'} = $phrase;
+            last;
+	    
+	} 
+	# end of processing this element in mytext, UNLESS it was text (phrase)
+	# and we ran out of column space!
+
+	if ($phrase ne '') {
+	    # we left early, with incomplete text, because we ran out of
+	    # column space. can't process any more elements -- done with column.
+	    # mytext[el] already updated with remaining text
+#print STDERR "phrase still has '$phrase', finished = $finished. exit mytext loop\n";
+	    last; # exit mytext loop
+	} else {
+	    # more elements to go
+#print STDERR "finished phrase, go to next element\n";
+	    next;
+	}
+
+    } # for $el loop through mytext array over multiple lines
+
+    # if get to here, is it because we ran out of mytext (normal loop exit), or 
+    #   because we ran out of space in the column (early exit, in middle of a
+    #   text element)?
+    #
+    # for whatever reason we're exiting, remove first array element (default
+    # CSS entries). it is always re-created on entry to column(). leave next 
+    # element (consolidated <style> tags, if any).
+    shift @mytext;
+print STDERR "!!! exiting _output_text(), mytext after default css strip:\n"; print STDERR Dumper(@mytext);
+
+    # for some reason we get mytext with nothing but 2 elements: p /p
+    # where is style? 
+    if ($#mytext == 0) {
+	# [0] = consolidated styles (default styles was just removed)
+	# we ran out of input. return next start_y and empty list ref
+	return (0, $next_y, []);
+    } else {
+	# we ran out of vertical space in the column. return -1 and 
+	# remainder of mytext list (next_y would be inapplicable)
+#print STDERR "ran out of column, trim off first $finished elements of mytext\n";
+	return (1, -1, \@mytext);
+    }
+
+} # end of _output_text()
+
+# initialize current property settings to values that will cause updates (PDF
+# calls) when the first real properties are determined, and thereafter whenever
+# these properties change
+sub _init_current_prop {
+
+    my $cur_prop = {};
+    
+    # NOTE that all lengths must be in points (unitless), ratios are
+    # pure numbers, named things are strings.
+    $cur_prop->{'font-size'} = -1;
+    $cur_prop->{'line-height'} = 0;
+    $cur_prop->{'text-indent'} = 0;
+    $cur_prop->{'color'} = 'rainbow';
+    $cur_prop->{'font-family'} = 'yoMama';
+    $cur_prop->{'font-weight'} = 'abnormal';
+    $cur_prop->{'font-style'} = 'abnormal';
+   #$cur_prop->{'font-variant'} = 'abnormal';
+    $cur_prop->{'margin-top'} = '0'; 
+    $cur_prop->{'margin-right'} = '0'; 
+    $cur_prop->{'margin-bottom'} = '0'; 
+    $cur_prop->{'margin-left'} = '0'; 
+   #$cur_prop->{'text-align'} = 'left';
+   #$cur_prop->{'text-transform'} = 'none';
+   #$cur_prop->{'border-style'} = 'none';
+   #$cur_prop->{'border-width'} = '1pt'; 
+   #$cur_prop->{'border-color'} = 'inherit'; 
+    $cur_prop->{'text-decoration'} = 'none';
+    $cur_prop->{'display'} = 'block';
+    
+    return $cur_prop;
+} # end of _init_current_prop()
+
+# update a properties hash for a specific selector (all, if not given)
+sub _update_properties {
+    my ($target, $source, $selector) = @_;
+
+    if (defined $selector) {
+        if (defined $source->{$selector}) {
+	    foreach (keys %{$source->{$selector}}) {
+                $target->{$_} = $source->{$selector}->{$_};
+            }
+	}
+    } else {
+	foreach my $selector (keys %$source) { # top-level selectors
+	    if ($selector eq 'text' || $selector eq 'tag') { next; }
+	    if ($selector eq 'cont') { next; } # paragraph continuation flag
+	    if ($selector eq 'body') { next; } # do body selector last
+	    if (ref($source->{$selector}) ne 'HASH') { next; } # href, etc.
+print STDERR "_update_properties w/o tag (all): selector $selector\n";
+	    foreach (keys %{$source->{$selector}}) {
+print STDERR "  target->$_ = $source->{$selector}->{$_}\n";
+                $target->{$_} = $source->{$selector}->{$_};
+            }
+	}
+	# do body selector last, after others
+	if (defined $source->{'body'}) {
+	    foreach (keys %{$source->{'body'}}) {
+print STDERR "  target->$_ = $source->{'body'}->{$_}\n";
+                $target->{$_} = $source->{'body'}->{$_};
+            }
+        }
+    }
+
+    return;
+} # end of _update_properties()
+
+sub _get_fv_extents {
+    my ($pdf, $font_size, $leading) = @_;
+
+    $leading = 1.0 if $leading <= 0; # actually, a bad value
+    $leading++ if $leading < 1.0;    # might have been given as fractional
+
+    my $font = $pdf->get_font('face' => 'current');   # font object realized
+    # now it's loaded, if it wasn't already
+    my $ascender  = $font->ascender()/1000*$font_size; # positive
+    my $descender = $font->descender()/1000*$font_size; # negative
+
+    # ascender is positive, descender is negative (above/below baseline)
+    return ($ascender, $descender, $descender-($leading-1.0)*$font_size);
+} # end of _get_fv_extents()
+
+# returns a list (array) of x,y coordinates outlining the column defined
+# by various options entries. currently only 'rect' is used, to define a
+# rectangular outline.
+# $grfx is graphics context, non-dummy if 'outline' option given (draw outline)
+#
+# TBD: what to do if any line too short to use? 
+
+sub _get_column_outline {
+    my ($grfx, $draw_outline, %opts) = @_;
+
+    my @outline = ();
+    # currently only 'rect' supported. TBD: path
+    if (!defined $opts{'rect'}) {
+	croak "column: no outline of column area defined";
+    }
+
+    # treat coordinates as absolute, unless 'relative' option given
+    my $off_x = 0;
+    my $off_y = 0;
+    my $scale_x = 1;
+    my $scale_y = 1;
+    if (defined $opts{'relative'}) {
+        my @relative = @{ $opts{'relative'} };
+        croak "column: invalid number of elements in 'relative' list" 
+            if (@relative < 2 || @relative > 4);
+
+        $off_x = $relative[0];
+        $off_y = $relative[1];
+	# @relative == 2 use default 1 1 scale factors
+        if (@relative == 3) { # same scale for x and y
+            $scale_x = $scale_y = $relative[2];
+        }
+        if (@relative == 4) { # different scales for x and y
+            $scale_x = $relative[2];
+            $scale_y = $relative[3];
+        }
+    }
+
+    my @rect = @{$opts{'rect'}};  # if using 'rect' option
+    push @outline, [$rect[0], $rect[1]]; # UL corner = x,y
+          # TBD: check x,y reasonable, w,h reasonable
+    push @outline, [$rect[0]+$rect[2], $rect[1]]; # UR corner + width
+    push @outline, [$rect[0]+$rect[2], $rect[1]-$rect[3]]; # LR corner - height
+    push @outline, [$rect[0], $rect[1]-$rect[3]]; # LL corner - width
+    push @outline, [$rect[0], $rect[1]]; # back to UL corner
+
+    # TBD: 'path' option
+
+    # treat coordinates as absolute or relative
+    for (my $i = 0; $i < scalar @outline; $i++) {
+#print STDERR "raw outline[$i] = $outline[$i][0],$outline[$i][1]";
+	$outline[$i][0] = $outline[$i][0]*$scale_x + $off_x;
+	$outline[$i][1] = $outline[$i][1]*$scale_y + $off_y;
+#print STDERR ". scaled = $outline[$i][0],$outline[$i][1]\n";
+    }
+
+    # requested to draw outline (color other than 'none')?
+    if ($draw_outline ne 'none') {
+	# assume $grfx defined
+	$grfx->strokecolor($draw_outline);
+	$grfx->linewidth(0.5);
+	# only rect currently supported
+	my @flat = ();
+        for (my $i = 0; $i < scalar @outline; $i++) {
+	    push @flat, $outline[$i][0];
+	    push @flat, $outline[$i][1];
+	}
+	$grfx->poly(@flat);
+	$grfx->stroke();
+    }
+
+    return @outline;
+} # end of _get_column_outline()
+
+sub _get_col_extents {
+    my (@outline) = @_;
+    my ($minx, $miny, $maxx, $maxy);
+
+    # for rect, all pairs are x,y. once introduce splines/arcs, need more
+    for (my $i = 0; $i < scalar @outline; $i++) {
+	if ($i == 0) {
+	    $minx = $maxx = $outline[$i][0];
+	    $miny = $maxy = $outline[$i][1];
+	} else {
+	    $minx = min($minx, $outline[$i][0]);
+	    $miny = min($miny, $outline[$i][1]);
+	    $maxx = max($maxx, $outline[$i][0]);
+	    $maxy = max($maxy, $outline[$i][1]);
+	}
+    }
+
+    return ($minx, $miny, $maxx, $maxy);
+} # end of _get_col_extents()
+
+# get the next baseline from column outline @outline
+# the first argument is the y value of the baseline
+# we've already checked that there is room in this column, so y is good
+# returns on-page x,y, and width of baseline
+# currently expect outline to be UL UR LR LL UL coordinates. 
+# TBD: arbitrary shape with line at start_y clipped by outline (if multiple
+# lines result, pick longest or first one)
+sub _get_baseline {
+    my ($start_y, @outline) = @_;
+
+    my ($x,$y, $width);
+    $x = $outline[0][0];
+    $y = $start_y;
+    $width = $outline[1][0] - $x;
+
+    # note that this is the baseline, so it is possible that some
+    # descenders may exceed the limit, in a non-rectangular outline!
+
+    return ($x,$y, $width);
+} # end of _get_baseline()
+
+# returns array of hashes with prepared text. input could be
+#  'pre' markup: must be an array (list) of hashes, returned unchanged.
+#  'none' markup: empty lines separate paragraphs, array of texts permitted,
+#     paragraphs may not span array elements.
+#   'md1' markup: empty lines separate paragraphs, array of texts permitted,
+#     paragraphs may span array elements, content is converted to HTML
+#     per Text::Markdown, one array element at a time.
+#   'html' markup: single text string OR array of texts permitted (consolidated
+#     into one text), containing HTML markup. 
+#
+# each element is a hash containing the text and all attributes (HTML or MD
+# has been processed).
+
+sub _break_text {
+    my ($text, $markup) = @_;
+
+    my @array = ();
+
+    if      ($markup eq 'pre') {
+	# should already be in final format (such as continuing a column)
+#print STDERR "=== array of hashes\n";
+	return @$text;
+
+    } elsif ($markup eq 'none') {
+	# split up on blank lines into paragraphs and wrap with p and /p tags
+        if       (ref($text) eq '') {
+	    # is a single string (scalar)
+#print STDERR "=== single string text '$text' (none)\n";
+            @array = _none_hash($text);
+
+        } elsif (ref($text) eq 'ARRAY') {
+	    # array ref, elements should be text
+#print STDERR "=== array of text strings\n";
+            for (my $i = 0; $i < scalar(@$text); $i++) {
+                @array = (@array, _none_hash($text->[$i]));
+	    }
+	}
+
+        # dummy style element at array element [0]
+        my $style;
+        $style->{'tag'} = 'style';
+        $style->{'text'} = '';
+        unshift @array, $style;
+
+    } elsif ($markup eq 'md1') {
+	# process into HTML, then feed to HTML processing to make hash
+	# note that blank-separated lines already turned into paragraphs
+        if       (ref($text) eq '') {
+	    # is a single string (scalar)
+#print STDERR "=== single Markdown text '$text'\n";
+            @array = _md1_hash($text);
+
+        } elsif (ref($text) eq 'ARRAY') {
+	    # array ref, elements should be text
+#print STDERR "=== array of MD strings\n";
+            @array = _md1_hash(join("\n", @$text));
+	}
+
+    } else { # should be 'html'
+        if       (ref($text) eq '') {
+	    # is a single string (scalar)
+#print STDERR "=== single HTML string '$text'\n";
+            @array = _html_hash($text);
+	    
+        } elsif (ref($text) eq 'ARRAY') {
+	    # array ref, elements should be text
+	    # consolidate into one string. 
+#print STDERR "=== array of HTML strings\n";
+            @array = _html_hash(join("\n", @$text));
+	}
+    }
+
+print STDERR "\n\n_break_text() returns ".@array." element array\n";
+    return @array;
+} # end of _break_text()
+
+# convert unformatted string to array of hashes, splitting up on blank lines.
+# return with only markup as paragraphs
+# note that you can NOT span a paragraph across array elements
+sub _none_hash {
+    my ($text) = @_;
+print STDERR "~~~~~~~~~> none raw text is '$text'\n";
+
+    my @array = ();
+    my $in_para = 0;
+    my $line = '';
+    chomp($text); # don't want empty last element due to trailing \n
+    foreach (split /\n/, $text) {
+	# should be no \n's, but adjacent non-empty lines need to be joined
+	if ($_ =~ /^\s*$/) {
+	    # empty/blank line. end paragraph if one in progress
+#print STDERR "_none_hash() finds empty line to end para with text='$line'\n";
+	    if ($in_para) {
+#print STDERR "  push text=>'$line' element\n";
+	        push @array, {'tag' => '', 'text' => $line};
+#print STDERR "  push /p end para tag\n";
+		push @array, {'text' => "", 'tag' => '/p'};
+		$in_para = 0;
+		$line = '';
+	    }
+	    # not in a paragraph, just ignore this entry
+
+	} else {
+	    # content in this line. start paragraph if necessary
+#print STDERR "_none_hash() finds content line '$_'\n";
+	    if ($in_para) {
+		# accumulate content into line
+		$line .= " $_";
+#print STDERR "  already in para, so tack on to line, now '$line'\n";
+	    } else {
+		# start paragraph, content starts with this text
+#print STDERR "  NOT already in para, start one with p tag\n";
+	        push @array, {'text' => "", 'tag' => 'p'};
+		$in_para = 1;
+		$line = $_;
+	    }
+	}
+
+    } # end of loop through line(s) in paragraph
+   
+    # out of input.
+    # if still within a paragraph, need to properly close it
+    if ($in_para) {
+#print STDERR "  need to close para by pushing text element, then /p element\n";
+	push @array, {'tag' => '', 'text' => $line};
+	push @array, {'text' => "", 'tag' => '/p'};
+	$in_para = 0;
+	$line = '';
+    }
+	
+    return @array;
+} # end of _none_hash()
+
+# convert md1 string to html, returning array of hashes
+sub _md1_hash {
+    my ($text) = @_;
+print STDERR "~~~~~~~~~> md1 raw text is '$text'\n";
+
+    my @array;
+    my ($html, $rc);
+    $rc = eval {
+        require Text::Markdown; # want to use 'markdown'
+	1;
+    };
+    if (!defined $rc) { $rc = 0; }  # not available
+
+    if ($rc) {
+	# MD converter appears to be installed, so use it
+	$html = Text::Markdown::markdown($text);
+    } else {
+	# leave as MD, will cause a chain of problems
+	warn "Text::Markdown not installed, can't process Markdown";
+	$html = $text;
+    }
+#print STDERR "HTML: $html\n";
+
+    # dummy (or real) style element will be inserted at array element [0]
+    #   by _html_hash()
+
+print STDERR "~~~~~~~~~> md1 HTML hash is '$html'\n";
+    # blank-line separated paragraphs already wrapped in <p> </p>
+    @array = _html_hash($html);
+
+    return @array;
+} # end of _md1_hash()
+
+# convert html string to array of hashes. this is for both 'html' markup and
+# the final step of 'md1' markup.
+# returns array (list) of tags and text, and as a side effect, element [0] is
+# consolidated <style> tags (may be empty hash)
+sub _html_hash {
+    my ($text) = @_;
+
+    my $style = {};  # <style> hashref to return
+    my @array;       # array of body tags and text to return
+    my ($rc);
+
+    # TBD process 'substitute' stuff here. %opts needs to be passed in!
+
+    $rc = eval {
+	require HTML::TreeBuilder;
+	1;
+    };
+    if (!defined $rc) { $rc = 0; }  # not available
+
+    if ($rc) {
+	# HTML converter appears to be installed, so use it
+	my $tree = HTML::TreeBuilder->new();
+	$tree->ignore_unknown(0);  # don't discard non-HTML recognized tags
+	$tree->no_space_compacting(1);  # preserve spaces
+	$tree->parse_content($text);
+	
+	# see if there is a <head>, and if so, if any <style> tags within it
+	my $head = $tree->{'_head'}; # a hash
+	if (defined $head and defined $head->{'_content'}) {
+	    my @headList = @{ $head->{'_content'} }; # array of strings and tags
+	    @array = _walkTree(0, @headList);
+	    # pull out one or more style tags and build $styles hash
+            for (my $el = 0; $el < @array; $el++) {
+		my $style_text = $array[$el]->{'text'};
+		if ($style_text ne '') {
+		    # possible style content. style tag immediately before?
+		    if (defined $array[$el-1]->{'tag'} &&
+			        $array[$el-1]->{'tag'} eq 'style') {
+			$style = _process_style_tag($style, $style_text);
+		    }
+		}
+	    }
+	} # $style is either empty hash or has style content
+	
+	# there should always be a body of some sort
+	my $body = $tree->{'_body'}; # a hash
+	my @bodyList = @{ $body->{'_content'} }; # array of strings and tags
+#print STDERR Dumper(@bodyList);
+	@array = _walkTree(0, @bodyList);
+#print STDERR "There are ".(@array)." elements returned from parsing HTML\n";
+	# pull out one or more style tags and add to $styles hash
+        for (my $el = 0; $el < @array; $el++) {
+	    my $style_text = $array[$el]->{'text'};
+	    if ($style_text ne '') {
+		# possible style content. style tag immediately before?
+		if (defined $array[$el-1]->{'tag'} &&
+			    $array[$el-1]->{'tag'} eq 'style') {
+		    $style = _process_style_tag($style, $style_text);
+		    # remove <style> from body (array list)
+		    splice(@array, $el-1, 3);
+		}
+	    }
+	} # $style is either empty hash or has style content
+    } else {
+	# leave as original HTML, will cause a chain of problems
+	warn "HTML::TreeBuilder not installed, can't process HTML";
+	push @array, {'tag' => '', 'text' => $text};
+    }
+
+    # always first element tag=style containing the hash, even if it's empty
+    $style->{'tag'} = 'style';
+    $style->{'text'} = '';
+    unshift @array, $style;
+     
+    return @array;
+} # end of _html_hash()
+
+# given the text between <style> and </style>, and an existing $style
+# hashref, update $style and return it
+sub _process_style_tag {
+    my ($style, $text) = @_;
+
+    # expect sets of selector { property: value; ... }
+    # break up into selector => { property => value, ... }
+    # replace or add to existing $style
+    # note that a selector may be a tagName, a .className, or an #idName
+
+    $text =~ s/\n/ /sg;  # replace end-of-lines with spaces
+    while ($text ne '') {
+	my $selector;
+
+	if ($text =~ s/^\s+//) { # remove leading whitespace
+	    if ($text eq '') { last; }
+	}
+	if ($text =~ s/([^\s]+)//) { # extract selector
+	    $selector = $1;
+        }
+	if ($text =~ s/^\s*{//) { # remove whitespace up through {
+	    if ($text eq '') { last; }
+	}
+	# one or more property-name: value; sets (; might be missing on last)
+	# go into %prop_val. we don't expect to see any } within a property
+	# value string.
+	$text =~ s/([^}]+)//;
+	$style->{$selector} = _process_style_string({}, $1);
+	if ($text =~ s/^}\s*//) { # remove closing } and whitespace
+	    if ($text eq '') { last; }
+	}
+
+    }
+
+    return $style;
+} # end of _process_style_tag()
+
+# decompose a style string into property-value pairs. used for both <style>
+# tags and style= attributes.
+sub _process_style_string {
+    my ($style, $text) = @_;
+
+    # split up at ;'s. don't expect to see any ; within value strings
+    my @sets = split /;/, $text;
+    # split up at :'s. don't expect to see any : within value strings
+    foreach (@sets) {
+	my ($property_name, $value) = split /:/, $_;
+	# trim off leading and trailing whitespace from both
+	$property_name =~ s/^\s+//;
+	$property_name =~ s/\s+$//;
+	$value =~ s/^\s+//;
+	$value =~ s/\s+$//;
+	# trim off any single or double quotes around value string
+	if ($value =~ s/^['"]//) {
+	    $value =~ s/['"]$//;
+	}
+
+	$style->{$property_name} = $value;
+    }
+
+    return $style;
+} # end of _process_style_string()
+
+# given a list of tags and content and attributes, return a list of hashes.
+# new array element at start, at each tag, and each _content.
+sub _walkTree {
+    my ($depth, @bodyList) = @_;
+    my ($elIdx, $tag, $key, $element, $no_content);
+
+    my $bLSize = scalar(@bodyList);
+    # $depth not really used here, but might come in handy at some point
+    my @array = ();
+
+    for ($elIdx=0; $elIdx<$bLSize; $elIdx++) {
+        $element = $bodyList[$elIdx];
+	# an element may be a simple text string, but most are hashes that
+	# contain a _tag and _content array and any tag attributes. _tag and
+	# any attributes go into an entry with text='', while any _content
+	# goes into one entry with text='string' and usually no attributes. 
+	# if the _tag takes an end tag , it gets its own dummy entry.
+	
+        if ($element =~ m/^HTML::Element=HASH/) {
+            # $element should be anonymous hash
+            $tag = $element->{'_tag'};
+            push @array, {'tag' => $element->{'_tag'}, 'text' => ''};
+#print STDERR "${depth}-tag: $tag pushed as element $#array\n";
+
+	    # look for attributes for tag
+	    $no_content = 0;  # has content (children) until proven otherwise
+	    foreach $key (keys %$element) {
+		# 'key' is more of an attribute within a tag (element)
+	        if ($key =~ m/^_/) { next; } # built-in attribute
+	        # VOID elements (br, hr, img, area, base, col, embed, input,
+		# link, meta, source, track, wbr) should NOT have /> to mark
+		# as "self-closing", but it's harmless and much HTML code will
+		# have them marked as "self-closing" even though it really
+		# isn't! So be prepared to handle such dummy attributes, as
+		# per RT 143038.
+	        if ($element->{$key} eq '/' || $tag eq 'br' || $tag eq 'hr' ||
+		    $tag eq 'img' || $tag eq 'area' || $tag eq 'base' ||
+	            $tag eq 'col' || $tag eq 'embed' || $tag eq 'input' ||
+	            $tag eq 'link' || $tag eq 'meta' || $tag eq 'source' ||
+	            $tag eq 'track' || $tag eq 'wbr' || 
+		    $tag eq 'defaults' || $tag eq 'style') { 
+		    # self-closing or VOID with unnecessary /, there is no
+		    # child data/elements for this tag. and, we can ignore
+		    # this 'attribute' of /.
+		    # defaults and style are specially treated as a VOID tags
+		    $no_content = 1; 
+	        } else {
+		    # this tag has one or more attributes to add to it
+#print STDERR "${depth}-  attribute: $key --> '$element->{$key}' added to hash of element $#array\n";
+                    # add tag attribute (e.g., src= for <img>) to hash
+		    $array[-1]->{$key} = $element->{$key};
+	        }
+	    }
+if ($no_content) { print STDERR "${depth}-  self-closing or VOID tag."; }
+
+	    if (!$no_content && defined $element->{'_content'}) {
+	        my @content = @{ $element->{'_content'} };
+		# content array elements are either text segments or
+		# tag subelements
+	        foreach (@content) {
+	            if ($_ =~ m/^HTML::Element=HASH/) {
+		        # HASH child of this _content
+		        # recursively handle a tag within _content
+#print STDERR "=== before _walkTree recursively called, array last el is $#array\n";
+		        @array = (@array, _walkTree($depth+1, $_));
+#print STDERR "=== after _walkTree recursively called, array last el is $#array\n";
+		    } else {
+                        # _content text, shouldn't be any attributes
+		        push @array, {'tag' => '', 'text' => $_};
+#print STDERR "${depth}-  _content: '$_' pushed as element $#array\n";
+		    }
+	        }
+	    } else {
+		# no content for this tag
+#print STDERR "${depth}-  No _content for this tag\n";
+	    }
+	    # at end of a tag ... if has content, output end tag
+	    if (!$no_content) {
+		push @array, {'tag' => "/$tag", 'text' => ''};
+#print STDERR "${depth}-  closing tag pushed as element $#array\n";
+	    }
+
+	    $no_content = 0;
+
+       } else {
+            # SCALAR (string) element
+#print STDERR "${depth}-text: '$element'\n";
+            push @array, {'tag' => '', 'text' => $element};
+       }
+   } # loop through _content at this level
+
+   return @array;
+} # end of _walkTree()
+
+# convert a font-size (length) into points
+# TBD another parm to indicate how to treat 'no unit' case?
+sub _fs2pt {
+    my ($font_size, $cur_fs) = @_;
+    # requested font size (may be % relative to current font size)
+    # current font size (pts)
+
+print STDERR "------------------ _fs2pt('$font_size', '$cur_fs')\n";
+    my $number = 0;
+    my $unit = '';
+    # split into number and unit
+    if      ($font_size =~ m/^(\d+\.?\d*)(.*)$/) {
+	$number = $1; # nnn.nn, nnn., or nnn format
+	$unit = $2;   # may be empty
+    } elsif ($font_size =~ m/^(\.\d+)(.*)$/) {
+	$number = $1; # .nnn format
+	$unit = $2;   # may be empty
+    } else {
+	carp "Unable to find number in '$font_size', _fs2pt returning 0";
+	return 0;
+    }
+
+print STDERR "   raw number = '$number', raw unit = '$unit', return ";
+    if ($unit eq '') {
+        # if is already a pure number, just return it
+print STDERR "pure # $number\n";
+	return $number;
+    } elsif ($unit eq 'pt') {
+        # if the unit is 'pt', strip off the unit and return the number
+print STDERR "pt # $number\n";
+        return $number;
+    } elsif ($unit eq '%') {
+        # if the unit is '%', strip off, /100, multiply by current font-size
+print STDERR "% # ".($number/100*$cur_fs)."\n";
+	return $number/100 * $cur_fs;
+   #} elsif ($unit eq    ) {
+        # TBD more units in the future; for now, return an error
+    } else {
+	carp "Unknown unit '$unit' in '$font_size', _fs2pt assumes 'pt'";
+	return $number;
+    }
+
+    return 0; # should not get to here
+} # end of _fs2pt()
+
+# convert a size (length) into points
+# TBD another parm to indicate how to treat 'no unit' case?
+sub _size2pt {
+    my ($length, $font_size) = @_;
+    # length is requested size, possibly with a unit
+    # font_size is current_prop font-size (pts), 
+    #    in case relative to font size (such as %)
+
+print STDERR "------------------ _size2pt('$length', '$font_size')\n";
+    my $number = 0;
+    my $unit = '';
+    # split into number and unit
+    if      ($length =~ m/^(\d+\.?\d*)(.*)$/) {
+	$number = $1; # nnn.nn, nnn., or nnn format
+	$unit = $2;   # may be empty
+    } elsif ($length =~ m/^(\.\d+)(.*)$/) {
+	$number = $1; # .nnn format
+	$unit = $2;   # may be empty
+    } else {
+	carp "Unable to find number in '$length', _size2pt returning 0";
+	return 0;
+    }
+
+print STDERR "   raw number = '$number', raw unit = '$unit', return ";
+    # font_size should be in points (bare number)
+    if ($unit eq '') {
+        # if is already a pure number, just return it
+print STDERR "pure # $number\n";
+	return $number;
+    } elsif ($unit eq 'pt') {
+        # if the unit is 'pt', strip off the unit and return the number
+print STDERR "pt # $number\n";
+        return $number;
+    } elsif ($unit eq '%') {
+        # if the unit is '%', strip off, /100, multiply by current font-size
+print STDERR "% # ".($number/100*$font_size)."\n";
+	return $number/100 * $font_size;
+   #} elsif ($unit eq    ) {
+        # TBD more units in the future; for now, return an error
+    } else {
+	carp "Unknown unit '$unit' in '$length', _size2pt assumes 'pt'";
+	return $number;
+    }
+
+    return 0; # should not get to here
+} # end of _size2pt()
+
+# just something to pause during debugging
+sub  _pause {
+    print STDERR "====> Press Enter key to continue...";
+    my $input = <>;
+    return;
 }
 
 1;

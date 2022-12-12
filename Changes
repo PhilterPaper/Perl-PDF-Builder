@@ -2,7 +2,13 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.025     2022-11-30  UNRELEASED
+3.025     2022-12-11  UNRELEASED
+
+    lib/PDF/Builder/Content/Hyphenate_basic.pm
+     Add ability to split a word on Required Blanks (non-breaking spaces), as 
+      a last-ditch way to do basic hyphenation. Add ability to split a word to
+      fit a given width (regardless of where the split ends up), as an even
+      more last-ditch way.
 
     lib/PDF/Builder.pm
      Per PDF::API2 change, allow 'Times' as an alias for core font 
@@ -51,7 +57,10 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
 
 *   ===== many thanks to MyActiv Ltd for sponsoring this work!
     lib/PDF/Builder/Content/Text.pm, examples/README, examples/examples_output,
-      examples/Column.pl (new), MANIFEST, toos/3_examples.pl
+      examples/Column.pl (new), MANIFEST, tools/3_examples.pl
+     Add column() function to Content::Text, to support markup (none, Markdown,
+      and HTML) in arbitrary columns.
+*   At the moment, this is PRELIMINARY work -- not finished!
 
     lib/PDF/Builder.pm, lib/PDF/Builder/FontManager.pm (new), examples/README,
       examples/examples_output, examples/FontManager.pl (new), MANIFEST,

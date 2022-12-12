@@ -73,6 +73,7 @@ examples/060_transparency
 examples/BarCode.pl
 examples/Boxes.pl
 examples/Bspline.pl
+examples/Column.pl
 examples/Content.pl
 examples/ContentText.pl
 examples/examples.output

@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 use warnings;
 use strict;
+use List::Util 'any';
 
 # a utility to select which optional prerequisites to remove from the
 # "recommends" list in Makefile.PL, META.json, and META.yml before manually
@@ -270,7 +271,7 @@ sub update_META_yml {
 sub member_of {
     my ($member, @list) = @_;
 
-    if ($member ~~ @list) {
+    if (any {$member =~ $_} @list) {
 	return 1;
     } else {
 	return 0;

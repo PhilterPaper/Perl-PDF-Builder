@@ -618,7 +618,7 @@ sub _initialize_core {
 	        'settings' => { 'encode' => $single },
 	        'style' => 'symbol', 'width' => 'proportional',
                 'file' => {'symbol' => 'Symbol'} );
-    $self->add_font('face' => 'Dingbats', 'type' => 'core', 
+    $self->add_font('face' => 'ZapfDingbats', 'type' => 'core', 
 	        'settings' => { 'encode' => $single },
 	        'style' => 'symbol', 'width' => 'proportional',
                 'file' => {'symbol' => 'ZapfDingbats'} );
