@@ -2,7 +2,10 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.025     2022-12-11  UNRELEASED
+3.025     2022-12-12  UNRELEASED
+
+    xt/author-critic.t, xt/author-pod-syntax.t, MANIFEST, tools/2_t-tests.pl
+     Move a couple of specialty t tests from t/ to xt/
 
     lib/PDF/Builder/Content/Hyphenate_basic.pm
      Add ability to split a word on Required Blanks (non-breaking spaces), as 

@@ -1420,9 +1420,6 @@ sub column {
 
     # fallback CSS properties, inserted at array[0]
     my $default_css = _default_css(%opts); # per-tag properties
-#foreach (sort keys %$default_css) {
-#print STDERR "default_css entry $_ -> $default_css->{$_}\n";
-#}
     # dump @mytext list within designated column @outline
     # for now, the outline is a simple rectangle
     my $outline_color = 'none';  # optional outline of the column
@@ -1445,21 +1442,7 @@ sub column {
     # (or already set up, per 'pre' markup)
     # break up text into array of hashes so we have one common input
     my @mytext = _break_text($txt, $markup);
-print STDERR "after _break_text, mytext is\n"; print Dumper(@mytext);
-#_pause();
-    # add on defaults to front of list regardless of markup
-#foreach (@mytext) {
-#print STDERR "after _break_text(), mytext element\n";
-#foreach my $hashkey (sort keys %$_) {
-#print STDERR "$hashkey => '$_->{$hashkey}'\n";
-#}}
-#print STDERR "=============================\n";
-#print STDERR "default_css inserted as [0]:\n";
-#print STDERR Dumper($default_css);
-#print STDERR "===========================\n";
     unshift @mytext, $default_css;
-print STDERR "after default_css added to front, mytext has ".(@mytext)." elements:\n";
-#_pause();
 
     # each element of mytext is an anonymous hash, with members text=>text
     # content, font_size, color, font, variants, etc.
@@ -1479,21 +1462,7 @@ print STDERR "after default_css added to front, mytext has ".(@mytext)." element
     # attribute list. on exit from tag, set attributes to restore settings
     _tag_attributes(@mytext);
 
-#print STDERR "call _output_text() with leading=$leading and font_size=$font_size\n";
     ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $text, $grfx, $para, $font_size, $leading, @mytext);
-print STDERR "----back from _output_text with rc=$rc, start_y=$start_y, unused=".(@$unused)." elements\n";
-#_pause();
-
-#print STDERR "There are ".(scalar @mytext)." elements in mytext\n";
-#for (my $i = 0; $i < scalar(@mytext); $i++) {
-#    print STDERR "element $i: '$mytext[$i]->{'text'}'\n";
-#    my $attr = '   ';
-#    foreach (sort keys %{$mytext[$i]}) {
-#	if ($_ eq 'text') { next; }
-#	$attr .= " $_='$mytext[$i]->{$_}'";
-#    }
-#    if ($attr ne '   ') { print STDERR "$attr\n"; }
-#}
 
     return ($rc, $start_y, $unused);
 } # end of column()
@@ -1526,7 +1495,6 @@ sub _default_css {
 
     my $font_size = 12;
     $font_size = $opts{'font_size'} if defined $opts{'font_size'};
-#print STDERR "font_size = $font_size\n";
     $style{'body'}->{'font-size'} = $font_size."pt";
 
     my $leading = 1.125;
@@ -1536,7 +1504,6 @@ sub _default_css {
     my $para = [ 1, 1*$font_size, 0 ]; 
     # if font_size changes, change indentation
     if (defined $opts{'para'}) {
-#print STDERR "para has value [ @{$opts{'para'}} ]\n";
        #$para->[0]  # flag: 0 = <p> is normal top of paragraph (with indent
        #    and margin), 1 = at top of column, so suppress extra top margin
        #    (and reset once past this first line)
@@ -1545,7 +1512,6 @@ sub _default_css {
     }
     # $para flag determines whether these settings are used or ignored (=1, 
     # we are at the top of a column, ignore text-indent and margin-top)
-print STDERR "&&&&&&&&&& paragraph text-indent=$para->[1] margin-top=$para->[2]\n";
     $style{'p'}->{'text-indent'} = $para->[1];
     $style{'p'}->{'margin-top'} = $para->[2];
 
@@ -1641,9 +1607,6 @@ print STDERR "&&&&&&&&&& paragraph text-indent=$para->[1] margin-top=$para->[2]\
 sub _tag_attributes {
     my (@mytext) = @_;
     
-#foreach (@mytext) {
-#print STDERR "mytext element: $_\n";
-#}
     # start at [2], so defaults and styles skipped
     for (my $el=2; $el < @mytext; $el++) {
 	if ($mytext[$el]->{'text'} eq '') { next; }
@@ -1710,13 +1673,6 @@ sub _output_text {
     my ($start_y, $min_y, $outl, $pdf, $text, $grfx, $para, $font_size, 
 	$leading, @mytext) = @_;
     my @outline = @$outl;
-#print STDERR "_output_text() called with font_size=$font_size and leading=$leading\n";
-
-#for (my $i=0; $i<@mytext; $i++) {
-#print STDERR "mytext[$i]:\n";
-#foreach (sort keys %{$mytext[$i]}) { 
-#print STDERR "  $_->'$mytext[$i]->{$_}' \n";
-#}}
 
     # start_y is the lowest extent of the previous line, or the highest point
     # of the column outline, and is where we start the next one. 
@@ -1759,17 +1715,11 @@ sub _output_text {
     for (my $el = 2; $el < scalar @mytext; $el++) {
 	# discard any empty elements
 	if (!keys %{$mytext[$el]}) { next; }
-print STDERR "at top of mytext loop el=$el, properties stack has ".@properties." elements, text = '$mytext[$el]->{'text'}'\n";
-print STDERR "properties stack:\n".Dumper(@properties) if @properties;
-#print STDERR "mytext array:\n".Dumper(@mytext);
-#print STDERR "current properties hash:\n".Dumper($current_prop);
-print STDERR "mytext has ".(@mytext)." elements, properties stack has ".(@properties)." elements\n";
 	
 	if ($mytext[$el]->{'text'} eq '') {
             # ===================================== tags/end-tags
 	    # should be a tag or end-tag element defined
 	    my $tag = $mytext[$el]->{'tag'};
-#print STDERR "top of mytext loop, tag = '$tag'\n";
 
 	    if (substr($tag, 0, 1) ne '/') {
 	        # take care of 'beginning' tags. dup the top of the properties
@@ -1780,12 +1730,10 @@ print STDERR "mytext has ".(@mytext)." elements, properties stack has ".(@proper
 
 	        # 1. dup the top of the properties stack for a new set of
 	        #   properties to be modified by attributes and CSS
-#print STDERR "dupe properties top. before ".@properties." after ";
                 push @properties, {};
 	        foreach (keys %{$properties[-2]}) {
 	            $properties[-1]->{$_} = $properties[-2]->{$_};
 	        }
-#print STDERR @properties." properties elements\n";
 	        # current_prop is still previous text's properties
 
 	        # 2. update properties top with element [0] (default CSS) 
@@ -1837,8 +1785,6 @@ print STDERR "mytext has ".(@mytext)." elements, properties stack has ".(@proper
 		    # if CSS changed to display=inline for some reason, what to do?
 		    # no y change if at top of column, but still indent
 		    $add_x = $properties[-1]->{'text-indent'}; # indent by para indent amount
-print STDERR "---------------------------------------- para=$para, text-indent=$add_x\n";
-#print STDERR "  para: $para\n";
 		    if ($para) {
 		        # at top of column, so suppress extra space
 		        $add_y = 0; # no extra top margin if at column top
@@ -1851,7 +1797,6 @@ print STDERR "---------------------------------------- para=$para, text-indent=$
 	            if (defined $mytext[$el]->{'cont'} && $mytext[$el]->{'cont'}) {
                         $add_x = $add_y = 0;
                     }
-print STDERR "p tag, para=$para, add_x=$add_x, add_y=$add_y\n";
 	        }
 	       #if ($tag eq 'i') { } 
 	       #if ($tag eq 'em') { }
@@ -1942,7 +1887,6 @@ print STDERR "p tag, para=$para, add_x=$add_x, add_y=$add_y\n";
 	        if ($tag eq 'style') {
 		    # sometimes some stray empty style tags seem to come 
 		    # through...  can be ignored
-#print STDERR "*** Ignoring a stray <style> tag\n";
 	        }
 
 	        if (defined $mytext[$el]->{'empty_element'}) {
@@ -1981,13 +1925,11 @@ print STDERR "p tag, para=$para, add_x=$add_x, add_y=$add_y\n";
 		# element, its start tag, and everything in-between. adjust 
 		# $el and loop again.
 		for (my $first = $el-1; $first>1; $first--) {
-print STDERR "end tag at mytext[$el], look at [$first] for matching $tag\n";
 		    # looking for a tag matching $tag
 		    if ($mytext[$first]->{'text'} eq '' &&
 			$mytext[$first]->{'tag'} eq $tag) {
 			# found it at $first
 			my $len = $el - $first + 1;
-print STDERR "  remove $len elements starting at mytext[$first], el from $el to ".($el-$len+1).", pop properties\n";
 			splice(@mytext, $first, $len);
 			$el -= $len; # end of loop will advance $el
 			pop @properties;
@@ -2015,8 +1957,6 @@ print STDERR "  remove $len elements starting at mytext[$first], el from $el to 
 
 	    # what properties have changed and need PDF calls to update?
 	    $call_get_font = 0;
-#print STDERR "_tag_attributes() prop top font-family = '$properties[-1]->{'font-family'}'\n";
-#print STDERR "  current_prop font-family = '$current_prop->{'font-family'}'\n";
 	    if ($properties[-1]->{'font-family'} ne $current_prop->{'font-family'}) {
 		 $call_get_font = 1;
 		 $current_prop->{'font-family'} = $properties[-1]->{'font-family'};
@@ -2041,7 +1981,6 @@ print STDERR "  remove $len elements starting at mytext[$first], el from $el to 
 		 }
             }
 	    if ($call_get_font) {
-print STDERR "calling get_font with face=>$current_prop->{'font-family'}, italic=>".(($current_prop->{'font-style'} eq 'normal')? 0: 1).", bold=>".(($current_prop->{'font-weight'} eq 'normal')? 0: 1).", and text->font with size=$current_prop->{'font-size'}.\n";
                 $text->font($pdf->get_font(
 		    'face' => $current_prop->{'font-family'}, 
 		    'italic' => ($current_prop->{'font-style'} eq 'normal')? 0: 1, 
@@ -2055,7 +1994,6 @@ print STDERR "calling get_font with face=>$current_prop->{'font-family'}, italic
 		 $current_prop->{'color'} = $properties[-1]->{'color'};
 		 $text->fillcolor($current_prop->{'color'});
 		 $grfx->strokecolor($current_prop->{'color'});
-print STDERR "((((((((((setting color to $current_prop->{'color'}\n";
             }
 
 	    # these properties don't get a PDF::Builder call
@@ -2100,13 +2038,11 @@ print STDERR "((((((((((setting color to $current_prop->{'color'}\n";
 	    # for now, all whitespace convert to single blanks 
 	    # TBD blank preserve for <code> or <pre>
 	    $phrase =~ s/\s+/ /g;
-#print STDERR "top of mytext loop, phrase = '$phrase'\n";
 
 	    # a phrase may have multiple words. see if entire thing fits, and if
 	    # not, start trimming off right end (split into a new element)
     
             while ($phrase ne '') {
-print STDERR "top of phrase loop, phrase = '$phrase' and remainder = '$remainder'. need_line=$need_line\n";
 	        # one of four things to handle:
 	        # 1. entire phrase fits at x -- just write it out
 	        # 2. none of phrase fits at x (all went into remainder) --
@@ -2128,29 +2064,24 @@ print STDERR "top of phrase loop, phrase = '$phrase' and remainder = '$remainder
 	                $text->font($pdf->get_font('face'=>'current'), $font_size);
 		    }
 
-print STDERR "need a new line for '$phrase', with add_x=$add_x, add_y=$add_y, font_size=$font_size\n";
 	            # extents above and below the baseline (so far)?
-#print STDERR "call get_fv_extents with font_size=$font_size and leading=$leading\n";
 	            ($asc, $desc, $desc_leading) = 
 	                _get_fv_extents($pdf, $font_size, $leading);
 	            $next_y = $start_y - $add_y - $asc + $desc_leading;
 	            # did we go too low? will return -1 (start_x) and 
 		    #   remainder of input
 	            # don't include leading when seeing if line dips too low
-#print STDERR "  ran out of column for '$phrase'\n" if ($start_y - $asc + $desc < $min_y);
 	            if ($start_y - $add_y - $asc + $desc < $min_y) { last; }
 	            # start_y and next_y are vertical extent of this line 
 		    #   (so far)
 	            # y is the y value of the baseline (so far)
 	            $y = $start_y - $add_y - $asc;
-#print STDERR "  start_y=$start_y, asc=$asc, desc=$desc, desc_leading=$desc_leading, new y=$y, next_y=$next_y\n";
 
 	            # how tall is the line? need to set baseline. add_y is
 		    #   any paragraph top margin to drop further. note that this
 		    #   is just the starting point -- the line could get taller
                     ($x,$y, $width) = _get_baseline($y, @outline);
                     $endx = $x + $width;
-#print STDERR "  resulting baseline at x=$x, y=$y, of width $width\n";
 	            # at this point, we have established the next baseline 
 		    #   (x,y start and width/end x). fill this line.
 		    $x += $add_x; $add_x = 0; # indent
@@ -2164,10 +2095,8 @@ print STDERR "need a new line for '$phrase', with add_x=$add_x, add_y=$add_y, fo
 	        my $w = $text->advancewidth($phrase);
 
 	        if ($x + $w <= $endx) {
-print STDERR "  entire phrase '$phrase' of width=$w DOES fit at x=$x\n";
 	            # no worry, the entire phrase fits (case 1.)
 		    # TBD: only dummy at this point, as extents might increase, dropping baseline and perhaps changing linewidth
-print STDERR ">>>>>>>>>>    write $w wide '$phrase' at x=$x, y=$y\n";
 	            $text->translate($x,$y);
 	            $text->text($phrase); # only build up dry run list
 		                          # TBD with options (e.g., decorations)
@@ -2178,13 +2107,11 @@ print STDERR ">>>>>>>>>>    write $w wide '$phrase' at x=$x, y=$y\n";
 
 	            # next element in mytext (try to fit on same line)
 		    $phrase = $remainder; # may be empty
-#print STDERR " after writing phrase, it is now '$phrase'\n";
 		    $remainder = '';
 		    # since will start a new line, trim leading w/s
 		    $phrase =~ s/^\s+//;  # might now be empty
 		    if ($phrase ne '') {
 			# phrase used up, but remainder for next line
-#print STDERR " will need another line to fit this '$phrase'\n";
 			$need_line = 1;
 			$start_y = $next_y;
 		    }
@@ -2192,7 +2119,6 @@ print STDERR ">>>>>>>>>>    write $w wide '$phrase' at x=$x, y=$y\n";
 
 	        } else {
 		    # existing line plus phrase is too long
-#print STDERR "  entire phrase '$phrase' does NOT fit\n";
 	            # entire phrase does NOT fit (case 2 or 3). start splitting 
 		    # up phrase, beginning with stripping space(s) off end
 
@@ -2200,9 +2126,7 @@ print STDERR ">>>>>>>>>>    write $w wide '$phrase' at x=$x, y=$y\n";
 		        # remove whitespace at end (line will end somewhere
 		        # within phrase, anyway)
 		        $remainder = $1.$remainder;
-#print STDERR "    I. phrase now '$phrase', remainder now '$remainder'\n";
 		    } else {
-#print STDERR "space on line too short (".($endx-$x).") to fit '$phrase' ($w), full_line=$full_line\n";
 	                # Is line too short to fit even the first word at the
 		        # beginning of the line? force split in word somewhere 
 			# so that it fits.
@@ -2211,30 +2135,23 @@ print STDERR ">>>>>>>>>>    write $w wide '$phrase' at x=$x, y=$y\n";
 	                $word =~ s/\s+$//;
 	                if ($full_line && index($word, ' ') == -1) {
 	                    my ($wordLeft, $wordRight);
-print STDERR "attempt to deal with single word at beginning of line, doesn't fit\n";
                             # is a single word at the beginning of the line, 
 			    # and didn't fit
                             require PDF::Builder::Content::Hyphenate_basic;
                             ($wordLeft,$wordRight) = PDF::Builder::Content::Hyphenate_basic::splitWord($text, $word, $w);
-print STDERR "first attempt to split '$phrase' yields '$wordLeft' and '$wordRight'\n";
 			    if ($wordLeft eq '') {
 				# failed to split. try desperation move of
 				# splitting at Non Splitting SPace!
                                 ($wordLeft,$wordRight) = PDF::Builder::Content::Hyphenate_basic::splitWord($text, $word, $w, 'spRB'=>1);
-print STDERR "second attempt to split '$phrase' yields '$wordLeft' and '$wordRight'\n";
 				if ($wordLeft eq '') {
 	                            # super-desperation move... split to fit 
 				    # space! eventually with proper hyphenation
 				    # this probably will never be needed.
                                     ($wordLeft,$wordRight) = PDF::Builder::Content::Hyphenate_basic::splitWord($text, $word, $endx-$x, 'spFS'=>1);
-#print STDERR "third attempt to split '$phrase' for width $w yields '$wordLeft' and '$wordRight'\n";
 				}
 			    }
-#print STDERR "++++----++++ original phrase '$phrase' and remainder '$remainder'"; 
 			    $phrase = $wordLeft; 
 			    $remainder = "$wordRight $remainder";
-#print STDERR " split into '$wordLeft' (length ";
-#print STDERR $text->advancewidth($phrase).") and '$wordRight', with remainder now '$remainder'\n";
                             next; # re-try shortened phrase
 	                }
     
@@ -2243,7 +2160,6 @@ print STDERR "second attempt to split '$phrase' yields '$wordLeft' and '$wordRig
                         if ($phrase =~ s/(\S+)$//) {
 		            # remove word at end
 		            $remainder = $1.$remainder;
-#print STDERR "    II. phrase now '$phrase', remainder now '$remainder'\n";
 		        }
 		    }
 		    # at least part of text will end up on another line.
@@ -2258,7 +2174,6 @@ print STDERR "second attempt to split '$phrase' yields '$wordLeft' and '$wordRig
     
 		    if ($phrase eq '' && $remainder ne '') {
 			# entire phrase goes to next line
-#print STDERR " entire phrase needs to go to next line\n";
 			$need_line = 1;
 			$start_y = $next_y;
 			$add_x = $add_y = 0;
@@ -2277,7 +2192,6 @@ print STDERR "second attempt to split '$phrase' yields '$wordLeft' and '$wordRig
 	    # either ran out of phrase, or ran out of column
 
 	    if ($phrase eq '') {
-#print STDERR "end of phrase loop, phrase is empty, so go to next element\n";
 		# ran out of input text phrase, so process more elements
 		# but first, remove this text from mytext array so won't be
 		#   accidentally repeated
@@ -2287,7 +2201,6 @@ print STDERR "second attempt to split '$phrase' yields '$wordLeft' and '$wordRig
 	    }
 	    # could get here if exited loop due to running out of column,
 	    # in which case, phrase has to be stuffed back into mytext
-#print STDERR "end of phrase loop, ran out of column with '$phrase' still left\n";
 	    $mytext[$el]->{'text'} = $phrase;
             last;
 	    
@@ -2299,11 +2212,9 @@ print STDERR "second attempt to split '$phrase' yields '$wordLeft' and '$wordRig
 	    # we left early, with incomplete text, because we ran out of
 	    # column space. can't process any more elements -- done with column.
 	    # mytext[el] already updated with remaining text
-#print STDERR "phrase still has '$phrase', finished = $finished. exit mytext loop\n";
 	    last; # exit mytext loop
 	} else {
 	    # more elements to go
-#print STDERR "finished phrase, go to next element\n";
 	    next;
 	}
 
@@ -2317,7 +2228,6 @@ print STDERR "second attempt to split '$phrase' yields '$wordLeft' and '$wordRig
     # CSS entries). it is always re-created on entry to column(). leave next 
     # element (consolidated <style> tags, if any).
     shift @mytext;
-print STDERR "!!! exiting _output_text(), mytext after default css strip:\n"; print STDERR Dumper(@mytext);
 
     # for some reason we get mytext with nothing but 2 elements: p /p
     # where is style? 
@@ -2328,7 +2238,6 @@ print STDERR "!!! exiting _output_text(), mytext after default css strip:\n"; pr
     } else {
 	# we ran out of vertical space in the column. return -1 and 
 	# remainder of mytext list (next_y would be inapplicable)
-#print STDERR "ran out of column, trim off first $finished elements of mytext\n";
 	return (1, -1, \@mytext);
     }
 
@@ -2382,16 +2291,13 @@ sub _update_properties {
 	    if ($selector eq 'cont') { next; } # paragraph continuation flag
 	    if ($selector eq 'body') { next; } # do body selector last
 	    if (ref($source->{$selector}) ne 'HASH') { next; } # href, etc.
-print STDERR "_update_properties w/o tag (all): selector $selector\n";
 	    foreach (keys %{$source->{$selector}}) {
-print STDERR "  target->$_ = $source->{$selector}->{$_}\n";
                 $target->{$_} = $source->{$selector}->{$_};
             }
 	}
 	# do body selector last, after others
 	if (defined $source->{'body'}) {
 	    foreach (keys %{$source->{'body'}}) {
-print STDERR "  target->$_ = $source->{'body'}->{$_}\n";
                 $target->{$_} = $source->{'body'}->{$_};
             }
         }
@@ -2465,10 +2371,8 @@ sub _get_column_outline {
 
     # treat coordinates as absolute or relative
     for (my $i = 0; $i < scalar @outline; $i++) {
-#print STDERR "raw outline[$i] = $outline[$i][0],$outline[$i][1]";
 	$outline[$i][0] = $outline[$i][0]*$scale_x + $off_x;
 	$outline[$i][1] = $outline[$i][1]*$scale_y + $off_y;
-#print STDERR ". scaled = $outline[$i][0],$outline[$i][1]\n";
     }
 
     # requested to draw outline (color other than 'none')?
@@ -2550,19 +2454,16 @@ sub _break_text {
 
     if      ($markup eq 'pre') {
 	# should already be in final format (such as continuing a column)
-#print STDERR "=== array of hashes\n";
 	return @$text;
 
     } elsif ($markup eq 'none') {
 	# split up on blank lines into paragraphs and wrap with p and /p tags
         if       (ref($text) eq '') {
 	    # is a single string (scalar)
-#print STDERR "=== single string text '$text' (none)\n";
             @array = _none_hash($text);
 
         } elsif (ref($text) eq 'ARRAY') {
 	    # array ref, elements should be text
-#print STDERR "=== array of text strings\n";
             for (my $i = 0; $i < scalar(@$text); $i++) {
                 @array = (@array, _none_hash($text->[$i]));
 	    }
@@ -2579,30 +2480,25 @@ sub _break_text {
 	# note that blank-separated lines already turned into paragraphs
         if       (ref($text) eq '') {
 	    # is a single string (scalar)
-#print STDERR "=== single Markdown text '$text'\n";
             @array = _md1_hash($text);
 
         } elsif (ref($text) eq 'ARRAY') {
 	    # array ref, elements should be text
-#print STDERR "=== array of MD strings\n";
             @array = _md1_hash(join("\n", @$text));
 	}
 
     } else { # should be 'html'
         if       (ref($text) eq '') {
 	    # is a single string (scalar)
-#print STDERR "=== single HTML string '$text'\n";
             @array = _html_hash($text);
 	    
         } elsif (ref($text) eq 'ARRAY') {
 	    # array ref, elements should be text
 	    # consolidate into one string. 
-#print STDERR "=== array of HTML strings\n";
             @array = _html_hash(join("\n", @$text));
 	}
     }
 
-print STDERR "\n\n_break_text() returns ".@array." element array\n";
     return @array;
 } # end of _break_text()
 
@@ -2611,7 +2507,6 @@ print STDERR "\n\n_break_text() returns ".@array." element array\n";
 # note that you can NOT span a paragraph across array elements
 sub _none_hash {
     my ($text) = @_;
-print STDERR "~~~~~~~~~> none raw text is '$text'\n";
 
     my @array = ();
     my $in_para = 0;
@@ -2621,11 +2516,8 @@ print STDERR "~~~~~~~~~> none raw text is '$text'\n";
 	# should be no \n's, but adjacent non-empty lines need to be joined
 	if ($_ =~ /^\s*$/) {
 	    # empty/blank line. end paragraph if one in progress
-#print STDERR "_none_hash() finds empty line to end para with text='$line'\n";
 	    if ($in_para) {
-#print STDERR "  push text=>'$line' element\n";
 	        push @array, {'tag' => '', 'text' => $line};
-#print STDERR "  push /p end para tag\n";
 		push @array, {'text' => "", 'tag' => '/p'};
 		$in_para = 0;
 		$line = '';
@@ -2634,14 +2526,11 @@ print STDERR "~~~~~~~~~> none raw text is '$text'\n";
 
 	} else {
 	    # content in this line. start paragraph if necessary
-#print STDERR "_none_hash() finds content line '$_'\n";
 	    if ($in_para) {
 		# accumulate content into line
 		$line .= " $_";
-#print STDERR "  already in para, so tack on to line, now '$line'\n";
 	    } else {
 		# start paragraph, content starts with this text
-#print STDERR "  NOT already in para, start one with p tag\n";
 	        push @array, {'text' => "", 'tag' => 'p'};
 		$in_para = 1;
 		$line = $_;
@@ -2653,7 +2542,6 @@ print STDERR "~~~~~~~~~> none raw text is '$text'\n";
     # out of input.
     # if still within a paragraph, need to properly close it
     if ($in_para) {
-#print STDERR "  need to close para by pushing text element, then /p element\n";
 	push @array, {'tag' => '', 'text' => $line};
 	push @array, {'text' => "", 'tag' => '/p'};
 	$in_para = 0;
@@ -2666,7 +2554,6 @@ print STDERR "~~~~~~~~~> none raw text is '$text'\n";
 # convert md1 string to html, returning array of hashes
 sub _md1_hash {
     my ($text) = @_;
-print STDERR "~~~~~~~~~> md1 raw text is '$text'\n";
 
     my @array;
     my ($html, $rc);
@@ -2684,12 +2571,10 @@ print STDERR "~~~~~~~~~> md1 raw text is '$text'\n";
 	warn "Text::Markdown not installed, can't process Markdown";
 	$html = $text;
     }
-#print STDERR "HTML: $html\n";
 
     # dummy (or real) style element will be inserted at array element [0]
     #   by _html_hash()
 
-print STDERR "~~~~~~~~~> md1 HTML hash is '$html'\n";
     # blank-line separated paragraphs already wrapped in <p> </p>
     @array = _html_hash($html);
 
@@ -2743,9 +2628,7 @@ sub _html_hash {
 	# there should always be a body of some sort
 	my $body = $tree->{'_body'}; # a hash
 	my @bodyList = @{ $body->{'_content'} }; # array of strings and tags
-#print STDERR Dumper(@bodyList);
 	@array = _walkTree(0, @bodyList);
-#print STDERR "There are ".(@array)." elements returned from parsing HTML\n";
 	# pull out one or more style tags and add to $styles hash
         for (my $el = 0; $el < @array; $el++) {
 	    my $style_text = $array[$el]->{'text'};
@@ -2858,7 +2741,6 @@ sub _walkTree {
             # $element should be anonymous hash
             $tag = $element->{'_tag'};
             push @array, {'tag' => $element->{'_tag'}, 'text' => ''};
-#print STDERR "${depth}-tag: $tag pushed as element $#array\n";
 
 	    # look for attributes for tag
 	    $no_content = 0;  # has content (children) until proven otherwise
@@ -2884,7 +2766,6 @@ sub _walkTree {
 		    $no_content = 1; 
 	        } else {
 		    # this tag has one or more attributes to add to it
-#print STDERR "${depth}-  attribute: $key --> '$element->{$key}' added to hash of element $#array\n";
                     # add tag attribute (e.g., src= for <img>) to hash
 		    $array[-1]->{$key} = $element->{$key};
 	        }
@@ -2899,30 +2780,24 @@ if ($no_content) { print STDERR "${depth}-  self-closing or VOID tag."; }
 	            if ($_ =~ m/^HTML::Element=HASH/) {
 		        # HASH child of this _content
 		        # recursively handle a tag within _content
-#print STDERR "=== before _walkTree recursively called, array last el is $#array\n";
 		        @array = (@array, _walkTree($depth+1, $_));
-#print STDERR "=== after _walkTree recursively called, array last el is $#array\n";
 		    } else {
                         # _content text, shouldn't be any attributes
 		        push @array, {'tag' => '', 'text' => $_};
-#print STDERR "${depth}-  _content: '$_' pushed as element $#array\n";
 		    }
 	        }
 	    } else {
 		# no content for this tag
-#print STDERR "${depth}-  No _content for this tag\n";
 	    }
 	    # at end of a tag ... if has content, output end tag
 	    if (!$no_content) {
 		push @array, {'tag' => "/$tag", 'text' => ''};
-#print STDERR "${depth}-  closing tag pushed as element $#array\n";
 	    }
 
 	    $no_content = 0;
 
        } else {
             # SCALAR (string) element
-#print STDERR "${depth}-text: '$element'\n";
             push @array, {'tag' => '', 'text' => $element};
        }
    } # loop through _content at this level
@@ -2937,7 +2812,6 @@ sub _fs2pt {
     # requested font size (may be % relative to current font size)
     # current font size (pts)
 
-print STDERR "------------------ _fs2pt('$font_size', '$cur_fs')\n";
     my $number = 0;
     my $unit = '';
     # split into number and unit
@@ -2952,18 +2826,14 @@ print STDERR "------------------ _fs2pt('$font_size', '$cur_fs')\n";
 	return 0;
     }
 
-print STDERR "   raw number = '$number', raw unit = '$unit', return ";
     if ($unit eq '') {
         # if is already a pure number, just return it
-print STDERR "pure # $number\n";
 	return $number;
     } elsif ($unit eq 'pt') {
         # if the unit is 'pt', strip off the unit and return the number
-print STDERR "pt # $number\n";
         return $number;
     } elsif ($unit eq '%') {
         # if the unit is '%', strip off, /100, multiply by current font-size
-print STDERR "% # ".($number/100*$cur_fs)."\n";
 	return $number/100 * $cur_fs;
    #} elsif ($unit eq    ) {
         # TBD more units in the future; for now, return an error
@@ -2983,7 +2853,6 @@ sub _size2pt {
     # font_size is current_prop font-size (pts), 
     #    in case relative to font size (such as %)
 
-print STDERR "------------------ _size2pt('$length', '$font_size')\n";
     my $number = 0;
     my $unit = '';
     # split into number and unit
@@ -2998,19 +2867,15 @@ print STDERR "------------------ _size2pt('$length', '$font_size')\n";
 	return 0;
     }
 
-print STDERR "   raw number = '$number', raw unit = '$unit', return ";
     # font_size should be in points (bare number)
     if ($unit eq '') {
         # if is already a pure number, just return it
-print STDERR "pure # $number\n";
 	return $number;
     } elsif ($unit eq 'pt') {
         # if the unit is 'pt', strip off the unit and return the number
-print STDERR "pt # $number\n";
         return $number;
     } elsif ($unit eq '%') {
         # if the unit is '%', strip off, /100, multiply by current font-size
-print STDERR "% # ".($number/100*$font_size)."\n";
 	return $number/100 * $font_size;
    #} elsif ($unit eq    ) {
         # TBD more units in the future; for now, return an error
