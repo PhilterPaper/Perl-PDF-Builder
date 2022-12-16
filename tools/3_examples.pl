@@ -139,7 +139,7 @@ my %args;
 #
 # 021_psfonts needs T1 glyph and metrics files (not included)
 # assuming metrics file (.afm or .pfm) is in same directory
-  $args{'021_psfonts'} = "/Users/Phil/T1fonts/URWPalladioL-Roma.pfb";
+  $args{'021_psfonts'} = "/Users/Phil/fonts/T1fonts/URWPalladioL-Roma.pfb";
 # 022_truefonts needs a TTF or OTF font to do its thing
   $args{'022_truefonts'} = "/WINDOWS/fonts/times.ttf";
 # 022_truefonts_diacrits_utf8 needs a TTF or OTF font that includes a
@@ -147,7 +147,7 @@ my %args;
   $args{'022_truefonts_diacrits_utf8'} = "/WINDOWS/fonts/tahoma.ttf";
 # 024_bdffonts needs a sample BDF (bitmapped font), which is not
 # included with the distribution
-  $args{'024_bdffonts'} = "/Users/Phil/BDFfonts/codec/codec.bdf";
+  $args{'024_bdffonts'} = "/Users/Phil/fonts/BDFfonts/codec/codec.bdf";
 # ShowFont.pl needs a corefont (by default) font name
   $args{'ShowFont.pl'} = "Helvetica";
 

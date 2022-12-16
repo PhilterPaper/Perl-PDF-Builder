@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.025'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.024_002'; # manually update whenever code is changed
 
 use PDF::Builder;
 use utf8;
@@ -16,6 +16,9 @@ use Carp;
 
 my $do_noncore = 1; # TTF, etc., will require manual update before running!
 my $dump = 1; # debug dump of font data
+
+my $name = $0;
+$name =~ s/\.pl$/.pdf/; # write into examples directory
 
 my ($page, $text, $grfx);
 my $pdf = PDF::Builder->new('compress' => 'none');
@@ -210,13 +213,13 @@ if ($do_noncore) {
     my @fontpaths;
 
     # ==== type1 (PS)
-    push @fontpaths, "C:/Users/Phil/T1fonts";  # Windows absolute path with drive letter
+    push @fontpaths, "C:/Users/Phil/fonts/T1fonts";  # Windows absolute path with drive letter
     # URW Bookman for MikTex (Windows)
     push @fontpaths, "/Program Files/MikTex 2.9/fonts/type1/urw/bookman";
     # URW Bookman for older versions of MikTex (Windows)
     push @fontpaths, "/Program Files (x86)/MikTex 2.9/fonts/type1/urw/bookman";
     # ==== BDF (bitmapped)
-    push @fontpaths, "/Users/Phil/BDFfonts";
+    push @fontpaths, "/Users/Phil/fonts/BDFfonts";
     # ==== CJK (Chinese)
     push @fontpaths, "/Program Files/Adobe/Acrobat DC/Resource/CIDFont";
 
@@ -325,7 +328,7 @@ if ($do_noncore) {
     }
 } # non-core samples, likely requiring manual updates
 
-$pdf->saveas("FontManager.pdf");
+$pdf->saveas($name);
 
 # output a stream of words on THIS line, returning unused portion.
 # for now, not worrying about running off bottom of page!
