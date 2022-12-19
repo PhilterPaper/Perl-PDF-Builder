@@ -3,8 +3,8 @@ package PDF::Builder::FontManager;
 use strict;
 use warnings;
 
-our $VERSION = '3.024'; # VERSION
-our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
+# VERSION
+our $LAST_UPDATE = '3.024_001'; # manually update whenever code is changed
 
 use Carp;
 use Scalar::Util qw(weaken);
@@ -717,9 +717,9 @@ sub _initialize_core {
 If no parameters are given (C<@current = $pdf-E<gt>get_font()>), a list
 (array) is returned giving the I<current> font setting: I<face> name, I<italic> 
 flag 0/1, I<bold> flag 0/1, I<type> ('core', 'ttf', etc.), I<encoding> ('utf8' 
-etc.), I<style> value, I<width> value, and a list of variants (roman, bold, 
-etc.). If no font has yet been explicitly set, the current font will be the 
-default font.
+etc.), I<style> value, I<width> value, and an array reference (list) of 
+variants (roman, bold, etc.). If no font has yet been explicitly set, the 
+current font will be the default font.
 
 If at least one parameter is given (C<%info> hash), the font manager will
 attempt to discover the appropriate font (from within the font list), load it
@@ -767,20 +767,20 @@ sub get_font {
 
     if (!keys %info) {
 	# Get request for whatever the "current" (last selected) entry is
-	push @list, $self->{' current-font'}->{'face'};
-	push @list, $self->{' current-font'}->{'italic'};
-	push @list, $self->{' current-font'}->{'bold'};
+	push @list, $self->{' current-font'}->{'face'};                # [0] s
+	push @list, $self->{' current-font'}->{'italic'};              # [1] b
+	push @list, $self->{' current-font'}->{'bold'};                # [2] b
 	$index = $self->{' current-font'}->{'index'};
 
-	push @list, $self->{' font-list'}->[$index]->{'type'};
+	push @list, $self->{' font-list'}->[$index]->{'type'};         # [3] s
 	# note that settings will be a hashref, not a string
-	push @list, $self->{' font-list'}->[$index]->{'settings'};
-	push @list, $self->{' font-list'}->[$index]->{'style'};
-	push @list, $self->{' font-list'}->[$index]->{'width'};
+	push @list, $self->{' font-list'}->[$index]->{'settings'};     # [4] hr
+	push @list, $self->{' font-list'}->[$index]->{'style'};        # [5] s
+	push @list, $self->{' font-list'}->[$index]->{'width'};        # [6] s
 
 	# what variants are defined? just the key names
 	my @variants = keys %{ $self->{' font-list'}->[$index]->{'entry'} };
-	push @list, \@variants;
+	push @list, \@variants;                                        # [7] ar
 
 	return @list;
     }

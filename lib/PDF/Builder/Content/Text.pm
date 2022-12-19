@@ -6,10 +6,11 @@ use strict;
 use warnings;
 use Carp;
 use List::Util qw(min max);
- use Data::Dumper;
+#use Data::Dumper;  # for debugging
+#  $Data::Dumper::Sortkeys = 1;  # hash keys in sorted order
 
-our $VERSION = '3.024'; # VERSION
-our $LAST_UPDATE = '3.024_001'; # manually update whenever code is changed
+# VERSION
+our $LAST_UPDATE = '3.024_002'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -1098,7 +1099,7 @@ sub textlabel {
 
 =over
 
-=item ($rc, $next_y, $unused) = $text->column($text, $grfx, $markup, $txt, %opts)
+=item ($rc, $next_y, $unused) = $text->column($page, $text, $grfx, $markup, $txt, %opts)
 
 This method fills out a column of text on a page, returning any unused portion
 that could not be fit, and where it left off on the page.
@@ -1107,13 +1108,19 @@ Tag names, CSS entries, markup type, etc. are case-sensitive (usually
 lower-case letters only). For example, you cannot give a <P> paragraph in
 HTML or a B<P> selector in CSS styling.
 
+B<$page> is the page context. Currently, its only use is for page annotations
+for links ('md1' []() and 'html' E<lt>aE<gt>), so if you're not using those, 
+you may pass anything such as C<undef> for C<$page> if you wish.
+
 B<$text> is the text context, so that various font and text-output operations
-may be performed.
+may be performed. It is often, but not necessarily always, the same as the
+object containing the "column" method.
 
 B<$grfx> is the graphics (gfx) context. It may be a dummy (e.g., undef) if
 I<no> graphics are to be drawn, but graphical items such as the column outline 
-('outline' option) or a horizontal rule (<hr> in HTML markup) require a valid
-graphics context.
+('outline' option), horizontal rule (<hr> in HTML markup), or I<text-decoration>
+underline (default for links, 'md1' []() and 'html' E<lt>aE<gt>) or line-through
+or overline require a valid graphics context.
 
 B<$markup> is information on what sort of I<markup> is being used to format
 and lay out the column's text:
@@ -1150,8 +1157,9 @@ This specifies a certain flavor of Markdown:
     [label](URL) external links 
     ` (backticks) enclose a "code" section
 
-HTML may be mixed in as desired 
-(although not within "code" blocks marked by backticks). 
+HTML may be mixed in as desired (although not within "code" blocks marked by 
+backticks, where <, >, and & get turned into HTML entities, disabling the
+intended tags). 
 Markdown will be converted into HTML, which will then be interpreted into PDF.
 
 The input B<txt> is a list (anonymous array reference) of strings, each 
@@ -1161,7 +1169,7 @@ separate the paragraphs. Separate array elements will first be glued together
 into a single string before processing, permitting paragraphs to span array 
 elements if desired.  
 
-There are other flavors of Markdown, so other mdI<n> flavors may be defined 
+There are other flavors of Markdown, so other mdI<n> flavors I<may> be defined 
 in the future.
 
 =item  'html'
@@ -1170,20 +1178,23 @@ This specifies that a subset of HTML markup is used, along with some attributes
 and CSS. Currently, HTML tags 
 
     'i'/'em' (italic), 'b'/'strong' (bold), 
-    'p' (paragraph, align. cont=>1 to suppress indent, margin-top),
+    'p' (paragraph),
     'font' (font face->font-family, color, size->font-size), 
-    'span' (needs style attribute with CSS to do anything useful), 
+    'span' (needs style= attribute with CSS to do anything useful), 
     'ul', 'ol', 'li' (bulleted, numbered lists, currently NO NESTING)), 
     'img' (TBD, image, empty. hspace->margin-left/right, 
            vspace->margin-top/bottom, width, height), 
-    'a' (anchor/link, href), 
+    'a' (anchor/link), 
     'pre', 'code' (TBD, preformatted and code blocks),
-    'h1' through 'h6' (headings, align)
+    'h1' through 'h6' (headings)
     'hr' (TBD, horizontal rule, empty. align, size->linewidth, width)
     'br' (TBD, line break, empty)
     'sup', 'sub' (TBD superscript and subscript)
+    's', 'strike', 'del' (line-through)
+    'u', 'ins' (underline)
 
-are supported, along with limited CSS for color, font-size, font-family, etc. 
+are supported (fully or in part), along with limited CSS for color, font-size, 
+font-family, etc. 
 E<lt>styleE<gt> tags may be placed in an optional E<lt>headE<gt> section, or
 within the E<lt>bodyE<gt>. In the latter case, style tags will be pulled out
 of the body and added (in order) on to the end of any style tag(s) defined in 
@@ -1193,13 +1204,14 @@ have global effect, as though they were defined in the head. As with normal CSS,
 the hierarchy of a given property (in decreasing precedence) is
 
     appearance in a style= tag attribute
-    appearance in a tag attribute
+    appearance in a tag attribute (possibly a different name than the property)
     appearance in a #IDname selector in a <style>
     appearance in a .classname selector in a <style>
     appearance in a tag name selector in a <style>
 
 Selectors are quite simple: a single tag name (e.g., B<body>),
-a single class, or a single ID. There are I<no> combinations (e.g., 
+a single class (.cname), or a single ID (#iname). 
+There are I<no> combinations (e.g., 
 C<p.abstract> or C<ol, ul>), hierarchies (e.g., C<ol E<gt> li>), specified 
 number of appearance, or other such complications as found in a browser's CSS. 
 Sorry!
@@ -1208,7 +1220,7 @@ Supported CSS properties: font-family, font-size, font-style (normal/italic),
 font-weight (normal/bold), margin-top/right/bottom/left, color (foreground
 color), line-height (as ratio of baseline-spacing to font-size), 
 display (inline/block),
-text-decoration (none, underline, TBD line-through, overline), text-indent.
+text-decoration (none, underline, line-through, TBD overline), text-indent.
 Sizes may be '%' (of font-size), or 'pt' (the default). TBD A margin-left or 
 -right may be 'auto' for centering purposes. More support is expected to be
 added over time.
@@ -1225,9 +1237,9 @@ elements if desired.
 
 =back
 
-I<There are other markup languages out there, such as Pango, that might be
-supported in the future. It is very unlikely that TeX or LaTeX will be 
-supported, as they both already have excellent PDF output.>
+I<There are other markup languages out there, such as HTML-like Pango, that 
+might be supported in the future. It is very unlikely that TeX or LaTeX will 
+ever be supported, as they both already have excellent PDF output.>
 
 B<$txt> is the input text: a string, an array reference to multiple strings,
 or an array reference to hashes. See C<$markup> for details.
@@ -1250,7 +1262,7 @@ clips that baseline, as it does additional baselines down the page (interline
 spacing is C<leading> multiplied by the largest C<font_size> or image height
 needed on that line).
 
-_Currently, 'rect' is required, as it is the only column shape supported._
+I<Currently, 'rect' is required, as it is the only column shape supported.>
 
 =item 'relative' => [ x, y, scale(s) ]
 
@@ -1326,29 +1338,35 @@ black (#000000).
 
 =item 'substitute' => [ [ 'char or string', 'before', 'replace', 'after'],... ]
 
-TBD, not implemented yet.
-
 When a certain Unicode code point (character) or string is found, insert 
 I<before> text before the character, replace the character or string with
 I<replace> text, and insert I<after> text after the character. This may make
 it easier to insert HTML code (font, color, etc.) into Markdown text, if the
 desired settings and character can not be produced by your Markdown editor.
-This applies only to 'md1' markup. Multiple substitutions may be defined.
+This applies both to 'md1' and 'html' markup. Multiple substitutions may be 
+defined via multiple array elements.
 If you want to leave the original character or string I<itself> unchanged, you
-should define the I<replace> text to be the same as C<'char or string'>.
+should define the I<replace> text to be the same as C<'char or string'>. 
+'before' and/or 'after' text may be empty strings if you don't want to insert
+some sort of markup there.
 
 Example: to insert a red cross (X-out) and green tick (check) mark
 
     'substitute' => [
-      [ '|cross|', '<font face="ZapfDingbats" color="red">', '8', '</font>' ],
-      [ '|tick|', '<font face="ZapfDingbats" color="green">', '4', '</font>' ],
+      [ '%cross%', '<font face="ZapfDingbats" color="red">', '8', '</font>' ],
+      [ '%tick%', '<font face="ZapfDingbats" color="green">', '4', '</font>' ],
     ]
 
-should change C<|cross|> in Markdown text ('md1') to C<E<lt>font 
-face="ZapfDingbats" color="green"E<gt>8E<lt>/fontE<gt>> and similar for 
-C<|tick|>. This is done I<after> the Markdown is converted to HTML, so make 
-sure that your text (e.g., C<|tick|>) isn't something that Markdown will try to 
-interpret by itself!
+should change C<%cross%> in Markdown text ('md1') or HTML text ('html')
+to C<E<lt>font face="ZapfDingbats" color="green"E<gt>8E<lt>/fontE<gt>> 
+and similarly for C<%tick%>. This is done I<after> the Markdown is converted 
+to HTML (but before HTML is parsed), so make sure that your macro text (e.g., 
+C<%tick%>) isn't something that Markdown will try to interpret by itself! Also, 
+Perl's regular expression parser seems to get upset with some characters, such 
+as C<|>, so don't use them as delimiters (e.g., C<|cross|>). You don't I<have> 
+to wrap your macro name in delimiters, but it can make the text structure
+clearer, and may be necessary in order not to do substitutions in the wrong 
+place.
 
 =back
 
@@ -1361,24 +1379,11 @@ the specified font encoding.
 Absent any markup changing the font face or styling, whatever is defined by
 Font Manager as the I<current> (default) font will be what is used.
 
-If there is more text than can be accommodated by the column size, the unused
-portion is returned, with a return code of 1. It is an empty list if all the 
-text could be formatted, and the return code is 0.
-C<next_y> is the y coordinate where any additional text (C<column()> call) 
-could be added to a column (as C<start_y>) that wasn't completely filled.
-This would be at the starting point of a new column (i.e., the
-last paragraph is ended). Note that the application code should check if this
-position is too far down the page (in the bottom margin) and not blindly use
-it! Also, as 'md1' is first converted to HTML, any unused portion will be 
-returned as 'pre' markup, rather than Markdown or HTML. Be sure to specify 
-'pre' for any continuation of the column (with one or more additional 
-C<column()> calls), rather than 'none', 'md1', or 'html'.
-
 Line fitting (paragraph shaping) is currently quite primitive. Most words will
 not be split (hyphenated) except for a few language-independent cases 
-(camelCase, mixed alphanumeric, etc.). _It is planned to eventually add 
+(camelCase, mixed alphanumeric, etc.). I<It is planned to eventually add 
 Knuth-Plass paragraph shaping, along with proper language-dependent 
-hyphenation._
+hyphenation.>
 
 Each change of font automatically supplies its maximum ascender and minimum
 descender, the B<extents> above and below the text line's baseline. Each block
@@ -1396,6 +1401,81 @@ whether descenders or ascenders will fall outside the defined column (i.e.,
 project into the inset). We suggest that you try to keep font sizes fairly
 consistent, to keep reasonably consistent text vertical extents.
 
+B<Data returned by this call>
+
+If there is more text than can be accommodated by the column size, the unused
+portion is returned, with a return code of 1. It is an empty list if all the 
+text could be formatted, and the return code is 0.
+C<next_y> is the y coordinate where any additional text (C<column()> call) 
+could be added to a column (as C<start_y>) that wasn't completely filled.
+This would be at the starting point of a new column (i.e., the
+last paragraph is ended). Note that the application code should check if this
+position is too far down the page (in the bottom margin) and not blindly use
+it! Also, as 'md1' is first converted to HTML, any unused portion will be 
+returned as 'pre' markup, rather than Markdown or HTML. Be sure to specify 
+'pre' for any continuation of the column (with one or more additional 
+C<column()> calls), rather than 'none', 'md1', or 'html'.
+
+=over
+
+=item $rc
+
+The return code.
+
+=over
+
+=item '0'
+
+A return code of 0 indicates that the call completed, while using up all the
+input C<$txt>. It did I<not> run out of defined column space.
+
+B<NOTE:> the C<column()> call makes no effort to "restore" conditions to any
+starting values. If your last bit of text left the "current" font with some
+"odd" face/family, size, I<italicized>, B<bolded>, or colored; that will be
+what is used by the next column call (or other PDF::Builder text calls). You
+may want to add C<get_font()>, C<font()>, C<fillcolor()>, and
+C<strokecolor()> calls as necessary before the next text output, to get the
+expected text characteristics.
+
+=item '1'
+
+A return code of 1 indicates that the call completed by filling up the defined
+column space. It did I<not> run out of input C<$txt>. You will need to make
+one or more calls with empty column space (to fill), to use up the remaining
+input text (with "pre" I<$markup>).
+
+The text settings in the "current" font are left as-is, so that whatever you
+were doing when you ran out of defined column (as regards to font face/family,
+size, italic and bold states, and color) should automatically be the same when 
+you make the next C<column()> call to make more output.
+
+=back
+
+Additional return codes I<may> be added in the future, to indicate failures
+of one sort or another.
+
+=item $next_y
+
+The next page "y" coordinate to start at, if using the same column definition
+as the previous C<column()> definition did (i.e., you didn't completely fill
+the column, and received a return code of 0). In that case, C<$next_y> would
+give the page "y" coordinate to pass to C<column()> (as C<start_y>) to start a 
+new paragraph at.
+
+If the return code C<$rc> was 1 (column was used up), the C<$next_y> returned
+will be -1, as it would be meaningless to use it.
+
+=item $unused
+
+This is the unused portion of the input text (return code C<$rc> is 1), in a 
+format ("pre" C<$markup>) suitable for input as C<$txt>. It will be a
+I<reference> to an array of hashes.
+
+If C<$rc> is 0 (all input was used up), C<$unused> is an empty anonymous array.
+It contains nothing to be used.
+
+=back
+
 =back
 
 =cut
@@ -1410,7 +1490,7 @@ consistent, to keep reasonably consistent text vertical extents.
 #   <pc> (Petite case) like <sc> but 1ex font-size, expand 120%
 
 sub column {
-    my ($self, $text, $grfx, $markup, $txt, %opts) = @_;
+    my ($self, $page, $text, $grfx, $markup, $txt, %opts) = @_;
     my $pdf = $self->{' api'}->{' FM'}->{' pdf'};
 
     my $rc = 0; # so far, a normal call with input completely consumed
@@ -1419,7 +1499,7 @@ sub column {
     my ($x, $y);
 
     # fallback CSS properties, inserted at array[0]
-    my $default_css = _default_css(%opts); # per-tag properties
+    my $default_css = _default_css($pdf, $text, %opts); # per-tag properties
     # dump @mytext list within designated column @outline
     # for now, the outline is a simple rectangle
     my $outline_color = 'none';  # optional outline of the column
@@ -1441,7 +1521,7 @@ sub column {
     # what is the content of $text: string, array, or array of hashes?
     # (or already set up, per 'pre' markup)
     # break up text into array of hashes so we have one common input
-    my @mytext = _break_text($txt, $markup);
+    my @mytext = _break_text($txt, $markup, %opts);
     unshift @mytext, $default_css;
 
     # each element of mytext is an anonymous hash, with members text=>text
@@ -1462,7 +1542,7 @@ sub column {
     # attribute list. on exit from tag, set attributes to restore settings
     _tag_attributes(@mytext);
 
-    ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $text, $grfx, $para, $font_size, $leading, @mytext);
+    ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $page, $text, $grfx, $para, $font_size, $leading, @mytext);
 
     return ($rc, $start_y, $unused);
 } # end of column()
@@ -1471,7 +1551,26 @@ sub column {
 # passed in by column() parameters and options. this is generated once for
 # each call to column, in case any parameters or options change.
 sub _default_css {
-    my %opts = @_;
+    my ($pdf, $text, %opts) = @_;
+
+    my @cur_font = $pdf->get_font();
+    my @cur_color = $text->fillcolor();
+    my $current_color;
+   #my $cur_color = 'black';
+    if (@cur_color == 1) { 
+	# 'name', '#rrggbb' etc. suitable for CSS usage
+	# TBD: single gray scale value s/b changed to '#rrggbb'
+	#       (might be 0..1, 0..100, 0..ff)?
+	$current_color = $cur_color[0];
+    } else {
+	# returned an array of values, unsuitable for CSS
+	# TBD: 3 values 0..1 turn into #rrggbb
+	# TBD: 3 values 0..100 turn into #rrggbb
+	# TBD: 3 values 0..ff turn into #rrggbb
+	# TBD: 4 values like 3, but CMYK
+	# for now, default to 'black'
+	$current_color = 'black';
+    }
 
     my %style;
     $style{'tag'} = 'defaults';
@@ -1515,14 +1614,16 @@ sub _default_css {
     $style{'p'}->{'text-indent'} = $para->[1];
     $style{'p'}->{'margin-top'} = $para->[2];
 
-    my $color = 'black';  # text default color
+    my $color = $current_color;  # text default color
     $color = $opts{'color'} if defined $opts{'color'};
     $style{'body'}->{'color'} = $color;
 
     # now for fixed settings
-    $style{'body'}->{'font-family'} = 'current'; # face
-    $style{'body'}->{'font-weight'} = 'normal'; # bold
-    $style{'body'}->{'font-style'} = 'normal'; # italic
+    $style{'body'}->{'font-family'} = $cur_font[0]; # face
+   #$style{'body'}->{'font-style'} = $cur_font[1]? 'italic': 'normal';
+   #$style{'body'}->{'font-weight'} = $cur_font[2]? 'bold': 'normal';
+    $style{'body'}->{'font-style'} = 'normal';
+    $style{'body'}->{'font-weight'} = 'normal';
    #$style{'body'}->{'font-variant'} = 'normal'; # small-caps
     $style{'body'}->{'margin-top'} = '0'; 
     $style{'body'}->{'margin-right'} = '0'; 
@@ -1536,33 +1637,39 @@ sub _default_css {
    #$style{'body'}->{'border-color'} = 'inherit'; 
     $style{'body'}->{'text-decoration'} = 'none';
     $style{'body'}->{'display'} = 'block'; 
+    $style{'body'}->{'_href'} = ''; 
 
-    $style{'a'}->{'text-decoration'} = 'underline'; # none, underline, overline, line-through
+    $style{'font'}->{'display'} = 'inline';
+    $style{'span'}->{'display'} = 'inline';
+
+    $style{'a'}->{'text-decoration'} = 'underline'; 
+          # none, underline, overline, line-through or a combination
     $style{'a'}->{'color'} = 'blue'; 
     $style{'a'}->{'display'} = 'inline'; 
+    $style{'a'}->{'_href'} = ''; 
 
-    $style{'ul'}->{'list-style-position'} = 'outside'; # inside
     $style{'ul'}->{'list-style-type'} = 'disc'; # circle, square
+    $style{'ul'}->{'list-style-position'} = 'outside'; # inside
     $style{'ul'}->{'display'} = 'block'; 
     $style{'ul'}->{'margin-bottom'} = '50%'; 
-    $style{'ol'}->{'list-style-position'} = 'outside'; # inside
     $style{'ol'}->{'list-style-type'} = 'decimal'; # lower-roman, upper-roman, lower-alpha, upper-alpha
+    $style{'ol'}->{'list-style-position'} = 'outside'; # inside
     $style{'ol'}->{'display'} = 'block'; 
     $style{'ol'}->{'margin-bottom'} = '50%'; 
     $style{'li'}->{'display'} = 'block';  # should inherit from ul or ol
-    $style{'li'}->{'margin-top'} = '50%'; 
+    $style{'li'}->{'margin-top'} = '50%';  # relative to text's font-size
 
    #$style{'h6'}->{'text-transform'} = 'uppercase'; # heading this level CAPS
     $style{'h6'}->{'font-weight'} = 'bold'; # all headings bold
-    $style{'h6'}->{'font-size'} = '75%'; # % of font-size
-    $style{'h6'}->{'margin-top'} = '200%'; # all headings same margins
-    $style{'h6'}->{'margin-bottom'} = '200%';
+    $style{'h6'}->{'font-size'} = '75%'; # % of original font-size
+    $style{'h6'}->{'margin-top'} = '267%'; # relative to the font-size
+    $style{'h6'}->{'margin-bottom'} = '267%'; # relative to the font-size
     $style{'h6'}->{'display'} = 'block'; # block (start on new line)
 
     $style{'h5'}->{'font-weight'} = 'bold';
     $style{'h5'}->{'font-size'} = '85%';
-    $style{'h5'}->{'margin-top'} = '200%';
-    $style{'h5'}->{'margin-bottom'} = '200%';
+    $style{'h5'}->{'margin-top'} = '235%';
+    $style{'h5'}->{'margin-bottom'} = '235%';
     $style{'h5'}->{'display'} = 'block';
 
     $style{'h4'}->{'font-weight'} = 'bold';
@@ -1573,20 +1680,20 @@ sub _default_css {
 
     $style{'h3'}->{'font-weight'} = 'bold';
     $style{'h3'}->{'font-size'} = '115%';
-    $style{'h3'}->{'margin-top'} = '200%';
-    $style{'h3'}->{'margin-bottom'} = '200%';
+    $style{'h3'}->{'margin-top'} = '174%';
+    $style{'h3'}->{'margin-bottom'} = '174%';
     $style{'h3'}->{'display'} = 'block';
 
     $style{'h2'}->{'font-weight'} = 'bold';
     $style{'h2'}->{'font-size'} = '150%';
-    $style{'h2'}->{'margin-top'} = '200%';
-    $style{'h2'}->{'margin-bottom'} = '200%';
+    $style{'h2'}->{'margin-top'} = '133%';
+    $style{'h2'}->{'margin-bottom'} = '133%';
     $style{'h2'}->{'display'} = 'block';
 
     $style{'h1'}->{'font-weight'} = 'bold';
     $style{'h1'}->{'font-size'} = '200%';
-    $style{'h1'}->{'margin-top'} = '200%';
-    $style{'h1'}->{'margin-bottom'} = '200%';
+    $style{'h1'}->{'margin-top'} = '100%';
+    $style{'h1'}->{'margin-bottom'} = '100%';
     $style{'h1'}->{'display'} = 'block';
 
     $style{'i'}->{'font-style'} = 'italic';
@@ -1597,6 +1704,21 @@ sub _default_css {
     $style{'em'}->{'display'} = 'inline';
     $style{'strong'}->{'font-weight'} = 'bold';
     $style{'strong'}->{'display'} = 'inline';
+
+    # TBD text-decoration possible to combine underline line-through overline 
+    # works OK if style="text-decoration: 'underline line-through'", but fails
+    # if <s><u>text</u></s> because u's td overwrites s's td.
+    $style{'u'}->{'display'} = 'inline';
+    $style{'u'}->{'text-decoration'} = 'underline';
+    $style{'ins'}->{'display'} = 'inline';
+    $style{'ins'}->{'text-decoration'} = 'underline';
+
+    $style{'s'}->{'display'} = 'inline';
+    $style{'s'}->{'text-decoration'} = 'line-through';
+    $style{'strike'}->{'display'} = 'inline';
+    $style{'strike'}->{'text-decoration'} = 'line-through';
+    $style{'del'}->{'display'} = 'inline';
+    $style{'del'}->{'text-decoration'} = 'line-through';
 
     return \%style;
 } # end of _default_css()
@@ -1609,7 +1731,8 @@ sub _tag_attributes {
     
     # start at [2], so defaults and styles skipped
     for (my $el=2; $el < @mytext; $el++) {
-	if ($mytext[$el]->{'text'} eq '') { next; }
+	if (ref($mytext[$el]) ne 'HASH') { next; }
+	if ($mytext[$el]->{'tag'} eq '') { next; }
 
         my $tag = $mytext[$el]->{'tag'};
 	if (!defined $tag) { next; }
@@ -1641,6 +1764,11 @@ sub _tag_attributes {
 	        $mytext[$el]->{'list-style-type'} = delete($mytext[$el]->{'type'});
 	    }
 	}
+	if ($tag eq 'a') {
+	    if (defined $mytext[$el]->{'href'}) {
+	        $mytext[$el]->{'_href'} = delete($mytext[$el]->{'href'});
+	    }
+	}
 	 
 	# process any style attribute and override attribute values
 	if (defined $mytext[$el]->{'style'}) {
@@ -1670,7 +1798,7 @@ sub _tag_attributes {
 # the workhorse of the library: output text (modified by tags) in @mytext
 # for now, just output text, ignoring all tags (TBD)
 sub _output_text {
-    my ($start_y, $min_y, $outl, $pdf, $text, $grfx, $para, $font_size, 
+    my ($start_y, $min_y, $outl, $pdf, $page, $text, $grfx, $para, $font_size, 
 	$leading, @mytext) = @_;
     my @outline = @$outl;
 
@@ -1702,7 +1830,8 @@ sub _output_text {
     my $phrase='';
     my $remainder='';
     my $text_pre = ''; # things like li markers
-    my $vmargin = 0; # larger of adjoining bottom and top margins
+    my $topm = 0; # adjoining top margin
+    my $botm = 0; # adjoining bottom margin
     my $current_prop = _init_current_prop(); # determine if a property has 
     #           changed and PDF::Builder routines need calling
     my @properties = ({}); # stack of properties from tags
@@ -1714,11 +1843,17 @@ sub _output_text {
     # user input tags/text start at mytext[2]
     for (my $el = 2; $el < scalar @mytext; $el++) {
 	# discard any empty elements
+	if (ref($mytext[$el]) ne 'HASH') { next; }
 	if (!keys %{$mytext[$el]}) { next; }
 	
 	if ($mytext[$el]->{'text'} eq '') {
             # ===================================== tags/end-tags
 	    # should be a tag or end-tag element defined
+	    # for the most part, just set properties at stack top. sometimes
+	    # special actions need to be taken, with actual output (e.g.,
+	    # <hr> or <img>). remember that the properties stack includes
+	    # any units (%, pt, etc.), while current_prop has been converted
+	    # to points.
 	    my $tag = $mytext[$el]->{'tag'};
 
 	    if (substr($tag, 0, 1) ne '/') {
@@ -1761,21 +1896,25 @@ sub _output_text {
 	        # 6. update properties top with any tag/style attributes.
 		#   these come from the tag itself: its attributes, 
 		#   overridden by any style attribute. these are the
-		#   highest priority properties.
+		#   highest priority properties. everything copied over to
+		#   the stack top, but anything not a real property will end
+		#   up not being used.
 	        _update_properties($properties[-1], $mytext[$el]);
 	        
 	        if ($properties[-1]->{'display'} eq 'block') {
 		    $need_line = 1; 
 		    $start_y = $next_y;
 		    $add_x = $add_y = 0;
-	            # block display with a non-zero top margin... set skip.
-		    # this will set vmargin (overwriting any smaller
-		    #  bottom margin already set)
-		    if ($properties[-1]->{'margin-top'} ne '0') {
-			my $topm = _size2pt($properties[-1]->{'margin-top'},
-			                    $current_prop->{'font-size'});
-			if ($topm > $vmargin) { $vmargin = $topm; }
-		    }
+	            # block display with a non-zero top margin and/or bottom
+		    # margin... set skip to larger of the two.
+		    # when text is ready to be output, figure both any new
+		    # top margin (for that text) and compare to the existing
+		    # bottom margin (in points) saved at the end of the previous
+		    # text.
+		    $topm = $properties[-1]->{'margin-top'};
+		    # now that need_line etc. has been set due to block display,
+		    # change stack top into 'inline'
+		    $properties[-1]->{'display'} = 'inline';
 	        }
 		# handle specific kinds of tags' special processing
 	        $text_pre = ''; # marker for li
@@ -1816,17 +1955,17 @@ sub _output_text {
 	        }
 	        if ($tag eq 'li') {
 		    # paragraph, but label depends on parent (list-style-type)
-		    # type and value attributes can override parent list-style-type
-		    #   and start
+		    # type and value attributes can override parent 
+		    # list-style-type and start
 		    if (defined $mytext[$el]->{'value'}) {
 		        $start =  $mytext[$el]->{'value'}; # used only for ol
 		    }
 		    # for time-being, treat position of marker as 'outside' TBD
 		    # TBD temp put ' * ' in front if 'disc', ' N. ' if 'decimal'
 		    if ($properties[-1]->{'list-style-type'} ne 'decimal') {
-		        $text_pre = " * ";
+		        $text_pre = "  * ";
 		    } else {
-		        $text_pre = " $start. ";
+		        $text_pre = "  $start. ";
 		        $start++;
 		    }
 	        }
@@ -1835,7 +1974,8 @@ sub _output_text {
 	       #if ($tag eq 'a') { } href. text may be decorated, needs to be 
 	       #                     outlined (find extents) for annotation->link
 	       #if ($tag eq 'pre') { } TBD
-	       #if ($tag eq 'code') { } TBD
+	       #if ($tag eq 'code') { } TBD font-family sans-serif + 
+	       #                        constant width 75% font-size
                # treat headings as paragraphs
 	       #if ($tag eq 'h1') { }  align
 	       #if ($tag eq 'h2') { }
@@ -1855,8 +1995,9 @@ sub _output_text {
 	       #if ($tag eq 'aside') { } discrete section 
 	       #if ($tag eq 'base') { } 
 	       #if ($tag eq 'basefont') { } 
-	       #if ($tag eq 'big') { }  increase font size
-	       #if ($tag eq 'blockquote') { }  margins, font-size, leading
+	       #if ($tag eq 'big') { }  font-size 125%
+	       #if ($tag eq 'blockquote') { }  left/right margins 3em (300% of
+	       #               font-size), top/bottom margins 50% font-size
 	       # already taken care of head, body
 	       #if ($tag eq 'canvas') { } 
 	       #if ($tag eq 'caption') { } 
@@ -1865,25 +2006,27 @@ sub _output_text {
 	       #if ($tag eq 'dl') { }  similar to ul/li
 	       #if ($tag eq 'dt') { } 
 	       #if ($tag eq 'dd') { } 
-	       #if ($tag eq 'del') { } text-decoration=line-through
+	       #if ($tag eq 'del') { } 
 	       #if ($tag eq 'div') { }  # requires width, height, left, etc.
 	       #if ($tag eq 'figure') { }
 	       #if ($tag eq 'figcap') { }
 	       #if ($tag eq 'footer') { } discrete section
 	       #if ($tag eq 'header') { } discrete section
-	       #if ($tag eq 'ins') { }  inline mark
-	       #if ($tag eq 'kbd') { }  inline mark
+	       #if ($tag eq 'ins') { }
+	       #if ($tag eq 'kbd') { }  font-family sans-serif + constant width
+	       #                        75% font-size
 	       #if ($tag eq 'mark') { }
 	       #if ($tag eq 'nav') { } discrete section
-	       #if ($tag eq 'nobr') { }
-	       #if ($tag eq 'q') { }  quotes around
-	       #if ($tag eq 's') { }  text-decoration=line-through
-	       #if ($tag eq 'samp') { }
+	       #if ($tag eq 'nobr') { } treat all spaces within as NBSPs?
+	       #if ($tag eq 'q') { }  ldquo/rdquo quotes around
+	       #if ($tag eq 's') { } 
+	       #if ($tag eq 'samp') { } font-family sans-serif + constant width
+	       #                        75% font-size
 	       #if ($tag eq 'section') { } discrete section
-	       #if ($tag eq 'small') { } reduce font-size
-	       #if ($tag eq 'strike') { }  text-decoration=line-through
+	       #if ($tag eq 'small') { } font-size 75%
+	       #if ($tag eq 'strike') { } 
 	       #if ($tag eq 'summary') { } discrete section
-	       #if ($tag eq 'u') { }  text-decoration=underline
+	       #if ($tag eq 'u') { } 
 	        if ($tag eq 'style') {
 		    # sometimes some stray empty style tags seem to come 
 		    # through...  can be ignored
@@ -1914,11 +2057,10 @@ sub _output_text {
 		    $need_line = 1; 
 		    $start_y = $next_y;
 		    $add_x = $add_y = 0;
-	            # block display with a non-zero bottom margin... set skip
-		    if ($properties[-1]->{'margin-bottom'} ne '0') {
-			$vmargin = _size2pt($current_prop->{'margin-bottom'},
-			                    $current_prop->{'font-size'});
-		    }
+		    # ready to pick larger of top and bottom margins
+		    $botm = $current_prop->{'margin-bottom'};
+		    # now that need_line, etc. are set, make inline
+		    $current_prop->{'display'} = 'inline';
 	        }
 
 		# last step is to pop the properties stack and remove this
@@ -1943,12 +2085,14 @@ sub _output_text {
 		# end of handling end tags </tag>
 	    }
 
-
 	    # end of tag processing
 
 	} else {
             # ===================================== text to output
 	    # we should be at a new text entry ("phrase")
+	    # we have text to output on the page, using properties at the
+	    # properties stack top. compare against current properties to
+	    # see if need to make any calls (font, color, etc.) to make.
 
 	    # after tags processed, and property list (properties[-1]) updated,
 	    # typically at start of a text string (phrase) we will call PDF
@@ -1959,20 +2103,22 @@ sub _output_text {
 	    $call_get_font = 0;
 	    if ($properties[-1]->{'font-family'} ne $current_prop->{'font-family'}) {
 		 $call_get_font = 1;
+		 # a font label known to FontManager
 		 $current_prop->{'font-family'} = $properties[-1]->{'font-family'};
             }
 	    if ($properties[-1]->{'font-style'} ne $current_prop->{'font-style'}) {
-		 # normal or italic
 		 $call_get_font = 1;
+		 # normal or italic
 		 $current_prop->{'font-style'} = $properties[-1]->{'font-style'};
             }
 	    if ($properties[-1]->{'font-weight'} ne $current_prop->{'font-weight'}) {
-		 # normal or bold
 		 $call_get_font = 1;
+		 # normal or bold
 		 $current_prop->{'font-weight'} = $properties[-1]->{'font-weight'};
             }
 	    if ($properties[-1]->{'font-size'} ne $current_prop->{'font-size'}) {
 		 # don't want to trigger font call unless numeric value changed
+		 # current_prop's s/b in points, newval will be in points
 		 my $newval = _fs2pt($properties[-1]->{'font-size'}, 
 			             $current_prop->{'font-size'});
 		 if ($newval != $current_prop->{'font-size'}) {
@@ -1980,20 +2126,27 @@ sub _output_text {
 		     $current_prop->{'font-size'} = $newval;
 		 }
             }
+	    # any size as a percentage of font-size will use the current fs
+	    my $fs = $current_prop->{'font-size'};
+
 	    if ($call_get_font) {
                 $text->font($pdf->get_font(
 		    'face' => $current_prop->{'font-family'}, 
 		    'italic' => ($current_prop->{'font-style'} eq 'normal')? 0: 1, 
 		    'bold' => ($current_prop->{'font-weight'} eq 'normal')? 0: 1, 
-		                          ), $current_prop->{'font-size'}); 
+		                          ), $fs); 
 	    }
+	    # font-size should be set in current_prop for use by margins, etc.
 
 	    # don't know if color will be used for text or for graphics draw,
 	    # so set both
 	    if ($properties[-1]->{'color'} ne $current_prop->{'color'}) {
 		 $current_prop->{'color'} = $properties[-1]->{'color'};
 		 $text->fillcolor($current_prop->{'color'});
+		 $text->strokecolor($current_prop->{'color'}); 
+                 # for underlines and strikethroughs
 		 $grfx->strokecolor($current_prop->{'color'});
+		 # add fillcolor if ever do anything with that
             }
 
 	    # these properties don't get a PDF::Builder call
@@ -2001,27 +2154,29 @@ sub _output_text {
 	    # call a Builder routine to set them in PDF, so we can always use
 	    # current_prop instead of switching between the two. current_prop
 	    # property lengths should always be in pts (no labeled dimensions).
-	    $current_prop->{'text-indent'} = _size2pt($properties[-1]->{'text-indent'}, $current_prop->{'font-size'});
+	    $current_prop->{'text-indent'} = _size2pt($properties[-1]->{'text-indent'}, $fs);
 	    $current_prop->{'text-decoration'} = $properties[-1]->{'text-decoration'};
-	    $current_prop->{'margin-top'} = _size2pt($properties[-1]->{'margin-top'}, $current_prop->{'font-size'});
-	    $current_prop->{'margin-right'} = _size2pt($properties[-1]->{'margin-right'}, $current_prop->{'font-size'});
-	    $current_prop->{'margin-bottom'} = _size2pt($properties[-1]->{'margin-bottom'}, $current_prop->{'font-size'});
-	    $current_prop->{'margin-left'} = _size2pt($properties[-1]->{'margin-left'}, $current_prop->{'font-size'});
+	    $current_prop->{'margin-top'} = _size2pt($properties[-1]->{'margin-top'}, $fs);
+	    $current_prop->{'margin-right'} = _size2pt($properties[-1]->{'margin-right'}, $fs);
+	    $current_prop->{'margin-bottom'} = _size2pt($properties[-1]->{'margin-bottom'}, $fs);
+	    $current_prop->{'margin-left'} = _size2pt($properties[-1]->{'margin-left'}, $fs);
 	    # line-height is expected to be a multiplier to font-size, so
 	    # % or pts value would have to be converted back to ratio TBD
 	    $current_prop->{'line-height'} = $properties[-1]->{'line-height'};
 	    $current_prop->{'display'} = $properties[-1]->{'display'};
-	    $current_prop->{'list-style-position'} = $properties[-1]->{'list-style-position'};
 	    $current_prop->{'list-style-type'} = $properties[-1]->{'list-style-type'};
+	    $current_prop->{'list-style-position'} = $properties[-1]->{'list-style-position'};
+	    $current_prop->{'_href'} = $properties[-1]->{'_href'};
 	    # current_prop should now be up to date with properties[-1], and
 	    # any Builder calls have been made
 
-	    # vmargin is greater of any bottom margin and top margin above this
-	    # text. if vmargin nonzero, drop down by that amount
-	    if ($vmargin > 0) {
-	        $start_y -= $vmargin; # could be too low for a new line!
-	        $vmargin = 0;
-	    }
+	    # calculate this block's top margin, in points.
+	    # if botm (bottom margin of previous block) != 0pt, get larger
+	    # of the two and move start of block down by that amount.
+	    $topm = $current_prop->{'margin-top'};
+	    if ($botm < $topm) { $botm = $topm; }
+	    $start_y -= $botm; # could be too low for a new line!
+	    # will set botm to new margin-bottom after this block is done
 
 	    # we're ready to roll, and output the actual text itself
 	    #
@@ -2061,7 +2216,7 @@ sub _output_text {
 	        if ($need_line) {
 	            # first, set font (current, or something specified)
 		    if ($para) { # at top of column, font undefined
-	                $text->font($pdf->get_font('face'=>'current'), $font_size);
+	                $text->font($pdf->get_font('face'=>'default'), $font_size);
 		    }
 
 	            # extents above and below the baseline (so far)?
@@ -2098,10 +2253,33 @@ sub _output_text {
 	            # no worry, the entire phrase fits (case 1.)
 		    # TBD: only dummy at this point, as extents might increase, dropping baseline and perhaps changing linewidth
 	            $text->translate($x,$y);
-	            $text->text($phrase); # only build up dry run list
-		                          # TBD with options (e.g., decorations)
+		    if ($current_prop->{'text-decoration'} ne 'none') {
+			# supported: underline, line-through, overline
+			# may be a combination
+			my %lines;
+			$lines{'strokecolor'} = $current_prop->{'color'};
+			if ($current_prop->{'text-decoration'} =~ m#underline#) { $lines{'underline'} = 'auto'; }
+			if ($current_prop->{'text-decoration'} =~ m#line-through#) { $lines{'strikethru'} = 'auto'; }
+			if ($current_prop->{'text-decoration'} =~ m#overline#) { $lines{'overline'} = 'auto'; } # TBD
+	                $text->text($phrase, %lines); # only build up dry run list
+		    } else {
+	                $text->text($phrase); # only build up dry run list
+		    }
+                    if ($current_prop->{'_href'} ne '') {
+			# this text is a link, so need to make an annot. link
+			# $x,$y is baseline left, $w is width
+			# $asc, $desc are font ascenders/descenders
+                        # some extra margin to make it easier to select
+                        my $fs = 0.2*$current_prop->{'font-size'};
+                        my $rect = [ $x-$fs, $y-$desc-$fs, 
+				     $x+$w+$fs, $y+$asc+$fs ];
+			my $annotation = $page->annotation();
+			$annotation->uri($current_prop->{'_href'},
+			    'rect'=>$rect, 'border'=>[0,0,0]);
+		    }
 	            $x += $w;
 		    $full_line = 0;
+		    $need_line = 0;
 		    # change current property display to inline
 		    $current_prop->{'display'} = 'inline';
 
@@ -2255,8 +2433,8 @@ sub _init_current_prop {
     $cur_prop->{'font-size'} = -1;
     $cur_prop->{'line-height'} = 0;
     $cur_prop->{'text-indent'} = 0;
-    $cur_prop->{'color'} = 'rainbow';
-    $cur_prop->{'font-family'} = 'yoMama';
+    $cur_prop->{'color'} = 'black'; # PDF default
+    $cur_prop->{'font-family'} = 'yoMama';  # force a change
     $cur_prop->{'font-weight'} = 'abnormal';
     $cur_prop->{'font-style'} = 'abnormal';
    #$cur_prop->{'font-variant'} = 'abnormal';
@@ -2271,6 +2449,9 @@ sub _init_current_prop {
    #$cur_prop->{'border-color'} = 'inherit'; 
     $cur_prop->{'text-decoration'} = 'none';
     $cur_prop->{'display'} = 'block';
+    $cur_prop->{'list-style-type'} = 'disc';
+    $cur_prop->{'list-style-position'} = 'outside';
+    $cur_prop->{'_href'} = '';
     
     return $cur_prop;
 } # end of _init_current_prop()
@@ -2279,20 +2460,33 @@ sub _init_current_prop {
 sub _update_properties {
     my ($target, $source, $selector) = @_;
 
+    my $tag = '';
+    if (defined $selector) {
+        if ($selector =~ m#^tag:(.+)$#) {
+	    $tag = $1;
+	    $selector = undef;
+	}
+    }
+
     if (defined $selector) {
         if (defined $source->{$selector}) {
 	    foreach (keys %{$source->{$selector}}) {
                 $target->{$_} = $source->{$selector}->{$_};
             }
 	}
-    } else {
-	foreach my $selector (keys %$source) { # top-level selectors
-	    if ($selector eq 'text' || $selector eq 'tag') { next; }
-	    if ($selector eq 'cont') { next; } # paragraph continuation flag
-	    if ($selector eq 'body') { next; } # do body selector last
-	    if (ref($source->{$selector}) ne 'HASH') { next; } # href, etc.
-	    foreach (keys %{$source->{$selector}}) {
-                $target->{$_} = $source->{$selector}->{$_};
+    } else { # selector not defined (use all)
+	foreach my $tag_sel (keys %$source) { # top-level selectors
+	    if ($tag_sel eq 'text' || $tag_sel eq 'tag') { next; }
+	    if ($tag_sel eq 'cont') { next; } # paragraph continuation flag
+	    if ($tag_sel eq 'body') { next; } # do body selector last
+	    if (ref($source->{$tag_sel}) ne 'HASH') { 
+	        # e.g., <a href="..."> the href element is a string, not a 
+		# hashref (ref != HASH), so we put it in directly
+		$target->{$tag_sel} = $source->{$tag_sel};
+            } else {
+	        foreach (keys %{$source->{$tag_sel}}) {
+                    $target->{$_} = $source->{$tag_sel}->{$_};
+                }
             }
 	}
 	# do body selector last, after others
@@ -2306,6 +2500,8 @@ sub _update_properties {
     return;
 } # end of _update_properties()
 
+# according to Text::Layout#10, HarfBuzz::Shaper *may* now have per-glyph 
+# extents. should check some day when HS is supported (but not mandatory)
 sub _get_fv_extents {
     my ($pdf, $font_size, $leading) = @_;
 
@@ -2448,7 +2644,7 @@ sub _get_baseline {
 # has been processed).
 
 sub _break_text {
-    my ($text, $markup) = @_;
+    my ($text, $markup, %opts) = @_;
 
     my @array = ();
 
@@ -2460,12 +2656,12 @@ sub _break_text {
 	# split up on blank lines into paragraphs and wrap with p and /p tags
         if       (ref($text) eq '') {
 	    # is a single string (scalar)
-            @array = _none_hash($text);
+            @array = _none_hash($text, %opts);
 
         } elsif (ref($text) eq 'ARRAY') {
 	    # array ref, elements should be text
             for (my $i = 0; $i < scalar(@$text); $i++) {
-                @array = (@array, _none_hash($text->[$i]));
+                @array = (@array, _none_hash($text->[$i], %opts));
 	    }
 	}
 
@@ -2480,22 +2676,22 @@ sub _break_text {
 	# note that blank-separated lines already turned into paragraphs
         if       (ref($text) eq '') {
 	    # is a single string (scalar)
-            @array = _md1_hash($text);
+            @array = _md1_hash($text, %opts);
 
         } elsif (ref($text) eq 'ARRAY') {
 	    # array ref, elements should be text
-            @array = _md1_hash(join("\n", @$text));
+            @array = _md1_hash(join("\n", @$text), %opts);
 	}
 
     } else { # should be 'html'
         if       (ref($text) eq '') {
 	    # is a single string (scalar)
-            @array = _html_hash($text);
+            @array = _html_hash($text, %opts);
 	    
         } elsif (ref($text) eq 'ARRAY') {
 	    # array ref, elements should be text
 	    # consolidate into one string. 
-            @array = _html_hash(join("\n", @$text));
+            @array = _html_hash(join("\n", @$text), %opts);
 	}
     }
 
@@ -2506,7 +2702,7 @@ sub _break_text {
 # return with only markup as paragraphs
 # note that you can NOT span a paragraph across array elements
 sub _none_hash {
-    my ($text) = @_;
+    my ($text, %opts) = @_;
 
     my @array = ();
     my $in_para = 0;
@@ -2553,7 +2749,7 @@ sub _none_hash {
 
 # convert md1 string to html, returning array of hashes
 sub _md1_hash {
-    my ($text) = @_;
+    my ($text, %opts) = @_;
 
     my @array;
     my ($html, $rc);
@@ -2576,7 +2772,7 @@ sub _md1_hash {
     #   by _html_hash()
 
     # blank-line separated paragraphs already wrapped in <p> </p>
-    @array = _html_hash($html);
+    @array = _html_hash($html, %opts);
 
     return @array;
 } # end of _md1_hash()
@@ -2586,13 +2782,28 @@ sub _md1_hash {
 # returns array (list) of tags and text, and as a side effect, element [0] is
 # consolidated <style> tags (may be empty hash)
 sub _html_hash {
-    my ($text) = @_;
+    my ($text, %opts) = @_;
 
     my $style = {};  # <style> hashref to return
     my @array;       # array of body tags and text to return
     my ($rc);
 
-    # TBD process 'substitute' stuff here. %opts needs to be passed in!
+    # process 'substitute' stuff here. %opts needs to be passed in!
+    if (defined $opts{'substitute'}) {
+	# array of substitutions to make 
+	foreach my $macro_list (@{$opts{'substitute'}}) {
+	    # 4 element array: macro name (including any delimiters, such as ||)
+	    #                  HTML code to insert before the macro
+	    #                  anything to replace the macro name (could be the
+	    #                      macro name itself if you want it unchanged)
+	    #                  HTML code to insert after the macro
+	    # $text is updated, perhaps multiple times
+	    # $macro_list is anonymous array [ macro, before, rep, after ]
+	    my $macro = $macro_list->[0];
+	    my $sub = $macro_list->[1].$macro_list->[2].$macro_list->[3];
+            $text =~ s#$macro#$sub#g;
+	}
+    }
 
     $rc = eval {
 	require HTML::TreeBuilder;
@@ -2770,7 +2981,6 @@ sub _walkTree {
 		    $array[-1]->{$key} = $element->{$key};
 	        }
 	    }
-if ($no_content) { print STDERR "${depth}-  self-closing or VOID tag."; }
 
 	    if (!$no_content && defined $element->{'_content'}) {
 	        my @content = @{ $element->{'_content'} };

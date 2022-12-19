@@ -3411,8 +3411,6 @@ sub dump_font_tables {
     return $self->{' FM'}->dump_font_tables(@_);
 }
 
-=back
-
 =head1 IMAGE METHODS
 
 =over
