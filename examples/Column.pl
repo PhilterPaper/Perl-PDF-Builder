@@ -7,7 +7,7 @@ use PDF::Builder;
 # VERSION
 our $LAST_UPDATE = '3.024_002'; # manually update whenever code is changed
 
-my $use_Table = 0; # if 1, use PDF::Table for table example
+my $use_Table = 1; # if 1, use PDF::Table for table example
 
 my $pdf = PDF::Builder->new();
 my $content;
@@ -20,7 +20,7 @@ my $magenta = '#ff00ff';
 my $fs = 15;
 my ($rc, $next_y, $unused);
 
-if (1) { ###############
+#if (0) { ###############
 print "======================================================= pg 1\n";
 $page = $pdf->page();
 $text = $page->text();
@@ -81,7 +81,6 @@ $text->column($page, $text, $grfx, 'pre', [
 	{'text'=>'', 'tag'=>'/i'},
 	{'text'=>'', 'tag'=>'/p'},
 ], 'rect'=>[50,150, 500,50], 'outline'=>$magenta);
-} ###############
 
 # larger font size and narrower columns to force line wraps
 print "======================================================= pg 2\n";
@@ -91,7 +90,6 @@ $grfx = $page->gfx();
 
 print "single string entries\n";
  
-if (1) { ###############
 restore_props($text, $grfx);
 multicol($page, $text, $grfx, 'none', 
 	 "This is a single string text.\n\nWith two paragraphs.", 
@@ -106,7 +104,6 @@ restore_props($text, $grfx);
 multicol($page, $text, $grfx, 'html', 
 	 "<p>This is a <i>single <b>string</b></i> HTML text.</p><p>Two paragraphs.</p>", 
 	 [50,550, 50,50], $magenta, $fs);
-} ###############
 
 print "array of string entries\n";
  
@@ -116,7 +113,6 @@ multicol($page, $text, $grfx, 'none',
          ["This is an array","Of single string texts. Two paragraphs."], 
 	 [50,450, 50,50], $magenta, $fs);
 
-if (1) { ###################
 # would be glued together into one line, except there is a blank line in middle
 restore_props($text, $grfx);
 multicol($page, $text, $grfx, 'md1', 
@@ -154,9 +150,7 @@ multicol($page, $text, $grfx, 'pre', [
 	{'text'=>'', 'tag'=>'/i'},
 	{'text'=>'', 'tag'=>'/p'},
     ], [50,150, 50,50], $magenta, $fs);
-} ###############
 
-if (1) { ###############
 # let's try some large sample MD and HTML
 print "======================================================= pg 3\n";
 #
@@ -225,9 +219,9 @@ restore_props($text, $grfx);
 if ($rc) { 
     print STDERR "Lorem Ipsum string overflowed the column!\n";
 }
-} ###############
+#} ###############
 
-if (1) { ###############
+#if (1) { ###############
 # customer sample Markdown
 print "======================================================= pg 4\n";
 print "Customer sample Markdown and Table\n";
@@ -269,59 +263,80 @@ at a time</span> are possible.
 Then we need some styling features in tables as shown in the table below. There is no need to support this in text blocks, although it would be a nice feature (colored text is already available in text blocks using its options).
 END_OF_CONTENT
 
-if (1) { ###############################
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', 
 	          $content, 
-		  'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
+		  'rect'=>[50,750, 500,708], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ] );
 if ($rc) { 
     print STDERR "Sample Markdown overflowed the column!\n";
 }
-} ###############################
 
 # customer sample HTML
-$next_y -= 25; # gap to table
+$next_y -= 20; # gap to table
 
 if ($use_Table) {
     # use PDF::Table to draw a table, inheriting font from above
     # you need to be careful to end a cell with font, etc. restored
     #   this only works if PDF::Table installed!
 
-    #use PDF::Table;
-    #my $table = PDF::Table->new();
-    #my $table_data = [
-    #    # row 1, solid color lines
-    #    [column($page, $text, $grfx, 'html', 
-    #	     [ '<font color="red">This is some red text</font>', 
-    #    [column($page, $text, $grfx, 'html', 
-    #        [ "<span style=\"color:green\">This is some green text</span>", 
-    #    # row 2, special symbols, colored
-    #	          'This is a red cross: <font face="ZapfDingbats" color="red">8</font>.', 
-    #	          "This is a green tick: <span style=\"font-family:ZapfDingbats; color:green\">4</span>.", 
-    #    # row 3, like row 2, but using macro substitutions
-    #	          "This is a red cross substitute: %cross%.", 
-    #		  'rect'=>[55,$next_y-(5+$row_num*$cell_height), 240,20], 
-    #		  'font_size'=>12, 'para'=>[ 0, 0 ], 
-    #		  'substitute'=>[
-    #		      ['%cross%','<font face="ZapfDingbats" color="red">', '8', '</font>'],
-    #		      ['%tick%','<span style="font-family: ZapfDingbats; color: green;">', '4', '</span>']
-    #	          ]);
-    #	          "This is a green tick substitute: %tick%.", 
-    #my $size = '* *'; # two equal columns
-    #$table->table(
-    #    $pdf, $page, $table_data,
-    #    'x'      => $x,
-    #    'y'      => $next_y,
-    #    'w'      => 500,
-    #    'h'      => $next_y-50,
-    #    'next_y' => 700,
-    #    'next_h' => 650,
-    #    'size'   => $size,
-    #    # global markups (can be overridden for row, column, or cell)
-    #    'markup' => [ 'type'=>'html', 'font_size'=>12, 'para'=>[ 0, 0 ], 
-    #);
+    use PDF::Table;
+    my $table = PDF::Table->new();
+    my $table_data = [
+        # row 1, solid color lines
+    	[   
+ 	    [ 'html', '<font color="red">This is some red text</font>',
+	      { 'font_size' => 12, 'para' => [ 0, 0 ] } ], 
+            [ 'html', "<span style=\"color:green\">This is some green text</span>",
+	      { 'font_size' => 12, 'para' => [ 0, 0 ] } ], 
+	], 
+
+        # row 2, special symbols, colored
+	[
+    	    [ 'html', 'This is a red cross: <font face="ZapfDingbats" color="red">8</font>.', 
+	      { 'font_size' => 12, 'para' => [ 0, 0 ] } ], 
+    	    [ 'html', "This is a green tick: <span style=\"font-family:ZapfDingbats; color:green\">4</span>.", 
+	      { 'font_size' => 12, 'para' => [ 0, 0 ] } ], 
+        ],
+
+        # row 3, like row 2, but using macro substitutions
+	[
+    	    [ 'html', "This is a red cross substitute: %cross%.", 
+	      { 'font_size'=>12, 'para'=>[ 0, 0 ], 
+    		'substitute'=>[
+    		    ['%cross%','<font face="ZapfDingbats" color="red">', '8', '</font>'],
+    		    ['%tick%','<span style="font-family: ZapfDingbats; color: green;">', '4', '</span>'] ]
+	      } 
+            ],
+    	    [ 'html', "This is a green tick substitute: %tick%.", 
+    	      { 'font_size'=>12, 'para'=>[ 0, 0 ], 
+    		'substitute'=>[
+    		    ['%cross%','<font face="ZapfDingbats" color="red">', '8', '</font>'],
+    		    ['%tick%','<span style="font-family: ZapfDingbats; color: green;">', '4', '</span>'] ]
+	      }
+            ],
+	],
+
+        # row 4, non-markup text
+	[ 'Plain old text', 
+	  'More plain text'
+        ],
+	             ];
+
+    my $size = '* *'; # two equal columns
+    $table->table(
+        $pdf, $page, $table_data,
+        'x'      => 50,
+        'y'      => $next_y,
+        'w'      => 500,
+        'h'      => $next_y-42,
+        'next_y' => 750,
+        'next_h' => 708,
+        'size'   => $size,
+        # global markups (can be overridden for row, column, or cell)
+        'padding' => 4.5,
+    );
 
 } else {
     # fake a table so that PDF::Table is not required within PDF::Builder 
@@ -330,13 +345,13 @@ if ($use_Table) {
     # and rules
     # we will show a number of different techniques
     # do 6 cells as 6 small columns in 3x2 grid
-    my $table_rows = 3;
+    my $table_rows = 4;
     my $table_cols = 2;
     my $cell_height = 20;
     my $row_num = 0;
     # 
-    # row 1, pure color text
  
+    # row 1, simple color text
     restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'html', 
 	          '<font color="red">This is some red text</font>', 
@@ -345,12 +360,12 @@ if ($use_Table) {
 
     restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'html', 
-	          "<span style=\"color:green\">This is some green text</span>", 
+	          '<span style="color:green">This is some green text</span>', 
 		  'rect'=>[305,$next_y-(5+$row_num*$cell_height), 240,20], 
 		  'font_size'=>12, 'para'=>[ 0, 0 ] );
     $row_num++;
-    # row 2, show a tick and cross, changed color, font and span tags
 
+    # row 2, show a tick and cross, changed color, font and span tags
     restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'html', 
 	          'This is a red cross: <font face="ZapfDingbats" color="red">8</font>.', 
@@ -363,8 +378,8 @@ if ($use_Table) {
 		  'rect'=>[305,$next_y-(5+$row_num*$cell_height), 240,20], 
 		  'font_size'=>12, 'para'=>[ 0, 0 ] );
     $row_num++;
-    # row 3, like 2 but illustrate text/HTML substitution
  
+    # row 3, like 2 but illustrate text/HTML substitution
     restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'md1', 
 	          "This is a red cross substitute: %cross%.", 
@@ -386,6 +401,22 @@ if ($use_Table) {
 	          ]);
     $row_num++;
 
+    # row 4, non-markup text
+    restore_props($text, $grfx);
+    $text->column($page, $text, $grfx, 'none', 
+	          "Plain old text",
+		  'rect'=>[55,$next_y-(5+$row_num*$cell_height), 240,20], 
+		  'font_size'=>12, 'para'=>[ 0, 0 ], 
+	         );
+
+    restore_props($text, $grfx);
+    $text->column($page, $text, $grfx, 'none', 
+	          "More plain text",
+		  'rect'=>[305,$next_y-(5+$row_num*$cell_height), 240,20], 
+		  'font_size'=>12, 'para'=>[ 0, 0 ], 
+	         );
+    $row_num++;
+
     # draw border and rules
     $grfx->poly(50,$next_y, 550,$next_y, 550,$next_y-($table_rows*20), 50,$next_y-($table_rows*20), 50,$next_y);
     # horizontal dividers between rows
@@ -400,11 +431,12 @@ if ($use_Table) {
     $grfx->strokecolor('black');
     $grfx->stroke();
 }
-} ###############
+#} ###############
 
-if (0) { ###############
+#if (0) { ###############
 # more pages with more extensive MD
 print "======================================================= pg 5+\n";
+print "A README.md file for PDF::Builder\n";
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
@@ -585,7 +617,7 @@ while ($rc) {
 		      'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
 		      'para'=>[ 0, 0 ] );
 }
-} ###############
+#} ###############
 
 # ---------------------------------------------------------------------------
 # end of program

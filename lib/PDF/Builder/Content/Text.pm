@@ -1796,7 +1796,6 @@ sub _tag_attributes {
 } # end of _tag_attributes()
 
 # the workhorse of the library: output text (modified by tags) in @mytext
-# for now, just output text, ignoring all tags (TBD)
 sub _output_text {
     my ($start_y, $min_y, $outl, $pdf, $page, $text, $grfx, $para, $font_size, 
 	$leading, @mytext) = @_;
@@ -1971,8 +1970,7 @@ sub _output_text {
 	        }
 	       #if ($tag eq 'img') { } TBD, hspace and vspace already margins,
 	       #                            width, height
-	       #if ($tag eq 'a') { } href. text may be decorated, needs to be 
-	       #                     outlined (find extents) for annotation->link
+	       #if ($tag eq 'a') { } 
 	       #if ($tag eq 'pre') { } TBD
 	       #if ($tag eq 'code') { } TBD font-family sans-serif + 
 	       #                        constant width 75% font-size
@@ -1988,6 +1986,11 @@ sub _output_text {
 	       #if ($tag eq 'br') { } TBD force new line
 	       #if ($tag eq 'sup') { } TBD
 	       #if ($tag eq 'sub') { } TBD
+	       #if ($tag eq 'del') { } 
+	       #if ($tag eq 'ins') { }
+	       #if ($tag eq 's') { } 
+	       #if ($tag eq 'strike') { } 
+	       #if ($tag eq 'u') { } 
     
 	       # tags maybe some time in the future TBD
 	       #if ($tag eq 'address') { } inline formatting
@@ -2006,27 +2009,22 @@ sub _output_text {
 	       #if ($tag eq 'dl') { }  similar to ul/li
 	       #if ($tag eq 'dt') { } 
 	       #if ($tag eq 'dd') { } 
-	       #if ($tag eq 'del') { } 
 	       #if ($tag eq 'div') { }  # requires width, height, left, etc.
 	       #if ($tag eq 'figure') { }
 	       #if ($tag eq 'figcap') { }
 	       #if ($tag eq 'footer') { } discrete section
 	       #if ($tag eq 'header') { } discrete section
-	       #if ($tag eq 'ins') { }
 	       #if ($tag eq 'kbd') { }  font-family sans-serif + constant width
 	       #                        75% font-size
 	       #if ($tag eq 'mark') { }
 	       #if ($tag eq 'nav') { } discrete section
 	       #if ($tag eq 'nobr') { } treat all spaces within as NBSPs?
 	       #if ($tag eq 'q') { }  ldquo/rdquo quotes around
-	       #if ($tag eq 's') { } 
 	       #if ($tag eq 'samp') { } font-family sans-serif + constant width
 	       #                        75% font-size
 	       #if ($tag eq 'section') { } discrete section
 	       #if ($tag eq 'small') { } font-size 75%
-	       #if ($tag eq 'strike') { } 
 	       #if ($tag eq 'summary') { } discrete section
-	       #if ($tag eq 'u') { } 
 	        if ($tag eq 'style') {
 		    # sometimes some stray empty style tags seem to come 
 		    # through...  can be ignored
