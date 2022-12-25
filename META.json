@@ -31,11 +31,6 @@
          }
       },
       "runtime" : {
-	 "recommends" : {
-            "Graphics::TIFF" : "19",
-            "Image::PNG::Libpng" : "0.57",
-            "HarfBuzz::Shaper" : "0.024"
-	 },
          "requires" : {
             "Compress::Zlib" : "1.0",
             "Font::TTF" : "1.04",

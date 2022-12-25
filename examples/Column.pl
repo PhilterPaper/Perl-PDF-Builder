@@ -1,3 +1,5 @@
+#!/usr/bin/perl
+#
 use warnings;
 use strict;
 use PDF::Builder;
@@ -521,14 +523,14 @@ These libraries should be automatically installed...
 #### OPTIONAL
 
 These libraries are _recommended_ for improved functionality and performance.
-The default behavior is to attempt to install all of them during PDF::Builder
-installation. If you use tools/optional\_update.pl to _not_ to install any of
-them, or they fail to install automatically, you can always manually install 
-them later.
+The default behavior is **NOT** to attempt to install all of them during 
+PDF::Builder installation.
 
 * Graphics::TIFF (recommended if using TIFF image functions)
 * Image::PNG::Libpng (recommended for enhanced PNG image function processing)
-* HarfBuzz::Shaper (recommended for Latin script ligatures and kerning, as well as for any complex script such as Arabic, Indic scripts, or Khmer)
+* HarfBuzz::Shaper (needed for Latin script ligatures and kerning, as well as for any complex script such as Arabic, Indic scripts, or Khmer)
+* HTML::TreeBuilder (needed for 'md1' and 'html' markup)
+* Text::Markdown (needed for 'md1' markup)
 
 Other than an installer for standard CPAN packages (such as 'cpan' on
 Strawberry Perl for Windows), no other tools or manually-installed prereqs are
@@ -638,6 +640,7 @@ sub multicol {
             $text->column($page, $text, $grfx, 'pre', $content, 
 		          'rect'=>$rect, 'outline'=>$outline, 'font_size'=>$fs);
     }
+    return;
 }
 
 # pause during debug

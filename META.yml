@@ -19,10 +19,12 @@ no_index:
   directory:
     - t
     - inc
-recommends:
-  Graphics::TIFF: '19'
-  HarfBuzz::Shaper: '0.024'
-  Image::PNG::Libpng: '0.57'
+#recommends:
+#  Graphics::TIFF: '19'
+#  HarfBuzz::Shaper: '0.024'
+#  Image::PNG::Libpng: '0.57'
+#  Text::Markdown: '1.000031'
+#  HTML::TreeBuilder: '5.07'
 requires:
   Compress::Zlib: '1.0'
   Font::TTF: '1.04'

@@ -77,14 +77,15 @@ These libraries should be automatically installed...
 #### OPTIONAL
 
 These libraries are _recommended_ for improved functionality and performance.
-The default behavior is to attempt to install all of them during PDF::Builder
-installation. If you use tools/optional\_update.pl to _not_ to install any of
-them, or they fail to install automatically, you can always manually install 
-them later.
+The default behavior is to **not** attempt to install them during PDF::Builder
+installation. You can always manually install them later, if you desire to 
+make use of their added functionality.
 
-* Graphics::TIFF (recommended if using TIFF image functions)
-* Image::PNG::Libpng (recommended for enhanced PNG image function processing)
-* HarfBuzz::Shaper (recommended for Latin script ligatures and kerning, as well as for any complex script such as Arabic, Indic scripts, or Khmer)
+* Graphics::TIFF (19 or higher, recommended if using TIFF image functions)
+* Image::PNG::Libpng (0.57 or higher, recommended for enhanced PNG image function processing)
+* HarfBuzz::Shaper (0.024 or higher, needed for Latin script ligatures and kerning, as well as for any complex script such as Arabic, Indic scripts, or Khmer)
+* Text::Markdown (1.000031 or higher, needed if using 'md1' markup)
+* HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup)
 
 Other than an installer for standard CPAN packages (such as 'cpan' on
 Strawberry Perl for Windows), no other tools or manually-installed prereqs are
@@ -160,4 +161,4 @@ We admit that the documentation is a bit light on "how to" task orientation.
 We hope to more fully address this in the future, but for now, get the full
 installation and look at the `examples/` and `contrib/` directories for sample
 code that may help you figure out how to do things. The installation tests in
-the `t/` directory might also be useful to you.
+the `t/` and `xt/` directories might also be useful to you.

@@ -30,6 +30,8 @@ FONT_TTF           1.04
 GRAPHICS_TIFF    19   
 HARFBUZZ_SHAPER  0.024  # 0.026 is current release
 IMAGE_PNG_LIBPNG 0.57
+TEXT_MARKDOWN    1.000031
+HTML_TREEBUILDER 5.07
 
 # problems seen with 3.024 build:
 #   META.* final version not seeing 'recommends' after install

@@ -2,7 +2,16 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.025     2022-12-19  UNRELEASED
+3.025     2022-12-25  UNRELEASED
+
+    README.md, Makefile.PL, META.json, META.yml, tools/optional_update.pl,
+      t/00-all-usable.t, lib/PDF/Builder.pm, MANIFEST
+     No longer automatically install Graphics::TIFF, Image::PNG::Libpng, and
+      HarfBuzz::Shaper. This should lighten the installation and testing load
+      on users, if they do not plan to use TIFF or PNG images, or do text
+      shaping. Also list the new prerequisites for markup processing 
+      (HTML::TreeBuilder, Text::Markdown). optional_update.pl no longer needed
+      and has been removed from the distribution.
 
     xt/author-critic.t, xt/author-pod-syntax.t, MANIFEST, tools/2_t-tests.pl
      Move a couple of specialty t tests from t/ to xt/

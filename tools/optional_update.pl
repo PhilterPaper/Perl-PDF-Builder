@@ -3,6 +3,7 @@ use warnings;
 use strict;
 use List::Util 'any';
 
+# ***** No longer needed, as optional prereqs no longer auto-installed *****
 # a utility to select which optional prerequisites to remove from the
 # "recommends" list in Makefile.PL, META.json, and META.yml before manually
 # running Makefile.PL to build the product. 
@@ -18,14 +19,16 @@ use List::Util 'any';
 # optional prerequisites, do not need to exclude unused optionals.
 
 our $VERSION = '3.024'; # VERSION
-our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
 
 # master list of optional prerequisites:
 # make sure that any updates to patterns etc. keep the same order
 my %options = (
-	'1' => ["Graphics::TIFF",     "19"   ],
-	'2' => ["Image::PNG::Libpng", "0.57" ],
-	'3' => ["HarfBuzz::Shaper",   "0.024"],
+	'1' => ["Graphics::TIFF",     "19"       ],
+	'2' => ["Image::PNG::Libpng", "0.57"     ],
+	'3' => ["HarfBuzz::Shaper",   "0.024"    ],
+	'4' => ["Text::Markdown",     "1.000031" ],
+	'5' => ["HTML::TreeBuilder",  "5.07"     ],
               );
 
 print "\nHere are the available optional libraries. Select 0 or more of\n";
@@ -81,6 +84,8 @@ sub update_Makefile {
 	           "(\"Graphics::TIFF\"\\s*=>\\s*)[\\d.]+,", 
 	           "(\"Image::PNG::Libpng\"\\s*=>\\s*)[\\d.]+,",
                    "(\"HarfBuzz::Shaper\"\\s*=>\\s*)[\\d.]+,",
+                   "(\"Text::Markdown\"\\s*=>\\s*)[\\d.]+,",
+                   "(\"HTML::TreeBuilder\"\\s*=>\\s*)[\\d.]+,",
 	          );
 
     my $infile = "Makefile.PL";
@@ -156,6 +161,8 @@ sub update_META_json {
 	           "(\"Graphics::TIFF\"\\s*:\\s*)\"[\\d.]+\"", 
 	           "(\"Image::PNG::Libpng\"\\s*:\\s*)\"[\\d.]+\"",
                    "(\"HarfBuzz::Shaper\"\\s*:\\s*)\"[\\d.]+\"",
+                   "(\"Text::Markdown\"\\s*:\\s*)\"[\\d.]+\"",
+                   "(\"HTML::TreeBuilder\"\\s*:\\s*)\"[\\d.]+\"",
 	          );
 
     my $infile = "META.json";
@@ -218,6 +225,8 @@ sub update_META_yml {
 	           "(Graphics::TIFF:\\s*)'[\\d.]+'", 
 	           "(Image::PNG::Libpng:\\s*)'[\\d.]+'",
                    "(HarfBuzz::Shaper:\\s*)'[\\d.]+'",
+                   "(Text::Markdown\\s*)'[\\d.]+'",
+                   "(HTML::TreeBuilder\\s*)'[\\d.]+'",
 	          );
 
     my $infile = "META.yml";

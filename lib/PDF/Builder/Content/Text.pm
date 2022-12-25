@@ -1157,9 +1157,9 @@ This specifies a certain flavor of Markdown:
     [label](URL) external links 
     ` (backticks) enclose a "code" section
 
-HTML may be mixed in as desired (although not within "code" blocks marked by 
-backticks, where <, >, and & get turned into HTML entities, disabling the
-intended tags). 
+HTML (see below) may be mixed in as desired (although not within "code" blocks 
+marked by backticks, where <, >, and & get turned into HTML entities, disabling 
+the intended tags).
 Markdown will be converted into HTML, which will then be interpreted into PDF.
 
 The input B<txt> is a list (anonymous array reference) of strings, each 
@@ -1170,7 +1170,7 @@ into a single string before processing, permitting paragraphs to span array
 elements if desired.  
 
 There are other flavors of Markdown, so other mdI<n> flavors I<may> be defined 
-in the future.
+in the future, such as POD from Perl code.
 
 =item  'html'
 
@@ -1216,14 +1216,22 @@ C<p.abstract> or C<ol, ul>), hierarchies (e.g., C<ol E<gt> li>), specified
 number of appearance, or other such complications as found in a browser's CSS. 
 Sorry!
 
-Supported CSS properties: font-family, font-size, font-style (normal/italic), 
-font-weight (normal/bold), margin-top/right/bottom/left, color (foreground
-color), line-height (as ratio of baseline-spacing to font-size), 
-display (inline/block),
-text-decoration (none, underline, line-through, TBD overline), text-indent.
-Sizes may be '%' (of font-size), or 'pt' (the default). TBD A margin-left or 
--right may be 'auto' for centering purposes. More support is expected to be
-added over time.
+Supported CSS properties: 
+
+    font-family (name as defined to FontManager, e.g. Times)
+    font-size (pt, bare number = pt, % of current size)
+    font-style (normal/italic) 
+    font-weight (normal/bold)
+    margin-top/right/bottom/left (pt, bare number = pt, % of font-size)
+    color (foreground color)
+    line-height (leading, as ratio of baseline-spacing to font-size)
+    display (inline/block)
+    text-decoration (none, underline, line-through, TBD overline)
+    text-indent (pt, bare number = pt, % of current font-size)
+
+Sizes may be '%' (of font-size), or 'pt' (the default unit). 
+TBD A margin-left or -right may be 'auto' for centering purposes. 
+More support may be added over time.
 
 Numeric entities (decimal &#nnn; and hexadecimal
 &#xnnn;) are supported (named entities are planned for later support).
@@ -1237,7 +1245,8 @@ elements if desired.
 
 =back
 
-I<There are other markup languages out there, such as HTML-like Pango, that 
+I<There are other markup languages out there, such as HTML-like Pango, and
+man page (troff), that 
 might be supported in the future. It is very unlikely that TeX or LaTeX will 
 ever be supported, as they both already have excellent PDF output.>
 
@@ -2932,13 +2941,13 @@ sub _process_style_string {
 # new array element at start, at each tag, and each _content.
 sub _walkTree {
     my ($depth, @bodyList) = @_;
-    my ($elIdx, $tag, $key, $element, $no_content);
+    my ($tag, $element, $no_content);
 
     my $bLSize = scalar(@bodyList);
     # $depth not really used here, but might come in handy at some point
     my @array = ();
 
-    for ($elIdx=0; $elIdx<$bLSize; $elIdx++) {
+    for (my $elIdx=0; $elIdx<$bLSize; $elIdx++) {
         $element = $bodyList[$elIdx];
 	# an element may be a simple text string, but most are hashes that
 	# contain a _tag and _content array and any tag attributes. _tag and
@@ -2953,7 +2962,7 @@ sub _walkTree {
 
 	    # look for attributes for tag
 	    $no_content = 0;  # has content (children) until proven otherwise
-	    foreach $key (keys %$element) {
+	    foreach my $key (keys %$element) {
 		# 'key' is more of an attribute within a tag (element)
 	        if ($key =~ m/^_/) { next; } # built-in attribute
 	        # VOID elements (br, hr, img, area, base, col, embed, input,

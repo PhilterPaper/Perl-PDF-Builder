@@ -9,9 +9,11 @@ our $VERSION = '3.024'; # VERSION
 our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
 
 # updated during CPAN build
-my $GrTFversion = 19;    # minimum version of Graphics::TIFF
-my $HBShaperVer = 0.024; # minimum version of HarfBuzz::Shaper
-my $LpngVersion = 0.57;  # minimum version of Image::PNG::Libpng
+my $GrTFversion  = 19;       # minimum version of Graphics::TIFF
+my $HBShaperVer  = 0.024;    # minimum version of HarfBuzz::Shaper
+my $LpngVersion  = 0.57;     # minimum version of Image::PNG::Libpng
+my $TextMarkdown = 1.000031; # minimum version of Text::Markdown
+my $HTMLTreeBldr = 5.07;     # minimum version of HTML::TreeBuilder
 
 use Carp;
 use Encode qw(:all);
