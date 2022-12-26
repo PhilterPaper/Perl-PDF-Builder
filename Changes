@@ -2,7 +2,18 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.025     2022-12-25  UNRELEASED
+3.025     2022-12-26  UNRELEASED
+
+    META.json, META.yml
+     Remove "provides" entries because 1) they do not seem to survive the
+      packaging process, 2) no one seems to be able to state what this inform-
+      ation is actually used for -- I see something vague about "search", and 
+      3) how do I make "provides" entries that are better at doing whatever 
+      they're supposed to do better than what CPAN does by default? Also, 
+      there may be a META_ADD provides that I'm supposed to add to Makefile.PL, 
+      but again, documentation is quite scarce. I think I'll just ignore the
+      whole "provides" thing until there's good documentation on it. Screw you,
+      "kwalitee" system!
 
     README.md, Makefile.PL, META.json, META.yml, tools/optional_update.pl,
       t/00-all-usable.t, lib/PDF/Builder.pm, MANIFEST
