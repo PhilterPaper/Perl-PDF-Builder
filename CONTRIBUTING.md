@@ -9,9 +9,8 @@ not good to spend a lot of time working on something that no one is interested
 in!
 
 You can contribute to the discussion by posting bug reports, feature requests, 
-observations, etc. to the GitHub issues area, https://github.com/
-PhilterPaper/Perl-PDF-Builder/issues?q=is%3Aissue+sort%3Aupdated-desc (please 
-tag new threads accordingly, using ["Labels"]).
+observations, etc. to the [GitHub issues area](https://github.com/PhilterPaper/Perl-PDF-Builder/issues?q=is%3Aissue+sort%3Aupdated-desc "issues")
+(please tag new threads accordingly, using ["Labels"], if possible).
 
 Please also read INFO/RoadMap to get an idea of where we would like for 
 PDF::Builder to be heading, and may give you an idea of where you could
