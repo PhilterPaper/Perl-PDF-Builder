@@ -1,8 +1,8 @@
 # PDF::Builder
 
-`A Perl library to facilitate the creation and modification of PDF files`
+A Perl library to facilitate the creation and modification of PDF files
 
-[![Open Issues](https://img.shields.io/github/issues/PhilterPaper/perl-PDF-Builder)]([https://GitHub.com/](https://github.com/PhilterPaper/Perl-PDF-Builder/issues?q=is%3Aissue+sort%3Aupdated-desc+is%3Aopen)
+[![Open Issues](https://img.shields.io/github/issues/PhilterPaper/perl-PDF-Builder)](https://github.com/PhilterPaper/Perl-PDF-Builder/issues)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/PhilterPaper/perl-PDF-Builder/graphs/commit-activity)
 
