@@ -2,9 +2,9 @@
 
 `A Perl library to facilitate the creation and modification of PDF files`
 
-[![Open Issues](https://img.shields.io/github/issues/PhilterPaper/perl-PDF-Builder)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/PhilterPaper/perl-PDF-Builder/graphs/commit-activity)
+![Open Issues](https://img.shields.io/github/issues/PhilterPaper/perl-PDF-Builder)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
+![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/PhilterPaper/perl-PDF-Builder/graphs/commit-activity)
 
 This archive contains the distribution PDF::Builder.
 See **Changes** file for the version.
