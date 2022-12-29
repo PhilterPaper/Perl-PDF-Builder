@@ -5,7 +5,7 @@
 # if add or delete a contribution, also update tools/4_contrib.pl
 .perlcriticrc
 Changes
-CONTRIBUTING
+CONTRIBUTING.md
 LICENSE
 Makefile.PL
 MANIFEST

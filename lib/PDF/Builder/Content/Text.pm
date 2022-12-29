@@ -10,7 +10,7 @@ use List::Util qw(min max);
 #  $Data::Dumper::Sortkeys = 1;  # hash keys in sorted order
 
 # VERSION
-our $LAST_UPDATE = '3.024_002'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024_003'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -1224,10 +1224,22 @@ Supported CSS properties:
     font-weight (normal/bold)
     margin-top/right/bottom/left (pt, bare number = pt, % of font-size)
     color (foreground color)
-    line-height (leading, as ratio of baseline-spacing to font-size)
+    text-height (leading, as ratio of baseline-spacing to font-size)
     display (inline/block)
     text-decoration (none, underline, line-through, TBD overline)
     text-indent (pt, bare number = pt, % of current font-size)
+
+Non-standard CSS "properties". You may want to set these in CSS:
+
+    _marker-before (text to insert before <ol> marker)
+    _marker-after (text to insert after <ol> marker)
+
+Non-standard CSS "properties". You normally would not set these in CSS:
+
+    _fs (current running font size, in points, on the properties stack)
+    _href (URL for <a>, normally provided by href= attribute)
+    _left (running number of points to indent on the left, from margin-left and list nesting)
+    _right (running number of points to indent on the right, from margin-right)
 
 Sizes may be '%' (of font-size), or 'pt' (the default unit). 
 TBD A margin-left or -right may be 'auto' for centering purposes. 
@@ -1317,6 +1329,21 @@ an C<x> position to start at.
 
 This is the starting font size (in points) to be used. Over the course of
 the text, it may be modified by markup.
+
+=item 'marker_width' => $marker_width
+
+This is the width of the gutter to the left of a list item, where (for the
+first line of the item) the marker lives. The marker contains the symbol (for
+bulleted/unordered lists) or formatted number and "before" and "after" text
+(for numbered/ordered lists). Both have a single space before the item text
+starts. The number is a length, in points.
+
+The default is 2 times the font_size passed to C<column()>, and is not adjusted
+for any changes of font_size in the markup. An explicit value passed in is 
+also not changed -- the gutter width for the marker will be the same in all 
+lists (keeping them aligned). If you plan to have exceptionally long markers, 
+such as an ordered list of years in Roman numerals, such as B<(MCMXCIX)>, you 
+may want to make this gutter a bit wider.
 
 =item 'leading' => $leading
 
@@ -1441,7 +1468,11 @@ input C<$txt>. It did I<not> run out of defined column space.
 B<NOTE:> the C<column()> call makes no effort to "restore" conditions to any
 starting values. If your last bit of text left the "current" font with some
 "odd" face/family, size, I<italicized>, B<bolded>, or colored; that will be
-what is used by the next column call (or other PDF::Builder text calls). You
+what is used by the next column call (or other PDF::Builder text calls). This
+is done in order to allow you to easily chain from one column to the next,
+without having to manually tell the system what font, color, etc. you want
+to return to. On the other hand, in some cases you may want to start from the
+same initial coditions as usual. You
 may want to add C<get_font()>, C<font()>, C<fillcolor()>, and
 C<strokecolor()> calls as necessary before the next text output, to get the
 expected text characteristics.
@@ -1543,15 +1574,17 @@ sub column {
     # finally, resulting array of hashes is interpreted and fit in column
     my $font_size = 12; # basic default, override with font-size
     if (defined $opts{'font_size'}) { $font_size=$opts{'font_size'}; }
-    my $leading = 1.125; # basic default, override with line-height
+    my $leading = 1.125; # basic default, override with text-height
     if (defined $opts{'leading'}) { $leading=$opts{'leading'}; }
+    my $marker_width = 2*$font_size;
+    if (defined $opts{'marker_width'}) { $marker_width=$opts{'marker_width'}; }
 
     # process style attributes, tag attributes, style tags, column() options,
     # and fixed default attributes in that order to fill in each tag's
     # attribute list. on exit from tag, set attributes to restore settings
     _tag_attributes(@mytext);
 
-    ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $page, $text, $grfx, $para, $font_size, $leading, @mytext);
+    ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $page, $text, $grfx, $para, $font_size, $marker_width, $leading, @mytext);
 
     return ($rc, $start_y, $unused);
 } # end of column()
@@ -1603,11 +1636,12 @@ sub _default_css {
 
     my $font_size = 12;
     $font_size = $opts{'font_size'} if defined $opts{'font_size'};
-    $style{'body'}->{'font-size'} = $font_size."pt";
+    $style{'body'}->{'font-size'} = $font_size;
+    $style{'body'}->{'_fs'} = $font_size; # carry current value
 
     my $leading = 1.125;
     $leading = $opts{'leading'} if defined $opts{'leading'};
-    $style{'body'}->{'line-height'} = $leading;
+    $style{'body'}->{'text-height'} = $leading;
 
     my $para = [ 1, 1*$font_size, 0 ]; 
     # if font_size changes, change indentation
@@ -1638,6 +1672,8 @@ sub _default_css {
     $style{'body'}->{'margin-right'} = '0'; 
     $style{'body'}->{'margin-bottom'} = '0'; 
     $style{'body'}->{'margin-left'} = '0'; 
+    $style{'body'}->{'_left'} = '0'; 
+    $style{'body'}->{'_right'} = '0'; 
     $style{'body'}->{'text-indent'} = '0'; 
    #$style{'body'}->{'text-align'} = 'left'; # center, right
    #$style{'body'}->{'text-transform'} = 'none'; # capitalize, uppercase, lowercase
@@ -1653,18 +1689,22 @@ sub _default_css {
 
     $style{'a'}->{'text-decoration'} = 'underline'; 
           # none, underline, overline, line-through or a combination
+	  # separated by spaces (overline TBD)
     $style{'a'}->{'color'} = 'blue'; 
     $style{'a'}->{'display'} = 'inline'; 
     $style{'a'}->{'_href'} = ''; 
 
-    $style{'ul'}->{'list-style-type'} = 'disc'; # circle, square
+    $style{'ul'}->{'list-style-type'} = '.u'; # disc, circle, square, box, none
     $style{'ul'}->{'list-style-position'} = 'outside'; # inside
     $style{'ul'}->{'display'} = 'block'; 
     $style{'ul'}->{'margin-bottom'} = '50%'; 
-    $style{'ol'}->{'list-style-type'} = 'decimal'; # lower-roman, upper-roman, lower-alpha, upper-alpha
+    $style{'ol'}->{'list-style-type'} = '.o'; # decimal, lower-roman, upper-roman, lower-alpha, upper-alpha, none
     $style{'ol'}->{'list-style-position'} = 'outside'; # inside
     $style{'ol'}->{'display'} = 'block'; 
     $style{'ol'}->{'margin-bottom'} = '50%'; 
+    $style{'ol'}->{'_marker-before'} = ''; # content to add before marker
+    $style{'ol'}->{'_marker-after'} = '.'; # content to add after marker
+   #$style{'sl'}->{'list-style-type'} = 'none';
     $style{'li'}->{'display'} = 'block';  # should inherit from ul or ol
     $style{'li'}->{'margin-top'} = '50%';  # relative to text's font-size
 
@@ -1729,6 +1769,18 @@ sub _default_css {
     $style{'del'}->{'display'} = 'inline';
     $style{'del'}->{'text-decoration'} = 'line-through';
 
+    $style{'blockquote'}->{'display'} = 'block';
+    $style{'blockquote'}->{'margin-top'} = '56%';
+    $style{'blockquote'}->{'margin-bottom'} = '56%';
+    $style{'blockquote'}->{'margin-left'} = '300%';  # want 3em TBD
+    $style{'blockquote'}->{'margin-right'} = '300%';
+    $style{'blockquote'}->{'text-height'} = '1.00'; # close spacing
+    $style{'blockquote'}->{'font-size'} = '80%'; # smaller type
+
+   #$style{'sc'}->{'font-size'} = '80%'; # smaller type
+   #$style{'sc'}->{'_expand'} = '110%'; # wider type   TBD _expand
+   #likewise for pc (petite caps)
+
     return \%style;
 } # end of _default_css()
 
@@ -1755,7 +1807,8 @@ sub _tag_attributes {
 	    }
 	    if (defined $mytext[$el]->{'size'}) {
 		$mytext[$el]->{'font-size'} = delete($mytext[$el]->{'size'});
-		# note: some sizes may need to be converted to points
+		# TBD some sizes may need to be converted to points. for now,
+		#   assume is a bare number (pt), pt, or % like font-size CSS
 	    }
 	}
 	if ($tag eq 'ol') {
@@ -1807,7 +1860,7 @@ sub _tag_attributes {
 # the workhorse of the library: output text (modified by tags) in @mytext
 sub _output_text {
     my ($start_y, $min_y, $outl, $pdf, $page, $text, $grfx, $para, $font_size, 
-	$leading, @mytext) = @_;
+	$marker_width, $leading, @mytext) = @_;
     my @outline = @$outl;
 
     # start_y is the lowest extent of the previous line, or the highest point
@@ -1833,11 +1886,13 @@ sub _output_text {
 		       # level display (treat like a paragraph)
     my $add_x = 0; # amount to add for indent
     my $add_y = 0; # amount to drop for first line's top margin
+
     my $start = 1; # counter for ordered lists
+    my $list_depth = 0; # nesting level of ol and ul
+    my $list_marker = ''; # li marker text
 
     my $phrase='';
     my $remainder='';
-    my $text_pre = ''; # things like li markers
     my $topm = 0; # adjoining top margin
     my $botm = 0; # adjoining bottom margin
     my $current_prop = _init_current_prop(); # determine if a property has 
@@ -1870,6 +1925,12 @@ sub _output_text {
 		# current_prop usually isn't updated until the text is being
 		# processed. some tags need some special processing if they 
 		# do something that isn't just a property change
+
+                # special directives such as TBD
+		# <endc> force end of column here
+		# <nolig></nolig> forbid ligatures in this range
+		# <lig gid='nnn'> </lig> replace character(s) by a ligature
+		# <alt gid='nnn'> </alt> replace character(s) by alternate glyph
 
 	        # 1. dup the top of the properties stack for a new set of
 	        #   properties to be modified by attributes and CSS
@@ -1925,7 +1986,7 @@ sub _output_text {
 		    $properties[-1]->{'display'} = 'inline';
 	        }
 		# handle specific kinds of tags' special processing
-	        $text_pre = ''; # marker for li
+	        $list_marker = ''; # marker for li
 	        if ($tag eq 'p') {
                     # para=1 we're at top of column (no extra margin)
 		    # per $para (or default), drop down a line?, indent?
@@ -1954,12 +2015,15 @@ sub _output_text {
 	       #if ($tag eq 'span') { } needs style= or <style> to be useful
 	       # initially no nesting for lists. ul and ol just set up things;
 	       #   li actually does marker output and sets up paragraph for text
-	       #if ($tag eq 'ul') { } type already list-style-type
+	        if ($tag eq 'ul') { 
+		    $list_depth++;
+		}
 	        if ($tag eq 'ol') { 
 	            $start = 1;
 	            if (defined $mytext[$el]->{'start'}) {
 	                $start = $mytext[$el]->{'start'};
 		    }
+		    $list_depth++;
 	        }
 	        if ($tag eq 'li') {
 		    # paragraph, but label depends on parent (list-style-type)
@@ -1969,13 +2033,20 @@ sub _output_text {
 		        $start =  $mytext[$el]->{'value'}; # used only for ol
 		    }
 		    # for time-being, treat position of marker as 'outside' TBD
-		    # TBD temp put ' * ' in front if 'disc', ' N. ' if 'decimal'
-		    if ($properties[-1]->{'list-style-type'} ne 'decimal') {
-		        $text_pre = "  * ";
+		    $list_marker = _marker($properties[-1]->{'list-style-type'},
+			$list_depth, $start, 
+			$properties[-1]->{'_marker-before'}, 
+			$properties[-1]->{'_marker-after'});
+		    if (substr($list_marker, 0, 1) eq '.') {
+			# it's a bullet character
 		    } else {
-		        $text_pre = "  $start. ";
+			# fully formatted ordered list item
 		        $start++;
 		    }
+		    # sl: use normal marker width, marker is blank. position
+		    #     is always outside (ignore inside if given)
+		    # dl: variable length marker width, minimum size given,
+		    #     which is where dd left margin is
 	        }
 	       #if ($tag eq 'img') { } TBD, hspace and vspace already margins,
 	       #                            width, height
@@ -1983,6 +2054,11 @@ sub _output_text {
 	       #if ($tag eq 'pre') { } TBD
 	       #if ($tag eq 'code') { } TBD font-family sans-serif + 
 	       #                        constant width 75% font-size
+	       #if ($tag eq 'blockquote') { } 
+                if ($tag eq 'li') {
+	            $properties[-1]->{'_left'} += $marker_width 
+		        if $list_depth == 1;
+                }
                # treat headings as paragraphs
 	       #if ($tag eq 'h1') { }  align
 	       #if ($tag eq 'h2') { }
@@ -2000,6 +2076,8 @@ sub _output_text {
 	       #if ($tag eq 's') { } 
 	       #if ($tag eq 'strike') { } 
 	       #if ($tag eq 'u') { } 
+	        
+	       #if ($tag eq 'blockquote') { } 
     
 	       # tags maybe some time in the future TBD
 	       #if ($tag eq 'address') { } inline formatting
@@ -2008,8 +2086,6 @@ sub _output_text {
 	       #if ($tag eq 'base') { } 
 	       #if ($tag eq 'basefont') { } 
 	       #if ($tag eq 'big') { }  font-size 125%
-	       #if ($tag eq 'blockquote') { }  left/right margins 3em (300% of
-	       #               font-size), top/bottom margins 50% font-size
 	       # already taken care of head, body
 	       #if ($tag eq 'canvas') { } 
 	       #if ($tag eq 'caption') { } 
@@ -2055,17 +2131,18 @@ sub _output_text {
 		# property change. current_prop should be up to date.
 		$tag = substr($tag, 1); # discard /
 
+		if ($tag eq 'ol' || $tag eq 'ul') { $list_depth--; }
 		# note that current_prop should be all up to date by the
 		# time you hit the end tag
 
+		# ready to pick larger of top and bottom margins (block display)
+		$botm = $current_prop->{'margin-bottom'};
 		# block display element end (including paragraphs)
 	        # start next material on new line
 	        if ($current_prop->{'display'} eq 'block') {
 		    $need_line = 1; 
 		    $start_y = $next_y;
 		    $add_x = $add_y = 0;
-		    # ready to pick larger of top and bottom margins
-		    $botm = $current_prop->{'margin-bottom'};
 		    # now that need_line, etc. are set, make inline
 		    $current_prop->{'display'} = 'inline';
 	        }
@@ -2123,16 +2200,21 @@ sub _output_text {
 		 # normal or bold
 		 $current_prop->{'font-weight'} = $properties[-1]->{'font-weight'};
             }
-	    if ($properties[-1]->{'font-size'} ne $current_prop->{'font-size'}) {
-		 # don't want to trigger font call unless numeric value changed
-		 # current_prop's s/b in points, newval will be in points
-		 my $newval = _fs2pt($properties[-1]->{'font-size'}, 
-			             $current_prop->{'font-size'});
-		 if ($newval != $current_prop->{'font-size'}) {
-		     $call_get_font = 1;
-		     $current_prop->{'font-size'} = $newval;
-		 }
-            }
+	    # font size
+	    # don't want to trigger font call unless numeric value changed
+	    # current_prop's s/b in points, newval will be in points. if
+	    # properties (latest request) is a relative size (e.g., %),
+	    # what it is relative to is NOT the last font size used
+	    # (current_prop), but carried-along current font size.
+	    my $newval = _fs2pt($properties[-1]->{'font-size'}, 
+	                        $properties[-1]->{'_fs'});
+	    $properties[-1]->{'_fs'} = $newval;  # remember it!
+	    # newval is the latest requested size (in points), while
+	    # current_prop is last one used for output (in points)
+	    if ($newval != $current_prop->{'font-size'}) {
+	        $call_get_font = 1;
+		$current_prop->{'font-size'} = $newval;
+	    }
 	    # any size as a percentage of font-size will use the current fs
 	    my $fs = $current_prop->{'font-size'};
 
@@ -2164,12 +2246,16 @@ sub _output_text {
 	    $current_prop->{'text-indent'} = _size2pt($properties[-1]->{'text-indent'}, $fs);
 	    $current_prop->{'text-decoration'} = $properties[-1]->{'text-decoration'};
 	    $current_prop->{'margin-top'} = _size2pt($properties[-1]->{'margin-top'}, $fs);
+	    # the incremental right margin, and the running total
 	    $current_prop->{'margin-right'} = _size2pt($properties[-1]->{'margin-right'}, $fs);
+	    $properties[-1]->{'_right'} += $current_prop->{'margin-right'};
 	    $current_prop->{'margin-bottom'} = _size2pt($properties[-1]->{'margin-bottom'}, $fs);
+	    # the incremental left margin, and the running total
 	    $current_prop->{'margin-left'} = _size2pt($properties[-1]->{'margin-left'}, $fs);
-	    # line-height is expected to be a multiplier to font-size, so
+	    $properties[-1]->{'_left'} += $current_prop->{'margin-left'};
+	    # text-height is expected to be a multiplier to font-size, so
 	    # % or pts value would have to be converted back to ratio TBD
-	    $current_prop->{'line-height'} = $properties[-1]->{'line-height'};
+	    $current_prop->{'text-height'} = $properties[-1]->{'text-height'};
 	    $current_prop->{'display'} = $properties[-1]->{'display'};
 	    $current_prop->{'list-style-type'} = $properties[-1]->{'list-style-type'};
 	    $current_prop->{'list-style-position'} = $properties[-1]->{'list-style-position'};
@@ -2181,8 +2267,9 @@ sub _output_text {
 	    # if botm (bottom margin of previous block) != 0pt, get larger
 	    # of the two and move start of block down by that amount.
 	    $topm = $current_prop->{'margin-top'};
-	    if ($botm < $topm) { $botm = $topm; }
-	    $start_y -= $botm; # could be too low for a new line!
+            my $vmargin = $botm;
+	    if ($botm < $topm) { $vmargin = $topm; }
+	    $start_y -= $vmargin; # could be too low for a new line!
 	    # will set botm to new margin-bottom after this block is done
 
 	    # we're ready to roll, and output the actual text itself
@@ -2193,8 +2280,14 @@ sub _output_text {
 	    # mytext element at the x,y it left off. otherwise, unused portion
 	    # of phrase (remainder) becomes the next element to process.
 	    $phrase = $mytext[$el]->{'text'}; # there should always be a text
-	    # text_pre was set in li tag processing
-	    $phrase = $text_pre.$phrase;
+	    # $list_marker was set in li tag processing
+	    # if $list_depth > 0, use $marker_width additional left margin
+	    #   calculate $marker_width if 0 from current font and size 
+	    #   _marker('decimal', 1, 888, $prop top _marker-before/after)
+	    #   note that ol is bold, ul is Symbol (replace macros .disc, etc.).
+	    #   content of li is with new left margin. first line ($list_marker
+	    #   ne '') text_right of $list_marker at left margin of li text.
+	    #   then set $list_marker to '' to cancel out until next li.
 	    $remainder = '';
 
 	    # for now, all whitespace convert to single blanks 
@@ -2228,7 +2321,8 @@ sub _output_text {
 
 	            # extents above and below the baseline (so far)?
 	            ($asc, $desc, $desc_leading) = 
-	                _get_fv_extents($pdf, $font_size, $leading);
+	                _get_fv_extents($pdf, $font_size, 
+				        $properties[-1]->{'text-height'});
 	            $next_y = $start_y - $add_y - $asc + $desc_leading;
 	            # did we go too low? will return -1 (start_x) and 
 		    #   remainder of input
@@ -2243,6 +2337,8 @@ sub _output_text {
 		    #   any paragraph top margin to drop further. note that this
 		    #   is just the starting point -- the line could get taller
                     ($x,$y, $width) = _get_baseline($y, @outline);
+		    $x += $properties[-1]->{'_left'};
+		    $width -= $properties[-1]->{'_left'} + $properties[-1]->{'_right'};
                     $endx = $x + $width;
 	            # at this point, we have established the next baseline 
 		    #   (x,y start and width/end x). fill this line.
@@ -2252,6 +2348,57 @@ sub _output_text {
 		    $full_line = 1;
 	        }
     	
+		# if this is a <li>, there may be non-empty $list_marker to add
+		if ($list_marker ne '') {
+		    # we have a <li> list marker to add (bold for <ol>, Symbol
+		    # font for <ul>, blank for <sl>)
+		    #
+		    # first step is to get marker_width if it is still 0
+		    # use ol 8888 in bold, with prefix and suffix
+                    $properties[-1]->{'_left'} += $marker_width;
+
+		    # output the marker. x,y is the upper left baseline of
+		    #   the <li> text, so text_right() the marker
+		    if ($list_marker =~ m/^\./) {
+			# it's a symbol for <ul>. 50% size, +y by 33% size
+			# add doubled space at end (font size 50%).
+			# TBD url image and other character symbols (possibly
+			#     in other than Zapf Dingbats). 
+			if      ($list_marker eq '.disc') {
+			    $list_marker = chr(108).'  ';
+			} elsif ($list_marker eq '.circle') {
+			    $list_marker = chr(109).'  ';
+			} elsif ($list_marker eq '.square') {
+			    $list_marker = chr(110).'  ';
+			} elsif ($list_marker eq '.box') {
+			    $list_marker = chr(111).'  '; # non-standard
+			}
+                        $text->font($pdf->get_font(
+		            'face' => 'ZapfDingbats',
+		            'italic' => 0, 'bold' => 0,
+		                                  ), 0.5*$fs); 
+			$text->translate($x,$y+0.15*$fs);
+			$text->text_right($list_marker);
+		    } else {
+			# it's a count for <ol>. use bold. TBD CSS for weight
+                        $text->font($pdf->get_font(
+		            'face' => $current_prop->{'font-family'},
+		            'italic' => 0, 'bold' => 1,
+		                                  ), $fs); 
+			$text->translate($x,$y);
+			$text->text_right($list_marker);
+		    }
+
+		    # clear the marker so must be redefined for next <li>
+		    $list_marker = '';
+		    # restore font to requested one
+                    $text->font($pdf->get_font(
+		        'face' => $current_prop->{'font-family'}, 
+		        'italic' => ($current_prop->{'font-style'} eq 'normal')? 0: 1, 
+		        'bold' => ($current_prop->{'font-weight'} eq 'normal')? 0: 1, 
+		                              ), $fs); 
+		}
+
 		# have a phrase to attempt to add to output, and an
 		#   x,y to start it at (tentative if start of line)
 	        my $w = $text->advancewidth($phrase);
@@ -2438,7 +2585,7 @@ sub _init_current_prop {
     # NOTE that all lengths must be in points (unitless), ratios are
     # pure numbers, named things are strings.
     $cur_prop->{'font-size'} = -1;
-    $cur_prop->{'line-height'} = 0;
+    $cur_prop->{'text-height'} = 0;
     $cur_prop->{'text-indent'} = 0;
     $cur_prop->{'color'} = 'black'; # PDF default
     $cur_prop->{'font-family'} = 'yoMama';  # force a change
@@ -2456,8 +2603,10 @@ sub _init_current_prop {
    #$cur_prop->{'border-color'} = 'inherit'; 
     $cur_prop->{'text-decoration'} = 'none';
     $cur_prop->{'display'} = 'block';
-    $cur_prop->{'list-style-type'} = 'disc';
+    $cur_prop->{'list-style-type'} = '.u';
     $cur_prop->{'list-style-position'} = 'outside';
+    $cur_prop->{'_marker-before'} = ''; 
+    $cur_prop->{'_marker-after'} = '.'; 
     $cur_prop->{'_href'} = '';
     
     return $cur_prop;
@@ -3103,6 +3252,78 @@ sub _size2pt {
 
     return 0; # should not get to here
 } # end of _size2pt()
+
+# create ordered or unordered list item marker
+# for ordered, returns $prefix.formatted_value.$suffix.blank
+# for unordered, returns string .disc, .circle, .square, or .box
+#   (.box is nonstandard marker)
+sub _marker {
+    my ($type, $depth, $value, $prefix, $suffix) = @_; 
+                                     # type = list-style-type, 
+                                     # depth = 1, 2,... nesting level,
+				     # (following ordered list only):
+				     #   value = counter (start)
+				     #   prefix = text before formatted value
+				     #    default ''
+				     #   suffix = text after formatted value
+				     #    default '.'
+    if (!defined $suffix) { $suffix = '.'; }
+    if (!defined $prefix) { $prefix = ''; }
+
+    my $output = '';
+    if      ($type eq 'decimal') {
+	$output = "$prefix$value$suffix ";
+    } elsif ($type eq 'upper-roman' || $type eq 'lower-roman') {
+	while ($value >= 1000) { $output .= 'M';  $value -= 1000; }
+	if ($value >= 900)     { $output .= 'CM'; $value -= 900;  }
+	if ($value >= 500)     { $output .= 'D';  $value -= 500;  }
+	if ($value >= 400)     { $output .= 'CD'; $value -= 500;  }
+	while ($value >= 100)  { $output .= 'C';  $value -= 100;  }
+	if ($value >= 90)      { $output .= 'XC'; $value -= 90;   }
+	if ($value >= 50)      { $output .= 'L';  $value -= 50;   }
+	if ($value >= 40)      { $output .= 'XL'; $value -= 40;   }
+	while ($value >= 10)   { $output .= 'X';  $value -= 10;   }
+	if ($value == 9)       { $output .= 'IX'; $value -= 9;    }
+	if ($value >= 5)       { $output .= 'V';  $value -= 5;    }
+	if ($value == 4)       { $output .= 'IV'; $value -= 4;    }
+	while ($value >= 1)    { $output .= 'I';  $value -= 1;    }
+        if ($type eq 'lower-roman') { $output = lc($output); }
+	$output = "$prefix$output$suffix ";
+    } elsif ($type eq 'upper-alpha' || $type eq 'lower-alpha') {
+	my $n;
+	while ($value) {
+	    $n = ($value - 1)%26; # least significant letter digit 0..25
+	    $output = chr(ord('A') + $n) . $output;
+	    $value -= ($n+1);
+	    $value /= 26;
+	}
+        if ($type eq 'lower-alpha') { $output = lc($output); }
+	$output = "$prefix$output$suffix ";
+    } elsif ($type eq 'disc') {
+	$output = '.disc';
+    } elsif ($type eq 'circle') {
+	$output = '.circle';
+    } elsif ($type eq 'square') {
+	$output = '.square';
+    } elsif ($type eq 'box') {  # non-standard
+	$output = '.box';
+    } elsif ($type eq '.u') { # default for unordered list at this depth
+	if      ($depth == 1) {
+	    $output = '.disc';
+	} elsif ($depth == 2) {
+	    $output = '.circle';
+	} elsif ($depth >= 3) {
+	    $output = '.square';
+        }
+    } elsif ($type eq '.o') { # default for ordered list at this depth
+	$output = "$prefix$value$suffix "; # decimal
+    } else {
+	# unknown. use disc
+	$output =  '.disc';
+    }
+
+    return $output;
+} # end of _marker()
 
 # just something to pause during debugging
 sub  _pause {

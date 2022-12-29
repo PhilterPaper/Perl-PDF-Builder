@@ -10,6 +10,7 @@ use PDF::Builder;
 our $LAST_UPDATE = '3.024_002'; # manually update whenever code is changed
 
 my $use_Table = 1; # if 1, use PDF::Table for table example
+# TBD automatically check if PDF::Table available, and if so, use it
 
 my $pdf = PDF::Builder->new();
 my $content;
@@ -22,7 +23,6 @@ my $magenta = '#ff00ff';
 my $fs = 15;
 my ($rc, $next_y, $unused);
 
-#if (0) { ###############
 print "======================================================= pg 1\n";
 $page = $pdf->page();
 $text = $page->text();
@@ -221,9 +221,7 @@ restore_props($text, $grfx);
 if ($rc) { 
     print STDERR "Lorem Ipsum string overflowed the column!\n";
 }
-#} ###############
 
-#if (1) { ###############
 # customer sample Markdown
 print "======================================================= pg 4\n";
 print "Customer sample Markdown and Table\n";
@@ -433,11 +431,9 @@ if ($use_Table) {
     $grfx->strokecolor('black');
     $grfx->stroke();
 }
-#} ###############
 
-#if (0) { ###############
 # more pages with more extensive MD
-print "======================================================= pg 5+\n";
+print "======================================================= pg 5-7\n";
 print "A README.md file for PDF::Builder\n";
 $page = $pdf->page();
 $text = $page->text();
@@ -619,7 +615,193 @@ while ($rc) {
 		      'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
 		      'para'=>[ 0, 0 ] );
 }
-#} ###############
+
+# a variety of lists over multiple pages
+print "======================================================= pg 8\n";
+print "A variety of lists\n";
+$page = $pdf->page();
+$text = $page->text();
+$grfx = $page->gfx();
+
+$content = <<"END_OF_CONTENT";
+<h2>Unordered (bulleted) lists with various markers</h2>
+<ul> <!-- default disc -->
+  <li>Unordered 1A, disc</li>
+  <li>Unordered 1B
+  <ul> <!-- default circle -->
+    <li>Unordered 2A, circle</li>
+    <li>Unordered 2B
+    <ul> <!-- default (filled) square -->
+      <li>Unordered 3A, square</li>
+      <li>Unordered 3B
+      <ul style="list-style-type: box"> <!-- box (open square) -->
+        <li>Unordered 4A, box</li>
+        <li>Unordered 4B
+        <ul style="list-style-type: disc"> <!-- and back to disc -->
+          <li>Unordered 5A, disc</li>
+          <li>Unordered 5B</li>
+	</ul>
+	<ul> <!-- default (filled) square) -->
+          <li>Unordered 6A, square</li>
+          <li>Unordered 6B</li>
+	</ul></li>
+      </ul></li>
+    </ul></li>
+  </ul></li>
+</ul>
+
+<h2>Ordered (numbered) lists with various markers</h2>
+<ol> <!-- default decimal -->
+  <li>Ordered 1A, decimal 1., 2.</li>
+  <li>Ordered 1B
+  <ol style="list-style-type: upper-roman"> <!-- I, II, III, IV -->
+    <li>Ordered 2A, upper-roman I., II.</li>
+    <li>Ordered 2B
+    <ol style="list-style-type: upper-alpha"> <!-- A, B, C, D -->
+      <li>Ordered 3A, upper-alpha A., B.</li>
+      <li>Ordered 3B
+      <ol style="list-style-type: lower-roman"> <!-- i, ii, iii, iv -->
+        <li>Ordered 4A, lower-roman i., ii.</li>
+        <li>Ordered 4B
+        <ol style="list-style-type: lower-alpha"> <!-- a, b, c, d -->
+          <li>Ordered 5A lower-alpha a., b.</li>
+          <li>Ordered 5B</li>
+	</ol>
+        <ol> <!-- default decimal -->
+          <li>Ordered 6A, decimal 1., 2.</li>
+          <li>Ordered 6B</li>
+	</ol></li>
+      </ol></li>
+    </ol></li>
+  </ol></li>
+</ol>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ] );
+if ($rc) {
+    print STDERR "list example overflowed column!\n";
+}
+
+print "======================================================= pg 9\n";
+print "More list examples\n";
+$page = $pdf->page();
+$text = $page->text();
+$grfx = $page->gfx();
+
+$content = <<"END_OF_CONTENT";
+<h2>Mixture of ordered and unordered with default markers</h2>
+<ol> <!-- default decimal -->
+  <li>Ordered 1A, decimal 1., 2.</li>
+  <li>Ordered 1B
+  <ul> <!-- default circle -->
+    <li>Unordered 2A, circle</li>
+    <li>Unordered 2B
+    <ol> <!-- default decimal -->
+      <li>Ordered 3A, decimal 1., 2.</li>
+      <li>Ordered 3B
+      <ul> <!-- default (filled) square -->
+        <li>Unordered 4A, square</li>
+        <li>Unordered 4B
+        <ol> <!-- default decimal -->
+          <li>Ordered 5A, decimal 1., 2.</li>
+          <li>Ordered 5B</li>
+	</ol>
+        <ul> <!-- default (filled) square -->
+          <li>Unordered 6A, square</li>
+          <li>Unordered 6B</li>
+	</ul></li>
+      </ul></li>
+    </ol></li>
+  </ul></li>
+</ol>
+
+<!-- TBD position inside/outside
+<h2>list-style-position inside and outside, with multiline li's</h2>
+-->
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[50,750, 500,450], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ] );
+if ($rc) {
+    print STDERR "list example overflowed column!\n";
+}
+
+# try nesting in Markdown
+$content = <<"END_OF_CONTENT";
+## Try nested Markdown entries (manually indent items)
+
+1. This is a numbered list unnested.
+2. This is another item in the numbered list.
+   - This is a first nested level bulleted list.
+     - This is a further nested bulleted list.
+     - And a second item.
+   - Back to first nested level bulleted list
+3. One last numbered list item
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'md1', $content, 
+	          'rect'=>[50,250, 500,200], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ] );
+if ($rc) {
+    print STDERR "list example overflowed column!\n";
+}
+
+# block quotes
+print "======================================================= pg 10\n";
+print "Block quotes\n";
+$page = $pdf->page();
+$text = $page->text();
+$grfx = $page->gfx();
+
+$content = <<"END_OF_CONTENT";
+<h2>Block Quote (left and right margins)</h2>
+<p>Sed ut perspiciatis, &mdash; unde omnis iste natus error sit 
+voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, 
+quae ab illo inventore veritatis et quasi architecto beatae vitae dicta 
+sunt, explicabo. Nemo enim ipsam voluptatem, quia voluptas sit, aspernatur 
+aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione 
+dolor sit, voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem 
+ipsum, quia amet, consectetur, adipisci velit, sed quia non numquam eius 
+modi tempora incidunt, ut labore et dolore magnam aliquam quaerat 
+voluptatem.</p>
+<blockquote>Ut enim ad minima veniam, quis nostrum exercitationem ullam 
+corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? 
+Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam 
+nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas 
+nulla pariatur?
+At vero eos et accusamus et iusto odio dignissimos ducimus, 
+qui blanditiis praesentium voluptatum deleniti atque corrupti, quos dolores 
+et quas molestias excepturi sint, obcaecati cupiditate non provident, 
+similique sunt in culpa, qui officia deserunt mollitia animi, id est laborum 
+et dolorum fuga.</blockquote>
+<p>Sed ut perspiciatis, unde omnis iste natus error sit 
+voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, 
+quae ab illo inventore veritatis et quasi architecto beatae vitae dicta 
+sunt, explicabo. Nemo enim ipsam voluptatem, quia voluptas sit, aspernatur 
+aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione 
+dolor sit, voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem 
+ipsum, quia amet, consectetur, adipisci velit, sed quia non numquam eius 
+modi tempora incidunt, ut labore et dolore magnam aliquam quaerat 
+voluptatem.</p>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[50,750, 500,300], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ] );
+if ($rc) { 
+    print STDERR "Block quotes example overflowed column!\n";
+}
 
 # ---------------------------------------------------------------------------
 # end of program
