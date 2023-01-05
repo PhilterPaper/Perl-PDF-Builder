@@ -2,7 +2,31 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.025     2022-12-26  UNRELEASED
+3.025     2023-01-04  UNRELEASED
+
+    ===== many thanks to MyActiv Ltd. for sponsoring this work!
+    lib/PDF/Builder/Content/Text.pm, examples/README, examples/examples_output,
+      examples/Column.pl (new), MANIFEST, tools/3_examples.pl
+     Add column() function to Content::Text, to support markup (none, Markdown,
+      and HTML) in arbitrary columns. Note that PDF::Table will also support
+      column(), but only when using PDF::Builder.
+*   At the moment, this is PRELIMINARY work -- not finished!
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/FontManager.pm (new), examples/README,
+      examples/examples_output, examples/FontManager.pl (new), MANIFEST,
+      tools/3_examples.pl
+     Add a Font Manager to be able to select a font simply by giving the "face"
+      and whether bold and/or italics are to be used. The actual font setting
+      (with font size) is still done with $text->font($font, $size), but
+      instead of having to explicitly create (or reuse) a $font, that part is
+      all handled for you. It does not depend on any OS-provided font manager
+      libraries (such as Linux provides, but Windows does not). Except for
+      the core fonts, your application has to specify the base font and the
+      files to use for italic, bold, etc.
+    ===== end of sponsored work
+
+    README.md, LICENSE, lib/PDF/Builder.pm, examples/Column.pl
+     Change copyright to 2023.
 
     META.json, META.yml
      Remove "provides" entries because 1) they do not seem to survive the
@@ -77,26 +101,6 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
       args was even could this be detected. An odd number of args, plus the
       location string, would be indistinguishable from a hash list, one of 
       which may follow (as options) the location+args list. Ref: #190.
-
-*   ===== many thanks to MyActiv Ltd for sponsoring this work!
-    lib/PDF/Builder/Content/Text.pm, examples/README, examples/examples_output,
-      examples/Column.pl (new), MANIFEST, tools/3_examples.pl
-     Add column() function to Content::Text, to support markup (none, Markdown,
-      and HTML) in arbitrary columns.
-*   At the moment, this is PRELIMINARY work -- not finished!
-
-    lib/PDF/Builder.pm, lib/PDF/Builder/FontManager.pm (new), examples/README,
-      examples/examples_output, examples/FontManager.pl (new), MANIFEST,
-      tools/3_examples.pl
-     Add a Font Manager to be able to select a font simply by giving the "face"
-      and whether bold and/or italics are to be used. The actual font setting
-      (with font size) is still done with $text->font($font, $size), but
-      instead of having to explicitly create (or reuse) a $font, that part is
-      all handled for you. It does not depend on any OS-provided font manager
-      libraries (such as Linux provides, but Windows does not). Except for
-      the core fonts, your application has to specify the base font and the
-      files to use for italic, bold, etc.
-    ===== end of sponsored work
 
     lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm
      Typo fixed.

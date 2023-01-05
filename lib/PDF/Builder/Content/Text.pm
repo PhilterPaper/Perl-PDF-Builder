@@ -1181,10 +1181,10 @@ and CSS. Currently, HTML tags
     'p' (paragraph),
     'font' (font face->font-family, color, size->font-size), 
     'span' (needs style= attribute with CSS to do anything useful), 
-    'ul', 'ol', 'li' (bulleted, numbered lists, currently NO NESTING)), 
+    'ul', 'ol', 'li' (bulleted, numbered lists), 
     'img' (TBD, image, empty. hspace->margin-left/right, 
            vspace->margin-top/bottom, width, height), 
-    'a' (anchor/link), 
+    'a' (anchor/link, web page target), 
     'pre', 'code' (TBD, preformatted and code blocks),
     'h1' through 'h6' (headings)
     'hr' (TBD, horizontal rule, empty. align, size->linewidth, width)
@@ -1242,11 +1242,10 @@ Non-standard CSS "properties". You normally would not set these in CSS:
     _right (running number of points to indent on the right, from margin-right)
 
 Sizes may be '%' (of font-size), or 'pt' (the default unit). 
-TBD A margin-left or -right may be 'auto' for centering purposes. 
 More support may be added over time.
 
-Numeric entities (decimal &#nnn; and hexadecimal
-&#xnnn;) are supported (named entities are planned for later support).
+Numeric entities (decimal &#nnn; and hexadecimal &#xnnn;) are supported, 
+as well as named entities (&mdash; for example).
 
 The input B<txt> is a list (anonymous array reference) of strings, each 
 containing one or more paragraphs and other markup. A single string may also be 
@@ -1711,38 +1710,38 @@ sub _default_css {
    #$style{'h6'}->{'text-transform'} = 'uppercase'; # heading this level CAPS
     $style{'h6'}->{'font-weight'} = 'bold'; # all headings bold
     $style{'h6'}->{'font-size'} = '75%'; # % of original font-size
-    $style{'h6'}->{'margin-top'} = '267%'; # relative to the font-size
-    $style{'h6'}->{'margin-bottom'} = '267%'; # relative to the font-size
+    $style{'h6'}->{'margin-top'} = '200%'; # relative to the font-size
+    $style{'h6'}->{'margin-bottom'} = '200%'; # relative to the font-size
     $style{'h6'}->{'display'} = 'block'; # block (start on new line)
 
     $style{'h5'}->{'font-weight'} = 'bold';
     $style{'h5'}->{'font-size'} = '85%';
-    $style{'h5'}->{'margin-top'} = '235%';
-    $style{'h5'}->{'margin-bottom'} = '235%';
+    $style{'h5'}->{'margin-top'} = '175%';
+    $style{'h5'}->{'margin-bottom'} = '.35%';
     $style{'h5'}->{'display'} = 'block';
 
     $style{'h4'}->{'font-weight'} = 'bold';
     $style{'h4'}->{'font-size'} = '100%';
-    $style{'h4'}->{'margin-top'} = '200%';
-    $style{'h4'}->{'margin-bottom'} = '200%';
+    $style{'h4'}->{'margin-top'} = '150%';
+    $style{'h4'}->{'margin-bottom'} = '150%';
     $style{'h4'}->{'display'} = 'block';
 
     $style{'h3'}->{'font-weight'} = 'bold';
     $style{'h3'}->{'font-size'} = '115%';
-    $style{'h3'}->{'margin-top'} = '174%';
-    $style{'h3'}->{'margin-bottom'} = '174%';
+    $style{'h3'}->{'margin-top'} = '130%';
+    $style{'h3'}->{'margin-bottom'} = '130%';
     $style{'h3'}->{'display'} = 'block';
 
     $style{'h2'}->{'font-weight'} = 'bold';
     $style{'h2'}->{'font-size'} = '150%';
-    $style{'h2'}->{'margin-top'} = '133%';
-    $style{'h2'}->{'margin-bottom'} = '133%';
+    $style{'h2'}->{'margin-top'} = '100%';
+    $style{'h2'}->{'margin-bottom'} = '100%';
     $style{'h2'}->{'display'} = 'block';
 
     $style{'h1'}->{'font-weight'} = 'bold';
     $style{'h1'}->{'font-size'} = '200%';
-    $style{'h1'}->{'margin-top'} = '100%';
-    $style{'h1'}->{'margin-bottom'} = '100%';
+    $style{'h1'}->{'margin-top'} = '75%';
+    $style{'h1'}->{'margin-bottom'} = '75%';
     $style{'h1'}->{'display'} = 'block';
 
     $style{'i'}->{'font-style'} = 'italic';
@@ -1768,6 +1767,10 @@ sub _default_css {
     $style{'strike'}->{'text-decoration'} = 'line-through';
     $style{'del'}->{'display'} = 'inline';
     $style{'del'}->{'text-decoration'} = 'line-through';
+
+    # non-standard tag for overline (TBD, not supported yet)
+   #$style{'ovl'}->{'display'} = 'inline';
+   #$style{'ovl'}->{'text-decoration'} = 'overline';
 
     $style{'blockquote'}->{'display'} = 'block';
     $style{'blockquote'}->{'margin-top'} = '56%';
@@ -1873,7 +1876,7 @@ sub _output_text {
     # leading is the default leading ratio to use.
     # mytext is the array of hashes containing tags, attributes, and text.
       
-    my ($x,$y, $width, $endx); # current position of text
+    my ($start_x, $x,$y, $width, $endx); # current position of text
     my ($asc, $desc, $desc_leading); 
     my $next_y = $start_y;
     # we loop to fill next line, starting with a y position baseline set when
@@ -1886,6 +1889,8 @@ sub _output_text {
 		       # level display (treat like a paragraph)
     my $add_x = 0; # amount to add for indent
     my $add_y = 0; # amount to drop for first line's top margin
+    my @line_extents = (); # for dealing with changes to vertical extents
+                           # changes mid-line
 
     my $start = 1; # counter for ordered lists
     my $list_depth = 0; # nesting level of ol and ul
@@ -1927,10 +1932,14 @@ sub _output_text {
 		# do something that isn't just a property change
 
                 # special directives such as TBD
-		# <endc> force end of column here
+		# <endc> force end of column here (while still filling line)
+		#   e.g., to prevent an orphan
 		# <nolig></nolig> forbid ligatures in this range
 		# <lig gid='nnn'> </lig> replace character(s) by a ligature
 		# <alt gid='nnn'> </alt> replace character(s) by alternate glyph
+		#   such as a swash. font-dependent
+		# <hyp>, <nohyp> control hypenation in a word (and remember
+		#   rules when see this word again)
 
 	        # 1. dup the top of the properties stack for a new set of
 	        #   properties to be modified by attributes and CSS
@@ -2013,8 +2022,6 @@ sub _output_text {
 	       #if ($tag eq 'font') { } face already renamed to font-family,
 	       #                        size already renamed to font-size, color
 	       #if ($tag eq 'span') { } needs style= or <style> to be useful
-	       # initially no nesting for lists. ul and ol just set up things;
-	       #   li actually does marker output and sets up paragraph for text
 	        if ($tag eq 'ul') { 
 		    $list_depth++;
 		}
@@ -2056,8 +2063,8 @@ sub _output_text {
 	       #                        constant width 75% font-size
 	       #if ($tag eq 'blockquote') { } 
                 if ($tag eq 'li') {
-	            $properties[-1]->{'_left'} += $marker_width 
-		        if $list_depth == 1;
+		    # indent each list level by same amount
+	            $properties[-1]->{'_left'} += $marker_width;
                 }
                # treat headings as paragraphs
 	       #if ($tag eq 'h1') { }  align
@@ -2336,26 +2343,51 @@ sub _output_text {
 	            # how tall is the line? need to set baseline. add_y is
 		    #   any paragraph top margin to drop further. note that this
 		    #   is just the starting point -- the line could get taller
-                    ($x,$y, $width) = _get_baseline($y, @outline);
-		    $x += $properties[-1]->{'_left'};
+                    ($start_x,$y, $width) = _get_baseline($y, @outline);
+                    # need to increase start_x, or list too far left
+		    $start_x += $properties[-1]->{'_left'};
 		    $width -= $properties[-1]->{'_left'} + $properties[-1]->{'_right'};
-                    $endx = $x + $width;
+                    $endx = $start_x + $width;
+		    $x = $start_x;
 	            # at this point, we have established the next baseline 
 		    #   (x,y start and width/end x). fill this line.
 		    $x += $add_x; $add_x = 0; # indent
 		    $add_y = 0; # para top margin extra
 		    $need_line = 0;
 		    $full_line = 1;
+
+                    # stuff to remember if need to shift line down due to 
+		    #   vertical extents increase
+		    @line_extents = ();
+		    push @line_extents, $start_x; # current baseline's start
+		    push @line_extents, $x; # current baseline 
+		    # note that $x advances with each write
+		    push @line_extents, $y;
+		    push @line_extents, $width;
+		    push @line_extents, $endx;
+		    push @line_extents, $next_y;
+		    push @line_extents, $asc; # current vertical extents
+		    push @line_extents, $desc;
+		    push @line_extents, $desc_leading;
+		    push @line_extents, $text;
+		    push @line_extents, length($text->{' stream'});
+	                         # where the current line starts in the stream
+		    push @line_extents, $start_y;
+		    push @line_extents, $min_y;
+		    push @line_extents, \@outline;
+		    push @line_extents, $properties[-1]->{'_left'};
+		    push @line_extents, $properties[-1]->{'_right'};
+
+		    # if starting a line, make sure no leading whitespace
+		    # TBD if pre, don't remove whitespace
+		    $phrase =~ s/^\s+//;
 	        }
     	
 		# if this is a <li>, there may be non-empty $list_marker to add
 		if ($list_marker ne '') {
 		    # we have a <li> list marker to add (bold for <ol>, Symbol
 		    # font for <ul>, blank for <sl>)
-		    #
-		    # first step is to get marker_width if it is still 0
-		    # use ol 8888 in bold, with prefix and suffix
-                    $properties[-1]->{'_left'} += $marker_width;
+		    # without this increase of _left, lists don't nest
 
 		    # output the marker. x,y is the upper left baseline of
 		    #   the <li> text, so text_right() the marker
@@ -2404,21 +2436,41 @@ sub _output_text {
 	        my $w = $text->advancewidth($phrase);
 
 	        if ($x + $w <= $endx) {
+		    my $rc;
 	            # no worry, the entire phrase fits (case 1.)
-		    # TBD: only dummy at this point, as extents might increase, dropping baseline and perhaps changing linewidth
 	            $text->translate($x,$y);
+		    # y (and possibly x) might change if extents change
+		    my %lines;
 		    if ($current_prop->{'text-decoration'} ne 'none') {
 			# supported: underline, line-through, overline
 			# may be a combination
-			my %lines;
 			$lines{'strokecolor'} = $current_prop->{'color'};
 			if ($current_prop->{'text-decoration'} =~ m#underline#) { $lines{'underline'} = 'auto'; }
 			if ($current_prop->{'text-decoration'} =~ m#line-through#) { $lines{'strikethru'} = 'auto'; }
 			if ($current_prop->{'text-decoration'} =~ m#overline#) { $lines{'overline'} = 'auto'; } # TBD
-	                $text->text($phrase, %lines); # only build up dry run list
 		    } else {
-	                $text->text($phrase); # only build up dry run list
+			%lines = (); # no options at this time
 		    }
+		    # before writing a new phrase with possibly increased
+		    # extents, see if new baseline needed
+	            # extents above and below the baseline (so far)?
+	            my ($n_asc, $n_desc, $n_desc_leading) = 
+	                _get_fv_extents($pdf, $current_prop->{'font-size'}, 
+				        $properties[-1]->{'text-height'});
+		    $line_extents[1] = $x;  # current position
+		    ($rc, @line_extents) = 
+		        _revise_baseline(@line_extents, $n_asc, $n_desc, $n_desc_leading, $text->advancewidth($phrase));
+		    ($start_x, $x, $y, $width, $endx, $next_y, 
+			$asc, $desc, $desc_leading)
+		        = @line_extents; # only parts which might have changed
+		    # if rc == 0, line successfully moved down page
+		    # if rc == 1, existing line moved down, but need to check if
+		    #             still room for $phrase
+		    # if rc == 2, current written line doesn't fit narrower line
+		    # if rc == 3, revised line won't fit in column! (vertically)
+		    # TBD need to check $rc once column width can vary
+	            $text->text($phrase, %lines);
+
                     if ($current_prop->{'_href'} ne '') {
 			# this text is a link, so need to make an annot. link
 			# $x,$y is baseline left, $w is width
@@ -2613,6 +2665,9 @@ sub _init_current_prop {
 } # end of _init_current_prop()
 
 # update a properties hash for a specific selector (all, if not given)
+# in all but a few cases, a higher level selector overrides a lower level by
+#   simply replacing the old content, but in some, property values are
+#   combined
 sub _update_properties {
     my ($target, $source, $selector) = @_;
 
@@ -2627,7 +2682,19 @@ sub _update_properties {
     if (defined $selector) {
         if (defined $source->{$selector}) {
 	    foreach (keys %{$source->{$selector}}) {
-                $target->{$_} = $source->{$selector}->{$_};
+		# $selector e.g., 'u' for underline
+		# $_ is property name, e.g., 'text-decoration'
+		# special treatment for text-decoration
+		if ($_ eq 'text-decoration') {
+		    # 'none' is overwritten, but subsequent values appended
+		    if (defined $target->{$_} && $target->{$_} ne 'none') {
+			$target->{$_} .= " $source->{$selector}->{$_}";
+		    } else {
+                        $target->{$_} = $source->{$selector}->{$_};
+		    }
+		} else {
+                    $target->{$_} = $source->{$selector}->{$_};
+		}
             }
 	}
     } else { # selector not defined (use all)
@@ -3307,6 +3374,8 @@ sub _marker {
 	$output = '.square';
     } elsif ($type eq 'box') {  # non-standard
 	$output = '.box';
+    } elsif ($type eq 'none') {
+	$output = '.none';
     } elsif ($type eq '.u') { # default for unordered list at this depth
 	if      ($depth == 1) {
 	    $output = '.disc';
@@ -3324,6 +3393,149 @@ sub _marker {
 
     return $output;
 } # end of _marker()
+
+# stuff to remember if need to shift line down due to extent increase
+# @line_extents array:
+#   $start_x # fixed start of current baseline
+#   $x # current baseline offset to write at
+#        note that $x changes with each write 
+#   $y
+#   $width
+#   $endx
+#   $next_y # where next line will start (may move down)
+#   $asc # current vertical extents
+#   $desc
+#   $desc_leading
+#   $text # text context (won't change)
+#   length($text->{' stream'}) # where the current line starts in the stream
+#                              # (won't change)
+#   TBD add $grfx graphics context if necessary, and its current length
+#   $start_y # very top of this line (won't change)
+#   $min_y # lowest allowable inked value (won't change)
+#   $outline # array ref to outline (won't change)
+#   $left_margin to shorten line (won't change)
+#   $right_margin to shorten line (won't change)
+# we do the asc/desc externally, as how to get them depends on whether it's
+#   a font change, an image or equation, or some other kind of inline object
+# $asc = new ascender (does it exceed the old one?)
+# $desc = new descender (does it exceed the old one?)
+# $desc_leading = new descender with leading (does it exceed the old one?)
+# $text_w = width of text ($phrase) to be written
+# returns $rc = 0: all OK, line fits with no change to available space
+#               1: OK, but available space reduced, so need to recheck
+#               2: problem -- existing line (already written) won't fit in
+#                             shorter line, much less space for new text
+#               3: problem -- line now runs off bottom of column
+#         @line_extents, with some entries revised
+sub _revise_baseline {
+    my ($o_start_x, $o_x, $o_y, $o_width, $o_endx, $o_next_y, $o_asc, $o_desc,
+	$o_desc_leading, $text, $line_start_offset, $start_y, $min_y,
+	$outline, $margin_left, $margin_right, 
+	$asc, $desc, $desc_leading, $text_w) = @_;
+    
+    my $rc = 0; # everything OK so far
+    # items which may change (remembering initial/old values)
+    my $start_x = $o_start_x; # line's original starting x
+    my $x = $o_x; # current x position
+    my $y = $o_y;
+    my $width = $o_width;
+    my $endx = $o_endx;
+    my $next_y = $o_next_y;
+    # may change, but supplied separately
+    # $asc = $o_asc;
+    # $desc = $o_desc;
+    # $desc_leading = $o_desc_leading;
+
+    my $need_revise = 0;
+    # determine whether we need to revise baseline due to extent increases
+    if ($asc > $o_asc) {
+	$need_revise = 1;
+    } else {
+	$asc = $o_asc;
+    }
+    if ($desc < $o_desc) { # desc and desc_leading are negative values
+	$need_revise = 1;
+    } else {
+	$desc = $o_desc;
+    }
+    if ($desc_leading < $o_desc_leading) {
+	$need_revise = 1;
+    } else {
+	$desc_leading = $o_desc_leading;
+    }
+
+    if ($need_revise) {
+	# in middle of line, add_x and add_y are 0
+	# start_y is unchanged, but asc, desc may have increased
+	$next_y = $start_y - $asc + $desc_leading;
+	# did we go too low? will return -1 (start_x) and 
+	#   remainder of input
+	# don't include leading when seeing if line dips too low
+	if ($start_y - $asc + $desc < $min_y) {
+	    $rc = 3; # ran out of column (vertically) = we overflow column
+	             # off bottom if we go ahead and write any of new text
+	    # TBD instead just end line here (early), 
+	    #     go to next column for taller text we want to print
+        } else {
+	    # start_y and next_y are vertical extent of this line (revised)
+	    # y is the y value of the baseline (so far). lower it a bit.
+	    $y -= $asc - $o_asc;
+	    # start_x is baseline start (so far), x is current write position
+
+	    # how tall is the line? need to set baseline.
+            ($start_x,$y, $width) = _get_baseline($y, @$outline);
+	    $width -= $margin_left + $margin_right;
+            $endx = $start_x + $width;
+	    $x += $start_x - $o_start_x;
+
+	    # we don't know the nature of the new material attempting to add,
+	    #   so can't resolve insufficient space issues here
+	    if      ($x > $endx) {
+	        # if current (already written) line can't fit (due to much 
+		#     shorter line), rc = 2
+                $rc = 2;
+	    } elsif ($x + $text_w > $endx) {
+	        # if new text will overflow line, rc = 1
+		$rc = 1;
+	    } else { # should have room to write new text
+		$rc = 0;
+	    
+		# revise (move in x,y) any existing text in this line
+                my $i = $line_start_offset;
+		my $delta_x = $start_x - $o_start_x;
+		my $delta_y = $y - $o_y;
+                while(1) {
+                   $i = index($text->{' stream'}, ' Tm', $i+3);
+                   if ($i == -1) { last; }
+		   # $i is the position of a Tm command in the stream. the two
+		   # words before it are x and y position to write at.
+		   # $j is $i back up by two spaces
+		   my $j = rindex($text->{' stream'}, ' ', $i-1);
+		   $j = rindex($text->{' stream'}, ' ', $j-1) + 1;
+		   # $j points to first char of x, $i to one after last y char
+		   my $str1 = substr($text->{' stream'}, 0, $j);
+		   my $str2 = substr($text->{' stream'}, $i);
+		   my $old_string = substr($text->{' stream'}, $j, $i-$j);
+		   $old_string =~ m/^([^ ]+) ([^ ]+)$/;
+		   my $old_x = $1;
+		   my $old_y = $2;
+		   $old_x += $delta_x;
+		   $old_y += $delta_y;
+                   $text->{' stream'} = $str1."$old_x $old_y".$str2;
+                   # no need to change line_start_offset, but $i has to be 
+		   # adjusted to account for possible change in resulting 
+		   # position of Tm
+		   $i += length("$x $y") - ($i - $j);
+                } 
+	    }
+        }
+    }
+
+    return ($rc, $start_x, $x, $y, $width, $endx, $next_y, 
+	    $asc, $desc, $desc_leading, 
+            $text, $line_start_offset, $start_y, $min_y, $outline,
+            $margin_left, $margin_right);
+} # end of _revise_baseline()
 
 # just something to pause during debugging
 sub  _pause {

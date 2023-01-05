@@ -7,7 +7,7 @@ use PDF::Builder;
 # $Data::Dumper::Sortkeys = 1; # hash keys in sorted order
 
 # VERSION
-our $LAST_UPDATE = '3.024_002'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.024_003'; # manually update whenever code is changed
 
 my $use_Table = 1; # if 1, use PDF::Table for table example
 # TBD automatically check if PDF::Table available, and if so, use it
@@ -28,7 +28,7 @@ $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
 
-print "single string entries\n";
+print "---- single string entries\n";
 $text->column($page, $text, $grfx, 'none', 
 	      "This is a single string text.\n\nWith two paragraphs.", 
 	      'rect'=>[50,750, 500,50], 'outline'=>$magenta);
@@ -43,7 +43,7 @@ $text->column($page, $text, $grfx, 'html',
 	      "<p>This is a <i>single <b>string</b></i> HTML text.</p><p>With two paragraphs.</p>", 
 	      'rect'=>[50,550, 500,50], 'outline'=>$magenta);
 
-print "array of string entries\n";
+print "---- array of string entries\n";
 # should be two paragraphs, as a new array element starts a new paragraph
 restore_props($text, $grfx);
 $text->column($page, $text, $grfx, 'none', 
@@ -61,7 +61,7 @@ $text->column($page, $text, $grfx, 'html',
 	      'rect'=>[50,250, 500,50], 'outline'=>$magenta);
 
 restore_props($text, $grfx);
-print "pre array of hashes\n";
+print "---- pre array of hashes\n";
 $text->column($page, $text, $grfx, 'pre', [
 	{'text'=>'', 'tag'=>'style' }, # dummy style tag
 	{'text'=>'', 'tag'=>'p'},
@@ -90,7 +90,7 @@ $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
 
-print "single string entries\n";
+print "---- single string entries\n";
  
 restore_props($text, $grfx);
 multicol($page, $text, $grfx, 'none', 
@@ -107,7 +107,7 @@ multicol($page, $text, $grfx, 'html',
 	 "<p>This is a <i>single <b>string</b></i> HTML text.</p><p>Two paragraphs.</p>", 
 	 [50,550, 50,50], $magenta, $fs);
 
-print "array of string entries\n";
+print "---- array of string entries\n";
  
 # should be two paragraphs, as a new array element starts a new paragraph
 restore_props($text, $grfx);
@@ -128,7 +128,7 @@ multicol($page, $text, $grfx, 'html',
 	 ["<p>This is an <b>array</b></p>\n","<p>Of single <i>string</i> HTML texts. Two paragraphs.</p>\n"], 
 	 [50,250, 50,50], $magenta, $fs);
 
-print "pre array of hashes\n";
+print "---- pre array of hashes\n";
  
 restore_props($text, $grfx);
 multicol($page, $text, $grfx, 'pre', [
@@ -202,7 +202,7 @@ consequatur aut perferendis doloribus asperiores repellat.
 );
 my $SLoremIpsum = join("\n",@ALoremIpsum);
 
-print "Lorem Ipsum array of string entries\n";
+print "---- Lorem Ipsum array of string entries, default paragraphs\n";
 # default paragraph indent and top margin
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
@@ -211,7 +211,7 @@ restore_props($text, $grfx);
 if ($rc) { 
     print STDERR "Lorem Ipsum array overflowed the column!\n";
 }
-print "Lorem Ipsum string entry\n";
+print "---- Lorem Ipsum string entry, block-style paragraphs\n";
 # no indent, extra top margin
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
@@ -224,7 +224,7 @@ if ($rc) {
 
 # customer sample Markdown
 print "======================================================= pg 4\n";
-print "Customer sample Markdown and Table\n";
+print "---- Customer sample Markdown and Table\n";
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
@@ -258,10 +258,13 @@ Show some <ins>inserted</ins> text and <u>underlined</u> text that display
 underlines. Show some <del>deleted</del> text, <strike>strike-out</strike> text,
 and <s>s'd out</s> text that show line-throughs. Currently, overlines are not
 enabled. More than <span style="text-decoration: 'underline line-through'">one
-at a time</span> are possible.
+at a time</span> are possible via style attribute, also via
+<u><s>nested tags</s></u>.
 
 Then we need some styling features in tables as shown in the table below. There is no need to support this in text blocks, although it would be a nice feature (colored text is already available in text blocks using its options).
 END_OF_CONTENT
+# TBD in above text, <u><s>nested</s></u> <del><ins>tags</ins></del> lost the
+# space between the words in Treebuilder? needs investigating
 
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
@@ -433,8 +436,8 @@ if ($use_Table) {
 }
 
 # more pages with more extensive MD
-print "======================================================= pg 5-7\n";
-print "A README.md file for PDF::Builder\n";
+print "======================================================= pg 5-8\n";
+print "---- A README.md file for PDF::Builder\n";
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
@@ -442,7 +445,11 @@ $grfx = $page->gfx();
 $content = <<"END_OF_CONTENT";
 # PDF::Builder
 
-`A Perl library to facilitate the creation and modification of PDF files`
+A Perl library to facilitate the creation and modification of PDF files
+
+[![Open Issues](https://img.shields.io/github/issues/PhilterPaper/Perl-PDF-Builder)](https://github.com/PhilterPaper/Perl-PDF-Builder/issues)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/PhilterPaper/Perl-PDF-Builder/graphs/commit-activity)
 
 This archive contains the distribution PDF::Builder.
 See **Changes** file for the version.
@@ -465,10 +472,7 @@ compiles at this time).
 Note that there are several "optional" libraries (Perl modules) used to extend
 and improve PDF::Builder. Read about the list of optional libraries in
 PDF::Builder::Docs, and decide whether or not you want to install any of them.
-By default, all are installed (as "recommended", so failure to install will
-not fail the overall PDF::Builder installation). You may choose which ones to
-install by modifying certain installation files with 
-"tools/optional\_update.pl".
+By default, none are installed.
 
 ## Requirements
 
@@ -500,7 +504,7 @@ edited directory back into a `.tar.gz` installable. YMMV.
 If all goes well, PDF::Builder will be installed on your system. Whether or
 not it will RUN is another matter. Please do NOT open a bug report (ticket)
 unless you're absolutely sure that the problem is not a result of using an old
-Perl release, e.g., PDF::Builder is using a feature introduced in Perl 5.008
+Perl release, e.g., PDF::Builder is using a feature introduced in Perl 5.018
 and you're trying to run Perl 5.002!
 
 ### Libraries used
@@ -519,14 +523,23 @@ These libraries should be automatically installed...
 #### OPTIONAL
 
 These libraries are _recommended_ for improved functionality and performance.
-The default behavior is **NOT** to attempt to install all of them during 
-PDF::Builder installation.
+The default behavior is **not** to attempt to install them during PDF::Builder
+installation, in order to speed up the testing process and not clutter up 
+matters, especially if an optional package fails to install. You can always 
+manually install them later, if you desire to make use of their added 
+functionality.
 
-* Graphics::TIFF (recommended if using TIFF image functions)
-* Image::PNG::Libpng (recommended for enhanced PNG image function processing)
-* HarfBuzz::Shaper (needed for Latin script ligatures and kerning, as well as for any complex script such as Arabic, Indic scripts, or Khmer)
-* HTML::TreeBuilder (needed for 'md1' and 'html' markup)
-* Text::Markdown (needed for 'md1' markup)
+* Graphics::TIFF (19 or higher, recommended if using TIFF image functions)
+* Image::PNG::Libpng (0.57 or higher, recommended for enhanced PNG image function processing)
+* HarfBuzz::Shaper (0.024 or higher, needed for Latin script ligatures and kerning, as well as for any complex script such as Arabic, Indic scripts, or Khmer)
+* Text::Markdown (1.000031 or higher, needed if using 'md1' markup)
+* HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup)
+
+If an optional package is needed, but not installed, sometimes PDF::Builder
+will be able to fall back to built-in partial functionality (TIFF and PNG 
+images), but other times will fail. After installing the missing package, you 
+may wish to then run the t-test suite for that library to confirm that it is 
+properly running, as well as running the examples.
 
 Other than an installer for standard CPAN packages (such as 'cpan' on
 Strawberry Perl for Windows), no other tools or manually-installed prereqs are
@@ -555,9 +568,15 @@ will not be used. The build process merely copies .pm files around.
 
 ## Copyright
 
-This software is Copyright (c) 2017-2022 by Phil M. Perry.
+This software is Copyright (c) 2017-2023 by Phil M. Perry.
 
 Previous copyrights are held by others (Steve Simms, Alfred Reibenschuh, et al.). See The HISTORY section of the documentation for more information.
+
+We would like to acknowledge the efforts and contributions of a number of
+users of PDF::Builder (and its predecessor, PDF::API2), who have given their
+time to report issues, ask for new features, and have even contributed code.
+Generally, you will find their names listed in the Changes and/or issue tickets
+related to some particular item.
 
 ## License
 
@@ -596,14 +615,14 @@ We admit that the documentation is a bit light on "how to" task orientation.
 We hope to more fully address this in the future, but for now, get the full
 installation and look at the `examples/` and `contrib/` directories for sample
 code that may help you figure out how to do things. The installation tests in
-the `t/` directory might also be useful to you.
+the `t/` and `xt/` directories might also be useful to you.
 END_OF_CONTENT
 
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
-		  'para'=>[ 0, 0 ] );
+		  'para'=>[ 0, 5 ] );
 while ($rc) { 
     # new page
     $page = $pdf->page();
@@ -613,12 +632,12 @@ while ($rc) {
     ($rc, $next_y, $unused) =
         $text->column($page, $text, $grfx, 'pre', $unused, 
 		      'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
-		      'para'=>[ 0, 0 ] );
+		      'para'=>[ 0, 5 ] );
 }
 
 # a variety of lists over multiple pages
-print "======================================================= pg 8\n";
-print "A variety of lists\n";
+print "======================================================= pg 9\n";
+print "---- A variety of lists\n";
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
@@ -626,16 +645,16 @@ $grfx = $page->gfx();
 $content = <<"END_OF_CONTENT";
 <h2>Unordered (bulleted) lists with various markers</h2>
 <ul> <!-- default disc -->
-  <li>Unordered 1A, disc</li>
+  <li>Unordered 1A, disc and here is a bunch more text to try to cause a spill to a second line. Looks like we need a bit more filler here.</li>
   <li>Unordered 1B
   <ul> <!-- default circle -->
     <li>Unordered 2A, circle</li>
-    <li>Unordered 2B
+    <li>Unordered 2B and here is a bunch more text to try to cause a spill to a second line. Looks like we need a bit more filler here.
     <ul> <!-- default (filled) square -->
       <li>Unordered 3A, square</li>
       <li>Unordered 3B
       <ul style="list-style-type: box"> <!-- box (open square) -->
-        <li>Unordered 4A, box</li>
+        <li>Unordered 4A, box. A &ldquo;box&rdquo; marker is non-standard &mdash; it is an empty square marker. A bit more filler here. How about a <i>lot</i> more, driving it to three lines in all? Oh yeah, that's the ticket!</li>
         <li>Unordered 4B
         <ul style="list-style-type: disc"> <!-- and back to disc -->
           <li>Unordered 5A, disc</li>
@@ -686,8 +705,8 @@ if ($rc) {
     print STDERR "list example overflowed column!\n";
 }
 
-print "======================================================= pg 9\n";
-print "More list examples\n";
+print "======================================================= pg 10\n";
+print "---- More list examples\n";
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
@@ -755,9 +774,9 @@ if ($rc) {
     print STDERR "list example overflowed column!\n";
 }
 
-# block quotes
-print "======================================================= pg 10\n";
-print "Block quotes\n";
+# block quotes and font extent changes
+print "======================================================= pg 11\n";
+print "---- Block quotes\n";
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
@@ -803,6 +822,34 @@ if ($rc) {
     print STDERR "Block quotes example overflowed column!\n";
 }
 
+print "---- Font size changes\n";
+$content = <<"END_OF_CONTENT";
+<p><span style="font-size: 15pt">Here is some text at 15 point size. We follow
+it <i>somewhere</i> down the line with <span style="font-size: 45pt">much larger text, 
+<span style="font-size:  60pt">and follow it with some ginormous text.</span> That 
+should have moved the entirety of the baseline </span>down by quite a bit, 
+while maintaining an even baseline.</span></p>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[50,400, 500,350], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ] );
+if ($rc) { 
+    print STDERR "Font size changes example overflowed column!\n";
+}
+
+# might have to go to a column2.pl!
+# demonstrate balanced columns two long columns and one short, first pass
+#   fill blindly, then by trial-and-error shorten long columns until short
+#   one just fills (show initial and final runs)
+# demonstrate column shapes that split line in two (only first part used)
+# demonstrate irregularly shaped columns, including a bowtie scaled 3 times
+# demonstrate two column layout with insets and marginpar
+# demonstrate a circular column, etc.
+# demonstrate a spline column cutout, with image in background with edges
+#   that fade away so text can overlap outer fringes of image
 # ---------------------------------------------------------------------------
 # end of program
 $pdf->saveas($name);

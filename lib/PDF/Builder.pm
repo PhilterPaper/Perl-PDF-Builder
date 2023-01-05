@@ -218,7 +218,7 @@ may give the go-ahead. Unsolicited PRs may be closed without further action.
 
 =head2 LICENSE
 
-This software is Copyright (c) 2017-2022 by Phil M. Perry.
+This software is Copyright (c) 2017-2023 by Phil M. Perry.
 
 This is free software, licensed under:
 
