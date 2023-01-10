@@ -5,7 +5,7 @@ use warnings;
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
-our $VERSION = '3.024'; # VERSION
+our $VERSION = '3.024_001'; # VERSION
 our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
 
 # updated during CPAN build
@@ -40,10 +40,11 @@ use List::Util qw(max);
 use Scalar::Util qw(weaken);
 
 my @font_path = __PACKAGE__->set_font_path(
+	          '.',
                   '/usr/share/fonts',
 		  '/usr/local/share/fonts',
-		  'C:/Windows/Fonts',
-		  'C:/WinNT/Fonts'
+		  '/Windows/Fonts',
+		  '/WinNT/Fonts'
 	                                  );
 
 our @MSG_COUNT = (0,  # [0] Graphics::TIFF not installed
@@ -3223,7 +3224,8 @@ sub set_font_path {
     shift() if ref($_[0]);
     shift() if $_[0] eq __PACKAGE__;
 
-    @font_path = ((map { "$_/PDF/Builder/fonts" } @INC), @_);
+   #@font_path = ((map { "$_/PDF/Builder/fonts" } @INC), @_);
+    @font_path = @_;
 
     return @font_path;
 }

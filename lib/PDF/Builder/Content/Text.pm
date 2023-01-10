@@ -9,8 +9,8 @@ use List::Util qw(min max);
 #use Data::Dumper;  # for debugging
 #  $Data::Dumper::Sortkeys = 1;  # hash keys in sorted order
 
-# VERSION
-our $LAST_UPDATE = '3.024_003'; # manually update whenever code is changed
+our $VERSION = '3.024_004'; # VERSION
+our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -1329,6 +1329,13 @@ an C<x> position to start at.
 This is the starting font size (in points) to be used. Over the course of
 the text, it may be modified by markup.
 
+The starting font size may be set in a number of ways. It may be inherited from
+a previous C<$text-E<gt>font(..., font-size)> statement; it may be set via the
+C<font_size> option (overriding any font method inheritance); it may default to 
+12pt (if neither explicit way is given). For HTML markup, it may of course be 
+modified by the C<font> tag or by CSS styling C<font-size>. For Markdown, it
+may be modified by CSS styling.
+
 =item 'marker_width' => $marker_width
 
 This is the width of the gutter to the left of a list item, where (for the
@@ -1411,14 +1418,17 @@ is called. Any request to change the encoding within C<column()> will be
 ignored, as the fonts have already been specified for a specific encoding.
 Needless to say, the encoding used in creating the input text needs to match
 the specified font encoding.
-Absent any markup changing the font face or styling, whatever is defined by
-Font Manager as the I<current> (default) font will be what is used.
 
-Line fitting (paragraph shaping) is currently quite primitive. Most words will
-not be split (hyphenated) except for a few language-independent cases 
-(camelCase, mixed alphanumeric, etc.). I<It is planned to eventually add 
-Knuth-Plass paragraph shaping, along with proper language-dependent 
-hyphenation.>
+Absent any markup changing the font face or styling, whatever is defined by
+Font Manager as the I<current> font will be what is used. This way, you may
+inherit the font from the previous C<column()>, or call 
+C<$text->font($pdf-E<gt>get_font(), size)> to set both the font and size, or 
+just call C<$pdf->get_font()> to set only the font, relying on the C<font_size> 
+option or CSS markup to set the size.
+
+Line fitting (paragraph shaping) is currently quite primitive. Words will
+not be split (hyphenated).  I<It is planned to eventually add Knuth-Plass 
+paragraph shaping, along with proper language-dependent hyphenation.>
 
 Each change of font automatically supplies its maximum ascender and minimum
 descender, the B<extents> above and below the text line's baseline. Each block
@@ -1520,13 +1530,41 @@ It contains nothing to be used.
 =cut
 
 # TBD, future:
+# perhaps 3.026?
 #   arbitrary paragraph shapes (path)
-#   Knuth-Plass paragraph shaping (with proper hyphenation) 
-#   HarfBuzz::Shaper for ligatures, callout of specific glyphs (not entities), 
-#     RTL and non-Western language support. 
+#   at a minimum, hyphenate-basic usage including &SHY;
+#   <hr>, <img>, <sup>, <sub>, <pre>, <code>, <br>, <sl>, <dl>
+#   <big> <bigger> <smaller> <small> <center> <cite> <kbd> <nobr> <q> <samp>
+#   CSS _expand to call hscale() and/or condensed/expanded type in get_font()
+#        (if do synfont() call)
+#   CSS text transform, such as uppercase and lowercase flavors
+#   CSS em and ex sizes relative to current font size (like %), 
+#        other absolute sizes such as in, cm, mm, px (?)
 #   <sc> preprocess: around runs of lowercase put <span style="font-size: 80%;
-#        expand: 110%"> and fold to UPPER CASE
+#        expand: 110%"> and fold to UPPER CASE. this is post-mytext creation!
 #   <pc> (Petite case) like <sc> but 1ex font-size, expand 120%
+#   ability to form (La)TeX logo through character positioning
+#        what to do at HTML level? x+/- %fs, y+/- %fs
+#   HTML attributes to tune (force end) of something, such as early </sc> 
+#        after X words and/or end of line. flag to ignore next </sc> coming up,
+#        or just make self-closing with children?
+#   <endc> force end of column here (while still filling line)
+#        e.g., to prevent an orphan
+#   leading as a dimension instead of a ratio
+#
+# 3.027 or later?
+#  left/right auto margins? <center> may need this
+#  Text::KnuthLiang hyphenation
+#  <hyp>, <nohyp> control hypenation in a word (and remember
+#        rules when see this word again)
+#  Knuth-Plass paragraph shaping (with proper hyphenation) 
+#  HarfBuzz::Shaper for ligatures, callout of specific glyphs (not entities), 
+#        RTL and non-Western language support. 
+#  <nolig></nolig> forbid ligatures in this range
+#  <lig gid='nnn'> </lig> replace character(s) by a ligature
+#  <alt gid='nnn'> </alt> replace character(s) by alternate glyph
+#        such as a swash. font-dependent
+#  <eqn> (needs image support, SVG processing)
 
 sub column {
     my ($self, $page, $text, $grfx, $markup, $txt, %opts) = @_;
@@ -1537,8 +1575,17 @@ sub column {
     # array[1] will be consolidated CSS from any <style> tags
     my ($x, $y);
 
+    my $font_size = 12; # basic default, override with font-size
+    if ($text->{' fontsize'} > 0) { $font_size = $text->{' fontsize'}; }
+    if (defined $opts{'font_size'}) { $font_size = $opts{'font_size'}; }
+    
+    my $leading = 1.125; # basic default, override with text-height
+    if (defined $opts{'leading'}) { $leading=$opts{'leading'}; }
+    my $marker_width = 2*$font_size;
+    if (defined $opts{'marker_width'}) { $marker_width=$opts{'marker_width'}; }
+
     # fallback CSS properties, inserted at array[0]
-    my $default_css = _default_css($pdf, $text, %opts); # per-tag properties
+    my $default_css = _default_css($pdf, $text, $font_size, $leading, %opts); # per-tag properties
     # dump @mytext list within designated column @outline
     # for now, the outline is a simple rectangle
     my $outline_color = 'none';  # optional outline of the column
@@ -1571,13 +1618,6 @@ sub column {
     # if md1, convert to HTML (error if no converter)
     # if html, need to interpret (error if no converter)
     # finally, resulting array of hashes is interpreted and fit in column
-    my $font_size = 12; # basic default, override with font-size
-    if (defined $opts{'font_size'}) { $font_size=$opts{'font_size'}; }
-    my $leading = 1.125; # basic default, override with text-height
-    if (defined $opts{'leading'}) { $leading=$opts{'leading'}; }
-    my $marker_width = 2*$font_size;
-    if (defined $opts{'marker_width'}) { $marker_width=$opts{'marker_width'}; }
-
     # process style attributes, tag attributes, style tags, column() options,
     # and fixed default attributes in that order to fill in each tag's
     # attribute list. on exit from tag, set attributes to restore settings
@@ -1592,7 +1632,7 @@ sub column {
 # passed in by column() parameters and options. this is generated once for
 # each call to column, in case any parameters or options change.
 sub _default_css {
-    my ($pdf, $text, %opts) = @_;
+    my ($pdf, $text, $font_size, $leading, %opts) = @_;
 
     my @cur_font = $pdf->get_font();
     my @cur_color = $text->fillcolor();
@@ -1633,13 +1673,8 @@ sub _default_css {
     $style{'b'} = {};
     $style{'strong'} = {};
 
-    my $font_size = 12;
-    $font_size = $opts{'font_size'} if defined $opts{'font_size'};
     $style{'body'}->{'font-size'} = $font_size;
     $style{'body'}->{'_fs'} = $font_size; # carry current value
-
-    my $leading = 1.125;
-    $leading = $opts{'leading'} if defined $opts{'leading'};
     $style{'body'}->{'text-height'} = $leading;
 
     my $para = [ 1, 1*$font_size, 0 ]; 
@@ -2241,7 +2276,8 @@ sub _output_text {
 		 $text->fillcolor($current_prop->{'color'});
 		 $text->strokecolor($current_prop->{'color'}); 
                  # for underlines and strikethroughs
-		 $grfx->strokecolor($current_prop->{'color'});
+		 $grfx->strokecolor($current_prop->{'color'}) 
+		     if defined $grfx && ref($grfx) =~ m/^PDF::Builder::Content/;
 		 # add fillcolor if ever do anything with that
             }
 
@@ -2323,7 +2359,7 @@ sub _output_text {
 	        if ($need_line) {
 	            # first, set font (current, or something specified)
 		    if ($para) { # at top of column, font undefined
-	                $text->font($pdf->get_font('face'=>'default'), $font_size);
+	                $text->font($pdf->get_font('face'=>'current'), $font_size);
 		    }
 
 	            # extents above and below the baseline (so far)?
@@ -2369,9 +2405,16 @@ sub _output_text {
 		    push @line_extents, $asc; # current vertical extents
 		    push @line_extents, $desc;
 		    push @line_extents, $desc_leading;
+		    # text and graphics contexts and
+	            # where the current line starts in the streams
 		    push @line_extents, $text;
 		    push @line_extents, length($text->{' stream'});
-	                         # where the current line starts in the stream
+		    push @line_extents, $grfx;
+		    if (defined $grfx && ref($grfx) =~ m/^PDF::Builder::Content/) {
+		        push @line_extents, length($grfx->{' stream'});
+		    } else {
+			push @line_extents, 0;
+		    }
 		    push @line_extents, $start_y;
 		    push @line_extents, $min_y;
 		    push @line_extents, \@outline;
@@ -2795,8 +2838,7 @@ sub _get_column_outline {
     }
 
     # requested to draw outline (color other than 'none')?
-    if ($draw_outline ne 'none') {
-	# assume $grfx defined
+    if ($draw_outline ne 'none' && defined $grfx && ref($grfx) =~ m/^PDF::Builder::Content/) {
 	$grfx->strokecolor($draw_outline);
 	$grfx->linewidth(0.5);
 	# only rect currently supported
@@ -3409,7 +3451,9 @@ sub _marker {
 #   $text # text context (won't change)
 #   length($text->{' stream'}) # where the current line starts in the stream
 #                              # (won't change)
-#   TBD add $grfx graphics context if necessary, and its current length
+#   $grfx # graphis content, might be undef (won't change)
+#   length($grfx->{' stream'}) # where the current line starts in the stream
+#                              # (won't change)
 #   $start_y # very top of this line (won't change)
 #   $min_y # lowest allowable inked value (won't change)
 #   $outline # array ref to outline (won't change)
@@ -3429,7 +3473,8 @@ sub _marker {
 #         @line_extents, with some entries revised
 sub _revise_baseline {
     my ($o_start_x, $o_x, $o_y, $o_width, $o_endx, $o_next_y, $o_asc, $o_desc,
-	$o_desc_leading, $text, $line_start_offset, $start_y, $min_y,
+	$o_desc_leading, $text, $line_start_offset, 
+	$grfx, $line_start_offsetg, $start_y, $min_y,
 	$outline, $margin_left, $margin_right, 
 	$asc, $desc, $desc_leading, $text_w) = @_;
     
@@ -3476,6 +3521,7 @@ sub _revise_baseline {
 	             # off bottom if we go ahead and write any of new text
 	    # TBD instead just end line here (early), 
 	    #     go to next column for taller text we want to print
+	    #     however, could then end up with a very short line!
         } else {
 	    # start_y and next_y are vertical extent of this line (revised)
 	    # y is the y value of the baseline (so far). lower it a bit.
@@ -3484,6 +3530,7 @@ sub _revise_baseline {
 
 	    # how tall is the line? need to set baseline.
             ($start_x,$y, $width) = _get_baseline($y, @$outline);
+            $start_x += $margin_left;
 	    $width -= $margin_left + $margin_right;
             $endx = $start_x + $width;
 	    $x += $start_x - $o_start_x;
@@ -3500,7 +3547,7 @@ sub _revise_baseline {
 	    } else { # should have room to write new text
 		$rc = 0;
 	    
-		# revise (move in x,y) any existing text in this line
+		# revise (move in x,y) any existing text in this line (Tm cmd)
                 my $i = $line_start_offset;
 		my $delta_x = $start_x - $o_start_x;
 		my $delta_y = $y - $o_y;
@@ -3525,7 +3572,7 @@ sub _revise_baseline {
                    # no need to change line_start_offset, but $i has to be 
 		   # adjusted to account for possible change in resulting 
 		   # position of Tm
-		   $i += length("$x $y") - ($i - $j);
+		   $i += length("$old_x old_$y") - ($i - $j);
                 } 
 	    }
         }
@@ -3533,7 +3580,8 @@ sub _revise_baseline {
 
     return ($rc, $start_x, $x, $y, $width, $endx, $next_y, 
 	    $asc, $desc, $desc_leading, 
-            $text, $line_start_offset, $start_y, $min_y, $outline,
+            $text, $line_start_offset, $grfx, $line_start_offsetg,
+	    $start_y, $min_y, $outline,
             $margin_left, $margin_right);
 } # end of _revise_baseline()
 

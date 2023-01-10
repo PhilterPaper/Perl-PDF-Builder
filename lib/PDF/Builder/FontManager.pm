@@ -3,8 +3,8 @@ package PDF::Builder::FontManager;
 use strict;
 use warnings;
 
-# VERSION
-our $LAST_UPDATE = '3.024_001'; # manually update whenever code is changed
+our $VERSION = '3.024'; # VERSION
+our $LAST_UPDATE = '3.024_002'; # manually update whenever code is changed
 
 use Carp;
 use Scalar::Util qw(weaken);
@@ -25,7 +25,7 @@ PDF::Builder::FontManager - Managing the font library for PDF::Builder
 
 =head1 SYNOPSIS
 
-These routines are called via stubs in Builder.pm (see get_font(),
+These routines are called from the PDF::Builder class (see get_font(),
 add_font() methods).
 
     # core fonts come pre-loaded
@@ -774,7 +774,11 @@ sub get_font {
 
 	push @list, $self->{' font-list'}->[$index]->{'type'};         # [3] s
 	# note that settings will be a hashref, not a string
-	push @list, $self->{' font-list'}->[$index]->{'settings'};     # [4] hr
+	if (defined $self->{' font-list'}->[$index]->{'settings'}) {
+	    push @list, $self->{' font-list'}->[$index]->{'settings'}; # [4] hr
+	} else {
+	    push @list, {};
+	}
 	push @list, $self->{' font-list'}->[$index]->{'style'};        # [5] s
 	push @list, $self->{' font-list'}->[$index]->{'width'};        # [6] s
 

@@ -2,9 +2,9 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.025     2023-01-04  UNRELEASED
+3.025     2023-01-07  UNRELEASED
 
-    ===== many thanks to MyActiv Ltd. for sponsoring this work!
+    ===== many thanks to Amtivo Group for sponsoring this work!
     lib/PDF/Builder/Content/Text.pm, examples/README, examples/examples_output,
       examples/Column.pl (new), MANIFEST, tools/3_examples.pl
      Add column() function to Content::Text, to support markup (none, Markdown,

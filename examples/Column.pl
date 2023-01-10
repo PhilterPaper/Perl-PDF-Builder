@@ -328,6 +328,7 @@ if ($use_Table) {
 	             ];
 
     my $size = '* *'; # two equal columns
+print STDERR "we ARE using PDF::Table. at table() call.\n";
     $table->table(
         $pdf, $page, $table_data,
         'x'      => 50,
@@ -826,7 +827,7 @@ print "---- Font size changes\n";
 $content = <<"END_OF_CONTENT";
 <p><span style="font-size: 15pt">Here is some text at 15 point size. We follow
 it <i>somewhere</i> down the line with <span style="font-size: 45pt">much larger text, 
-<span style="font-size:  60pt">and follow it with some ginormous text.</span> That 
+<span style="font-size:  60pt"><s>and</s> follow it with some ginormous text.</span> <u>That</u> 
 should have moved the entirety of the baseline </span>down by quite a bit, 
 while maintaining an even baseline.</span></p>
 END_OF_CONTENT
