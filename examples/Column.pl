@@ -7,7 +7,7 @@ use PDF::Builder;
 # $Data::Dumper::Sortkeys = 1; # hash keys in sorted order
 
 # VERSION
-our $LAST_UPDATE = '3.024_003'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
 
 my $use_Table = 1; # if 1, use PDF::Table for table example
 # TBD automatically check if PDF::Table available, and if so, use it
@@ -256,8 +256,8 @@ Show that [another link](https://www.catskilltech.com) on the same page works.
 
 Show some <ins>inserted</ins> text and <u>underlined</u> text that display 
 underlines. Show some <del>deleted</del> text, <strike>strike-out</strike> text,
-and <s>s'd out</s> text that show line-throughs. Currently, overlines are not
-enabled. More than <span style="text-decoration: 'underline line-through'">one
+and <s>s'd out</s> text that show line-throughs. 
+More than <span style="text-decoration: 'underline line-through overline'">one
 at a time</span> are possible via style attribute, also via
 <u><s>nested tags</s></u>.
 
@@ -328,7 +328,6 @@ if ($use_Table) {
 	             ];
 
     my $size = '* *'; # two equal columns
-print STDERR "we ARE using PDF::Table. at table() call.\n";
     $table->table(
         $pdf, $page, $table_data,
         'x'      => 50,
@@ -827,8 +826,8 @@ print "---- Font size changes\n";
 $content = <<"END_OF_CONTENT";
 <p><span style="font-size: 15pt">Here is some text at 15 point size. We follow
 it <i>somewhere</i> down the line with <span style="font-size: 45pt">much larger text, 
-<span style="font-size:  60pt"><s>and</s> follow it with some ginormous text.</span> <u>That</u> 
-should have moved the entirety of the baseline </span>down by quite a bit, 
+<span style="font-size:  60pt"><s>and</s> follow <span style="text-decoration: overline;">it</span> with some ginormous text.</span> <u>That</u> 
+should have moved the entirety of the baseline </span><span style="text-decoration: overline;">down</span> by quite a bit, 
 while maintaining an even baseline.</span></p>
 END_OF_CONTENT
 
@@ -839,6 +838,129 @@ restore_props($text, $grfx);
 		  'para'=>[ 0, 0 ] );
 if ($rc) { 
     print STDERR "Font size changes example overflowed column!\n";
+}
+
+# setting your own CSS for Markdown or none
+print "======================================================= pg 12\n";
+$page = $pdf->page();
+$text = $page->text();
+$grfx = $page->gfx();
+
+print "---- default CSS for Markdown\n";
+$content = <<"END_OF_CONTENT";
+Ordered list with no margin-top/bottom (extra space between elements)
+
+1. Numbered item 1.
+2. Numbered item 2.
+3. Numbered item 3.
+
+## And a subheading to make green
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'md1', $content, 
+	          'rect'=>[50,750, 500,100], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ] );
+if ($rc) { 
+    print STDERR "Markdown CSS example overflowed column!\n";
+}
+
+print "---- set CSS for Markdown\n";
+$content = <<"END_OF_CONTENT";
+Ordered list with no margin-top/bottom (no space between elements) and new marker format
+
+1. Numbered item 1.
+2. Numbered item 2.
+3. Numbered item 3.
+
+## And a subheading to make green
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'md1', $content, 
+	          'rect'=>[50,650, 500,100], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ],
+	          'style'=>"
+        ol { _marker-before: '(' ; _marker-after: ')' ; }
+        li { margin-top: 0; margin-bottom: 0 } 
+        h2 { color: green; }
+       ", 
+        # marker-before/after could be in ol, too 
+	# note that comments not supported in CSS
+	         );
+if ($rc) { 
+    print STDERR "Markdown CSS example overflowed column!\n";
+}
+
+print "---- horizontal rules Markdown\n";
+$content = <<"END_OF_CONTENT";
+Markdown horizontal rules: 3 or more ---, ***, or ___. full width
+
+----------
+
+Between two rules
+
+****
+
+Between two rules
+
+___
+
+Last commentary
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'md1', $content, 
+	          'rect'=>[50,525, 500,125], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ],
+	         );
+if ($rc) { 
+    print STDERR "Markdown horizontal rule example overflowed column!\n";
+}
+
+print "---- horizontal rules HTML\n";
+$content = <<"END_OF_CONTENT";
+<p>HTML horizontal rules, with CSS</p>
+<hr>
+<p>Between two rules, above is default settings</p>
+<hr style="height: 5; color: blue">
+<p>Between two rules, above is very thick and blue</p>
+<hr style="width: 200" />
+<p>Above rule is only 200pt long</p>
+<hr size="17" color="orange" width="300">
+<p>Above rule is <em>very</em> thick orange and 300pt long</p>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[50,400, 500,185], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ],
+	         );
+if ($rc) { 
+    print STDERR "HTML horizontal rule example overflowed column!\n";
+}
+
+print "---- PDF page link\n";
+$content = <<"END_OF_CONTENT";
+Let's try linking to [another page](#4) of this document.
+
+Also try a link to a [specific place](#4-50-200) unzoomed.
+
+While we're here, how about [linking](#4-50-200-1.5) with zoom-in?
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'md1', $content, 
+	          'rect'=>[50,200, 500,100], 'outline'=>$magenta, 
+		  'para'=>[ 0, 10 ],
+	         );
+if ($rc) { 
+    print STDERR "PDF links example overflowed column!\n";
 }
 
 # might have to go to a column2.pl!

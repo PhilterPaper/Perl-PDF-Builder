@@ -5,7 +5,7 @@ use warnings;
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
-our $VERSION = '3.024_001'; # VERSION
+our $VERSION = '3.024'; # VERSION
 our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
 
 # updated during CPAN build
@@ -39,10 +39,18 @@ use PDF::Builder::FontManager;
 use List::Util qw(max);
 use Scalar::Util qw(weaken);
 
+# Note that every Linux distribution seems to put font files in a different
+# place, and even Windows is consistent only for TTF/OTF font files.
 my @font_path = __PACKAGE__->set_font_path(
-	          '.',
+	         #'.',  # could a font ever be a security risk?
                   '/usr/share/fonts',
 		  '/usr/local/share/fonts',
+		  '/usr/share/fonts/type1/gsfonts',
+		  '/usr/share/X11/fonts/urw-fonts',
+		  '/usr/share/fonts/dejavu-sans-fonts',
+		  '/usr/share/fonts/truetype/ttf-dejavu',
+		  '/usr/share/fonts/truetype/dejavu',
+		  '/var/lib/defoma/gs.d/dirs/fonts',
 		  '/Windows/Fonts',
 		  '/WinNT/Fonts'
 	                                  );

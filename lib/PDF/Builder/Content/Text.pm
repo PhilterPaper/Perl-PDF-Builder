@@ -9,7 +9,7 @@ use List::Util qw(min max);
 #use Data::Dumper;  # for debugging
 #  $Data::Dumper::Sortkeys = 1;  # hash keys in sorted order
 
-our $VERSION = '3.024_004'; # VERSION
+# VERSION
 our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
 
 =head1 NAME
@@ -1154,7 +1154,8 @@ This specifies a certain flavor of Markdown:
     * or _ italics, ** bold, *** bold+italic; 
     bulleted list *, numbered list 1. 2. etc.; 
     #, ## etc. headings and subheadings; 
-    [label](URL) external links 
+    ---, ===, ___ horizontal rule;
+    [label](URL) external links (to HTML page or within this document, see 'a')
     ` (backticks) enclose a "code" section
 
 HTML (see below) may be mixed in as desired (although not within "code" blocks 
@@ -1184,14 +1185,16 @@ and CSS. Currently, HTML tags
     'ul', 'ol', 'li' (bulleted, numbered lists), 
     'img' (TBD, image, empty. hspace->margin-left/right, 
            vspace->margin-top/bottom, width, height), 
-    'a' (anchor/link, web page target), 
+    'a' (anchor/link, web page URL or this document target #p[-x-y[-z]]), 
     'pre', 'code' (TBD, preformatted and code blocks),
     'h1' through 'h6' (headings)
-    'hr' (TBD, horizontal rule, empty. align, size->linewidth, width)
+    'hr' (horizontal rule)
     'br' (TBD, line break, empty)
     'sup', 'sub' (TBD superscript and subscript)
     's', 'strike', 'del' (line-through)
     'u', 'ins' (underline)
+    'ovl' (TBD, overline)
+    'k' (TBD, kerning left/right shift)
 
 are supported (fully or in part), along with limited CSS for color, font-size, 
 font-family, etc. 
@@ -1218,16 +1221,20 @@ Sorry!
 
 Supported CSS properties: 
 
+    color (foreground color)
+    display (inline/block)
     font-family (name as defined to FontManager, e.g. Times)
     font-size (pt, bare number = pt, % of current size)
     font-style (normal/italic) 
     font-weight (normal/bold)
+    height (pt, bare number) thickness of horizontal rule
+    list-style-position (outside) TBD inside
+    list-style-type (marker description, see also _marker-before/after)
     margin-top/right/bottom/left (pt, bare number = pt, % of font-size)
-    color (foreground color)
+    text-decoration (none, underline, line-through, overline)
     text-height (leading, as ratio of baseline-spacing to font-size)
-    display (inline/block)
-    text-decoration (none, underline, line-through, TBD overline)
     text-indent (pt, bare number = pt, % of current font-size)
+    width (pt, bare number) width of horizontal rule
 
 Non-standard CSS "properties". You may want to set these in CSS:
 
@@ -1242,7 +1249,8 @@ Non-standard CSS "properties". You normally would not set these in CSS:
     _right (running number of points to indent on the right, from margin-right)
 
 Sizes may be '%' (of font-size), or 'pt' (the default unit). 
-More support may be added over time.
+More support may be added over time. B<CAUTION:> comments /* and */ are NOT
+currently supported in CSS -- perhaps in the future.
 
 Numeric entities (decimal &#nnn; and hexadecimal &#xnnn;) are supported, 
 as well as named entities (&mdash; for example).
@@ -1377,6 +1385,13 @@ in debugging fitting problems.
 
 The color to draw the text (or rule or other graphic) in. The default is 
 black (#000000).
+
+=item 'style' => "CSS styling"
+
+You may define CSS (selectors and properties lists) to override the built-in
+CSS defaults. These will be applied for the entire C<column()> call. You can
+use this, or C<style> tags in 'html', but for 'none' or 'md1', you will need to
+use this method to set styling.
 
 =item 'substitute' => [ [ 'char or string', 'before', 'replace', 'after'],... ]
 
@@ -1530,41 +1545,58 @@ It contains nothing to be used.
 =cut
 
 # TBD, future:
-# perhaps 3.026?
+#  * = not official HTML5 or CSS (i.e., extension)
+# perhaps 3.026?  
 #   arbitrary paragraph shapes (path)
 #   at a minimum, hyphenate-basic usage including &SHY;
-#   <hr>, <img>, <sup>, <sub>, <pre>, <code>, <br>, <sl>, <dl>
-#   <big> <bigger> <smaller> <small> <center> <cite> <kbd> <nobr> <q> <samp>
-#   CSS _expand to call hscale() and/or condensed/expanded type in get_font()
+#   <hr>, <img>, <sup>, <sub>, <pre>, <nobr>, <br>, <dl>/<dt>/<dd>, <center>*
+#   <big>*, <bigger>*, <smaller>*, <small> 
+#   <cite>, <q>, <code>, <kbd>, <samp>, <var>
+#   CSS _expand* to call hscale() and/or condensed/expanded type in get_font()
 #        (if do synfont() call)
 #   CSS text transform, such as uppercase and lowercase flavors
 #   CSS em and ex sizes relative to current font size (like %), 
 #        other absolute sizes such as in, cm, mm, px (?)
-#   <sc> preprocess: around runs of lowercase put <span style="font-size: 80%;
+#
+#  possibly...
+#   <abbr>, <base>, <wbr>
+#   <article>, <aside>, <section>  as predefined page areas?
+#
+#  extensions to HTML and CSS...
+#   <sl>* simple list (no markers)
+#   <sc>* preprocess: around runs of lowercase put <span style="font-size: 80%;
 #        expand: 110%"> and fold to UPPER CASE. this is post-mytext creation!
-#   <pc> (Petite case) like <sc> but 1ex font-size, expand 120%
-#   ability to form (La)TeX logo through character positioning
+#   <pc>* (Petite case) like <sc> but 1ex font-size, expand 120%
+#   <dc>* drop caps
+#   <ovl>* overline (similar to underline) using CSS text-decoration: overline
+#   <k>* kern text (shift left or right) with CSS _kern, or general positioning:
+#     ability to form (La)TeX logo through character positioning
 #        what to do at HTML level? x+/- %fs, y+/- %fs
+#     also useful for <sup>4</sup><sub>2</sub>He notation
+#   <vfrac>* vulgar fraction, using sup, sup, kern
 #   HTML attributes to tune (force end) of something, such as early </sc> 
 #        after X words and/or end of line. flag to ignore next </sc> coming up,
 #        or just make self-closing with children?
-#   <endc> force end of column here (while still filling line)
-#        e.g., to prevent an orphan
-#   leading as a dimension instead of a ratio
+#   <endc>* force end of column here (at this y, while still filling line)
+#        e.g., to prevent an orphan. optional conditional (e.g., less than 1"
+#        of vertical space left in column)
+#   <keep>* material to keep together, such as headings and paragraph text
+#   leading (line-height) as a dimension instead of a ratio, convert to ratio
 #
 # 3.027 or later?
 #  left/right auto margins? <center> may need this
 #  Text::KnuthLiang hyphenation
-#  <hyp>, <nohyp> control hypenation in a word (and remember
+#  <hyp>*, <nohyp>* control hypenation in a word (and remember
 #        rules when see this word again)
+#  <lang>* define language of a span of text, for hyphenation/audio purposes
 #  Knuth-Plass paragraph shaping (with proper hyphenation) 
 #  HarfBuzz::Shaper for ligatures, callout of specific glyphs (not entities), 
-#        RTL and non-Western language support. 
-#  <nolig></nolig> forbid ligatures in this range
-#  <lig gid='nnn'> </lig> replace character(s) by a ligature
-#  <alt gid='nnn'> </alt> replace character(s) by alternate glyph
+#        RTL and non-Western language support. <bdi>, <bdo>
+#  <nolig></nolig>* forbid ligatures in this range
+#  <lig gid='nnn'> </lig>* replace character(s) by a ligature
+#  <alt gid='nnn'> </alt>* replace character(s) by alternate glyph
 #        such as a swash. font-dependent
-#  <eqn> (needs image support, SVG processing)
+#  <eqn>* (needs image support, SVG processing)
 
 sub column {
     my ($self, $page, $text, $grfx, $markup, $txt, %opts) = @_;
@@ -1672,6 +1704,7 @@ sub _default_css {
     $style{'em'} = {};
     $style{'b'} = {};
     $style{'strong'} = {};
+    $style{'hr'} = {};
 
     $style{'body'}->{'font-size'} = $font_size;
     $style{'body'}->{'_fs'} = $font_size; # carry current value
@@ -1716,6 +1749,8 @@ sub _default_css {
    #$style{'body'}->{'border-color'} = 'inherit'; 
     $style{'body'}->{'text-decoration'} = 'none';
     $style{'body'}->{'display'} = 'block'; 
+    $style{'body'}->{'width'} = '-1';  # TBD currently unused
+    $style{'body'}->{'height'} = '-1';  # TBD currently unused ex. hr size
     $style{'body'}->{'_href'} = ''; 
 
     $style{'font'}->{'display'} = 'inline';
@@ -1723,7 +1758,7 @@ sub _default_css {
 
     $style{'a'}->{'text-decoration'} = 'underline'; 
           # none, underline, overline, line-through or a combination
-	  # separated by spaces (overline TBD)
+	  # separated by spaces
     $style{'a'}->{'color'} = 'blue'; 
     $style{'a'}->{'display'} = 'inline'; 
     $style{'a'}->{'_href'} = ''; 
@@ -1752,7 +1787,7 @@ sub _default_css {
     $style{'h5'}->{'font-weight'} = 'bold';
     $style{'h5'}->{'font-size'} = '85%';
     $style{'h5'}->{'margin-top'} = '175%';
-    $style{'h5'}->{'margin-bottom'} = '.35%';
+    $style{'h5'}->{'margin-bottom'} = '175%';
     $style{'h5'}->{'display'} = 'block';
 
     $style{'h4'}->{'font-weight'} = 'bold';
@@ -1788,9 +1823,6 @@ sub _default_css {
     $style{'strong'}->{'font-weight'} = 'bold';
     $style{'strong'}->{'display'} = 'inline';
 
-    # TBD text-decoration possible to combine underline line-through overline 
-    # works OK if style="text-decoration: 'underline line-through'", but fails
-    # if <s><u>text</u></s> because u's td overwrites s's td.
     $style{'u'}->{'display'} = 'inline';
     $style{'u'}->{'text-decoration'} = 'underline';
     $style{'ins'}->{'display'} = 'inline';
@@ -1803,9 +1835,20 @@ sub _default_css {
     $style{'del'}->{'display'} = 'inline';
     $style{'del'}->{'text-decoration'} = 'line-through';
 
-    # non-standard tag for overline (TBD, not supported yet)
+    # non-standard tag for overline
    #$style{'ovl'}->{'display'} = 'inline';
    #$style{'ovl'}->{'text-decoration'} = 'overline';
+    
+    # non-standard tag for kerning (+ font-size fraction to move left, - right)
+    # e.g., for vulgar fraction adjust / and denominator <sub>
+   #$style{'k'}->{'display'} = 'inline';
+   #$style{'k'}->{'_kern'} = '0.2';
+
+    $style{'hr'}->{'display'} = 'block';
+    $style{'hr'}->{'height'} = '1'; # 1pt default thickness
+    $style{'hr'}->{'width'} = '-1'; # default width is full column
+    $style{'hr'}->{'margin-top'} = '100%'; 
+    $style{'hr'}->{'margin-bottom'} = '100%'; 
 
     $style{'blockquote'}->{'display'} = 'block';
     $style{'blockquote'}->{'margin-top'} = '56%';
@@ -1867,6 +1910,11 @@ sub _tag_attributes {
 	if ($tag eq 'a') {
 	    if (defined $mytext[$el]->{'href'}) {
 	        $mytext[$el]->{'_href'} = delete($mytext[$el]->{'href'});
+	    }
+	}
+	if ($tag eq 'hr') {
+	    if (defined $mytext[$el]->{'size'}) {
+	        $mytext[$el]->{'height'} = delete($mytext[$el]->{'size'});
 	    }
 	}
 	 
@@ -2030,7 +2078,6 @@ sub _output_text {
 		    $properties[-1]->{'display'} = 'inline';
 	        }
 		# handle specific kinds of tags' special processing
-	        $list_marker = ''; # marker for li
 	        if ($tag eq 'p') {
                     # para=1 we're at top of column (no extra margin)
 		    # per $para (or default), drop down a line?, indent?
@@ -2108,8 +2155,42 @@ sub _output_text {
 	       #if ($tag eq 'h4') { }
 	       #if ($tag eq 'h5') { }
 	       #if ($tag eq 'h6') { }
-	       #if ($tag eq 'hr') { } TBD  align, size is linewidth, width
-	       #                      this actually draws something, not just setup
+	        if ($tag eq 'hr') { 
+		    my $fs = $current_prop->{'font-size'};
+		    # actually draw a horizontal line
+		    $start_y = $next_y;
+		    my $oldcolor = $grfx->strokecolor();
+		    $grfx->strokecolor($properties[-1]->{'color'});
+		    my $oldlinewidth = $grfx->linewidth();
+		    my $thickness = $properties[-1]->{'height'} || 1;
+		    $grfx->linewidth($thickness);
+		    my $y = $start_y - 
+		        _size2pt($properties[-1]->{'margin-top'}, $fs) -
+		       $thickness/2;
+                    ($start_x,$y, $width) = _get_baseline($y, @outline);
+                    # need to increase start_x by any left margin
+		    $start_x += $properties[-1]->{'_left'};
+		    $width -= $properties[-1]->{'_left'} + $properties[-1]->{'_right'};
+		    # if there is a requested width, use the smaller of the two
+		    # TBD future, width as % of possible baseline, 
+		    #     center or right aligned, explicit units (pt default)
+		    if ($properties[-1]->{'width'} > 0 &&
+			$properties[-1]->{'width'} < $width) {
+			$width = $properties[-1]->{'width'};
+		    }
+                    $endx = $start_x + $width;
+
+		    $grfx->move($start_x, $y);
+		    $grfx->hline($endx);
+		    $grfx->stroke();
+		    $y -= $thickness/2 + 
+		        _size2pt($properties[-1]->{'margin-bottom'}, $fs);
+		    $next_y = $y;
+
+		    # restore changed values
+		    $grfx->linewidth($oldlinewidth);
+		    $grfx->strokecolor($oldcolor);
+		} 
 	       #if ($tag eq 'br') { } TBD force new line
 	       #if ($tag eq 'sup') { } TBD
 	       #if ($tag eq 'sub') { } TBD
@@ -2161,6 +2242,8 @@ sub _output_text {
 	            # empty/void tag, no end tag, pop property stack
 		    # as this tag's actions have already been taken
 		    pop @properties;
+		    splice(@mytext, $el, 1);
+		    $el--; # end of loop will advance $el
 		    # no text as child of this tag, whatever it does, it has
 		    # to be completely handled in this section
 	        }
@@ -2359,7 +2442,7 @@ sub _output_text {
 	        if ($need_line) {
 	            # first, set font (current, or something specified)
 		    if ($para) { # at top of column, font undefined
-	                $text->font($pdf->get_font('face'=>'current'), $font_size);
+	                $text->font($pdf->get_font('face'=>'current'), $fs);
 		    }
 
 	            # extents above and below the baseline (so far)?
@@ -2454,6 +2537,8 @@ sub _output_text {
 		                                  ), 0.5*$fs); 
 			$text->translate($x,$y+0.15*$fs);
 			$text->text_right($list_marker);
+		    } elsif ($list_marker eq '' || $list_marker eq ' ') {
+			# simple list, no marker
 		    } else {
 			# it's a count for <ol>. use bold. TBD CSS for weight
                         $text->font($pdf->get_font(
@@ -2483,16 +2568,42 @@ sub _output_text {
 	            # no worry, the entire phrase fits (case 1.)
 	            $text->translate($x,$y);
 		    # y (and possibly x) might change if extents change
-		    my %lines;
+		    my $w = $text->advancewidth($phrase);
 		    if ($current_prop->{'text-decoration'} ne 'none') {
+			# output any requested line strokes, after baseline
+			#   positioned and before baseline adjusted
 			# supported: underline, line-through, overline
-			# may be a combination
-			$lines{'strokecolor'} = $current_prop->{'color'};
-			if ($current_prop->{'text-decoration'} =~ m#underline#) { $lines{'underline'} = 'auto'; }
-			if ($current_prop->{'text-decoration'} =~ m#line-through#) { $lines{'strikethru'} = 'auto'; }
-			if ($current_prop->{'text-decoration'} =~ m#overline#) { $lines{'overline'} = 'auto'; } # TBD
-		    } else {
-			%lines = (); # no options at this time
+			# may be a combination separated by spaces
+			# inherit current color (strokecolor) setting
+			my $font = $pdf->get_font('face'=>'current');
+			my $strokethickness = $font->underlinethickness() || 1;
+			$strokethickness *= $fs/1000;
+			my $stroke_ydist = $font->underlineposition() || 1;
+			$stroke_ydist *= $fs/1000;
+			$text->add('q');
+			$text->add('ET'); # go into graphics mode
+			$text->add("$strokethickness w");
+			# baseline is x,y to x+w,y, ydist is < 0
+			if ($current_prop->{'text-decoration'} =~ m#underline#) { 
+			    # use ydist as-is
+			    $text->add("$x ".($y+$stroke_ydist)." m");
+			    $text->add(($x+$w)." ".($y+$stroke_ydist)." l");
+			}
+			if ($current_prop->{'text-decoration'} =~ m#line-through#) { 
+			    # use new ydist at .3fs
+			    $stroke_ydist = 0.3*$fs;
+			    $text->add("$x ".($y+$stroke_ydist)." m");
+			    $text->add(($x+$w)." ".($y+$stroke_ydist)." l");
+			}
+			if ($current_prop->{'text-decoration'} =~ m#overline#) { 
+			    # use new ydist at 0.65fs
+			    $stroke_ydist = 0.70*$fs;
+			    $text->add("$x ".($y+$stroke_ydist)." m");
+			    $text->add(($x+$w)." ".($y+$stroke_ydist)." l");
+			}
+			$text->add('S');
+			$text->add('BT'); # back into text mode
+			$text->add('Q');
 		    }
 		    # before writing a new phrase with possibly increased
 		    # extents, see if new baseline needed
@@ -2502,7 +2613,7 @@ sub _output_text {
 				        $properties[-1]->{'text-height'});
 		    $line_extents[1] = $x;  # current position
 		    ($rc, @line_extents) = 
-		        _revise_baseline(@line_extents, $n_asc, $n_desc, $n_desc_leading, $text->advancewidth($phrase));
+		        _revise_baseline(@line_extents, $n_asc, $n_desc, $n_desc_leading, $w);
 		    ($start_x, $x, $y, $width, $endx, $next_y, 
 			$asc, $desc, $desc_leading)
 		        = @line_extents; # only parts which might have changed
@@ -2512,7 +2623,7 @@ sub _output_text {
 		    # if rc == 2, current written line doesn't fit narrower line
 		    # if rc == 3, revised line won't fit in column! (vertically)
 		    # TBD need to check $rc once column width can vary
-	            $text->text($phrase, %lines);
+	            $text->text($phrase);
 
                     if ($current_prop->{'_href'} ne '') {
 			# this text is a link, so need to make an annot. link
@@ -2522,9 +2633,68 @@ sub _output_text {
                         my $fs = 0.2*$current_prop->{'font-size'};
                         my $rect = [ $x-$fs, $y-$desc-$fs, 
 				     $x+$w+$fs, $y+$asc+$fs ];
+			# TBD what if link wraps around? make two or more?
 			my $annotation = $page->annotation();
-			$annotation->uri($current_prop->{'_href'},
-			    'rect'=>$rect, 'border'=>[0,0,0]);
+			my $href = $current_prop->{'_href'};
+			# TBD: href=pdf:docpath.pdf#p.x.y.z jump to another PDF
+			if ($href =~ m/^#/) {
+			    # href starts with # so it's a jump within this doc
+			    my ($pageno, $xpos, $ypos, $zoom);
+			    if      ($href =~ m/^#(\d+)$/) {
+				# #p format (whole page)
+				$pageno = $1;
+				$xpos = $ypos = $zoom = undef;
+			    } elsif ($href =~ m/^#(\d+)-(\d+)-(\d+)$/) {
+				# #p-x-y format (no zoom, at a specific spot)
+				$pageno = $1;
+				$xpos = $2;
+				$ypos = $3; 
+				$zoom = 1;
+			    } elsif ($href =~ m/^#(\d+)-(\d+)-(\d+)-(.+)$/) {
+				# #p-x-y-z format (zoom, at a specific spot)
+				$pageno = $1; # integer > 0
+				$xpos = $2; # number >= 0
+				$ypos = $3; # number >= 0
+				$zoom = $4; # number >= 0
+				if ($zoom <= 0) {
+				    carp "Invalid zoom value $zoom. Using 1";
+				    $zoom = 1;
+				}
+		            } else {
+			        # bad format
+				carp "Invalid link format '$href'. Using page 1";
+				$pageno = 1;
+				$xpos = $ypos = $zoom = undef;
+			    }
+			    if ($pageno < 1) { 
+				carp "Invalid page number $pageno. Using page 1";
+				$pageno = 1; 
+			    }
+			    if (defined $xpos && $xpos < 0) { 
+				carp "Invalid page x coordinate $xpos. Using x=100";
+				$xpos = 100; 
+			    }
+			    if (defined $ypos && $ypos < 0) { 
+				carp "Invalid page y coordinate $ypos. Using y=300";
+				$ypos = 300; 
+			    }
+
+			    my $tgt_page = $pdf->open_page($pageno);
+			    if (!defined $xpos) {
+				# page only
+			        $annotation->link($tgt_page,
+			            'rect'=>$rect, 'border'=>[0,0,0]);
+			    } else {
+				# page at a location and zoom factor
+			        $annotation->link($tgt_page,
+			            'rect'=>$rect, 'border'=>[0,0,0],
+			            'xyz'=>[ $xpos,$ypos, $zoom ]);
+			    }
+			} else {
+			    # webpage (usually HTML) link
+			    $annotation->uri($href,
+			        'rect'=>$rect, 'border'=>[0,0,0]);
+		        }
 		    }
 	            $x += $w;
 		    $full_line = 0;
@@ -2612,8 +2782,6 @@ sub _output_text {
 		} # phrase did not fit (else)
 	        # end of entire phrase does NOT fit
 
-		# TBD somewhere around here output dry run text for real
-
             } # end of while phrase has content loop
 	    # remainder should be '' at this point, phrase may have content
 	    # either ran out of phrase, or ran out of column
@@ -2656,8 +2824,6 @@ sub _output_text {
     # element (consolidated <style> tags, if any).
     shift @mytext;
 
-    # for some reason we get mytext with nothing but 2 elements: p /p
-    # where is style? 
     if ($#mytext == 0) {
 	# [0] = consolidated styles (default styles was just removed)
 	# we ran out of input. return next start_y and empty list ref
@@ -3069,6 +3235,11 @@ sub _html_hash {
             $text =~ s#$macro#$sub#g;
 	}
     }
+    # does call include a style initialization (opt in column() call)?
+    if (defined $opts{'style'}) {
+	# $style should be empty at this point
+        $style = _process_style_tag($style, $opts{'style'});
+    }
 
     $rc = eval {
 	require HTML::TreeBuilder;
@@ -3158,8 +3329,9 @@ sub _process_style_tag {
 	# one or more property-name: value; sets (; might be missing on last)
 	# go into %prop_val. we don't expect to see any } within a property
 	# value string.
-	$text =~ s/([^}]+)//;
-	$style->{$selector} = _process_style_string({}, $1);
+	if ($text =~ s/([^}]+)//) {
+	    $style->{$selector} = _process_style_string({}, $1);
+	}
 	if ($text =~ s/^}\s*//) { # remove closing } and whitespace
 	    if ($text eq '') { last; }
 	}
@@ -3179,6 +3351,7 @@ sub _process_style_string {
     # split up at :'s. don't expect to see any : within value strings
     foreach (@sets) {
 	my ($property_name, $value) = split /:/, $_;
+	if (!defined $property_name || !defined $value) { last; }
 	# trim off leading and trailing whitespace from both
 	$property_name =~ s/^\s+//;
 	$property_name =~ s/\s+$//;
@@ -3216,35 +3389,38 @@ sub _walkTree {
         if ($element =~ m/^HTML::Element=HASH/) {
             # $element should be anonymous hash
             $tag = $element->{'_tag'};
-            push @array, {'tag' => $element->{'_tag'}, 'text' => ''};
+            push @array, {'tag' => $tag, 'text' => ''};
 
-	    # look for attributes for tag
+	    # look for attributes for tag, also see if no child content
 	    $no_content = 0;  # has content (children) until proven otherwise
-	    foreach my $key (keys %$element) {
+	    my @tag_attr = keys %$element;
+	    # VOID elements (br, hr, img, area, base, col, embed, input,
+	    # link, meta, source, track, wbr) should NOT have /> to mark
+	    # as "self-closing", but it's harmless and much HTML code will
+	    # have them marked as "self-closing" even though it really
+	    # isn't! So be prepared to handle such dummy attributes, as
+	    # per RT 143038.
+	    if ($tag eq 'br' || $tag eq 'hr' ||
+	        $tag eq 'img' || $tag eq 'area' || $tag eq 'base' ||
+	        $tag eq 'col' || $tag eq 'embed' || $tag eq 'input' ||
+	        $tag eq 'link' || $tag eq 'meta' || $tag eq 'source' ||
+	        $tag eq 'track' || $tag eq 'wbr' || 
+		$tag eq 'defaults' || $tag eq 'style') { 
+		# self-closing or VOID with unnecessary /, there is no
+		# child data/elements for this tag. and, we can ignore
+		# this 'attribute' of /.
+		# defaults and style are specially treated as a VOID tags
+		$no_content = 1; 
+	    }
+	    foreach my $key (@tag_attr) {
+		# has an (unnecessary) self-closing / ?
+	        if ($element->{$key} eq '/') { next; }
+	        
 		# 'key' is more of an attribute within a tag (element)
 	        if ($key =~ m/^_/) { next; } # built-in attribute
-	        # VOID elements (br, hr, img, area, base, col, embed, input,
-		# link, meta, source, track, wbr) should NOT have /> to mark
-		# as "self-closing", but it's harmless and much HTML code will
-		# have them marked as "self-closing" even though it really
-		# isn't! So be prepared to handle such dummy attributes, as
-		# per RT 143038.
-	        if ($element->{$key} eq '/' || $tag eq 'br' || $tag eq 'hr' ||
-		    $tag eq 'img' || $tag eq 'area' || $tag eq 'base' ||
-	            $tag eq 'col' || $tag eq 'embed' || $tag eq 'input' ||
-	            $tag eq 'link' || $tag eq 'meta' || $tag eq 'source' ||
-	            $tag eq 'track' || $tag eq 'wbr' || 
-		    $tag eq 'defaults' || $tag eq 'style') { 
-		    # self-closing or VOID with unnecessary /, there is no
-		    # child data/elements for this tag. and, we can ignore
-		    # this 'attribute' of /.
-		    # defaults and style are specially treated as a VOID tags
-		    $no_content = 1; 
-	        } else {
-		    # this tag has one or more attributes to add to it
-                    # add tag attribute (e.g., src= for <img>) to hash
-		    $array[-1]->{$key} = $element->{$key};
-	        }
+		# this tag has one or more attributes to add to it
+                # add tag attribute (e.g., src= for <img>) to hash
+		$array[-1]->{$key} = $element->{$key};
 	    }
 
 	    if (!$no_content && defined $element->{'_content'}) {
@@ -3573,6 +3749,42 @@ sub _revise_baseline {
 		   # adjusted to account for possible change in resulting 
 		   # position of Tm
 		   $i += length("$old_x old_$y") - ($i - $j);
+                } 
+
+		# AFTER the Tm statement may come one or more strokes for
+		# underline, strike-through, and/or overline
+                $i = $line_start_offset;
+		# $delta_x, $delta_y same as before
+		while (1) {
+                   $i = index($text->{' stream'}, ' l S', $i+4);
+                   if ($i == -1) { last; }
+		   # $i is the position of a lS command in the stream. the five
+		   # words before it are x and y positions to write at.
+		   # (x y m x' y l S is full command to modify)
+		   # $j is $i back up by five spaces
+		   my $j = rindex($text->{' stream'}, ' ', $i-1);
+		   $j = rindex($text->{' stream'}, ' ', $j-1);
+		   $j = rindex($text->{' stream'}, ' ', $j-1);
+		   $j = rindex($text->{' stream'}, ' ', $j-1);
+		   $j = rindex($text->{' stream'}, ' ', $j-1);
+		   # $j points to first char of x, $i to one after last y char
+		   my $str1 = substr($text->{' stream'}, 0, $j);
+		   my $str2 = substr($text->{' stream'}, $i);
+		   my $old_string = substr($text->{' stream'}, $j, $i-$j);
+		   $old_string =~ m/^ ([^ ]+) ([^ ]+) m ([^ ]+) ([^ ]+)$/;
+		   my $old_x1 = $1;
+		   my $old_y1 = $2;
+		   my $old_x2 = $3;
+		   my $old_y2 = $4;
+		   $old_x1 += $delta_x;
+		   $old_y1 += $delta_y;
+		   $old_x2 += $delta_x;
+		   $old_y2 += $delta_y;
+                   $text->{' stream'} = $str1." $old_x1 $old_y1 m $old_x2 $old_y2".$str2;
+                   # no need to change line_start_offset, but $i has to be 
+		   # adjusted to account for possible change in resulting 
+		   # position of lS
+		   $i += length(" $old_x1 $old_y1 m $old_x2 $old_y2") - ($i - $j);
                 } 
 	    }
         }

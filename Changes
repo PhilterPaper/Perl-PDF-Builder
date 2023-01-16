@@ -2,15 +2,15 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.025     2023-01-07  UNRELEASED
+3.025     2023-01-15  UNRELEASED
 
     ===== many thanks to Amtivo Group for sponsoring this work!
+          see INFO/SPONSORS for more information
     lib/PDF/Builder/Content/Text.pm, examples/README, examples/examples_output,
       examples/Column.pl (new), MANIFEST, tools/3_examples.pl
      Add column() function to Content::Text, to support markup (none, Markdown,
       and HTML) in arbitrary columns. Note that PDF::Table will also support
       column(), but only when using PDF::Builder.
-*   At the moment, this is PRELIMINARY work -- not finished!
 
     lib/PDF/Builder.pm, lib/PDF/Builder/FontManager.pm (new), examples/README,
       examples/examples_output, examples/FontManager.pl (new), MANIFEST,
@@ -25,6 +25,17 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
       files to use for italic, bold, etc.
     ===== end of sponsored work
 
+    lib/PDF/Builder.pm, lib/PDF/Builder/FontManager.pm
+     Update "font path" in Builder, make use of it in Font Manager. Note that
+      at this time, only FontManager.pm makes use of the global font path
+      settings (font_path() method). All other code, examples, and t tests 
+      give full paths to font files. At some point in the future, this may be 
+      changed, but the problem is that Linux and other non-Windows systems 
+      seem to store their font files all over the place, and even Windows is 
+      consistent only for TrueType files (it doesn't ship with any Type1 or 
+      other format fonts). Note that if you wish to modify the default font
+      path list, you need to edit Builder.pm.
+
     README.md, LICENSE, lib/PDF/Builder.pm, examples/Column.pl
      Change copyright to 2023.
 
@@ -36,8 +47,7 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
       they're supposed to do better than what CPAN does by default? Also, 
       there may be a META_ADD provides that I'm supposed to add to Makefile.PL, 
       but again, documentation is quite scarce. I think I'll just ignore the
-      whole "provides" thing until there's good documentation on it. Screw you,
-      "kwalitee" system!
+      whole "provides" thing until there's good documentation on it. 
 
     README.md, Makefile.PL, META.json, META.yml, tools/optional_update.pl,
       t/00-all-usable.t, lib/PDF/Builder.pm, MANIFEST

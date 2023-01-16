@@ -3,8 +3,8 @@ package PDF::Builder::FontManager;
 use strict;
 use warnings;
 
-our $VERSION = '3.024'; # VERSION
-our $LAST_UPDATE = '3.024_002'; # manually update whenever code is changed
+# VERSION
+our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
 
 use Carp;
 use Scalar::Util qw(weaken);
@@ -140,8 +140,8 @@ sub new {
     # user. Note that an absolute (starts with /) or semi-absolute (starts 
     # with ./ or ../) font path/file will NOT have any search paths
     # prepended!
-    push @{$self->{' font-paths'}}, '.';  # always search current directory 1st
-    push @{$self->{' font-paths'}}, '/WINDOWS/Fonts' if $^O eq 'MSWin32';
+    push @{$self->{' font-paths'}}, $pdf->font_path();
+    # can add any additional paths, but better to do in Builder.pm
 
     $self->_initialize_core();
 
@@ -267,10 +267,12 @@ fonts that come standard with Windows, so it is added by default. Anything
 else, including all Linux (and other non-Windows operating systems), will have
 to be added depending on your particular system. Some common places are:
 
-Windows (B<NOTE:> use / and not \\ in Windows paths!)
+Windows (B<NOTE:> use / and not \\ in Windows paths!). Linux systems may or
+may not handle spaces in directory names gracefully!
 
     /Program Files/MikTex 2.9/fonts/type1/urw/bookman (URW Bookman for MikTex)
     /Program Files (x86)/MikTex 2.9/fonts/type1/urw/bookman (older versions)
+    /Program Files/Adobe/Acrobat DC/Resource/CIDFont (Adobe Reader fonts)
     GhostScript may have its own directories
 
 Linux, etc.
