@@ -42,11 +42,11 @@ contrib/pdf-deoptimize.pl
 contrib/pdf-optimize.pl
 contrib/text2pdf.pl
 docs/buildDoc.pl
+examples/resources/040_annotation.pdf
 examples/resources/aptfrontview.jpg
 examples/resources/sample_55.pdf
 examples/resources/sample.txt
 examples/resources/pod2htmd.temp
-examples/resources/HarfBuzz_example.pdf
 examples/011_open_update
 examples/012_pages
 examples/020_corefonts

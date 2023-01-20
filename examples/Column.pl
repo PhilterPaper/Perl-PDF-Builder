@@ -1009,11 +1009,11 @@ sub pause {
 sub restore_props {
     my ($text, $grfx) = @_;
 
-    $text->fillcolor('black');
-    $grfx->strokecolor('black');
+#   $text->fillcolor('black');
+#   $grfx->strokecolor('black');
     # italic and bold get reset to 'normal' anyway on column() entry,
     # but need to fix font face in case it was left something odd
-    $text->font($pdf->get_font('face'=>'default', 'italic'=>0, 'bold'=>0), 12);
+#   $text->font($pdf->get_font('face'=>'default', 'italic'=>0, 'bold'=>0), 12);
 
     return;
 }

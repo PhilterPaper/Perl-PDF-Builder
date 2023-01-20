@@ -89,7 +89,7 @@ my (@example_list, @example_results);
   push @example_results, "create examples/050_pagelabels.pdf, showing a number of pages, each with its\n own page label in different formats. You will see them when you drag the\n vertical scroll thumb and you see a thumbnail of each page,\n each with its own label.\n";
 
   push @example_list, "055_outlines";
-  push @example_results, "create examples/055_outlines_sample_55.pdf, showing a 12 page document.\n Click on the \"bookmark\" icon to see three pages in the outline, where you\n can click to jump to any of them.\n";
+  push @example_results, "create examples/055_outlines.sample_55.pdf, showing a 12 page document.\n Click on the \"bookmark\" icon to see three pages in the outline, where you\n can click to jump to any of them.\n";
 
   push @example_list, "060_transparency";
   push @example_results, "create examples/060_transparency.pdf, showing 2 pages with red opaque text\n partly covered by 40% transparent black text.\n";
@@ -103,11 +103,14 @@ my (@example_list, @example_results);
   push @example_list, "Bspline.pl";
   push @example_results, "create examples/Bspline.pdf, showing 4 pages with some annotated examples of\n using (cubic) B-splines to draw smoothly-connected lines through all the\n given points.\n";
 
+  push @example_list, "Column.pl";
+  push @example_results, "create examples/Column.pdf, showing multiple pages demonstrating the\n capabilities of the Content/Text.pm column() library methods\n";
+
   push @example_list, "Content.pl";
   push @example_results, "create examples/Content.pdf, showing multiple pages demonstrating the\n capabilities of the Content.pm library methods (graphics and text).\n";
 
   push @example_list, "ContentText.pl";
-  push @example_results, "create examples/ContentText.pdf, showing multiple pages demonstrating the\n capabilities of the Content/Text.pm library advanced text methods.\n";
+  push @example_results, "create examples/ContentText.pdf, showing multiple pages demonstrating the\n capabilities of the Content/Text.pm library advanced text methods.\nAlso see Column.pl for additional material.\n";
 
  if ($HS_installed) {
   push @example_list, "HarfBuzz.pl";

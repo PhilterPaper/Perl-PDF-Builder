@@ -2,7 +2,7 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.025     2023-01-15  UNRELEASED
+3.025     2023-01-19
 
     ===== many thanks to Amtivo Group for sponsoring this work!
           see INFO/SPONSORS for more information
@@ -35,6 +35,18 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
       consistent only for TrueType files (it doesn't ship with any Type1 or 
       other format fonts). Note that if you wish to modify the default font
       path list, you need to edit Builder.pm.
+
+    lib/PDF/Builder/Content.pm, examples/042_links, examples/HarfBuzz.pl, 
+      examples/examples.output; MANIFEST, 040_annotation.pdf (new),
+      examples/resources/HarfBuzz_example.pdf (removed) 
+     Remove the output of HarfBuzz Shaper's example from examples/resources 
+      (examples/resources/HarfBuzz_example.pdf), as this file is now available
+      on the CTS website (Examples/PDF/Builder/HarfBuzz.pdf) and substitute a
+      much smaller PDF, the output from 040_annotation, as the PDF sample for
+      042_links. This will cut the package size of PDF::Builder by about half!
+      References to HarfBuzz_example.pdf as a sample to look at (should you
+      not be able to run HarfBuzz.pl due to HarfBuzz::Shaper not being 
+      installed) have been updated to refer to the CTS website examples.
 
     README.md, LICENSE, lib/PDF/Builder.pm, examples/Column.pl
      Change copyright to 2023.

@@ -25,8 +25,8 @@ PDF::Builder::FontManager - Managing the font library for PDF::Builder
 
 =head1 SYNOPSIS
 
-These routines are called from the PDF::Builder class (see get_font(),
-add_font() methods).
+These routines are called from the PDF::Builder class (see C<get_font(),
+add_font()> methods).
 
     # core fonts come pre-loaded
     # Add new a new font face and variants
@@ -58,7 +58,7 @@ add_font() methods).
 	            'bold-italic' => 'DejaVuSans-BoldOblique.ttf' }
     );
 
-Some of the global data, which can be reset via the font_settings() method:
+Some of the global data, which can be reset via the C<font_settings()> method:
 
     * default-face:  initialized to Times-Roman (core), used if you start
       formatting text without explicitly setting a face
@@ -73,9 +73,9 @@ Some of the global data, which can be reset via the font_settings() method:
     * default-symbol initialized to Symbol (core), used if you want
       a "generic" symbol typeface
     * font-paths: C:/Windows/Fonts for Windows systems for TTF, other types
-      in non-standard paths, and for non-Windows, anything goes
+      are in non-standard paths, and for non-Windows, anything goes
 
-Usage of get_font is to specify the face and variants, and then each time,
+Usage of C<get_font()> is to specify the face and variants, and then each time,
 specify I<italic> and I<bold> to be on or off. If the desired file is not yet
 opened, it will be, and the C<$font> returned. If the font was already
 created earlier, the saved C<$font> will be returned.
@@ -168,10 +168,10 @@ generic script face is C<undef>).
     'sans-serif' => face to use for the generic sans serif face 
                     (initialized to Helvetica)
     'constant' => face to use for the generic constant width face 
-                    (initialized to Courier)
+                  (initialized to Courier)
     'script' => face to use for the generic script face (uninitialized)
     'symbol' => face to use for the generic symbol face 
-                    (initialized to Symbol)
+                (initialized to Symbol)
 
 =cut
 
@@ -254,14 +254,15 @@ sub font_settings {
 =item $rc = $pdf->add_font_path("a directory path", %opts)
 
 This method adds one search path to the list of paths to search. In the
-C<get_font> method, each defined search path will be prepended to the C<file> 
+C<get_font()> method, each defined search path will be prepended to the C<file> 
 entry (except for core fonts) in turn, until the font file is found. However, 
 if the C<file> entry starts with / or ./ or ../, it will be used alone.
 A C<file> entry starting with .../ is a special case, which is turned into ../
 before the search path is prepended. This permits you to give a search path
 that you expect to move up one or more directories.
 
-The font path search list always includes the current directory (.). For the
+The font path search list always includes the current directory (.), and is
+initialized in C<Builder.pm> as C<@font_path>. For the
 Windows operating system, C</Windows/Fonts> usually contains a number of TTF
 fonts that come standard with Windows, so it is added by default. Anything
 else, including all Linux (and other non-Windows operating systems), will have
@@ -270,18 +271,29 @@ to be added depending on your particular system. Some common places are:
 Windows (B<NOTE:> use / and not \\ in Windows paths!). Linux systems may or
 may not handle spaces in directory names gracefully!
 
+    /Windows/Fonts
+    /WinNT/Fonts
     /Program Files/MikTex 2.9/fonts/type1/urw/bookman (URW Bookman for MikTex)
     /Program Files (x86)/MikTex 2.9/fonts/type1/urw/bookman (older versions)
     /Program Files/Adobe/Acrobat DC/Resource/CIDFont (Adobe Reader fonts)
     GhostScript may have its own directories
 
+Note that directory names with spaces (e.g., C</Program Files>) may not play
+nice with some Linux systems, so they are not included by default.
+
 Linux, etc.
 
+    /usr/share/fonts (common base)
+    /usr/local/share/fonts (common base)
     /usr/share/fonts/dejavu-sans-fonts  (Deja Vu Sans TTF specifically)
     /usr/share/fonts/truetype/ttf-dejavu
+    /usr/share/fonts/truetype/dejavu
     /usr/lib/defoma/gs.d/devs/fonts   (GhostScript?)
     /usr/share/fonts/type1/gsfonts    (GhostScript PS)
     /usr/share/X11/fonts/urw-fonts    (URW PS)
+
+Third-party application installations, such as Adobe's Acrobat Reader, may be
+a source of installed fonts, too.
 
 A return code of 0 means the path was successfully added, while 1 means there
 was a problem encountered (and a message was issued).
@@ -345,7 +357,8 @@ will be running on Windows systems.
 
 =item B<ttf>
 
-This is a TrueType (.ttf) or OpenType (.otf) font. Currently this is the only
+This is a TrueType (.ttf) or OpenType (.otf) font, loaded with C<ttfont()>. 
+Currently this is the only
 type which can be used with multibyte (e.g., I<utf8>) encodings, as well as 
 with single byte encodings such as I<Latin-1>. It is also the only font type
 that can be used with HarfBuzz::Shaper. Many systems include a number of TTF
@@ -354,7 +367,8 @@ Font Manager, and must be explicitly loaded via C<add_font()>.
 
 =item B<type1>
 
-This is a PostScript (Type1) font, which used to be quite commonly used, but is
+This is a PostScript (Type1) font, loaded with C<psfont()>, which used to be 
+quite commonly used, but is
 fairly rarely used today, having mostly been supplanted by the more capable
 TTF format. Some systems may include some Type1 fonts, but Windows, 
 for example, does not normally come with any. No Type1 fonts are automatically
@@ -366,11 +380,13 @@ name as the glyph file (.pfa or .pfb), is found in the same directory, I<and>
 either can work with either.
 If you have need for a different directory, a different base name, or a 
 specific metrics file to go with a specific glyph file, let us know, so we can 
-add such functionality.
+add such functionality. Otherwise, you will need to directly use the C<psfont()>
+method in order to specify such different paths.
 
 =item B<cjk>
 
-This is an East Asian (Chinese-Japanese-Korean) type font. Note that CJK fonts
+This is an East Asian (Chinese-Japanese-Korean) type font, loaded with the
+C<cjkfont()> method. Note that CJK fonts
 have never been well supported by PDF::Builder, and depend on some fairly old
 (obsolete) features and external files (.cmap and .data). We suggest that,
 rather than going directly to CJK files, you first try directly using the
@@ -380,13 +396,14 @@ Manager, and must be explicitly loaded via C<add_font()>.
 
 =item B<bdf>
 
-This is an Adobe Bitmap Distribution Format font, a very old bitmapped format 
+This is an Adobe Bitmap Distribution Format font, loaded with the C<bdfont()>
+method, a very old bitmapped format 
 dating back to the early days of the X11 system. Unlike the filled smooth 
 outlines used in most modern fonts, BDF's are a coarse grid of on/off pixels.
 Please be kind to your readers and use this format sparingly, such as only for
-chapter titles!  Few systems come with BDF fonts installed any more. No BDF 
-fonts are automatically loaded by the PDF::Builder Font Manager, and must be 
-explicitly loaded via C<add_font()>.
+chapter titles or headings! Few systems come with BDF fonts installed any more. 
+No BDF fonts are automatically loaded by the PDF::Builder Font Manager, and 
+must be explicitly loaded via C<add_font()>.
 
 =back
 
@@ -718,7 +735,8 @@ sub _initialize_core {
 
 If no parameters are given (C<@current = $pdf-E<gt>get_font()>), a list
 (array) is returned giving the I<current> font setting: I<face> name, I<italic> 
-flag 0/1, I<bold> flag 0/1, I<type> ('core', 'ttf', etc.), I<encoding> ('utf8' 
+flag 0/1, I<bold> flag 0/1, I<type> ('core', 'ttf', etc.), a hash reference of
+I<settings>, such as the I<encoding> ('utf8',
 etc.), I<style> value, I<width> value, and an array reference (list) of 
 variants (roman, bold, etc.). If no font has yet been explicitly set, the 
 current font will be the default font.
@@ -743,6 +761,10 @@ script (cursive) face (B<if defined>) may be requested.
 
 If you give the C<face> entry, the other settings (C<italic>, C<bold>, etc.)
 are I<not> reset, unless it is impossible to use the existing setting.
+If you do I<not> give the C<face> entry, the I<current> entry will be updated
+(bold, italic switched on/off, etc.). You may always explicitly give 
+I<current> to make it clear in your code that you I<don't> want to change 
+the face.
 
 =item italic => flag
 

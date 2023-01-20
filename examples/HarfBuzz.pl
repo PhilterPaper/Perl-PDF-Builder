@@ -1,7 +1,4 @@
 #!/usr/bin/perl
-##########################
-# Note to maintainer: don't forget to refresh HarfBuzz_example.pdf
-##########################
 # demonstrate some usage of HarfBuzz::Shaper and related text calls
 # outputs HarfBuzz.pdf
 # author: Phil M Perry

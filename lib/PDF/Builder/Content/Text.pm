@@ -1118,9 +1118,11 @@ object containing the "column" method.
 
 B<$grfx> is the graphics (gfx) context. It may be a dummy (e.g., undef) if
 I<no> graphics are to be drawn, but graphical items such as the column outline 
-('outline' option), horizontal rule (<hr> in HTML markup), or I<text-decoration>
-underline (default for links, 'md1' []() and 'html' E<lt>aE<gt>) or line-through
-or overline require a valid graphics context.
+('outline' option) and horizontal rule (<hr> in HTML markup) use it. 
+Currently, I<text-decoration> underline (default for links, 'md1' C<[]()> and 
+'html' C<E<lt>aE<gt>>) or line-through or overline use the text context, but
+may in the future require a valid graphics context. Images (when implemented)
+will require a graphics context.
 
 B<$markup> is information on what sort of I<markup> is being used to format
 and lay out the column's text:
@@ -1132,9 +1134,9 @@ and lay out the column's text:
 The input material has already been processed and is already in the desired
 form. C<$txt> is an array reference to the list of hashes. This I<must> be used 
 when you are calling C<column()> a second (or later)
-time to output material left over from the first call. It may be used when
-the caller application has already processed the text, and other markup isn't
-being used.
+time to output material left over from the first call. It may also be used when
+the caller application has already processed the text into the appropriate
+format, and other markup isn't being used.
 
 =item  'none'
 
@@ -1149,7 +1151,7 @@ not span array elements.
 
 =item  'md1'
 
-This specifies a certain flavor of Markdown: 
+This specifies a certain flavor of Markdown compatible with Text::Markdown: 
 
     * or _ italics, ** bold, *** bold+italic; 
     bulleted list *, numbered list 1. 2. etc.; 
@@ -1162,6 +1164,9 @@ HTML (see below) may be mixed in as desired (although not within "code" blocks
 marked by backticks, where <, >, and & get turned into HTML entities, disabling 
 the intended tags).
 Markdown will be converted into HTML, which will then be interpreted into PDF.
+I<Note that Text::Markdown may produce HTML for certain features, that is not 
+yet supported by HTML processing (see 'html' section below). Let us know if 
+you need such a feature!>
 
 The input B<txt> is a list (anonymous array reference) of strings, each 
 containing one or more paragraphs and other markup. A single string may also be 
@@ -1193,11 +1198,11 @@ and CSS. Currently, HTML tags
     'sup', 'sub' (TBD superscript and subscript)
     's', 'strike', 'del' (line-through)
     'u', 'ins' (underline)
-    'ovl' (TBD, overline)
-    'k' (TBD, kerning left/right shift)
+    'ovl' (TBD -- non-HTML, overline)
+    'k' (TBD -- non-HTML, kerning left/right shift)
 
-are supported (fully or in part), along with limited CSS for color, font-size, 
-font-family, etc. 
+are supported (fully or in part I<unless> "TBD"), along with limited CSS for 
+color, font-size, font-family, etc. 
 E<lt>styleE<gt> tags may be placed in an optional E<lt>headE<gt> section, or
 within the E<lt>bodyE<gt>. In the latter case, style tags will be pulled out
 of the body and added (in order) on to the end of any style tag(s) defined in 
@@ -1238,8 +1243,8 @@ Supported CSS properties:
 
 Non-standard CSS "properties". You may want to set these in CSS:
 
-    _marker-before (text to insert before <ol> marker)
-    _marker-after (text to insert after <ol> marker)
+    _marker-before (text to insert before <ol> marker, default nothing)
+    _marker-after (text to insert after <ol> marker, default period)
 
 Non-standard CSS "properties". You normally would not set these in CSS:
 
@@ -1366,7 +1371,7 @@ The C<$x, $y> position through C<$x + width> is assumed to be the first
 text baseline. The next line down will be C<$y - $leading*$font_size>. If the
 font_size changes for any reason over the course of the column, the baseline
 spacing (leading * font_size) will also change. The B<default> leading ratio
-is 1.125 (12.5%).
+is 1.125 (12.5% added to font).
 
 =item 'para' => [ $indent, $top-margin ]
 
@@ -1424,6 +1429,81 @@ as C<|>, so don't use them as delimiters (e.g., C<|cross|>). You don't I<have>
 to wrap your macro name in delimiters, but it can make the text structure
 clearer, and may be necessary in order not to do substitutions in the wrong 
 place.
+
+=item 'restore' => flag
+
+This integer flag determines what sort of cleanup C<column()> will do upon
+exit, to restore (or not) the font state (face, bold or normal weight, 
+italic or normal style, size, and color).
+
+=over
+
+=item for rc = 0 (all input markup was used up, without running out of column)
+
+=over
+
+=item restore => 0
+
+This is the B<default>. Upon exiting, C<column()> will attempt to restore the 
+state to what one would see if there was yet more text to be output. Note that
+this is I<not> necessarily what one would see if the entire state was restored
+to entry conditions. The intent is that another C<column()> call can be 
+immediately made, using whatever font state was left by the previous call, as
+though the two calls' markup inputs were concatenated.
+
+=item restore => 1
+
+This value of C<restore> commands that I<no> change be made to the font state,
+that is, C<column()> exits with the font state left in the last text output.
+This may or may not be desirable, especially if the last text output left the
+text in an unexpected state.
+
+=item restore => 2
+
+This value of C<restore> attempts to bring the font state all the way back to
+what it was upon I<entry> to the routine, as if it had never been called. Note
+that if C<column()> was called with no global font settings, that can not be
+undone, although the color I<can> be changed back to its original state, 
+usually black.
+
+B<CAUTION:> The Font Manager is not synchronized with whatever state the font
+is returned to. You should not request the 'current' font, but should instead
+explicitly set it to a specific face, etc., which resets 'current'.
+
+=back
+
+=item for rc = 1 (ran out of column space before all the input markup was used up)
+
+=over
+
+=item restore => 0
+
+This is the B<default>. Upon exiting, no changes will be made to the font
+state. As the code will be in the middle of some output, the font state is
+kept the same, so the next C<column()> call (for the overflow) can pick up 
+where the previous call left off, with regards to the font state.
+
+It is equivalent to C<restore = 1>.
+
+=item restore => 1
+
+This is the same as C<restore = 0>.
+
+=item restore => 2
+
+This value of C<restore> attempts to bring the font state all the way back to
+what it was upon I<entry> to the routine, as if it had never been called. Note
+that if C<column()> was called with no global font settings, that can not be
+undone, although the color I<can> be changed back to its original state, 
+usually black.
+
+B<CAUTION:> The Font Manager is not synchronized with whatever state the font
+is returned to. You should not request the 'current' font, but should instead
+explicitly set it to a specific face, etc., which resets 'current'.
+
+=back
+
+=back
 
 =back
 
@@ -1489,7 +1569,8 @@ The return code.
 A return code of 0 indicates that the call completed, while using up all the
 input C<$txt>. It did I<not> run out of defined column space.
 
-B<NOTE:> the C<column()> call makes no effort to "restore" conditions to any
+B<NOTE:> if C<restore> has a value of 1, the C<column()> call makes no effort 
+to "restore" conditions to any
 starting values. If your last bit of text left the "current" font with some
 "odd" face/family, size, I<italicized>, B<bolded>, or colored; that will be
 what is used by the next column call (or other PDF::Builder text calls). This
@@ -1499,7 +1580,8 @@ to return to. On the other hand, in some cases you may want to start from the
 same initial coditions as usual. You
 may want to add C<get_font()>, C<font()>, C<fillcolor()>, and
 C<strokecolor()> calls as necessary before the next text output, to get the
-expected text characteristics.
+expected text characteristics. Or, you can simply let C<restore> default to
+0 to get the same effect.
 
 =item '1'
 
@@ -1508,7 +1590,8 @@ column space. It did I<not> run out of input C<$txt>. You will need to make
 one or more calls with empty column space (to fill), to use up the remaining
 input text (with "pre" I<$markup>).
 
-The text settings in the "current" font are left as-is, so that whatever you
+If C<restore> defaults to 0 (or is set to 1), the text settings in the 
+"current" font are left as-is, so that whatever you
 were doing when you ran out of defined column (as regards to font face/family,
 size, italic and bold states, and color) should automatically be the same when 
 you make the next C<column()> call to make more output.
@@ -1553,7 +1636,7 @@ It contains nothing to be used.
 #   <big>*, <bigger>*, <smaller>*, <small> 
 #   <cite>, <q>, <code>, <kbd>, <samp>, <var>
 #   CSS _expand* to call hscale() and/or condensed/expanded type in get_font()
-#        (if do synfont() call)
+#        (if not doing synfont() call)
 #   CSS text transform, such as uppercase and lowercase flavors
 #   CSS em and ex sizes relative to current font size (like %), 
 #        other absolute sizes such as in, cm, mm, px (?)
@@ -1616,6 +1699,23 @@ sub column {
     my $marker_width = 2*$font_size;
     if (defined $opts{'marker_width'}) { $marker_width=$opts{'marker_width'}; }
 
+    my $restore = 0; # restore text state and color at end
+    if (defined $opts{'restore'}) { $restore = $opts{'restore'}; }
+    my @entry_state = (); # font state, color and graphics color
+    push @entry_state, $text->{' font'};  # initially may be undef, then hashref
+    push @entry_state, $text->{' fontsize'};  # initially 0
+    push @entry_state, $text->{' fillcolor'};  # an arrayref, often single number or string
+    push @entry_state, $text->{' strokecolor'};  # an arrayref, often single number or string
+    if (defined $grfx && ref($grfx) =~ m/^PDF::Builder::Content=HASH/){
+	# we have a valid grfx, so can use its values
+        push @entry_state, $grfx->{' fillcolor'};  # an array, often single number or string
+        push @entry_state, $grfx->{' strokecolor'};  # an array, often single number or string
+    } else {
+        # no grfx, so use undef for values
+	push @entry_state, undef;
+	push @entry_state, undef;
+    }
+
     # fallback CSS properties, inserted at array[0]
     my $default_css = _default_css($pdf, $text, $font_size, $leading, %opts); # per-tag properties
     # dump @mytext list within designated column @outline
@@ -1655,7 +1755,23 @@ sub column {
     # attribute list. on exit from tag, set attributes to restore settings
     _tag_attributes(@mytext);
 
-    ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $page, $text, $grfx, $para, $font_size, $marker_width, $leading, @mytext);
+    ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $page, $text, $grfx, $restore, $para, $font_size, $marker_width, $leading, @mytext);
+
+    if ($rc > 1) {
+	# restore = 2 request restore to @entry_state for rc=0, 3 for 1
+        $text->{' font'} = $entry_state[0]; 
+        $text->{' fontsize'} = $entry_state[1]; 
+        $text->{' fillcolor'} = $entry_state[2];
+        $text->{' strokecolor'} = $entry_state[3];
+        if (defined $grfx && ref($grfx) =~ m/^PDF::Builder::Content=HASH/){
+	    # we have a valid grfx, so can use its values
+            $grfx->{' fillcolor'} = $entry_state[4];
+            $grfx->{' strokecolor'} = $entry_state[5];
+        } else {
+            # no grfx, so do nothing
+        }
+	$rc -= 2;
+    }
 
     return ($rc, $start_y, $unused);
 } # end of column()
@@ -1945,8 +2061,8 @@ sub _tag_attributes {
 
 # the workhorse of the library: output text (modified by tags) in @mytext
 sub _output_text {
-    my ($start_y, $min_y, $outl, $pdf, $page, $text, $grfx, $para, $font_size, 
-	$marker_width, $leading, @mytext) = @_;
+    my ($start_y, $min_y, $outl, $pdf, $page, $text, $grfx, $restore, $para, 
+	$font_size, $marker_width, $leading, @mytext) = @_;
     my @outline = @$outl;
 
     # start_y is the lowest extent of the previous line, or the highest point
@@ -2355,13 +2471,13 @@ sub _output_text {
 	    # don't know if color will be used for text or for graphics draw,
 	    # so set both
 	    if ($properties[-1]->{'color'} ne $current_prop->{'color'}) {
-		 $current_prop->{'color'} = $properties[-1]->{'color'};
-		 $text->fillcolor($current_prop->{'color'});
-		 $text->strokecolor($current_prop->{'color'}); 
-                 # for underlines and strikethroughs
-		 $grfx->strokecolor($current_prop->{'color'}) 
-		     if defined $grfx && ref($grfx) =~ m/^PDF::Builder::Content/;
-		 # add fillcolor if ever do anything with that
+		$current_prop->{'color'} = $properties[-1]->{'color'};
+		$text->fillcolor($current_prop->{'color'});
+		$text->strokecolor($current_prop->{'color'}); 
+		if (defined $grfx && ref($grfx) =~ m/^PDF::Builder::Content/) {
+		    $grfx->fillcolor($current_prop->{'color'});
+		    $grfx->strokecolor($current_prop->{'color'});
+                }
             }
 
 	    # these properties don't get a PDF::Builder call
@@ -2579,6 +2695,13 @@ sub _output_text {
 			my $strokethickness = $font->underlinethickness() || 1;
 			$strokethickness *= $fs/1000;
 			my $stroke_ydist = $font->underlineposition() || 1;
+
+			# don't stroke through any trailing whitespace
+			my $trail = 0; # width of WS
+			if ($phrase =~ m/(\s+)$/) {
+			    $trail = $text->advancewidth($1);
+			}
+
 			$stroke_ydist *= $fs/1000;
 			$text->add('q');
 			$text->add('ET'); # go into graphics mode
@@ -2587,19 +2710,19 @@ sub _output_text {
 			if ($current_prop->{'text-decoration'} =~ m#underline#) { 
 			    # use ydist as-is
 			    $text->add("$x ".($y+$stroke_ydist)." m");
-			    $text->add(($x+$w)." ".($y+$stroke_ydist)." l");
+			    $text->add(($x+$w-$trail)." ".($y+$stroke_ydist)." l");
 			}
 			if ($current_prop->{'text-decoration'} =~ m#line-through#) { 
 			    # use new ydist at .3fs
 			    $stroke_ydist = 0.3*$fs;
 			    $text->add("$x ".($y+$stroke_ydist)." m");
-			    $text->add(($x+$w)." ".($y+$stroke_ydist)." l");
+			    $text->add(($x+$w-$trail)." ".($y+$stroke_ydist)." l");
 			}
-			if ($current_prop->{'text-decoration'} =~ m#overline#) { 
+			if ($current_prop->{'text-decoration'} =~ m#overline#) {
 			    # use new ydist at 0.65fs
 			    $stroke_ydist = 0.70*$fs;
 			    $text->add("$x ".($y+$stroke_ydist)." m");
-			    $text->add(($x+$w)." ".($y+$stroke_ydist)." l");
+			    $text->add(($x+$w-$trail)." ".($y+$stroke_ydist)." l");
 			}
 			$text->add('S');
 			$text->add('BT'); # back into text mode
@@ -2631,7 +2754,7 @@ sub _output_text {
 			# $asc, $desc are font ascenders/descenders
                         # some extra margin to make it easier to select
                         my $fs = 0.2*$current_prop->{'font-size'};
-                        my $rect = [ $x-$fs, $y-$desc-$fs, 
+                        my $rect = [ $x-$fs, $y-$desc-3*$fs, 
 				     $x+$w+$fs, $y+$asc+$fs ];
 			# TBD what if link wraps around? make two or more?
 			my $annotation = $page->annotation();
@@ -2680,6 +2803,11 @@ sub _output_text {
 			    }
 
 			    my $tgt_page = $pdf->open_page($pageno);
+			    if (!defined $tgt_page) {
+				carp "Invalid page number $pageno. Using page 1";
+				$pageno = 1;
+				$tgt_page = $pdf->open_page($pageno);
+			    }
 			    if (!defined $xpos) {
 				# page only
 			        $annotation->link($tgt_page,
@@ -2827,10 +2955,85 @@ sub _output_text {
     if ($#mytext == 0) {
 	# [0] = consolidated styles (default styles was just removed)
 	# we ran out of input. return next start_y and empty list ref
+	
+	# first, handle restore = 0, 1, or 2
+	if      ($restore == 0) {
+	    # carry out pending font and color changes
+	    # what properties have changed and need PDF calls to update?
+	    my $call_get_font = 0;
+	    if ($properties[-1]->{'font-family'} ne $current_prop->{'font-family'}) {
+		 $call_get_font = 1;
+		 # a font label known to FontManager
+		 $current_prop->{'font-family'} = $properties[-1]->{'font-family'};
+            }
+	    if ($properties[-1]->{'font-style'} ne $current_prop->{'font-style'}) {
+		 $call_get_font = 1;
+		 # normal or italic
+		 $current_prop->{'font-style'} = $properties[-1]->{'font-style'};
+            }
+	    if ($properties[-1]->{'font-weight'} ne $current_prop->{'font-weight'}) {
+		 $call_get_font = 1;
+		 # normal or bold
+		 $current_prop->{'font-weight'} = $properties[-1]->{'font-weight'};
+            }
+	    # font size
+	    # don't want to trigger font call unless numeric value changed
+	    # current_prop's s/b in points, newval will be in points. if
+	    # properties (latest request) is a relative size (e.g., %),
+	    # what it is relative to is NOT the last font size used
+	    # (current_prop), but carried-along current font size.
+	    my $newval = _fs2pt($properties[-1]->{'font-size'}, 
+	                        $properties[-1]->{'_fs'});
+	    $properties[-1]->{'_fs'} = $newval;  # remember it!
+	    # newval is the latest requested size (in points), while
+	    # current_prop is last one used for output (in points)
+	    if ($newval != $current_prop->{'font-size'}) {
+	        $call_get_font = 1;
+		$current_prop->{'font-size'} = $newval;
+	    }
+	    # any size as a percentage of font-size will use the current fs
+	    my $fs = $current_prop->{'font-size'};
+
+	    if ($call_get_font) {
+                $text->font($pdf->get_font(
+		    'face' => $current_prop->{'font-family'}, 
+		    'italic' => ($current_prop->{'font-style'} eq 'normal')? 0: 1, 
+		    'bold' => ($current_prop->{'font-weight'} eq 'normal')? 0: 1, 
+		                          ), $fs); 
+	    }
+	    # font-size should be set in current_prop for use by margins, etc.
+
+	    # don't know if color will be used for text or for graphics draw,
+	    # so set both
+	    if ($properties[-1]->{'color'} ne $current_prop->{'color'}) {
+		$current_prop->{'color'} = $properties[-1]->{'color'};
+		$text->fillcolor($current_prop->{'color'});
+		$text->strokecolor($current_prop->{'color'}); 
+		if (defined $grfx && ref($grfx) =~ m/^PDF::Builder::Content/ ) {
+		    $grfx->fillcolor($current_prop->{'color'});
+		    $grfx->strokecolor($current_prop->{'color'});
+                }
+            }
+	} elsif ($restore == 1) {
+	    # do nothing, leave the font state/colors as-is
+	} else { # 2
+	    # restore to entry with @entry_state
+	    return (2, $next_y, []);
+	}
+
 	return (0, $next_y, []);
     } else {
 	# we ran out of vertical space in the column. return -1 and 
 	# remainder of mytext list (next_y would be inapplicable)
+	
+	# first, handle restore = 0, 1, or 2
+	if ($restore == 0 || $restore == 1) {
+	    # do nothing, leave the font state/colors as-is
+	} else { # 2
+	    # restore to entry with @entry_state
+	    return (3, -1, \@mytext);
+	}
+
 	return (1, -1, \@mytext);
     }
 
@@ -3252,6 +3455,9 @@ sub _html_hash {
 	my $tree = HTML::TreeBuilder->new();
 	$tree->ignore_unknown(0);  # don't discard non-HTML recognized tags
 	$tree->no_space_compacting(1);  # preserve spaces
+	$tree->warn(1);  # warn if syntax error found
+	$tree->p_strict(1);  # auto-close paragraph on new block element
+	$tree->implicit_body_p_tag(1);  # loose text gets wrapped in <p>
 	$tree->parse_content($text);
 	
 	# see if there is a <head>, and if so, if any <style> tags within it

@@ -4027,8 +4027,9 @@ It may rearrange and swap characters (glyphs), and the result may bear no
 resemblance to the original Unicode point list. You should see 
 examples/HarfBuzz.pl, which shows a number of examples with Latin and non-Latin 
 text, as well as vertical writing. 
-examples/resources/HarfBuzz_example.pdf is available in case you want to see 
-some examples and don't yet have HarfBuzz::Shaper installed.
+https://www.catskilltech.com/Examples has a sample available in case you want 
+to see some examples of what HarfBuzz can do, and don't yet have 
+HarfBuzz::Shaper installed.
 
 =over
 

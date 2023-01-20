@@ -5,7 +5,7 @@ use warnings;
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
-our $VERSION = '3.024'; # VERSION
+our $VERSION = '3.025'; # VERSION
 our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
 
 # updated during CPAN build
@@ -42,7 +42,7 @@ use Scalar::Util qw(weaken);
 # Note that every Linux distribution seems to put font files in a different
 # place, and even Windows is consistent only for TTF/OTF font files.
 my @font_path = __PACKAGE__->set_font_path(
-	         #'.',  # could a font ever be a security risk?
+	          '.',  # could a font ever be a security risk?
                   '/usr/share/fonts',
 		  '/usr/local/share/fonts',
 		  '/usr/share/fonts/type1/gsfonts',
@@ -155,6 +155,11 @@ The intent is to avoid expending unnecessary effort in supporting very old
 (obsolete) versions of Perl.
 
 =head3 Anticipated Support Cutoff Dates
+
+B<Note that these are I<not> hard and fast dates. In particular, we develop
+on Strawberry Perl, which is currently stuck at release 5.32! We'll have to
+see whether we can get around this problem in the summer of 2023, if Strawberry
+hasn't yet gotten up to at least 5.36 by then.>
 
 =over
 
@@ -2033,6 +2038,7 @@ I<not> a new, empty page; but contains the contents of that existing page.
 
 If C<$page_number> is 0, -1, or unspecified, 
 it will return the last page in the document.
+If the requested page is out of range, the C<$page> returned will be undefined.
 
 B<Example:>
 
@@ -3445,7 +3451,7 @@ C<$file> may be either a file name, a filehandle, or a
 L<PDF::Builder::Resource::XObject::Image::GD> object.
 
 B<Caution:> Do not confuse this C<image> ($pdf-E<gt>) with the image method 
-found in the graphics (gfx) class ($gfx-E<gt>), used to actually place a
+found in the graphics (gfx) class ($gfx-E<gt>), used to actually I<place> a
 read-in or decoded image on the page!
 
 See L<PDF::Builder::Content/image> for details about placing images on a page
