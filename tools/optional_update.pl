@@ -18,7 +18,7 @@ use List::Util 'any';
 # t/00-all-usable.t and lib/PDF/Builder.pm, while also making use of the
 # optional prerequisites, do not need to exclude unused optionals.
 
-our $VERSION = '3.024'; # VERSION
+our $VERSION = '3.025'; # VERSION
 our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
 
 # master list of optional prerequisites:

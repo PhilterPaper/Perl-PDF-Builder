@@ -1,6 +1,6 @@
 # PDF::Builder version being built
 # update *.pm, *.pl, Builder.pm, Makefile.PL, META.*
-VERSION 3.024
+VERSION 3.025
 
 # minimum Perl version needed
 # EVERY RELEASE: check https://www.cpan.org/src/ "First release in each branch
@@ -33,8 +33,3 @@ IMAGE_PNG_LIBPNG 0.57
 TEXT_MARKDOWN    1.000031
 HTML_TREEBUILDER 5.07
 
-# problems seen with 3.024 build:
-#   META.* final version not seeing 'recommends' after install
-#   META.yml 'provides' list 'version' not updated
-#   corrupted Makefile.PL update around GT line
-#   tools/update_optionals.pl not updated correctly

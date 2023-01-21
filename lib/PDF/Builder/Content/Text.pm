@@ -1263,9 +1263,12 @@ as well as named entities (&mdash; for example).
 The input B<txt> is a list (anonymous array reference) of strings, each 
 containing one or more paragraphs and other markup. A single string may also be 
 given. Per normal HTML practice, paragraph tags should be used to mark
-paragraphs. Separate array elements will first be glued together 
-into a single string before processing, permitting paragraphs to span array 
-elements if desired.  
+paragraphs. I<Note that HTML::TreeBuilder is configured to automatically
+mark top body-level text with paragraph tags, in case you forget to do so,
+although it is probably better to do it yourself, to maintain more control
+over the processing.>
+Separate array elements will first be glued together into a single string 
+before processing, permitting paragraphs to span array elements if desired.  
 
 =back
 
