@@ -10,7 +10,7 @@ use List::Util qw(min max);
 #  $Data::Dumper::Sortkeys = 1;  # hash keys in sorted order
 
 # VERSION
-our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -1629,60 +1629,6 @@ It contains nothing to be used.
 =back
 
 =cut
-
-# TBD, future:
-#  * = not official HTML5 or CSS (i.e., extension)
-# perhaps 3.026?  
-#   arbitrary paragraph shapes (path)
-#   at a minimum, hyphenate-basic usage including &SHY;
-#   <hr>, <img>, <sup>, <sub>, <pre>, <nobr>, <br>, <dl>/<dt>/<dd>, <center>*
-#   <big>*, <bigger>*, <smaller>*, <small> 
-#   <cite>, <q>, <code>, <kbd>, <samp>, <var>
-#   CSS _expand* to call hscale() and/or condensed/expanded type in get_font()
-#        (if not doing synfont() call)
-#   CSS text transform, such as uppercase and lowercase flavors
-#   CSS em and ex sizes relative to current font size (like %), 
-#        other absolute sizes such as in, cm, mm, px (?)
-#
-#  possibly...
-#   <abbr>, <base>, <wbr>
-#   <article>, <aside>, <section>  as predefined page areas?
-#
-#  extensions to HTML and CSS...
-#   <sl>* simple list (no markers)
-#   <sc>* preprocess: around runs of lowercase put <span style="font-size: 80%;
-#        expand: 110%"> and fold to UPPER CASE. this is post-mytext creation!
-#   <pc>* (Petite case) like <sc> but 1ex font-size, expand 120%
-#   <dc>* drop caps
-#   <ovl>* overline (similar to underline) using CSS text-decoration: overline
-#   <k>* kern text (shift left or right) with CSS _kern, or general positioning:
-#     ability to form (La)TeX logo through character positioning
-#        what to do at HTML level? x+/- %fs, y+/- %fs
-#     also useful for <sup>4</sup><sub>2</sub>He notation
-#   <vfrac>* vulgar fraction, using sup, sup, kern
-#   HTML attributes to tune (force end) of something, such as early </sc> 
-#        after X words and/or end of line. flag to ignore next </sc> coming up,
-#        or just make self-closing with children?
-#   <endc>* force end of column here (at this y, while still filling line)
-#        e.g., to prevent an orphan. optional conditional (e.g., less than 1"
-#        of vertical space left in column)
-#   <keep>* material to keep together, such as headings and paragraph text
-#   leading (line-height) as a dimension instead of a ratio, convert to ratio
-#
-# 3.027 or later?
-#  left/right auto margins? <center> may need this
-#  Text::KnuthLiang hyphenation
-#  <hyp>*, <nohyp>* control hypenation in a word (and remember
-#        rules when see this word again)
-#  <lang>* define language of a span of text, for hyphenation/audio purposes
-#  Knuth-Plass paragraph shaping (with proper hyphenation) 
-#  HarfBuzz::Shaper for ligatures, callout of specific glyphs (not entities), 
-#        RTL and non-Western language support. <bdi>, <bdo>
-#  <nolig></nolig>* forbid ligatures in this range
-#  <lig gid='nnn'> </lig>* replace character(s) by a ligature
-#  <alt gid='nnn'> </alt>* replace character(s) by alternate glyph
-#        such as a swash. font-dependent
-#  <eqn>* (needs image support, SVG processing)
 
 sub column {
     my ($self, $page, $text, $grfx, $markup, $txt, %opts) = @_;

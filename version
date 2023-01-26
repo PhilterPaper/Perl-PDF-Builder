@@ -1,6 +1,6 @@
 # PDF::Builder version being built
 # update *.pm, *.pl, Builder.pm, Makefile.PL, META.*
-VERSION 3.025
+VERSION 3.026
 
 # minimum Perl version needed
 # EVERY RELEASE: check https://www.cpan.org/src/ "First release in each branch

@@ -288,41 +288,41 @@ if ($use_Table) {
     my $table = PDF::Table->new();
     my $table_data = [
         # row 1, solid color lines
-    	[   
- 	    [ 'html', '<font color="red">This is some red text</font>',
-	      { 'font_size' => 12, 'para' => [ 0, 0 ] } ], 
+	[
+	    [ 'html', '<font color="red">This is some red text</font>',
+	      { 'font_size' => 12, 'para' => [ 0, 0 ] } ],
             [ 'html', "<span style=\"color:green\">This is some green text</span>",
-	      { 'font_size' => 12, 'para' => [ 0, 0 ] } ], 
-	], 
+	      { 'font_size' => 12, 'para' => [ 0, 0 ] } ],
+	],
 
         # row 2, special symbols, colored
 	[
-    	    [ 'html', 'This is a red cross: <font face="ZapfDingbats" color="red">8</font>.', 
-	      { 'font_size' => 12, 'para' => [ 0, 0 ] } ], 
-    	    [ 'html', "This is a green tick: <span style=\"font-family:ZapfDingbats; color:green\">4</span>.", 
+	    [ 'html', 'This is a red cross: <font face="ZapfDingbats" color="red">8</font>.',
+	      { 'font_size' => 12, 'para' => [ 0, 0 ] } ],
+	    [ 'html', "This is a green tick: <span style=\"font-family:ZapfDingbats; color:green\">4</span>.",
 	      { 'font_size' => 12, 'para' => [ 0, 0 ] } ], 
         ],
 
         # row 3, like row 2, but using macro substitutions
 	[
-    	    [ 'html', "This is a red cross substitute: %cross%.", 
-	      { 'font_size'=>12, 'para'=>[ 0, 0 ], 
-    		'substitute'=>[
-    		    ['%cross%','<font face="ZapfDingbats" color="red">', '8', '</font>'],
-    		    ['%tick%','<span style="font-family: ZapfDingbats; color: green;">', '4', '</span>'] ]
-	      } 
-            ],
-    	    [ 'html', "This is a green tick substitute: %tick%.", 
-    	      { 'font_size'=>12, 'para'=>[ 0, 0 ], 
-    		'substitute'=>[
-    		    ['%cross%','<font face="ZapfDingbats" color="red">', '8', '</font>'],
-    		    ['%tick%','<span style="font-family: ZapfDingbats; color: green;">', '4', '</span>'] ]
+	    [ 'html', "This is a red cross substitute: %cross%.",
+	      { 'font_size'=>12, 'para'=>[ 0, 0 ],
+		'substitute'=>[
+		    ['%cross%','<font face="ZapfDingbats" color="red">', '8', '</font>'],
+		    ['%tick%','<span style="font-family: ZapfDingbats; color: green;">', '4', '</span>'] ]
 	      }
             ],
-	],
+	    [ 'html', "This is a green tick substitute: %tick%.",
+	      { 'font_size'=>12, 'para'=>[ 0, 0 ],
+		'substitute'=>[
+		    ['%cross%','<font face="ZapfDingbats" color="red">', '8', '</font>'],
+		    ['%tick%','<span style="font-family: ZapfDingbats; color: green;">', '4', '</span>'] ]
+	      }
+            ],
+  	],
 
         # row 4, non-markup text
-	[ 'Plain old text', 
+	[ 'Plain old text',
 	  'More plain text'
         ],
 	             ];
@@ -965,11 +965,18 @@ if ($rc) {
 
 # might have to go to a column2.pl!
 # demonstrate balanced columns two long columns and one short, first pass
-#   fill blindly, then by trial-and-error shorten long columns until short
-#   one just fills (show initial and final runs)
+#   fill blindly, overflowing to column 2 then 3, then by trial-and-error
+#   shorten long two columns until short one just fills (show initial and
+#   final runs). graphic X-out block for ad.
+#   headline in English Towne Medium (.otf) "New Yawk Times" ("All the news
+#   that fits, we print!"). Headline under it (across 3 columns): "Congress
+#   Does Something Stoopid". Lorem Ipsum for body text.
+#   continuation to page __ method? text to output for very last line in col.
 # demonstrate column shapes that split line in two (only first part used)
 # demonstrate irregularly shaped columns, including a bowtie scaled 3 times
-# demonstrate two column layout with insets and marginpar
+# demonstrate two column layout with insets and marginpar (inset routine to
+#   place text w/ hr's, return cutout outline for columns outline creation,
+#   intersect with rectangles for columns)
 # demonstrate a circular column, etc.
 # demonstrate a spline column cutout, with image in background with edges
 #   that fade away so text can overlap outer fringes of image

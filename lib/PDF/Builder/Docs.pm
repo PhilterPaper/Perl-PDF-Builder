@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.025'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 # originally part of Builder.pm, it was split out due to its length
 
@@ -1432,6 +1432,23 @@ See also L<PDF::Builder::Resource::Font::CoreFont>.
 
 =head3 PS Fonts
 
+=head4 WARNING: End of Adobe Support
+
+B<Adobe has announced an end to support for Type 1 (Postscript/T1) fonts in its 
+products. The announcement wordings are a bit vague, sometimes referring to 
+"all products" and other times just to "authoring software". Presumably, Adobe 
+PDF Readers (as well as Readers supplied by other parties) will continue to 
+display PDFs with Type 1 fonts for quite some time, although this is by no 
+means absolutely certain. Note that this does NOT mean that PDF::Builder or 
+other Third Party authoring tools may not continue to support Type 1 fonts. 
+This termination by Adobe of support of a now old and obsolete font format does 
+not affect the use of PDF::Builder for authoring PDFs, nor is it binding on 
+other non-Adobe readers and authoring tools. However, using Adobe products for 
+editing of PDFs with Type 1 fonts, and possibly of displaying them, may no 
+longer be possible. At any rate, users may want to consider starting to move 
+away from Type 1 font usage and switch to TTF or even core fonts, although it 
+is unknown how long Type 1 Reader support will continue.>
+
 PS (T1) fonts are limited to single byte encodings. You cannot use UTF-8 or 
 other multibyte encodings with T1 fonts.
 The default encoding for the T1 fonts is
@@ -1443,11 +1460,15 @@ guarantee that future changes to font files will permit consistent results>.
 B<Note:> many Type1 fonts are limited to 256 glyphs, but some are available
 with more than 256 glyphs. Still, a maximum of 256 at a time are usable.
 
-C<psfont> accepts both ASCII (.pfa) and binary (.pfb) Type1 glyph files.
+C<psfont> accepts ASCII (.pfa), binary (.pfb), and .t1 Type1 glyph files.
 Font metrics can be supplied in either ASCII (.afm) or binary (.pfm) format,
 as can be seen in the examples given below. It is possible to use .pfa with .pfm
 and .pfb with .afm if that's what's available. The ASCII and binary files have
 the same content, just in different formats.
+
+B<Caution:> the file name given for the glyph file (first argument to C<psfont>)
+I<must> have a file extension of .pfa, .pfb, or .t1; as the extension will
+be checked to see how to parse the file.
 
 To allow UTF-8 text and extended glyph counts in one font, you should 
 consider replacing your use of Type1 fonts with TrueType (.ttf) and OpenType
@@ -1603,6 +1624,19 @@ lookup is (if C<.cmap> isn't used, see C<usecmf>) to try to get a match with
 the default list for the appropriate OS. If none can be found, find_ms() is 
 tried, and as last resort use the C<.cmap> (if available), even if C<usecmf> 
 is not 1.
+
+B<CAUTION:> There is a "gotcha" with TrueType fonts that you need to be aware
+of when using them. PDF::Builder outputs to the text stream a list of I<glyph
+IDs> as four-digit hex codes, rather than the list of characters used by other
+font types. The B<Tw> operator, if used (C<$text->wordspace(n)>) to adjust
+inter-word spacing, B<will be ignored> by most, if not all, PDF Readers
+(including Adobe products). This is because this operator is looking for actual
+ASCII spaces (x20 bytes) in the stream, to apply the width change to. Note that 
+only ASCII spaces are affected (not other spaces), and not at all for TrueType 
+and OpenType fonts! We are considering adding ways to emulate word spacing for 
+TrueType font support, as well as possibly extending it to non-ASCII spaces for 
+all font types. Note that inter-character spacing (via C<$text->charspace(n)> 
+and the B<Tc> operator) still works for all font types.
 
 =back
 

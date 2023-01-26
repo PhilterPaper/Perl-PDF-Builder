@@ -6,7 +6,7 @@ use warnings;
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
 our $VERSION = '3.025'; # VERSION
-our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 # updated during CPAN build
 my $GrTFversion  = 19;       # minimum version of Graphics::TIFF
@@ -47,11 +47,13 @@ my @font_path = __PACKAGE__->set_font_path(
 		  '/usr/local/share/fonts',
 		  '/usr/share/fonts/type1/gsfonts',
 		  '/usr/share/X11/fonts/urw-fonts',
+		  '/usr/share/fonts/urw-base35',
 		  '/usr/share/fonts/dejavu-sans-fonts',
 		  '/usr/share/fonts/truetype/ttf-dejavu',
 		  '/usr/share/fonts/truetype/dejavu',
 		  '/var/lib/defoma/gs.d/dirs/fonts',
 		  '/Windows/Fonts',
+		  '/Users/XXXX/AppData/Local/Microsoft/Windows/Fonts',
 		  '/WinNT/Fonts'
 	                                  );
 
