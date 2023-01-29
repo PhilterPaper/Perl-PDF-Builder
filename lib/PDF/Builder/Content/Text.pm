@@ -1910,7 +1910,7 @@ sub _default_css {
    #$style{'k'}->{'_kern'} = '0.2';
 
     $style{'hr'}->{'display'} = 'block';
-    $style{'hr'}->{'height'} = '1'; # 1pt default thickness
+    $style{'hr'}->{'height'} = '0.5'; # 1/2 pt default thickness
     $style{'hr'}->{'width'} = '-1'; # default width is full column
     $style{'hr'}->{'margin-top'} = '100%'; 
     $style{'hr'}->{'margin-bottom'} = '100%'; 
@@ -2721,7 +2721,7 @@ sub _output_text {
 				$pageno = $1;
 				$xpos = $2;
 				$ypos = $3; 
-				$zoom = 1;
+				$zoom = undef;
 			    } elsif ($href =~ m/^#(\d+)-(\d+)-(\d+)-(.+)$/) {
 				# #p-x-y-z format (zoom, at a specific spot)
 				$pageno = $1; # integer > 0

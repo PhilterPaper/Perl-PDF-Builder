@@ -4,6 +4,14 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
 
 3.026     2023-01-29   UNRELEASED
 
+    lib/PDF/Builder/Content/Text.pm
+     When linking to a page via Markdown or HTML (URL #p-x-y), the default
+      zoom was 1 (100%) when given just the x and y coordinates on a page. This
+      has been changed to leave the zoom factor unchanged by default (unless,
+      of course, you choose to specify a zoom amount). Also, the thickness
+      (height) of the horizontal rule defaulted to 1pt, which was a bit heavy
+      in appearance. It has been changed to default to 0.5pt.
+
     lib/PDF/Builder.pm
      GD image call was not working in some circumstances, due to image_gd()
       being called incorrectly. Reported and fixed by Hakon Hagland against
