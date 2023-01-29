@@ -2,7 +2,12 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-01-26   UNRELEASED
+3.026     2023-01-29   UNRELEASED
+
+    lib/PDF/Builder.pm
+     GD image call was not working in some circumstances, due to image_gd()
+      being called incorrectly. Reported and fixed by Hakon Hagland against
+      PDF::API2 (#60).
 
     lib/PDF/Builder/Resource/Font/Postscript.pm, lib/PDF/Builder/Docs.pm,
       examples/021_psfonts, t/font-type1.t

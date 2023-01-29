@@ -3490,7 +3490,7 @@ sub image {
     my $format = lc($opts{'format'} // '');
 
     if (ref($file) eq 'GD::Image') {
-        return image_gd($file, %opts);
+        return $self->image_gd($file, %opts);
     }
     elsif (ref($file)) {
         $format ||= _detect_image_format($file);
