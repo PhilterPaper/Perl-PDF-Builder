@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 use Encode qw(:all);
 
@@ -204,19 +204,49 @@ sub textByStrKern {
 sub text {
     my ($self, $text, $size, $indent) = @_;
 
-    my $newtext = $self->textByStr($text);
-    if      (defined $size && $self->{'-dokern'}) {
-        $newtext = $self->textByStrKern($text, $size, $indent);
-        return $newtext;
-    } elsif (defined $size) {
-        if (defined($indent) && $indent!=0) {
-	    return("[ $indent $newtext ] TJ");
-        } else {
-	    return "$newtext Tj";
-        }
-    } else {
-        return $newtext;
+    # need to break up $text into fragments ending with x20
+    # TBD: handle other spaces (espec. xA0) "appropriately" (control by flag)
+    #      0 = x20 space only
+    #      1 (default) = x20 and same/longer spaces
+    #      2 = all spaces
+    #      the problem is, other font types handle only x20 in Reader
+    my $wordspace = $self->{' apipdf'}->{' outlist'}[0]->{'Pages'}->{'Kids'}->{' val'}[-1]->{'Contents'}->{' val'}[0]->{' wordspace'};
+    my $fontsize = $self->{' apipdf'}->{' outlist'}[0]->{'Pages'}->{'Kids'}->{' val'}[-1]->{'Contents'}->{' val'}[0]->{' fontsize'};
+    my @fragments = ( $text ); # default for wordspace = 0
+    # TBD: get list of different lengths of spaces found, split on all of them
+    #      could have null fragments where two or more spaces in a row, or
+    #        text ended with a space
+    if ($wordspace) {
+	# split appears to drop trailing blanks, so need a guard
+        @fragments = split / /, $text."|";
+	chop($fragments[-1]);
     }
+
+    my $out_str = '';
+    for (my $i = 0; $i <= $#fragments; $i++) {
+	if ($fragments[$i] ne '') {
+            my $newtext = $self->textByStr($fragments[$i]);  # '<glyphIDsList>'
+            if      (defined $size && $self->{'-dokern'}) {
+                $newtext = $self->textByStrKern($fragments[$i], $size, $indent);
+                $out_str .= $newtext;
+            } elsif (defined $size) {
+                if (defined($indent) && $indent!=0) {
+	            $out_str .= "[ $indent $newtext ] TJ";
+                } else {
+	            $out_str .= "$newtext Tj";
+                }
+            } else {
+                $out_str .= $newtext;
+            }
+	}
+	# unless this is the last fragment (no space follows), add a "kerned"
+	# space to out_str (reduce its effective width by moving left).
+	# TBD: different spaces of different lengths with different "kerns"
+	if ($i < $#fragments) {
+	    $out_str .= "[ ".$self->textByStrKern(' ')." ".(-$wordspace/$fontsize*1000)." ] TJ";
+	}
+    }
+    return $out_str;
 }
 
 sub text_cid {

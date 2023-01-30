@@ -2,7 +2,24 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-01-29   UNRELEASED
+3.026     2023-01-30   UNRELEASED
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/CIDFont.pm
+     It has come to our attention (#193) that PDF Readers (Adobe Reader and a 
+      number of Third Party readers) do not properly handle the "Tw" operator 
+      with TrueType fonts. Other font types work as expected. This operator, 
+      set by the $text->wordspace(n) method, is ignored for TTF and OTF fonts
+      ($pdf->ttfont()) because Tw works only for inputs in the stream where 
+      words are separated by ASCII spaces (x20). TrueType fonts, on the other 
+      hand, uses an input list of glyph IDs (4 digit hex numbers). Thus, there 
+      are never any ASCII spaces to detect and adjust their widths. 
+
+      We have updated the TTF/OTF handling code to honor the Tw operator value
+      and emulate its actions, even though a native PDF Reader does not. In
+      order to match the effects of the Tw operator on other font types, only
+      ASCII spaces (x20) in the original text strings are affected, and not 
+      other flavors of spaces. Finally, TextHS() and advancewidthHS() still do
+      not handle charspace or wordspace settings (perhaps in the future).
 
     lib/PDF/Builder/Content/Text.pm
      When linking to a page via Markdown or HTML (URL #p-x-y), the default
@@ -23,18 +40,6 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
       Also some new font paths to search on.
 
     ===== IMPORTANT NOTICE =====
-    lib/PDF/Builder.pm
-     It has come to our attention (#193) that PDF Readers (Adobe Reader and a 
-      number of Third Party readers) do not properly handle the "Tw" operator 
-      with TrueType fonts. Other font types work as expected. This operator, 
-      set by the $text->wordspace(n) method, is ignored for TTF 
-      ($pdf->ttfont()) because Tw works only for inputs in the stream where 
-      words are separated by ASCII spaces (x20). TrueType fonts, on the other 
-      hand, uses an input list of glyph IDs (4 digit hex numbers). Thus, there 
-      are never any ASCII spaces to detect and adjust their widths. We are
-      currently looking at ways to emulate a working Tw operator.
-
-    ===== IMPORTANT NOTICE =====
     lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm, 
       lib/PDF/Builder/Resource/Font/Postscript.pm
      Adobe has announced an end to support for Type 1 (Postscript/T1) fonts in 
@@ -50,8 +55,9 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
       readers and authoring tools. However, using Adobe products for editing of 
       PDFs with Type 1 fonts, and possibly of displaying them, may no longer be 
       possible. At any rate, users may want to consider starting to move away 
-      from Type 1 font usage and switch to TTF or even core fonts, although it 
-      is unknown how long Type 1 Reader support will continue.
+      from Type 1 font usage and switch to TTF/OTF or even core fonts, 
+      as it is unknown how long Type 1 Reader support will continue.
+    ============================
 
 3.025     2023-01-19
 

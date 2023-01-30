@@ -1200,6 +1200,7 @@ and CSS. Currently, HTML tags
     'u', 'ins' (underline)
     'ovl' (TBD -- non-HTML, overline)
     'k' (TBD -- non-HTML, kerning left/right shift)
+    'blockquote' (block quote)
 
 are supported (fully or in part I<unless> "TBD"), along with limited CSS for 
 color, font-size, font-family, etc. 
