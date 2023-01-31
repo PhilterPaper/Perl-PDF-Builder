@@ -2,7 +2,10 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-01-30   UNRELEASED
+3.026     2023-01-31   UNRELEASED
+
+    lib/PDF/Builder/Docs.pm
+     Full writeup of what's supported for markup input (Markdown, HTML).
 
     tools/3_examples.pl, examples/020_corefonts, examples/021_synfonts,
       examples/023_cjkfonts

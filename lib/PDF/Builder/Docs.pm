@@ -537,13 +537,13 @@ http://pdfapi2.sourceforge.net, an unmaintained site), the history of PDF::API2
 
 =over
 
-=item E<nbsp> E<nbsp> E<bull>E<nbsp> First Code implemented based on PDFlib-0.6 (AFPL)
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> First Code implemented based on PDFlib-0.6 (AFPL)
 
-=item E<nbsp> E<nbsp> E<bull>E<nbsp> Changed to Text::PDF with a total rewrite as Text::PDF::API (procedural)
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> Changed to Text::PDF with a total rewrite as Text::PDF::API (procedural)
 
-=item E<nbsp> E<nbsp> E<bull>E<nbsp> Unmaintainable Code triggered rewrite into new Namespace PDF::API2 (object-oriented, LGPL)
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> Unmaintainable Code triggered rewrite into new Namespace PDF::API2 (object-oriented, LGPL)
 
-=item E<nbsp> E<nbsp> E<bull>E<nbsp> Object-Structure streamlined in 0.4x
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> Object-Structure streamlined in 0.4x
 
 =back
 
@@ -2048,6 +2048,122 @@ Currently, C<textHS()> can only handle a single text string. We are looking at
 how fitting to a line length (splitting up an array) could be done, as well as 
 how words might be split on hard and soft hyphens. At some point, full paragraph
 and page shaping could be possible.
+
+=head2 MARKUP
+
+This section documents the markup capabilities of the C<column()> method.
+It is expected to be updated over time as more functionality is added.
+
+A certain flavor of I<Markdown> is supported, as translated by the 
+Text::Markdown package into HTML. That I<HTML> (and more, as direct input), 
+along with a subset of CSS, is 
+supported by C<column()>. This is I<not> the full Markdown or HTML languages, 
+by any stretch of the imagination, so check before using! Also, a small I<none> 
+markup which only does paragraphs (separated by empty lines) is provided.
+
+In all markup cases, certain CSS settings can be given as parameters or options
+to the C<column()> call, including a CSS <style> section which applies to both
+'none' and Markdown source input.
+
+=head3 Current HTML/Markdown supported
+
+=over
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<<iE<gt>> and B<<emE<gt>> tags (Markdown B<_>, B<*>) as italic font style
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<<bE<gt>> and B<<strongE<gt>> tags (Markdown B<**>) as bold font weight
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<<pE<gt>> tag (Markdown empty line) as a paragraph
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<<font face="font-family" color="color" size="font-size"E<gt>> as selecting face, color and size
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<<spanE<gt>> needs style= attribute with CSS to do anything useful
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<<ulE<gt>> tag (Markdown B<->) unordered (bulleted) list. type to override marker supported
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<<olE<gt>> tag (Markdown B<1.>) ordered (numbered) list. start and type supported.
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<<liE<gt>> tag list item. value to override ordered list counter, and type to override marker type supported
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<<a href="URL"E<gt>> tag (Markdown B<[]()>) anchor/link, web page URL or this document target C<#p[-x-y[-z]]>
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<<h1E<gt>> through B<<h6E<gt>> tags (Markdown B<#> through B<######>) headings
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<<hr width="length" size="length"E<gt>> tag (Markdown B<--->) horizontal rule. currently no B<align> property (left alignment only). Default is C<width> = full column, and C<size> = 0.5pt.
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<<sE<gt>>, B<<strikeE<gt>>, B<<delE<gt>> tags (Markdown B<~~>) text line-through
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<<uE<gt>>, B<<insE<gt>> tags text underline
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<<blockquoteE<gt>> tag (Markdown B<E<gt>>) indented both sides block of smaller text
+
+=back
+
+I<Numbered> (decimal and hexadecimal) entities are supported, as well as I<named> entities (e.g., C<&mdash;>). Both lists get a "gutter" (for the marker) of I<marker_width> points wide, so list formats are consistent over the call.
+
+=head3 Current CSS supported
+
+Note that the default CSS applies to Markdown, unless you give a C<style =E<gt>> entry to the column() call to revise the CSS.
+
+In HTML, you can define B<<styleE<gt>> tags, but B<caution:> these are pulled out into a global style block (cumulative and global, as though they had all been given in the B<<headE<gt>>), applied after the CSS property defaults are defined and then any column() global C<style =E<gt> 'CSS list'> has been applied.
+
+CSS Selectors are very primitive:: a simple tag name (including B<body>), such as B<ol>; a class name such as B<.error>; or an ID such as B<#myID>. There are no hierarchies or combinations supported (e.g., nothing like B<p.abstract> or B<li E<gt> p>). The (decreasing) order of precedence follows a browser's: in a B<style => attribute, as a tag attribute (which may have a different name from the CSS's), an ID, a class, or a tag name. Comments /* and */ are B<NOT> currently supported in CSS.
+
+=over
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<color> (foreground color, in standard PDF::Builder formats)
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<display> (I<inline> or I<block>)
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<font-family> (as defined to Font Manager, e.g., I<Times>)
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<font-size> (I<n> points, I<n>pt, I<n%> of current font size. more units in future)
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<font-style> (I<normal> or I<italic>)
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<font-weight> (I<normal> or I<bold>)
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<height> (I<n> points or I<n>pt, thickness/size of horizontal rule B<ONLY>)
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<list-style-position> (I<outside> or I<inside>, currently only I<outside> supported)
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<list-style-type> (marker description, per standard CSS, plus "box" for unordered list to give a box outline marker (not a filled "square"))
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<margin-top/right/bottom/left> (per standard CSS. combined B<margin> in the future)
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<_marker-before> (I<extension>: text to insert before ordered list marker)
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<_marker-after> (I<extension>: text to insert after ordered list marker)
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<text-decoration> (per standard CSS)
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<text-height> (change leading, ratio of baseline-to-baseline to font size. future: set as a length or % of font size)
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<text-indent> (paragraph etc. indentation, I<n> points, I<npt>, I<n%> of font size)
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<width> (I<n> point or, I<npt>, width of horizontal rule B<ONLY>)
+
+=back
+
+=head3 Global Settings
+
+There are a number of global settings either required or available for tuning the behavior of C<column()>. In the parameter list you can set
+
+=over
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<font_size> = default initial font size (points) to be used, but can be overridden by CSS or C<<font sizeE<gt>>. Initially C<12>.
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<leading> = default leading (text-height) ratio. Initially C<1.125>.
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<marker_width> = points, set width of gutter where a list's marker goes. Initially C<2 * <font sizeE<gt>>.
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<para> = list of indentation (text-indent) and inter-paragraph spacing (margin-top), both in points. These are the defaults for all formatting modes, unless overridden by a style => entry. Initially C<[ <font sizeE<gt>, 0 ]>.
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<color> = initial text and graphics color setting, in standard PDF::Builder formats. Initially C<'black'>.
+
+=item E<nbsp> E<nbsp> E<nbsp> E<bull> E<nbsp> B<style> = CSS declarations to be applied after CSS properties initialization and before any global <style> tags, Initially C<''>.
+
+=back
 
 =cut
 
