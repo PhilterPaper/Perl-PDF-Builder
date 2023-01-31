@@ -2,13 +2,14 @@
 # run examples test suite
 # roughly equivalent to examples.bat
 #   you will need to update the %args list before running
+# -s flag to run short lists for 020_corefonts, 021_synfonts, 023_cjkfonts
 # author: Phil M Perry
 
 use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.018'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 # dependent on optional packages:
 my $HS_installed = 1; # HarfBuzz::Shaper IS installed and you want to use it.
@@ -18,6 +19,7 @@ my $HS_installed = 1; # HarfBuzz::Shaper IS installed and you want to use it.
 # command line:
 #   -step  = stop after each test to let the tester look at the PDF file
 #   -cont  = (default) run continuously to the end, to not tie up tester
+#   -s     = short list for corefont, synfont, cjkfont tests
 my $pause;
 
 my (@example_list, @example_results);
@@ -155,6 +157,7 @@ my %args;
   $args{'ShowFont.pl'} = "Helvetica";
 
 my $type;
+my $short_list = 0;  # no -s flag seen
 # one command line arg allowed (-cont is default)
 if      (scalar @ARGV == 0) {
     $type = '-cont';
@@ -164,6 +167,9 @@ if      (scalar @ARGV == 0) {
     } elsif ($ARGV[0] eq '-cont') {
 	# default
         $type = '-cont';
+    } elsif ($ARGV[0] eq '-s') {
+	$type = '-cont';
+	$short_list = 1;
     } else {
 	die "Unknown command line argument '$ARGV[0]'\n";
     }
@@ -205,7 +211,13 @@ for ($i=0; $i<scalar(@example_list); $i++) {
     print "\n=== Running test examples/$file $arg\n";
     print $desc;
 
-    system("perl examples/$file $arg");
+    if ($short_list && ($file eq '020_corefonts' ||
+		        $file eq '021_synfonts' ||
+			$file eq '023_cjkfonts')) {
+	system("perl examples/$file -s");
+    } else {
+        system("perl examples/$file $arg");
+    }
 
     if ($type eq '-cont') { next; }
     print "Press Enter to continue: ";

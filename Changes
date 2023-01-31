@@ -4,6 +4,11 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
 
 3.026     2023-01-30   UNRELEASED
 
+    tools/3_examples.pl, examples/020_corefonts, examples/021_synfonts,
+      examples/023_cjkfonts
+     Add -s flag to run a small subset of the lengthy test list for three of
+      the examples, plus overall when running all examples.
+
     lib/PDF/Builder/Page.pm, lib/PDF/Builder/Resource/CIDFont.pm
      Clean up some typos preventing synfont t-test from running.
 
