@@ -4,6 +4,9 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
 
 3.026     2023-01-30   UNRELEASED
 
+    lib/PDF/Builder/Page.pm, lib/PDF/Builder/Resource/CIDFont.pm
+     Clean up some typos preventing synfont t-test from running.
+
     lib/PDF/Builder.pm, lib/PDF/Builder/Resource/CIDFont.pm
      It has come to our attention (#193) that PDF Readers (Adobe Reader and a 
       number of Third Party readers) do not properly handle the "Tw" operator 

@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 use Carp;
 use POSIX qw(floor);
@@ -927,8 +927,8 @@ sub gfx {
 	if (defined $hash{'compress'}) { $compress = $hash{'compress'}; }
     }
     if ($prepend) { $prepend = 1; }
-    $compress //= $self->{' api'}->{'forcecompress'} eq 'flate' ||
-                  $self->{' api'}->{'forcecompress'} =~ m/^[1-9]\d*$/;
+    if ($self->{' api'}->{'forcecompress'} eq 'flate' ||
+        $self->{' api'}->{'forcecompress'} =~ m/^[1-9]\d*$/) { $compress = 1; }
 
     my $gfx = PDF::Builder::Content->new();
     $gfx->compressFlate() if $compress;
@@ -1010,8 +1010,8 @@ sub text {
 	if (defined $hash{'compress'}) { $compress = $hash{'compress'}; }
     }
     if ($prepend) { $prepend = 1; }
-    $compress //= $self->{' api'}->{'forcecompress'} eq 'flate' ||
-                  $self->{' api'}->{'forcecompress'} =~ m/^[1-9]\d*$/;
+    if ($self->{' api'}->{'forcecompress'} eq 'flate' ||
+        $self->{' api'}->{'forcecompress'} =~ m/^[1-9]\d*$/) { $compress = 1; }
 
     my $text = PDF::Builder::Content::Text->new();
     $text->compressFlate() if $compress;

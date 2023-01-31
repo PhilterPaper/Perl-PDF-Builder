@@ -210,8 +210,9 @@ sub text {
     #      1 (default) = x20 and same/longer spaces
     #      2 = all spaces
     #      the problem is, other font types handle only x20 in Reader
-    my $wordspace = $self->{' apipdf'}->{' outlist'}[0]->{'Pages'}->{'Kids'}->{' val'}[-1]->{'Contents'}->{' val'}[0]->{' wordspace'};
-    my $fontsize = $self->{' apipdf'}->{' outlist'}[0]->{'Pages'}->{'Kids'}->{' val'}[-1]->{'Contents'}->{' val'}[0]->{' fontsize'};
+    my $latest_page = $self->{' apipdf'}->{' outlist'}[0]->{'Pages'}->{'Kids'}->{' val'}[-1];
+    my $wordspace = $latest_page->{'Contents'}->{' val'}[0]->{' wordspace'};
+    my $fontsize = $latest_page->{'Contents'}->{' val'}[0]->{' fontsize'};
     my @fragments = ( $text ); # default for wordspace = 0
     # TBD: get list of different lengths of spaces found, split on all of them
     #      could have null fragments where two or more spaces in a row, or
