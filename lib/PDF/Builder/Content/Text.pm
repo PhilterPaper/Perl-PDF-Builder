@@ -792,7 +792,16 @@ fit to a given width, and nothing is done for "widows and orphans".
 # TBD for bidi/RTL languages, should indenting be on right?
 
 sub paragraph {
-    my ($self, $text, $width,$height, $continue, %opts) = @_;
+    my ($self, $text, $width,$height, @optsA) = @_;
+    # if odd number of elements in optsA, it contains $continue flag and
+    #   remainder is %opts. if even, paragraph is being called PDF::API2 style
+    #   with no $continue (default to 0).
+    my $continue = 0;
+    if (@optsA % 2) {
+	$continue = splice(@optsA, 0, 1);
+    }
+    my %opts = @optsA;
+
     # copy dashed option names to preferred undashed names
     if (defined $opts{'-align'} && !defined $opts{'align'}) { $opts{'align'} = delete($opts{'-align'}); }
     if (defined $opts{'-pndnt'} && !defined $opts{'pndnt'}) { $opts{'pndnt'} = delete($opts{'-pndnt'}); }
@@ -1819,6 +1828,7 @@ sub _default_css {
     $style{'body'}->{'height'} = '-1';  # TBD currently unused ex. hr size
     $style{'body'}->{'_href'} = ''; 
 
+    $style{'p'}->{'display'} = 'block';
     $style{'font'}->{'display'} = 'inline';
     $style{'span'}->{'display'} = 'inline';
 

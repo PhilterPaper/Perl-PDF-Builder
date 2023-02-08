@@ -2,7 +2,21 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-01-31   UNRELEASED
+3.026     2023-02-08   UNRELEASED
+
+    lib/PDF/Builder/Content/Text.pm
+     A numer of minor upgrades: explicitly make paragraph <p> a block level, 
+   * do not let first text of a list item <li> set the color of the marker,
+   * investigate growth of font size in a <a> tag,
+   
+   *needs investigation: PDF::TableX t-tests 01 and 03 work with PDF::Builder
+      only when compress=>0 (or 'none'). this may also have a bearing on the
+      problem seen with some TIFF tests.
+
+    lib/PDF/Builder/Content/Text.pm
+     Make paragraph() method compatible with PDF::API2's, i.e., $continue
+      parameter is optional. It should make no difference in calls to paragraph
+      whether there is a fourth parameter (continue) before the options.
 
     lib/PDF/Builder/Docs.pm
      Full writeup of what's supported for markup input (Markdown, HTML).
