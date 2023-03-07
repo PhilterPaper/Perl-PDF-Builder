@@ -2494,7 +2494,7 @@ sub page_count {
     return scalar @{$self->{'pagestack'}};
 }
 
-=item $pdf->page_labels($page_number, $opts)
+=item $pdf->page_labels($page_number, %opts)
 
 Sets page label numbering format, for the Reader's page-selection slider thumb 
 (I<not> the outline/bookmarks). At this time, there is no method to 
@@ -2502,8 +2502,20 @@ automatically synchronize a page's label with the outline/bookmarks, or to
 somewhere on the printed page.
 
 Note that many PDF Readers ignore these settings, and (at most) simply give
-you the physical page number 1, 2, 3,... instead of the page label specified 
-here.
+you the physical page number 1, 2, 3,... for the slider thumb label, instead
+of the page label specified here.
+Depending on the PDF Reader you are using, this
+formatted page label I<may> show up in the reader as the current page number.
+
+B<CAUTIONS:> 
+
+B<1.> The given page index started at 0 for the old method (C<pageLabel>),
+while for the new method (C<page_labels()>) it starts with 1!
+
+B<2.> Options for the old method (C<pageLabel>) were a hashref, while for the
+new method (C<page_labels>) it is a hash. This permits pageLabel() to accept
+I<multiple> page number schemes in one call, rather than one per call as per
+page_labels().
 
     # Generate a 30-page PDF
     my $pdf = PDF::Builder->new();
@@ -2513,6 +2525,12 @@ here.
     $pdf->page_labels(1, 'style' => 'roman');
     $pdf->page_labels(6, 'style' => 'decimal');
     $pdf->page_labels(26, 'style' => 'decimal', 'prefix' => 'A-');
+
+    or...
+
+    $pdf->pageLabel(0,  { style => 'roman' },
+                    5,  { style => 'decimal' },
+                    25, { style => 'decimal', prefix => 'A-' });
 
     $pdf->save('sample.pdf');
 
@@ -2556,50 +2574,63 @@ the counter).
 B<Example:>
 
     # Start with lowercase Roman Numerals at the 1st page, starting with i (1)
-    $pdf->page_labels(0, 
+    $pdf->page_labels(1, 
         'style' => 'roman',
     );
 
+    or,
+
+    $pdf->pageLabel(0, 
+	{ 'style' => 'roman' },
+    );
+
     # Switch to Arabic (decimal) at the 5th page, starting with 1
-    $pdf->page_labels(4, 
+    $pdf->page_labels(5, 
         'style' => 'decimal',
+    );
+
+    or, 
+
+    $pdf->pageLabel(4, 
+	{ 'style' => 'decimal' },
     );
 
     # invalid style at the 25th page, should just continue 
     # with decimal at the current counter
-    $pdf->page_labels(24, 
+    $pdf->page_labels(25, 
         'style' => 'raman_noodles',  # fail over to decimal
-	   # note that PDF::API2 will see the 'r' and treat it as 'roman'
-	'start' => 21,  # necessary, otherwise would restart at 1
+	   # note that older versions of PDF::API2 may see the 'r' and 
+	   #   treat it as 'roman'
+	'start' => 25,  # necessary, otherwise would restart at 1
     );
 
     # No page label at the 31st and 32nd pages. Note that this could be
     # confusing to the person viewing the PDF, but may be appropriate if
     # the page itself has no numbering.
-    $pdf->page_labels(30, 
+    $pdf->page_labels(31, 
         'style' => 'nocounter',
     );
 
     # Numbering for Appendix A at the 33rd page, A-1, A-2,...
-    $pdf->page_labels(32, 
+    $pdf->page_labels(33, 
         'start' => 1,  # unnecessary
         'prefix' => 'A-'
     );
 
     # Numbering for Appendix B at the 37th page, B-1, B-2,...
-    $pdf->page_labels( 36, 
+    $pdf->page_labels(37, 
         'prefix' => 'B-'
     );
 
     # Numbering for the Index at the 41st page, Index I, Index II,...
-    $pdf->page_labels(40, 
+    $pdf->page_labels(41, 
         'style' => 'Roman',
         'start' => 1,  # unnecessary
         'prefix' => 'Index '  # note trailing space
     );
 
     # Unnumbered 'Index' at the 45th page, Index, Index,...
-    $pdf->page_labels(40, 
+    $pdf->page_labels(45, 
         'style' => 'nocounter',
         'prefix' => 'Index '
     );
@@ -2609,7 +2640,9 @@ B<Alternate name:> C<pageLabel>
 This old method name is retained for compatibility with old user code.
 Note that with C<pageLabel>, you need to make the "options" list an anonymous
 hash by placing B<{ }> around the entire list, even if it has only one item
-in it.
+in it. Also remember that the page number (index) starts at 0, rather than 1.
+Finally, pageLabel() still permits you to define multiple page numbering schemes
+in one call.
 
 =cut
 
@@ -2617,7 +2650,11 @@ in it.
 # old pageLabel(). rather than an opts hashref, it is a hash.
 sub page_labels { 
     my ($self, $page_number, %opts) = @_;
-    return pageLabel($self, $page_number, \%opts);
+    if ($page_number == 0) {
+	carp "page_labels() start at 1, not 0. page changed to 1.";
+	$page_number = 1;
+    }
+    return pageLabel($self, $page_number-1, \%opts);
 }
 
 # actually, the old code
