@@ -22,6 +22,11 @@ find(\&add_to_files, 'lib');
 sub add_to_files {
     return unless -f $_;
     return unless $_ =~ /\.pm$/;
+    ### 3 currently disabled
+    return if ($_ =~ m/CCITTFaxDecode\.pm$/);
+    return if ($_ =~ m/Reader\.pm$/);
+    return if ($_ =~ m/Writer\.pm$/);
+    ###
     push @files, $File::Find::name;
     return;
 }

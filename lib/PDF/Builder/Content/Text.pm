@@ -2978,10 +2978,10 @@ sub _output_text {
 	    # do nothing, leave the font state/colors as-is
 	} else { # 2
 	    # restore to entry with @entry_state
-	    return (2, $next_y, []);
+	    return (2, $next_y-$botm, []);
 	}
 
-	return (0, $next_y, []);
+	return (0, $next_y-$botm, []);
     } else {
 	# we ran out of vertical space in the column. return -1 and 
 	# remainder of mytext list (next_y would be inapplicable)

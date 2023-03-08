@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 use Carp;
 use Compress::Zlib qw();
@@ -3039,6 +3039,8 @@ sub formimage {
 
 Places an image or other external object (a.k.a. XObject) on the page in the
 specified location.
+
+If C<$x> and C<$y> are omitted, the object will be placed at C<[0, 0]>.
 
 For images, C<$scale_x> and C<$scale_y> represent the width and height of the
 image on the page, in points. If C<$scale_x> is omitted, it will default to 72
