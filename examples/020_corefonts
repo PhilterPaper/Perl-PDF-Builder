@@ -70,9 +70,10 @@ my @fns=qw{
 #   bankgothicbolditalic
 #   bankgothicitalic
 
+my @ARGVcopy = @ARGV;
 # 'short' (-s flag)?
-if (@ARGV > 0 && $ARGV[0] eq '-s') {
-    @ARGV = qw{
+if (@ARGVcopy > 0 && $ARGVcopy[0] eq '-s') {
+    @ARGVcopy = qw{
         Courier-Bold
 	Times-Italic
 	Symbol
@@ -120,8 +121,8 @@ my @ecs = qw{
 my ($y, $pdf, $f1);
 
 # override default list with command line entries
-if (scalar @ARGV && $ARGV[0] ne '-s') {
-    @fns = @ARGV;
+if (scalar @ARGVcopy && $ARGVcopy[0] ne '-s') {
+    @fns = @ARGVcopy;
 }
 
 # loop through list of font names

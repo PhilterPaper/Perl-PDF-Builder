@@ -1087,6 +1087,9 @@ identifying the string as a PDF date.  The date may be truncated at any point
 after the year.  C<O> is one of C<+>, C<->, or C<Z>, with the following C<HH'mm>
 representing an offset from UTC.
 
+See comments in the internal function C<_is_date()> for more information on
+the inconsistency of PDF standards on exactly what the date format should be!
+
 When setting the date, C<D:> will be prepended automatically if omitted.
 
 =cut
@@ -1103,6 +1106,9 @@ sub created {
 Get/set/clear the document's modification date.  The date format is as described
 in C<created> above.
 
+See comments in the internal function C<_is_date()> for more information on
+the inconsistency of PDF standards on exactly what the date format should be!
+
 =cut
 
 sub modified {
@@ -1113,48 +1119,211 @@ sub modified {
 sub _is_date {
     my $value = shift();
 
+    # there are lists of leap seconds floating around, such as
+    # https://www.ietf.org/timezones/data/leap-seconds.list
+    # https://en.wikipedia.org/wiki/Leap_second
+    my %leap_sec = ('06'=>{
+	    1972=>1, 1981=>1, 1982=>1, 1983=>1, 1985=>1, 1992=>1, 
+	    1993=>1, 1994=>1, 1997=>1, 2012=>1, 2015=>1},
+                    '12'=>{
+	    1972=>1, 1973=>1, 1974=>1, 1975=>1, 1976=>1, 1977=>1, 
+	    1978=>1, 1979=>1, 1987=>1, 1989=>1, 1990=>1, 1995=>1, 
+	    1998=>1, 2005=>1, 2008=>1, 2016=>1});
+    # some sources list Dec 1971 as having a leap second, others don't
+
     # PDF 1.7 section 7.9.4 describes the required date format.  Other than the
     # D: prefix and the year, all components are optional but must be present if
-    # a later component is present.  No provision is made in the specification
-    # for leap seconds, etc.
-    return unless $value =~ /^D:([0-9]{4})        # D:YYYY (required)
-                             (?:([01][0-9])       # Month (01-12)
-                             (?:([0123][0-9])     # Day (01-31)
-                             (?:([012][0-9])      # Hour (00-23)
-                             (?:([012345][0-9])   # Minute (00-59)
-                             (?:([012345][0-9])   # Second (00-59)
-                             (?:([Z+-])           # UT Offset Direction
-                             (?:([012][0-9])      # UT Offset Hours
-                             (?:\'([012345][0-9]) # UT Offset Minutes
-                             )?)?)?)?)?)?)?)?$/x;
-    my ($year, $month, $day, $hour, $minute, $second, $od, $oh, $om)
-        = ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+    # a later component is present.
+    #
+    # comments by PM Perry:
+    # There is some conflict among various Adobe/ISO reference documents, as
+    # well as ambiguity within them (e.g., the example drops the seconds
+    # field, a trailing ' may or may not be required in a TZ offset). In 
+    # addition, the PDF format seems to be something of a subset of ISO 8601. 
+    # I have attempted to satisfy as many of the Adobe PDF reference documents 
+    # as I could, but there are no guarantees that all PDF editors and readers 
+    # will accept any given date/timestamp! 
+    # See https://www.rfc-editor.org/rfc/rfc3339#section-5.6, remembering that 
+    # many ISO 8601-compliant stamps will be considered invalid here. If there
+    # is demand for it, additional formats might be supported, and even a 
+    # format or flag that says, "Here is my timestamp. Do not validate -- trust
+    # me, I know what I'm doing!"
+     
+    my ($year, $month, $day, $hour, $minute, $second, $od, $oh, $om, $ts, $tz);
+    if ($value =~ /([Z+-])/) { # should be only zero (leave od undef) or one
+        $od = $1;
+    } else {
+	$od = undef; # in case value left over from previous data
+    }
+    # make sure od defined (and not empty)
+    $od ||= 'Z';
+    # ts must always have something, tz might not
+    ($ts, $tz) = split /[Z+-]/, $value;
+    $tz ||= '';
+
+    return 0 unless $ts =~ /^D:([0-9]{4})        # D:YYYY (required)
+                            (?:([0-1][0-9])      # Month (01-12)
+                            (?:([0-3][0-9])      # Day (01-31)
+                            (?:([0-2][0-9])      # Hour (00-23)
+                            (?:([0-5][0-9])      # Minute (00-59)
+                            (?:([0-6][0-9])      # Second (00-59), also leap sec
+                            ?)?)?)?)?)?$/x;
+    ($year, $month, $day, $hour, $minute, $second)
+        = ($1, $2, $3, $4, $5, $6);
+    $month  ||= 1;
+    $day    ||= 1;
+    $hour   ||= 0;
+    $minute ||= 0;
+    $second ||= 0;
+
+    # od is Z (tz s/b ''), or od is + or - with hh or more
+    if ($od ne 'Z') {
+	# must be + or -, and at least an hour given
+	# ' before minutes (if given), optional ' after minutes
+        # regexp should fail if tz is ''
+        return 0 unless $tz =~ /^([0-2][0-9])        # UT Offset Hours   
+                                (?:'?([0-5][0-9])    # UT Offset Minutes
+	                        (?:'                 # optional '
+                                ?)?)?$/x;
+        ($oh, $om) = ($1, $2);
+	$oh ||= 0;
+	$om ||= 0;
+	if ($oh == 0 && $om  == 0) {
+	    # +/- 0 offset, so just make it Z
+	    $od = 'Z';
+	}
+    } else {
+        # explicit Z spec, shouldn't have an offset
+	if ($tz ne '') {
+            carp "Ignoring hour['minute] offset with Z timezone\n";
+	}
+	$oh = $om = 0;
+    }
+    $oh ||= 0;
+    $om ||= 0;
+    if ($oh == 0 && $om == 0) { $od = 'Z'; 
+    }
 
     # Do some basic validation to catch accidental date formatting issues.
     # Complete date validation is out of scope.
-    if (defined $month) {
-        return unless $month >= 1 and $month <= 12;
+    # add determination of leap year and leap day
+    # treat ALL years as Gregorian calendar!
+    my $is_leap;
+    if      ($year % 400 == 0) { 
+	$is_leap = 1; 
+    } elsif ($year % 100 == 0) {
+	$is_leap = 0; 
+    } elsif ($year % 4   == 0) {
+	$is_leap = 1; 
+    } else {
+	$is_leap = 0; 
     }
-    if (defined $day) {
-        return unless $day >= 1 and $day <= 31;
-    }
-    if (defined $hour) {
-        return unless $hour <= 23;
-    }
-    if (defined $minute) {
-        return unless $minute <= 59;
-    }
-    if (defined $second) {
-        return unless $second <= 59;
-    }
-    if (defined $od) {
-        return if $od eq 'Z' and defined($oh);
-    }
-    if (defined $oh) {
-        return unless $oh <= 23;
-    }
-    if (defined $om) {
-        return unless $om <= 59;
+    my @mon_len = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+    if ($is_leap) { $mon_len[1]++; }
+
+    return 0 unless $month >= 1 and $month <= 12;
+    return 0 unless $day >= 1 and $day <= 31;
+    return 0 if $day > $mon_len[$month-1];  # added exact month length check
+    return 0 unless $hour <= 23;
+    return 0 unless $minute <= 59;
+    return 0 unless $oh <= 23;
+    return 0 unless $om <= 59;
+    return 0 if $second > 60;
+    if ($second == 60) {
+	# claimed leap second -- verify
+	# remember that +oh/om can place local date into next year!
+	# correct local date and time (per offset) to UTC (Z)
+	my $newy = $year;
+	my $newM = $month;
+	my $newd = $day;
+	my $newh = $hour;
+	my $newm = $minute;
+	# assuming tz offset won't move more than 1 day either way
+	# (max offset 12 or 13 hours?)
+	# we're really only interested if date/time adjusted to Z is
+	#   June 30 or December 31 at 23:59:60Z, for certain years
+	if      ($od eq '+') {
+	    # sub h:m could put us in previous day (and month, but not year)
+	    # if not, it's not possibly 23:59:60Z
+	    $newh -= $oh;
+	    $newm -= $om;
+	    if ($newm < 0) {
+	        $newm += 60; 
+		$newh--;
+	    }
+	    if ($newh < 0) { 
+		$newh += 24;
+		$newd--;
+		if ($newd == 0) {
+		    # local was first day of Jan or Jul?
+		    $newM--;
+		    if ($newM == 0) {
+			$newM = 12;
+			$newd = 31;
+			$newy--;
+		    } elsif ($newM == 6) {
+			$newd = 30;
+		    } else {
+			# last day of previous month, not Dec or Jun
+			return 0;
+		    }
+		} else {
+		    return 0; # wasn't last day of Dec or Jun (local date)
+		}
+       	    } else {
+	        # if got to here, didn't back up to previous day
+		return 0;
+	    }
+
+	} elsif ($od eq '-') {
+	    # add h:m could put us in next day (and month, and even year)
+	    $newh += $oh;
+	    $newm += $om;
+	    if ($newm > 59) {
+	        $newm -= 60; 
+		$newh++;
+	    }
+	    if ($newh > 23) { 
+		$newh -= 24;
+		$newd++;
+		if ($newd > $mon_len[$month-1]) {
+		    # local was last day of month, now (Z) 1st, wrong date
+		    $newM++;
+		    $newd = 1;
+		    if ($newM > 12) {
+			$newM = 1;
+			$newy++;
+		    }
+		    return 0; # ended up on 1st of a month, invalid leap second
+		}
+	    }
+	    # only Dec 31 and Jun 30 are eligible for consideration
+	    if (!($newM ==  6 && $newd == 30 ||
+	          $newM == 12 && $newd == 31)) {
+	        return 0;
+            }
+
+	} else {
+	    # local time is already Z, just use newh and newm
+	    if (!($newM == 6 && $newd == 30 ||
+		  $newM == 12 && $newd == 31)) {
+	        return 0;  # not Dec 31 or Jun 30
+	    }
+	}
+
+	# time newh:newm corrected to Z. check if 23:59.
+	# date corrected to Z, is OK (Dec 31 or Jun 30), 
+	#   check if is actual leap second date.
+        if ($newh == 23 && $newm == 59 && # second is 60
+	    defined $leap_sec{$newM}->{$newy}
+	    # assuming value is +1. if ever -1, need more code TBD
+	    #  (23:59:58 would be last second of month)
+	    # already on last day of listed month. at 23:59:60Z?
+	    # valid leap second
+	   ) {
+	} else {
+	    return 0;
+	}
     }
 
     return 1;

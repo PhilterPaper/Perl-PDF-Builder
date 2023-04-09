@@ -2,7 +2,7 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-03-07   UNRELEASED
+3.026     2023-04-08   UNRELEASED
 
     lib/PDF/Builder/Content/Text.pm
      A number of minor fixes: explicitly make paragraph <p> a block level, 
@@ -12,12 +12,29 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
    * do not let first text of a list item <li> set the color of the marker,
    * investigate growth of font size in a <a> tag,
    
-   *needs investigation: PDF::TableX t-tests 01 and 03 work with PDF::Builder
-      only when compress=>0 (or 'none'). this may also have a bearing on the
-      problem seen with some TIFF tests.
-   *does not seem to suppress compression of a text or graphics stream if the 
-      result saves 25 or fewer bytes (the size of the extra object header stuff)
+   * PDF::Builder needs to suppress compression of a text or graphics stream 
+      if the result saves 25 or fewer bytes (the size of the extra object 
+      header stuff). It DOES suppress for some image formats, but this needs 
+      to be extended to everything else.
 
+   * Although still fully functional, it appears that defining a core font with
+      PDF::Builder produces a font definition record much larger than PDF::API2
+      does. There is extra encoding and width information for all 256 glyphs,
+      which may not need to be there -- needs further investigation.
+
+    README.md  update to point to new Home Page structure on catskilltech.com
+
+    lib/PDF/Builder.pm
+     Incorrect check on date format (missing last '). Reported by Johan Vromans
+      against PDF::API2 #62.
+
+     Needs further investigation: PDF::TableX t-tests 01 and 03 work with 
+      PDF::Builder only when compress=>0 (or 'none'). This problem is ONLY 
+      seen with Adobe Acrobat Reader (free download); it does not show up with
+      any other Reader or converter I've tried (XpdfReader, Firefox, Chrome,
+      Edge, PDFtk). I have reported this on the Adobe Community Support
+      forum, as this appears to be an Acrobat problem.
+      
     lib/PDF/Builder.pm, examples/050_pagelabels
      Fix an incompatibility with PDF::API2 recent changes (page_labels method).
       Now starts page index (for page_labels) at 1 instead of 0, and warns
@@ -28,7 +45,8 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
     lib/PDF/Builder/Content/Text.pm
      Make paragraph() method compatible with PDF::API2's, i.e., $continue
       parameter is optional. It should make no difference in calls to paragraph
-      whether there is a fourth parameter (continue) before the options.
+      whether there is a fourth parameter (continue) before the options. This
+      incompatibility showed up in PDF::TableX t-tests.
 
     lib/PDF/Builder/Docs.pm
      Full writeup of what's supported for markup input (Markdown, HTML).
@@ -74,7 +92,8 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
     lib/PDF/Builder/Resource/Font/Postscript.pm, lib/PDF/Builder/Docs.pm,
       examples/021_psfonts, t/font-type1.t
      Update Type 1 font (PS font) handling to allow T1 fonts (.t1 filetype).
-      Also some new font paths to search on.
+      Also some new font paths to search on. Per request #194 from Red Hat
+      packager (@ppisar).
 
     ===== IMPORTANT NOTICE =====
     lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm, 
@@ -90,10 +109,10 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
       support of a now old and obsolete font format does not affect the use of 
       PDF::Builder for authoring PDFs, nor is it binding on other non-Adobe 
       readers and authoring tools. However, using Adobe products for editing of 
-      PDFs with Type 1 fonts, and possibly of displaying them, may no longer be 
-      possible. At any rate, users may want to consider starting to move away 
-      from Type 1 font usage and switch to TTF/OTF or even core fonts, 
-      as it is unknown how long Type 1 Reader support will continue.
+      PDFs with Type 1 fonts, and possibly of displaying them, may soon no 
+      longer be possible. At any rate, users may want to consider starting to 
+      move away from Type 1 font usage and switch to TTF/OTF or even core 
+      fonts, as it is unknown how long Type 1 Reader support will continue.
     ============================
 
 3.025     2023-01-19

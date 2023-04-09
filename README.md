@@ -121,7 +121,8 @@ have it under a different name, such as dmake (Strawberry Perl on Windows),
 gmake, or nmake.
 
 PDF::Builder does not currently compile and link anything, so `gcc`, `g++`,
-etc. will not be used. The build process merely copies .pm files around.
+etc. will not be used. The build process merely copies .pm files around, and
+runs the "t" tests to confirm the proper installation.
 
 ## Copyright
 
