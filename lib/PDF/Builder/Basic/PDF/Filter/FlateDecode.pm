@@ -35,8 +35,7 @@ sub new {
         -Bufsize => 32768,
     );
     $self->{'infilt'} = Compress::Zlib::inflateInit();
-    bless $self, $class;
-    return $self;  # API2 doesn't explicitly return anything
+    return bless $self, $class;
 }
 
 sub outfilt {

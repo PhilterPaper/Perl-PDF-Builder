@@ -1283,7 +1283,7 @@ bound together into books or magazines. You would usually just supply a PDF
 with all the pages; they would take care of the signature layout (which 
 includes offsets and 180 degree rotations). 
 
-(As an aside, don't count on a printer having
+(As an aside, don't count on a commercial printer having
 any particular font available, so be sure to ask. Usually they will want you
 to embed all fonts used, but ask first, and double-check before handing over
 the print job! TTF/OTF fonts (C<ttfont()>) are embedded by default, but other 
@@ -1627,7 +1627,8 @@ is not 1.
 
 B<CAUTION:> There is a "gotcha" with TrueType fonts that you need to be aware
 of when using them. PDF::Builder outputs to the text stream a list of I<glyph
-IDs> as four-digit hex codes, rather than the list of characters used by other
+IDs> as four-digit hex codes, rather than the list of character byte codes 
+used by other
 font types. The B<Tw> operator, if used (C<$text->wordspace(n)>) to adjust
 inter-word spacing, B<will be ignored> by most, if not all, PDF Readers
 (including Adobe products). This is because this operator is looking for actual
@@ -1637,6 +1638,49 @@ and OpenType fonts! We are considering adding ways to emulate word spacing for
 TrueType font support, as well as possibly extending it to non-ASCII spaces for 
 all font types. Note that inter-character spacing (via C<$text->charspace(n)> 
 and the B<Tc> operator) still works for all font types.
+
+PDF::Builder has been updated to attempt to respect the B<Tw> operator when
+using TTF/OTF fonts. If the C<Tw> amount is non-zero, it will split up 
+sentences on ASCII spaces (x20) and individually place words on the page. This 
+necessarily bloats the PDF file size, but is the only way to adjust word 
+spacing via the C<wordspace()> method. Note that again, I<only> ASCII spaces
+(x20) are affected (to match the behavior of the B<Tw> operator for other font
+types), and other spaces (xA0 required/non-breaking space, thin space, etc.)
+are not handled.
+
+B<Where is the font I just added?> Well, sometimes you get lucky and can
+specify the exact directory that the C<.ttf> or C<.otf> file will reside in,
+making it easy to specify the path to the font file (for uses such as 
+C<ttfont()>, C<font()>, or Font Manager calls). Other times, the operating
+system will play hide and seek with you, leaving you to expend much time and
+energy to track down where the file is. Linux distributions tend to have their
+own favorite hiding places for font files, but at least they tend to be
+consistent! On the other hand, Windows often decides that it knows better than
+you, and will put files in an unexpected place, and under an unexpected name!
+
+To find out where your TTF or OTF file ended up, if you don't see an obvious 
+entry in /Windows/Fonts (even if you drag and dropped the font file there), 
+you need to look in /Users/XXXX/AppData/Local/Microsoft/Windows/Fonts, 
+depending on what user name you were signed on as when you installed the font. 
+Even then, you may not be done, as the name may have been changed to something 
+unrecognizable. You may need to look at Windows' mapping of font name to 
+filename.
+
+In the command shell (command line), or whatever equivalent you like to use, 
+enter "regedit" to bring up the registry editor. For the top level, choose 
+(click on) either C<HKEY_LOCAL_MACHINE> (for global font settings, in 
+/Windows/Fonts) or C<HKEY_CURRENT_USER> (for fonts installed by whoever is 
+currently signed on, in /Users/XXXX/AppData...). From there, both have the same 
+path: C<SOFTWARE E<gt> Microsoft E<gt> Windows NT E<gt> CurrentVersion E<gt> 
+Fonts>. This should bring up a listing of all the installed fonts (full name, 
+e.g. "Papyrus Regular") and their actual filename ("PAPYRUS.TTF"). For 
+instance, I just installed (drag and drop into /Windows/Fonts) a blackletter 
+"Gothic" font named I<English Towne Medium>. It ended up in my /Users/XXXX... 
+directory as C<EnglishTowne.ttf>.
+
+You don't need to change anything in the registry, just look. You I<do> have 
+the capability to change things, including hiding/showing the font, if you 
+care to get into those things.
 
 =back
 

@@ -1341,6 +1341,10 @@ for interacting with custom metadata.
 
 Pass C<undef> as the value in order to remove the key from the dictionary.
 
+See comments in the internal function C<_is_date()> for more information on
+the inconsistency of PDF standards on exactly what the date format should be!
+This applies to CreationDate and ModDate keys.
+
 =cut
 
 sub info_metadata {
@@ -1367,6 +1371,7 @@ sub info_metadata {
 
         if ($field eq 'CreationDate' or $field eq 'ModDate') {
             if (defined ($value)) {
+		# make sure date/timestamp starts with D:
                 $value = 'D:' . $value unless $value =~ /^D:/;
                 croak "Invalid date string: $value" unless _is_date($value);
             }
