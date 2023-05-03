@@ -2,7 +2,7 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-04-28   UNRELEASED, release after *'d items
+3.026     2023-05-03   UNRELEASED, release after *'d items
 
     lib/PDF/Builder/Content/Text.pm
      A number of minor fixes: explicitly make paragraph <p> a block level, 
@@ -26,6 +26,12 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
       PDF::Builder produces a font definition record much larger than PDF::API2
       does. There is extra encoding and width information for all 256 glyphs,
       which may not need to be there -- needs further investigation.
+
+    lib/PDF/Builder/Basic/PDF/Filters/LZWDecode.pm
+     Revert an earlier change that broke some filtering.
+
+    t/info.t
+     Add test of modified() method.
 
     README.md  update to point to new Home Page structure on catskilltech.com
 
