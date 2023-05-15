@@ -2,6 +2,20 @@
 
 A Perl library to facilitate the creation and modification of PDF files
 
+## What is it?
+
+PDF::Builder is a **fork** of the popular PDF::API2 Perl library. It provides a 
+library of modules and functions so that a PDF file (document) may be built and 
+maintained from Perl programs. It is not a WYSIWYG editor; nor is it a canned 
+utility or converter. Rather, it is a set of building blocks with which you can 
+perform a wide variety of operations, ranging from basic operations such as 
+selecting a font face, to defining the document using a large subset of either 
+Markdown or HTML markup languages. You can call it from arbitrary Perl 
+programs, which may even create content on-the-fly (or read it in from another 
+source). Quite a few code examples are provided, to help you to get started 
+with the process of creating a PDF document. Many enhancements are in the 
+pipeline to make PDF::Builder even more powerful and versatile.
+
 [Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full), including Documentation and Examples.
 
 [![Open Issues](https://img.shields.io/github/issues/PhilterPaper/Perl-PDF-Builder)](https://github.com/PhilterPaper/Perl-PDF-Builder/issues)
