@@ -2,18 +2,19 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-05-03   UNRELEASED, release after *'d items
+3.026     2023-05-26   UNRELEASED, release after *'d items, BEFORE 7/19
 
     lib/PDF/Builder/Content/Text.pm
      A number of minor fixes: explicitly make paragraph <p> a block level, 
-     any pending margin-bottom at the end of a column (if ran out of input) 
-       should be accounted for in the returned $start_y
+       any pending margin-bottom at the end of a column (if ran out of input) 
+       should be accounted for in the returned $start_y,
    * any margin-top at the top of a column should be ignored, not just for <p>,
    * do not let first text of a list item <li> set the color of the marker,
-   * investigate growth of font size in a <a> tag,
+   * investigate growth of font size in an <a> tag,
    * CSS white-space and <br>, followed by <pre>, <code>, <kbd>, <samp>, <var>
        supports request in PDF::Table for code display
    * report unsupported tags and CSS properties encountered (warning)
+
   ?* adjacent characters (no space) under different tags should not line break
        this may require a substantial rewrite of text handling
    
@@ -27,7 +28,10 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
       does. There is extra encoding and width information for all 256 glyphs,
       which may not need to be there -- needs further investigation.
 
-    lib/PDF/Builder/Basic/PDF/Filters/LZWDecode.pm
+    INFO/ACKNOWLEDGE.md (new), README.md, MANIFEST 
+     Add acknowledgements and thanks.
+
+    lib/PDF/Builder/Basic/PDF/Filter/LZWDecode.pm
      Revert an earlier change that broke some filtering.
 
     t/info.t
@@ -37,14 +41,17 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
 
     lib/PDF/Builder.pm
      Incorrect check on date format (missing last '). Reported by Johan Vromans
-      against PDF::API2 #62.
+      against PDF::API2 #62. The _is_date() method has been updated to reflect
+      a number of date/time formats found "in the wild", although the PDF
+      documentation is a bit inconsistent over time, as well as ambiguous, so
+      this may allow through some invalid formats.
 
      Needs further investigation: PDF::TableX t-tests 01 and 03 work with 
       PDF::Builder only when compress=>0 (or 'none'). This problem is ONLY 
       seen with Adobe Acrobat Reader (free download); it does not show up with
       any other Reader or converter I've tried (XpdfReader, Firefox, Chrome,
       Edge, PDFtk). I have reported this on the Adobe Community Support
-      forum, as this appears to be an Acrobat problem.
+      forum, as this appears to be a possible Acrobat problem.
       
     lib/PDF/Builder.pm, examples/050_pagelabels
      Fix an incompatibility with PDF::API2 recent changes (page_labels method).
@@ -102,9 +109,9 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
 
     lib/PDF/Builder/Resource/Font/Postscript.pm, lib/PDF/Builder/Docs.pm,
       examples/021_psfonts, t/font-type1.t
-     Update Type 1 font (PS font) handling to allow T1 fonts (.t1 filetype).
-      Also some new font paths to search on. Per request #194 from Red Hat
-      packager (@ppisar).
+     Update Type 1 font (PS font) handling to allow T1 fonts (.t1 filetype,
+      variant of .afm/.pfm). Also some new font paths to search on. Per request 
+      #194 from Red Hat packager (@ppisar).
 
     ===== IMPORTANT NOTICE =====
     lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm, 

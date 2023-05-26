@@ -162,11 +162,23 @@ redistribute and/or modify this software (those portions under LGPL) at an
 LGPL version greater than 2.1. See INFO/LICENSE for more information on the
 licenses and warranty statement.
 
+### Carrying On...
+
+PDF::Builder is Open Source software, built upon the efforts not only of the
+current maintainer, but also of many people before me. Therefore, it's perfectly
+fair to make use of the algorithms and even code (within the terms of the
+Art progresses! Just please be considerate and acknowledge the work of others
+that you are building on, as well as pointing back to this package. Drop us a
+note with news of your project (if based on the code and algorithms in
+PDF::Builder, or even just heavily inspired by it) and we'll be happy to make
+a pointer to your work. The more cross-pollination, the better!
+
 ## See Also
 
 * INFO/RoadMap file for the PDF::Builder road map
 * CONTRIBUTING file for how to contribute to the project
 * LICENSE file for more on the license term
+* INFO/ACKNOWLEDGE.md for "thank yous" to those who contributed to this product
 * INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues 
 * INFO/DEPRECATED file for information on deprecated features
 * INFO/KNOWN\_INCOMP file for known incompatibilities with PDF::API2
