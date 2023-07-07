@@ -2597,7 +2597,8 @@ sub _output_text {
 			# it's a symbol for <ul>. 50% size, +y by 33% size
 			# add doubled space at end (font size 50%).
 			# TBD url image and other character symbols (possibly
-			#     in other than Zapf Dingbats). 
+			#     in other than Zapf Dingbats), including 
+			#     arbitrary text strings. 
 			if      ($list_marker eq '.disc') {
 			    $list_marker = chr(108).'  ';
 			} elsif ($list_marker eq '.circle') {

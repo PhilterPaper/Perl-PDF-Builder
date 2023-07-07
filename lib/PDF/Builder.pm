@@ -2499,9 +2499,12 @@ document.
 
 B<Example:>
 
-    my $pdf = PDF::Builder->new();
-    my $source = PDF::Builder->open('source.pdf');
-    my $page = $pdf->page();
+    # take page 2 of source.pdf and add to empty doc sample.pdf at half size
+    # note that sample.pdf could be an existing document!
+    #
+    my $pdf = PDF::Builder->new();                      # so far, empty document
+    my $source = PDF::Builder->open('source.pdf');        # content to copy over
+    my $page = $pdf->page();                      # place to be actually updated
 
     # Import Page 2 from the source PDF
     my $object = $pdf->embed_page($source, 2);
@@ -2670,26 +2673,30 @@ sub page_count {
 
 =item $pdf->page_labels($page_number, %opts)
 
-Sets page label numbering format, for the Reader's page-selection slider thumb 
-(I<not> the outline/bookmarks). At this time, there is no method to 
+Sets page label numbering format, for the PDF Reader's page-selection slider 
+thumb (I<not> the outline/bookmarks). At this time, there is no method to 
 automatically synchronize a page's label with the outline/bookmarks, or to 
 somewhere on the printed page.
-
-Note that many PDF Readers ignore these settings, and (at most) simply give
-you the physical page number 1, 2, 3,... for the slider thumb label, instead
-of the page label specified here.
-Depending on the PDF Reader you are using, this
-formatted page label I<may> show up in the reader as the current page number.
+Depending on the PDF Reader you are using, this formatted page label I<may> 
+show up in the reader control area as the current page number.
 
 B<CAUTIONS:> 
 
 B<1.> The given page index started at 0 for the old method (C<pageLabel>),
-while for the new method (C<page_labels()>) it starts with 1!
+which is the internal PDF array index, while for the new method 
+(C<page_labels()>) it starts with 1, the visible page number! Don't get
+confused.
 
 B<2.> Options for the old method (C<pageLabel>) were a hashref, while for the
 new method (C<page_labels>) it is a hash. This permits pageLabel() to accept
 I<multiple> page number schemes in one call, rather than one per call as per
 page_labels().
+
+B<3.> Many PDF readers do not support page labels; they simply (at most)
+label the sliding thumb with the physical page number. Adobe Acrobat Reader 
+(free version) appears to have a bug in some versions, where if the only
+page label is 'decimal' (the default), it labels the thumb as though no page 
+labels were defined ("Page I<m> of I<n>").
 
     # Generate a 30-page PDF
     my $pdf = PDF::Builder->new();
@@ -2744,6 +2751,20 @@ However, this appears to be ignored (use a style of I<nocounter> to suppress
 the counter).
 
 =back
+
+B<Dotted inserted page numbers>
+
+To easily insert a range of pages, e.g., 3 pages between existing pages 37 and 
+38, use a C<prefix> of '37.' and decimal numbering starting (C<start>) at 1 or 
+a specified point. This would produce pages 37.1, 37.2, and 37.3. To put 
+leading 0's on the numbers, if you find that you later need to insert additional
+pages between those, e.g., page 37.05 between 37 and 37.1, use a C<prefix> of 
+'37.0' and C<start> at 5. 
+
+Just remember that only the (rightmost) I<counter>, which begins at the 
+C<start> value, is incremented (and formatted) by the PDF Reader. Everything 
+else (the C<prefix>) is a constant string. At worst, you might have to define 
+a page label for each individual page.
 
 B<Example:>
 
@@ -2814,7 +2835,8 @@ B<Alternate name:> C<pageLabel>
 This old method name is retained for compatibility with old user code.
 Note that with C<pageLabel>, you need to make the "options" list an anonymous
 hash by placing B<{ }> around the entire list, even if it has only one item
-in it. Also remember that the page number (index) starts at 0, rather than 1.
+in it. Also remember that the page number (index) for C<pageLabel> starts at 0
+(same as the PDF page index), rather than 1 (as in C<page_labels>).
 Finally, pageLabel() still permits you to define multiple page numbering schemes
 in one call.
 
@@ -2824,9 +2846,14 @@ in one call.
 # old pageLabel(). rather than an opts hashref, it is a hash.
 sub page_labels { 
     my ($self, $page_number, %opts) = @_;
-    if ($page_number == 0) {
+    if ($page_number <= 0) {
 	carp "page_labels() start at 1, not 0. page changed to 1.";
 	$page_number = 1;
+    }
+    # check if opts is a hash?
+    if (ref(%opts) ne '') {
+	carp "page_labels() options must be a hash. Ignored.";
+	%opts = ();
     }
     return pageLabel($self, $page_number-1, \%opts);
 }
@@ -2841,7 +2868,16 @@ sub pageLabel {
     my $nums = $self->{'catalog'}->{'PageLabels'}->{'Nums'};
     while (scalar @_) { # should we have only one trip through here?
         my $index = shift();
+        if ($index < 0) {
+	    carp "page labels start at 0. page changed to 0.";
+	    $index = 0;
+        }
         my $opts = shift();
+        # check if opts is a hashref?
+        if (ref($opts) ne 'HASH') {
+	    carp "pageLabels() options must be a hash ref. Ignored.";
+	    $opts = {};
+        }
         # copy dashed options to preferred undashed option names
         if (defined $opts->{'-style'} && !defined $opts->{'style'}) { $opts->{'style'} = delete($opts->{'-style'}); }
         if (defined $opts->{'-prefix'} && !defined $opts->{'prefix'}) { $opts->{'prefix'} = delete($opts->{'-prefix'}); }
@@ -2856,7 +2892,8 @@ sub pageLabel {
                 $d->{'S'} = PDFName($opts->{'style'} eq 'Roman' ? 'R' :
                                     $opts->{'style'} eq 'roman' ? 'r' :
                                     $opts->{'style'} eq 'Alpha' ? 'A' :
-                                    $opts->{'style'} eq 'alpha' ? 'a' : 'D');
+                                    $opts->{'style'} eq 'alpha' ? 'a' :
+                                    $opts->{'style'} eq 'decimal' ? 'D' : 'D');
 	    } else {
 		# for nocounter (no styled counter), do not create /S entry
 	    }
@@ -3123,6 +3160,17 @@ sub artbox {
 =back
 
 =head1 FONT METHODS
+
+=head2 Embedding of Fonts
+
+B<CAUTION:> Some font routines (currently only C<ttfont()>) automatically embed
+font definitions for the purpose of improving portability of PDF files. Note 
+that font copyright and licensing terms vary by font provider, and some may 
+prohibit embedding of their fonts, either entirely, or allowing only the subset 
+of glyphs actually used in the document. You should be aware of the terms, and 
+use the C<noembed> or C<nosubset> flags as appropriate. The PDF::Builder font
+routines currently have no means to automatically detect any embedding 
+limitations for a given font, and cannot default their behavior accordingly!
 
 =over
 

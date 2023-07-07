@@ -43,6 +43,8 @@ _Linux_ distributions (which redistribute _PDF::Builder_).
 Thanks also go out to **Andy Beverley** of _Amtivo Group_ for financial 
 sponsorship of the Markdown and HTML formatted input.
 
+See also _INFO/SPONSORS_.
+
 ## Carrying On...
 
 _PDF::Builder_ is Open Source software, built upon the efforts not only of the

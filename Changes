@@ -2,31 +2,23 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-05-26   UNRELEASED, release after *'d items, BEFORE 7/19
+3.026     2023-07-05   UNRELEASED
+
+    lib/PDF/Builder.pm
+     Clarify documentation on page_labels() versus pageLabel(), add code to
+      check differences in starting page index and form of options, in response
+      to PDF::API2 Issue #61.
+
+    lib/PDF/Builder/Content/Text.pm
+ *   Rewrite of list processing (<ol> and <ul>) to fix problem with marker
+      color. Add "reversed" (boolean) to <ol> to count down instead of up 
+      (needs "start" value to make sense). 
+   * test ol reversed
 
     lib/PDF/Builder/Content/Text.pm
      A number of minor fixes: explicitly make paragraph <p> a block level, 
        any pending margin-bottom at the end of a column (if ran out of input) 
-       should be accounted for in the returned $start_y,
-   * any margin-top at the top of a column should be ignored, not just for <p>,
-   * do not let first text of a list item <li> set the color of the marker,
-   * investigate growth of font size in an <a> tag,
-   * CSS white-space and <br>, followed by <pre>, <code>, <kbd>, <samp>, <var>
-       supports request in PDF::Table for code display
-   * report unsupported tags and CSS properties encountered (warning)
-
-  ?* adjacent characters (no space) under different tags should not line break
-       this may require a substantial rewrite of text handling
-   
-  ?* PDF::Builder needs to suppress compression of a text or graphics stream 
-      if the result saves 25 or fewer bytes (the size of the extra object 
-      header stuff). It DOES suppress for some image formats, but this needs 
-      to be extended to everything else.
-
-  ?* Although still fully functional, it appears that defining a core font with
-      PDF::Builder produces a font definition record much larger than PDF::API2
-      does. There is extra encoding and width information for all 256 glyphs,
-      which may not need to be there -- needs further investigation.
+       should be accounted for in the returned $start_y.
 
     INFO/ACKNOWLEDGE.md (new), README.md, MANIFEST 
      Add acknowledgements and thanks.
@@ -34,10 +26,11 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
     lib/PDF/Builder/Basic/PDF/Filter/LZWDecode.pm
      Revert an earlier change that broke some filtering.
 
+    README.md  Update to point to new PDF::Builder Home Page structure (on 
+      catskilltech.com).
+
     t/info.t
      Add test of modified() method.
-
-    README.md  update to point to new Home Page structure on catskilltech.com
 
     lib/PDF/Builder.pm
      Incorrect check on date format (missing last '). Reported by Johan Vromans

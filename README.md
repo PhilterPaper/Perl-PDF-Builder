@@ -167,6 +167,7 @@ licenses and warranty statement.
 PDF::Builder is Open Source software, built upon the efforts not only of the
 current maintainer, but also of many people before me. Therefore, it's perfectly
 fair to make use of the algorithms and even code (within the terms of the
+LICENSE). That's exactly how the State of the
 Art progresses! Just please be considerate and acknowledge the work of others
 that you are building on, as well as pointing back to this package. Drop us a
 note with news of your project (if based on the code and algorithms in
