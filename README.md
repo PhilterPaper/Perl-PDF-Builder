@@ -176,9 +176,9 @@ a pointer to your work. The more cross-pollination, the better!
 
 ## See Also
 
-* INFO/RoadMap file for the PDF::Builder road map
 * CONTRIBUTING file for how to contribute to the project
 * LICENSE file for more on the license term
+* INFO/RoadMap file for the PDF::Builder road map
 * INFO/ACKNOWLEDGE.md for "thank yous" to those who contributed to this product
 * INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues 
 * INFO/DEPRECATED file for information on deprecated features
@@ -195,6 +195,10 @@ To build the full HTML documentation (all the POD), get the full installation
 and go to the `docs/` directory. Run `buildDoc.pl --all` to generate the full
 tree of documentation. There's a lot of additional information in the
 PDF::Builder::Docs module (it's all documentation).
+
+You may find it more convenient to point your browser to 
+https://www.catskilltech.com/FreeSW/product/PDF-Builder/title/PDF%3A%3ABuilder/freeSW\_full 
+to see the full documentation build (as well as most of the example outputs).
 
 We admit that the documentation is a bit light on "how to" task orientation.
 We hope to more fully address this in the future, but for now, get the full

@@ -53,7 +53,8 @@ The width used (in points) is B<returned>.
 sub text_left {
     my ($self, $text, @opts) = @_;
 
-    return $self->text($text, @opts);
+    # override any stray 'align' that got through to here
+    return $self->text($text, @opts, 'align'=>'l');
 }
 
 =over
@@ -72,8 +73,8 @@ The width used (in points) is B<returned>.
 sub text_center {
     my ($self, $text, @opts) = @_;
 
-    my $width = $self->advancewidth($text, @opts);
-    return $self->text($text, 'indent' => -($width/2), @opts);
+    # override any stray 'align' that got through to here
+    return $self->text($text, @opts, 'align'=>'c');
 }
 
 =over
@@ -94,8 +95,8 @@ The width used (in points) is B<returned>.
 sub text_right {
     my ($self, $text, @opts) = @_;
 
-    my $width = $self->advancewidth($text, @opts);
-    return $self->text($text, 'indent' => -$width, @opts);
+    # override any stray 'align' that got through to here
+    return $self->text($text, @opts, 'align'=>'r');
 }
 
 =over
@@ -302,7 +303,8 @@ sub text_justified {
 
     } # original $overage was not near 0
     # do the output, with wordspace, charspace, and possiby hscale changed
-    $self->text($text, %opts);
+    # override any stray 'align' that got through to here
+    $self->text($text, %opts, 'align'=>'l');
 
     # restore settings
     $self->hscale($hs); $self->wordspace($ws); $self->charspace($cs);
@@ -590,7 +592,8 @@ sub text_fill_left {
 
     my $over = (not(defined($opts{'spillover'}) and $opts{'spillover'} == 0));
     my ($line, $ret) = $self->_text_fill_line($text, $width, $over, %opts);
-    $width = $self->text($line, %opts);
+    # override any stray 'align' that got through to here
+    $width = $self->text($line, %opts, 'align'=>'l');
     return ($width, $ret);
 }
 
@@ -696,12 +699,13 @@ sub text_fill_justified {
     # if last line, use $align (don't justify)
     if ($ret eq '') {
 	my $lw = $self->advancewidth($line, %opts);
+        # override any stray 'align' that got through to here
 	if      ($align eq 'l') {
-	    $width = $self->text($line, %opts);
+	    $width = $self->text($line, %opts, 'align'=>'l');
 	} elsif ($align eq 'c') {
-	    $width = $self->text($line, 'indent' => ($width-$lw)/2, %opts);
+	    $width = $self->text($line, 'indent' => ($width-$lw)/2, %opts, 'align'=>'l');
 	} else {  # 'r'
-	    $width = $self->text($line, 'indent' => ($width-$lw), %opts);
+	    $width = $self->text($line, 'indent' => ($width-$lw), %opts, 'align'=>'l');
 	}
     } else {
         $width = $self->text_justified($line, $width, %opts);
@@ -1089,9 +1093,11 @@ sub textlabel {
         $wht = $self->text_center($text, %opts);
     } elsif (defined($opts{'left'}) && $opts{'left'} ||
 	     defined($opts{'align'}) && $opts{'align'} =~ /^l/i) {
-        $wht = $self->text($text, %opts);  # explicitly left aligned
+        # override any stray 'align' that got through to here
+        $wht = $self->text($text, %opts, 'align'=>'l');  # explicitly left aligned
     } else {
-        $wht = $self->text($text, %opts);  # left aligned by default
+        # override any stray 'align' that got through to here
+        $wht = $self->text($text, %opts, 'align'=>'l');  # left aligned by default
     }
 
     $self->textend();

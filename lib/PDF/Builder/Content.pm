@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 use Carp;
 use Compress::Zlib qw();
@@ -3745,6 +3745,10 @@ sub advancewidth {
         $opts{$k} = $self->{" $k"} unless defined $opts{$k};
     }
     # any other options given are ignored
+    
+    # $opts{'font'} (not ' font'}) needs to be defined. fail if not.
+    # other code should first fatal error in text() call, this is a fallback
+    return 0 if !defined $opts{'font'};
 
     $glyph_width = $opts{'font'}->width($text)*$opts{'fontsize'};
     $num_space   = $text =~ y/\x20/\x20/;
@@ -3770,17 +3774,49 @@ sub advancewidth {
 
 =item $width = $content->text($text, %opts)
 
-Adds text to the page (left justified). 
+Adds text to the page (left justified by default). 
 The width used (in points) is B<returned>.
 
 Options:
 
 =over
 
+=item 'align' => position
+
+Align the text, assuming left-to-right writing direction (RTL/bidirectional is
+not currently supported).
+
+=over
+
+=item 'l' or 'left' (case insensitive).
+
+B<default.> Text I<begins> at the current text position.
+
+=item 'c' or 'center' (case insensitive).
+
+Text is I<centered> at the current text position.
+
+=item 'r' or 'right' (case insensitive). 
+
+Text I<ends> (is right justified to) at the current text position.
+
+=back
+
+In all cases, the ending text position is at the (right) end of the text.
+If mixing various alignments, you should explicitly place the current text
+position so as to not overwrite earlier text.
+
 =item 'indent' => $distance
 
 Indents the text by the number of points (A value less than 0 gives an
 I<outdent>).
+The indentation amount moves the text left (negative indentation) or right 
+(positive indentation), regardless of alignment. This allows desired alignment
+effects (for centered and right) that aren't exactly aligned on the current 
+position. For example, consider a column of decimal numbers centered on a
+desired I<x> position, but aligned on their decimal points. The C<indent>
+would be on a per-line basis, adjusted by the length of the number and the
+decimal position.
 
 =item 'underline' => 'none'
 
@@ -3826,9 +3862,17 @@ Example:
     #   distance 7, thickness 1.5, color yellow
     'strikethru' => [4,[1,'red'],7,[1.5,'yellow']],
 
+=item 'strokecolor' => color_spec
+
+Defines the underline or strikethru line color, if different from the text
+color.
+
 =back
 
 =cut
+
+# TBD: consider 'overline' similar to underline
+#      bidirectional/RTL identation, alignment meanings?
 
 sub _text_underline {
     my ($self, $xy1,$xy2, $underline, $color) = @_;
@@ -3955,12 +3999,26 @@ sub _text_strikethru {
 sub text {
     my ($self, $text, %opts) = @_;
     # copy dashed option names to preferred undashed names
+    if (defined $opts{'-align'} && !defined $opts{'align'}) { $opts{'align'} = delete($opts{'-align'}); }
     if (defined $opts{'-indent'} && !defined $opts{'indent'}) { $opts{'indent'} = delete($opts{'-indent'}); }
     if (defined $opts{'-underline'} && !defined $opts{'underline'}) { $opts{'underline'} = delete($opts{'-underline'}); }
     if (defined $opts{'-strokecolor'} && !defined $opts{'strokecolor'}) { $opts{'strokecolor'} = delete($opts{'-strokecolor'}); }
     if (defined $opts{'-strikethru'} && !defined $opts{'strikethru'}) { $opts{'strikethru'} = delete($opts{'-strikethru'}); }
 
-    my $wd = 0;
+    my $align = 'l'; # default
+    if (defined $opts{'align'}) {
+	$align = lc($opts{'align'});
+	if      ($align eq 'l' || $align eq 'left') {
+	    $align = 'l';
+	} elsif ($align eq 'c' || $align eq 'center') {
+	    $align = 'c';
+	} elsif ($align eq 'r' || $align eq 'right') {
+	    $align = 'r';
+	} else {
+	    $align = 'l'; # silent error on bad alignment
+	}
+    }
+
     if ($self->{' fontset'} == 0) {
         unless (defined($self->{' font'}) and $self->{' fontsize'}) {
             croak q{Can't add text without first setting a font and font size};
@@ -3968,24 +4026,48 @@ sub text {
         $self->font($self->{' font'}, $self->{' fontsize'});
         $self->{' fontset'} = 1;
     }
-    if (defined $opts{'indent'}) {
-        $wd += $opts{'indent'};
-        $self->matrix_update($wd, 0);
-    }
-    my $ulxy1 = [$self->_textpos2()];
 
+    my $wd = $self->advancewidth($text);
+
+    my $indent = 0; # default
     if (defined $opts{'indent'}) {
-    # changed for Acrobat 8 and possibly others
-    #    $self->add('[', (-$opts{'indent'}*(1000/$self->{' fontsize'})*(100/$self->hscale())), ']', 'TJ');
-        $self->add($self->{' font'}->text($text, $self->{' fontsize'}, (-$opts{'indent'}*(1000/$self->{' fontsize'})*(100/$self->hscale()))));
+	$indent = $opts{'indent'};
+	# TBD: later may define indentation for RTL/bidirectional
+    }
+
+    # now have alignment, indentation amount, text width
+    # adjust indentation by text width and alignment. negative to move text left
+    if      ($align eq 'l') {
+	# no change
+    } elsif ($align eq 'c') {
+	$indent -= $wd/2;
+    } else { # 'r'
+	$indent -= $wd;
+    }
+
+    # indent is points to move text left (<0) or right (>0)
+    # per input 'indent' AND alignment AND text width
+    $self->matrix_update($indent, 0) if ($indent); # move current pos to start
+
+    my $ulxy1 = [$self->_textpos2()]; # x,y start of under/thru line
+
+    if ($indent) {
+	# now indent is positive >0 to move left. convert to milliems and scale
+        $self->add(
+	    $self->{' font'}->text(
+		$text, 
+		$self->{' fontsize'}, 
+	        -$indent*(1000/$self->{' fontsize'})*(100/$self->hscale()) ));
     } else {
-        $self->add($self->{' font'}->text($text, $self->{' fontsize'}));
+        $self->add(
+	    $self->{' font'}->text(
+		$text, 
+		$self->{' fontsize'} ));
     }
 
-    $wd = $self->advancewidth($text);
-    $self->matrix_update($wd, 0);
+    $self->matrix_update($wd, 0); # move current position right to end of text
 
-    my $ulxy2 = [$self->_textpos2()];
+    my $ulxy2 = [$self->_textpos2()]; # x,y end of under/thru line
 
     if (defined $opts{'underline'}) {
         $self->_text_underline($ulxy1,$ulxy2, $opts{'underline'}, $opts{'strokecolor'});
