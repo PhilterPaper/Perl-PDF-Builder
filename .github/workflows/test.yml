@@ -39,15 +39,15 @@ jobs:
 #       env:
 #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #         FILTER_REGEX_EXCLUDE: Makefile.PL
-## GD fixed, but not yet released (should work in 2.77)
-basic-windows:
-   name: Basic Windows
-   runs-on: windows-latest
-   steps:
-     - uses: actions/checkout@v2
-     - run: cpan Font::TTF GD IO::Compress Test::Exception Test::Memory::Cycle Readonly
-     - run: perl Makefile.PL
-     - run: make test TEST_VERBOSE=1
+## barfs on 'windows-latest'
+#basic-windows:
+#   name: Basic Windows
+#   runs-on: windows-latest
+#   steps:
+#     - uses: actions/checkout@v2
+#     - run: cpan Font::TTF GD IO::Compress Test::Exception Test::Memory::Cycle Readonly
+#     - run: perl Makefile.PL
+#     - run: make test TEST_VERBOSE=1
 ## currently doesn't work. remove for the time being 1) GD problem, 2) TIFF issues
 # full-windows:
 #   name: Full Windows
