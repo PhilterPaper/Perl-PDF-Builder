@@ -13,14 +13,15 @@ jobs:
       - run: sudo apt install libfont-ttf-perl libgd-perl libio-compress-perl libtest-exception-perl libtest-memory-cycle-perl ghostscript libgraphics-tiff-perl gsfonts
       - run: perl Makefile.PL
       - run: make test TEST_VERBOSE=1
-  nogt:
-    name: noGT
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - run: sudo apt install libfont-ttf-perl libgd-perl libio-compress-perl libtest-exception-perl libtest-memory-cycle-perl libreadonly-perl ghostscript gsfonts
-      - run: perl Makefile.PL
-      - run: make test TEST_VERBOSE=1
+## started failing on sudo apt install step
+#  nogt:
+#    name: noGT
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - run: sudo apt install libfont-ttf-perl libgd-perl libio-compress-perl libtest-exception-perl libtest-memory-cycle-perl libreadonly-perl ghostscript gsfonts
+#      - run: perl Makefile.PL
+#      - run: make test TEST_VERBOSE=1
   nogt_nogs:
     name: noGT_noGS
     runs-on: ubuntu-latest
