@@ -2291,10 +2291,10 @@ sub _sweep {
 
 =item $content->bogen($x1,$y1, $x2,$y2, $radius)
 
-(German for I<bow>, as in a segment (arc) of a circle. This is a segment
-of a circle defined by the intersection of two circles of a given radius, 
-with the two intersection points as inputs. There are four possible resulting
-arcs, which can be selected with C<$larger> and C<$reverse>.)
+(I<bogen> is German for I<bow>, as in a segment (arc) of a circle. This is a 
+segment of a circle defined by the intersection of two circles of a given 
+radius, with the two intersection points as inputs. There are B<four> possible 
+resulting arcs, which can be selected with C<$larger> and C<$reverse>.)
 
 This extends the path along an arc of a circle of the specified radius
 between C<[$x1,$y1]> to C<[$x2,$y2]>. The current position is then set
@@ -2307,15 +2307,19 @@ I<not> a straight line to I<P1> and then the arc, but a blending into the curve
 from the current point. It will often I<not> pass through I<P1>!
 
 Set C<$larger> to a I<true> value to draw the larger ("outer") arc between the 
-two points, instead of the smaller one. Both arcs are
-drawn I<clockwise> from I<P1> to I<P2>. The default value of I<false> draws
-the smaller arc.
+two points, instead of the smaller one. Both arcs are drawn I<clockwise> from 
+I<P1> to I<P2>. The default value of I<false> draws the smaller arc.
+Note that the "other" circle's larger arc is used (the center point is 
+"flipped" across the line between I<P1> and I<P2>), rather than using the 
+"remainder" of the smaller arc's circle (which would necessitate reversing the
+direction of travel along the arc -- see C<$reverse>).
 
 Set C<$reverse> to a I<true> value to draw the mirror image of the
 specified arc (flip it over, so that its center point is on the other
 side of the line connecting the two points). Both arcs are drawn
 I<counter-clockwise> from I<P1> to I<P2>. The default (I<false>) draws 
-clockwise arcs.
+clockwise arcs. An arc is B<always> drawn from I<P1> to I<P2>; the direction
+(clockwise or counter-clockwise) may be chosen.
 
 The C<$radius> value cannot be smaller than B<half> the distance from 
 C<[$x1,$y1]> to C<[$x2,$y2]>. If it is too small, the radius will be set to

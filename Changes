@@ -2,7 +2,10 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-07-15   UNRELEASED
+3.026     2023-07-24   UNRELEASED
+
+    lib/PDF/Builder/Content.pm
+     Clarify description of "bogen()" method's "larger" and "reverse" options.
 
     lib/PDF/Builder/Content.pm, lib/PDF/Builder/Content/Text.pm
      Implement 'align' option for text() left/center/right, l/c/r.
