@@ -34,7 +34,7 @@
          "requires" : {
             "Compress::Zlib" : "1.0",
             "Font::TTF" : "1.04",
-            "perl" : "5.024000"
+            "perl" : "5.026000"
          }
       },
       "test" : {

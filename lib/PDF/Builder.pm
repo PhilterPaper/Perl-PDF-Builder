@@ -159,23 +159,24 @@ The intent is to avoid expending unnecessary effort in supporting very old
 =head3 Anticipated Support Cutoff Dates
 
 B<Note that these are I<not> hard and fast dates. In particular, we develop
-on Strawberry Perl, which is currently stuck at release 5.32! We'll have to
-see whether we can get around this problem in the summer of 2023, if Strawberry
-hasn't yet gotten up to at least 5.36 by then.>
+on Strawberry Perl, which sometimes falls a little behind the official Perl
+release!
 
 =over
 
-=item * 5.24 current minimum supported version, until next PDF::Builder release after 30 May, 2023
-
-=item * 5.26 future minimum supported version, until next PDF::Builder release after 23 June, 2024
+=item * 5.26 current minimum supported version, until next PDF::Builder release after 23 June, 2024. This is currently the minimum tested version.
 
 =item * 5.28 future minimum supported version, until next PDF::Builder release after 22 May, 2025
 
 =item * 5.30 future minimum supported version, until next PDF::Builder release after 20 June, 2026
 
-=item * 5.32 future minimum supported version, until next PDF::Builder release after 20 May, 2027
+=item * 5.32 future minimum supported version, until next PDF::Builder release after 20 May, 2027. This is currently our primary development version.
 
 =item * 5.34 future minimum supported version, until next PDF::Builder release after 28 May, 2028
+
+=item * 5.36 future minimum supported version, until next PDF::Builder release after 02 Jul, 2029
+
+=item * 5.38 future minimum supported version, until next PDF::Builder release some time after 02 Jul, 2029. This is currently the maximum tested version.
 
 =back
 

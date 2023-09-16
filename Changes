@@ -2,7 +2,12 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-07-24   UNRELEASED
+3.026     2023-09-16   UNRELEASED
+
+    README.md, Makefile.PL, META.yml, META.json, lib/PDF/Builder.pm, 
+      examples/Column.pl
+     Minimum Perl version changed from 5.24 to 5.26. Update list of expected
+      end-of-service against various Perl versions.
 
     lib/PDF/Builder/Content.pm
      Clarify description of "bogen()" method's "larger" and "reverse" options.
