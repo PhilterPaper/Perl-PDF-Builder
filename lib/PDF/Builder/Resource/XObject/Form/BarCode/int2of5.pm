@@ -6,11 +6,24 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 =head1 NAME
 
 PDF::Builder::Resource::XObject::Form::BarCode::int2of5 - specific information for int 2-of-5 bar codes. Inherits from L<PDF::Builder::Resource::XObject::Form::BarCode>
+
+=head1 METHODS
+
+=head2 new
+
+    PDF::Builder::Resource::XObject::Form::BarCode::int2of5->new()
+
+=over
+
+Create an Interleaved 2 of 5 bar code object. Note that it is invoked from the 
+Builder.pm level method!
+
+=back
 
 =cut
 

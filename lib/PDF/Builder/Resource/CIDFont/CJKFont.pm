@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 use PDF::Builder::Util;
 use PDF::Builder::Basic::PDF::Utils;
@@ -22,9 +22,11 @@ PDF::Builder::Resource::CIDFont::CJKFont - Base class for CJK fonts
 
 =head1 METHODS
 
-=over
+=head2 new
 
-=item $font = PDF::Builder::Resource::CIDFont::CJKFont->new($pdf, $cjkname, %options)
+    $font = PDF::Builder::Resource::CIDFont::CJKFont->new($pdf, $cjkname, %options)
+
+=over
 
 Returns a cjk-font object.
 
@@ -45,6 +47,8 @@ Returns a cjk-font object.
 Defined Options:
 
     encode ... specify fonts encoding for non-utf8 text.
+
+=back
 
 =cut
 
@@ -318,9 +322,5 @@ BEGIN {
     };
 
 }
-
-=back
-
-=cut
 
 1;

@@ -19,11 +19,15 @@ PDF::Builder::Resource::CIDFont - Base class for CID fonts
 
 =head1 METHODS
 
+=head2 new
+
+    $font = PDF::Builder::Resource::CIDFont->new($pdf, $name)
+
 =over
 
-=item $font = PDF::Builder::Resource::CIDFont->new($pdf, $name)
-
 Returns a cid-font object, base class for all CID-based fonts.
+
+=back
 
 =cut
 
@@ -129,9 +133,15 @@ sub width_cid {
     return $width;
 }
 
-=item $cidstring = $font->cidsByStr($string)
+=head2 cidsByStr
+
+    $cidstring = $font->cidsByStr($string)
+
+=over
 
 Returns the cid-string from string based on the font's encoding map.
+
+=back
 
 =cut
 
@@ -171,9 +181,15 @@ sub cidsByStr {
     return $text;
 }
 
-=item $cidstring = $font->cidsByUtf($utf8string)
+=head2 cidsByUtf
+
+    $cidstring = $font->cidsByUtf($utf8string)
+
+=over
 
 Returns the CID-encoded string from utf8-string.
+
+=back
 
 =cut
 
@@ -367,9 +383,5 @@ sub glyphNum {
 #
 #    return $self->SUPER::outobjdeep($fh, $pdf, %opts);
 #}
-
-=back
-
-=cut
 
 1;

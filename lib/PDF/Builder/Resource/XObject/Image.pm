@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.017'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 
@@ -16,11 +16,15 @@ PDF::Builder::Resource::XObject::Image - Base class for external raster image ob
 
 =head1 METHODS
 
+=head2 new
+
+    $image = PDF::Builder::Resource::XObject::Image->new($pdf, $name)
+
 =over
 
-=item $image = PDF::Builder::Resource::XObject::Image->new($pdf, $name)
-
 Returns an image resource object.
+
+=back
 
 =cut
 
@@ -34,9 +38,15 @@ sub new {
     return $self;
 }
 
-=item $width = $image->width($width)
+=head2 width
+
+    $width = $image->width($width)
+
+=over
 
 Get or set the width value for the image object.
+
+=back
 
 =cut
 
@@ -47,9 +57,15 @@ sub width {
     return $self->{'Width'}->val();
 }
 
-=item $height = $image->height($height)
+=head2 height
+
+    $height = $image->height($height)
+
+=over
 
 Get or set the height value for the image object.
+
+=back
 
 =cut
 
@@ -60,9 +76,15 @@ sub height {
     return $self->{'Height'}->val();
 }
 
-=item $image->smask($xobject)
+=head2 smask
+
+    $image->smask($xobject)
+
+=over
 
 Set the soft-mask image object.
+
+=back
 
 =cut
 
@@ -73,12 +95,18 @@ sub smask {
     return $self;
 }
 
-=item $image->mask(@color_range)
+=head2 mask
 
-=item $image->mask($xobject)
+    $image->mask(@color_range)
+
+    $image->mask($xobject)
+
+=over
 
 Set the mask to an image mask XObject or an array containing a range
 of colors to be applied as a color key mask.
+
+=back
 
 =cut
 
@@ -96,9 +124,13 @@ sub mask {
 
 # imask() functionality rolled into mask()
 
-=item $image->colorspace($name)
+=head2 colorspace
 
-=item $image->colorspace($array)
+    $image->colorspace($name)
+
+    $image->colorspace($array)
+
+=over
 
 Set the color space used by the image. Depending on the color space,
 this will either be just the name of the color space, or it will be an
@@ -107,6 +139,8 @@ array containing the color space and any required parameters.
 If passing an array, parameters must already be encoded as PDF
 objects. The array itself may also be a PDF object. If not, one will
 be created.
+
+=back
 
 =cut
 
@@ -124,9 +158,15 @@ sub colorspace {
     return $self;
 }
 
-=item $image->bits_per_component($integer)
+=head2 bits_per_component
+
+    $image->bits_per_component($integer)
+
+=over
 
 Set the number of bits used to represent each color component.
+
+=back
 
 =cut
 
@@ -139,9 +179,5 @@ sub bits_per_component {
 }
 
 # bpc() renamed to bits_per_component()
-
-=back
-
-=cut
 
 1;

@@ -4,13 +4,26 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.023'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 use IO::File;
 
 =head1 NAME
 
 PDF::Builder::Resource::XObject::Image::TIFF::File - support routines for TIFF image library
+
+=head1 METHODS
+
+=head2 new
+
+    PDF::Builder::Resource::XObject::Image::TIFF::File->new()
+
+=over
+
+Create a TIFF image object, I<not> using the Graphics::TIFF library.
+Remember to use the Builder.pm method image_tiff.
+
+=back
 
 =cut
 

@@ -15,6 +15,18 @@ use PDF::Builder::Resource::XObject::Form;
 
 PDF::Builder::Resource::XObject::Form::Hybrid - support routines for Forms. Inherits from L<PDF::Builder::Content>, L<PDF::Builder::Content::Text>, and L<PDF::Builder::Resource::XObject::Form>
 
+=head1 METHODS
+
+=head2 new
+
+    PDF::Builder::Resource::XObject::Form->new(args)
+
+=over
+
+Create a new object for a form.
+
+=back
+
 =cut
 
 sub new {

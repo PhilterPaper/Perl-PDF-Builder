@@ -6,11 +6,24 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 =head1 NAME
 
 PDF::Builder::Resource::XObject::Form::BarCode::codabar - specific information for CodaBar bar codes. Inherits from L<PDF::Builder::Resource::XObject::Form::BarCode>
+
+=head1 METHODS
+
+=head2 new
+
+    PDF::Builder::Resource::XObject::Form::BarCode::codabar->new()
+
+=over
+
+Create a Codabar bar code object. Note that it is invoked from the Builder.pm
+level method!
+
+=back
 
 =cut
 

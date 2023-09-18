@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Util;
@@ -15,6 +15,16 @@ use Scalar::Util qw(weaken);
 =head1 NAME
 
 PDF::Builder::Resource::ColorSpace::Indexed::Hue - colorspace support for Device RGB. Inherits from L<PDF::Builder::Resource::ColorSpace::Indexed>
+
+=head1 METHODS
+
+=head2 new
+
+=over
+
+Create a new Indexed Hue colorspace object.
+
+=back
 
 =cut
 

@@ -18,6 +18,19 @@ use PDF::Builder::Basic::PDF::Utils;
 
 PDF::Builder::Resource::Font::Postscript - support routines for using PostScript fonts. Inherits from L<PDF::Builder::Resource::Font>
 
+=head1 METHODS
+
+=head2 new
+
+    PDF::Builder::Resource::Font::Postscript->new($pdf, $psfile, %opts)
+
+=over
+
+Create an object for a PostScript font. Handles ASCII (.pfa), binary (.pfb), and
+T1 (.t1) font files, as well as ASCII (.afm) and binary (.pfm) metrics files.
+
+=back
+
 =cut
 
 sub new {

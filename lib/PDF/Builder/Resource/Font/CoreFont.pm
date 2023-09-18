@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 use File::Basename;
 
@@ -38,9 +38,11 @@ PDF::Builder::Resource::Font::CoreFont - Module for using the 14 standard PDF bu
 
 =head1 METHODS
 
-=over
+=head2 new
 
-=item $font = PDF::Builder::Resource::Font::CoreFont->new($pdf, $fontname, %options)
+    $font = PDF::Builder::Resource::Font::CoreFont->new($pdf, $fontname, %options)
+
+=over
 
 Returns a corefont object.
 
@@ -253,12 +255,16 @@ sub new {
     return $self;
 }
 
-=over
+=head2 is_standard
 
-=item $bool = $class->is_standard($name)
+    $bool = $class->is_standard($name)
+
+=over
 
 Returns true if C<$name> is an exact, case-sensitive match for one of the
 standard font names shown above.
+
+=back
 
 =cut
 
@@ -288,9 +294,15 @@ sub is_standard {
     return;
 }
 
-=item PDF::Builder::Resource::Font::CoreFont->loadallfonts()
+=head2 loadallfonts
+
+    PDF::Builder::Resource::Font::CoreFont->loadallfonts()
+
+=over
 
 "Requires in" all fonts available as corefonts.
+
+=back
 
 =cut
 
@@ -425,8 +437,6 @@ BEGIN
 1;
 
 __END__
-
-=back
 
 =head1 AUTHOR
 
