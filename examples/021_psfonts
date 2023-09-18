@@ -229,7 +229,7 @@ for ($i=0; $i<scalar @gns; $i++) {
         $txt->transform(-translate => [50, 800]);
         $txt->fillcolor('black');
         $txt->font($fnt, 18);
-        $txt->lead(18*1.25);
+        $txt->leading(18*1.25);
         my $toprint;
         while ($textL ne '') {
         	($toprint, $textL) = $txt->_text_fill_line($textL, 500, 0);

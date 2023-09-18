@@ -55,15 +55,15 @@ is(ref($page), 'PDF::Builder::Page',
 
 # PDF::Builder-specific cases to ADD tests for (deprecated but NOT yet removed):
 #
-# ===== scheduled to be REMOVED 8/2021
-#  elementsof() -> elements()
+## ===== scheduled to be REMOVED 8/2021
+##  elementsof() -> elements()
 $pdf2 = PDF::Builder->new();
 $page = $pdf2->page();
 # should be US letter [ 0 0 612 792 ] for default media
-$media = $page->find_prop('MediaBox');
-$media = [ map { $_->val() } $media->elementsof() ];
-ok($media->[0]==0 && $media->[1]==0 && $media->[2]==612 && $media->[3]==792,
-    q{elementsof still works});
+#$media = $page->find_prop('MediaBox');
+#$media = [ map { $_->val() } $media->elementsof() ];
+#ok($media->[0]==0 && $media->[1]==0 && $media->[2]==612 && $media->[3]==792,
+    #q{elementsof still works});
 $media = $page->find_prop('MediaBox');
 $media = [ map { $_->val() } $media->elements() ];
 ok($media->[0]==0 && $media->[1]==0 && $media->[2]==612 && $media->[3]==792,
@@ -410,19 +410,19 @@ ok(array_comp($sizes_page, @box),
 	 q{pageLabel defaults to decimal if given invalid input});
 }
 
-# 
-# ===== scheduled to be REMOVED 3/2023
-#  lead() -> leading() 
-$pdf2 = PDF::Builder->new('compress' => 'none');
-my $text = $pdf2->page()->text();
-$text->lead(15);
-like($pdf2->to_string(), qr/15 TL/, q{lead still works });
+## 
+## ===== scheduled to be REMOVED 3/2023
+##  lead() -> leading() 
+#$pdf2 = PDF::Builder->new('compress' => 'none');
+#my $text = $pdf2->page()->text();
+#$text->lead(15);
+#like($pdf2->to_string(), qr/15 TL/, q{lead still works });
 $pdf2 = PDF::Builder->new('compress' => 'none');
 $text = $pdf2->page()->text();
 $text->leading(15);
 like($pdf2->to_string(), qr/15 TL/, q{leading replacement for lead IS available});
-#
-#  textlead() -> textleading()   Lite.pm only, no t test
+##
+##  textlead() -> textleading()   Lite.pm only, no t test
 
 # if nothing left to check...
 #is(ref($pdf), 'PDF::Builder',

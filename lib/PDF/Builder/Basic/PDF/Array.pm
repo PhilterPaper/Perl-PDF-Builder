@@ -21,7 +21,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -71,11 +71,7 @@ sub outobjdeep {
 
 Returns the contents of the array.
 
-Formerly called C<elementsof>, which is now B<deprecated>.
-
 =cut
-
-sub elementsof { return elements(@_); }
 
 sub elements {
     my $self = shift();
@@ -103,13 +99,7 @@ sub add_elements {
 
 Removes all occurrences of an element from an array.
 
-Formerly called C<removeobj>, which is now B<deprecated> and will be removed.
-
 =cut
-
-# not listed as deprecated, not used internally, should not have been
-# used in external code. remove after July 2021.
-sub removeobj { return remove_element(@_); }
 
 sub remove_element {
     my ($self, $element) = @_;

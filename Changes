@@ -2,7 +2,25 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-09-16   UNRELEASED
+3.026     2023-09-17   UNRELEASED
+ * = still in progress
+
+    lib/PDF/Builder/Content.pm, lib/PDF/Resource/XObject/Form/Hybrid.pm,
+      lib/PDF/Builder/Lite.pm, INFO/DEPRECATED, examples/021_psfonts,
+      t/content-deprecated.t, t/deprecations.t
+     Remove long-deprecated method and global variable "lead". Use "leading" 
+      instead, which is the correct typographical term. Although the "Lite" 
+      subpackage isn't really maintained, "textlead()" has been replaced by 
+      "textleading()".
+    
+    lib/PDF/Builder/Basic/PDF/Array-Objind.pm, INFO/DEPRECATED,
+      t/deprecations.t
+     Remove long-deprecated method "elementsof()" in favor of "elements()".
+     Remove long-deprecated method "removeobj()" in favor of "remove_element()".
+
+ *  (most .pm files)
+     Reformat to make navigation easier, including the listing of all user-
+      accessible methods in a POD's Table of Contents at the top.
 
     README.md, Makefile.PL, META.yml, META.json, lib/PDF/Builder.pm, 
       examples/Column.pl

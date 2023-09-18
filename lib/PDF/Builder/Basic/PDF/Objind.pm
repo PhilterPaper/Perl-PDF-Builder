@@ -20,7 +20,7 @@ use warnings;
 use Scalar::Util 'isweak';
 
 # VERSION
-my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 =head1 NAME
 
@@ -232,12 +232,7 @@ sub outobj {
 Abstract superclass function filler. Returns self here but should return
 something more useful if an array.
 
-The old name of this method, C<elementsof>, has been B<deprecated> and will
-be removed in the future.
-
 =cut
-
-sub elementsof { return elements(@_); }
 
 sub elements {
     my ($self) = @_;

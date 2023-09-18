@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.016'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Dict;
 use PDF::Builder::Basic::PDF::Utils;
@@ -27,7 +27,7 @@ sub new {
     $self->{' charspace'}   = 0;
     $self->{' hscale'}      = 100;
     $self->{' wordspace'}   = 0;
-    $self->{' lead'}        = 0;
+    $self->{' leading'}     = 0;
     $self->{' rise'}        = 0;
     $self->{' render'}      = 0;
     $self->{' matrix'}      = [1, 0, 0, 1, 0, 0];
@@ -57,7 +57,7 @@ sub outobjdeep {
 #   # missing: stream, poststream, apiistext
 #   # added:   api, apipdf, apipage
 #   foreach my $key (qw(api apipdf apipage font fontsize charspace hscale
-#                       wordspace lead rise render matrix fillcolor
+#                       wordspace leading rise render matrix fillcolor
 #                       strokecolor translate scale skew rotate)) {
 #       delete $self->{" $key"};
 #   }
