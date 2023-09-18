@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 71;
+use Test::More tests => 69;
 
 use PDF::Builder;
 my ($pdf, $page, $pdf2, $pdf_string, $media, $sizes_PDF, $sizes_page, @box);
@@ -418,7 +418,7 @@ ok(array_comp($sizes_page, @box),
 #$text->lead(15);
 #like($pdf2->to_string(), qr/15 TL/, q{lead still works });
 $pdf2 = PDF::Builder->new('compress' => 'none');
-$text = $pdf2->page()->text();
+my $text = $pdf2->page()->text();
 $text->leading(15);
 like($pdf2->to_string(), qr/15 TL/, q{leading replacement for lead IS available});
 ##

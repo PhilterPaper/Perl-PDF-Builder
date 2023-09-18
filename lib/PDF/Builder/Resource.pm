@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 use PDF::Builder::Util qw(pdfkey);
 use PDF::Builder::Basic::PDF::Utils; # PDFName
@@ -19,11 +19,15 @@ PDF::Builder::Resource - Base class for PDF resources. Inherit from L<PDF::Build
 
 =head1 METHODS
 
+=head2 new
+
+    $resource = PDF::Builder::Resource->new($pdf, $name)
+
 =over
 
-=item $resource = PDF::Builder::Resource->new($pdf, $name)
-
 Returns a resource object.
+
+=back
 
 =cut
 
@@ -47,11 +51,17 @@ sub new {
 # Note: new_api() removed in favor of new():
 #   new_api($api, ...)  replace with new($api->{'pdf'}, ...)
 
-=item $name = $resource->name() # Get
+=head2 name
 
-=item $resource->name($name) # Set
+    $name = $resource->name() # Get
+
+    $resource->name($name) # Set
+
+=over
 
 Get or set the name of the resource.
+
+=back
 
 =cut
 
@@ -70,9 +80,5 @@ sub name {
 #    delete $self->{' apipdf'};
 #    return $self->SUPER::outobjdeep($fh, $pdf, %options);
 #}
-
-=back
-
-=cut
 
 1;

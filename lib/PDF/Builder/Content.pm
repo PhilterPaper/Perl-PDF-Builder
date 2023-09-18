@@ -132,12 +132,16 @@ translate, rotate, scale, and skew calls I<cancel out> any previous settings.
 If you want to combine multiple transformations for text, use the C<transform>
 call.
 
+=head3 translate
+
+    $content->translate($dx,$dy)
+
 =over
 
-=item $content->translate($dx,$dy)
-
-Moves the origin along the x and y axes by 
+Moves the origin along the x and y axes to 
 C<$dx> and C<$dy> respectively.
+
+=back
 
 =cut
 
@@ -156,7 +160,11 @@ sub translate {
     return $self;
 }
 
-=item $content->rotate($degrees)
+=head3 rotate
+
+    $content->rotate($degrees)
+
+=over
 
 Rotates the coordinate system counter-clockwise (anti-clockwise) around the
 current origin. Use a negative argument to rotate clockwise. Note that 360 
@@ -171,6 +179,8 @@ positive territory (0 at bottom, +original_height at the top edge).
 This C<rotate()> call permits any angle. Do not confuse it with the I<page>
 rotation C<rotate> call, which only permits increments of 90 degrees (with
 opposite sign!), but I<does> shift the origin to another corner of the sheet.
+
+=back
 
 =cut
 
@@ -189,10 +199,16 @@ sub rotate {
     return $self;
 }
 
-=item $content->scale($sx,$sy)
+=head3 scale
+
+    $content->scale($sx,$sy)
+
+=over
 
 Scales (stretches) the coordinate systems along the x and y axes.
 Separate multipliers are provided for x and y.
+
+=back
 
 =cut
 
@@ -211,12 +227,18 @@ sub scale {
     return $self;
 }
 
-=item $content->skew($skx,$sky)
+=head3 skew
+
+    $content->skew($skx,$sky)
+
+=over
 
 Skews the coordinate system by C<$skx> degrees 
 (counter-clockwise/anti-clockwise) from
 the x axis I<and> C<$sky> degrees (clockwise) from the y axis.
 Note that 360 degrees will be treated the same as 0 degrees.
+
+=back
 
 =cut
 
@@ -235,7 +257,11 @@ sub skew {
     return $self;
 }
 
-=item $content->transform(%opts)
+=head3 transform
+
+    $content->transform(%opts)
+
+=over
 
 Use one or more of the given %opts:
 
@@ -272,6 +298,8 @@ Omitted options will be unchanged.
 If C<repeat> is true, and if this is not the first call to a transformation
 method, the previous transformation will be performed again, modified by any
 other provided arguments.
+
+=back
 
 =cut
 
@@ -380,13 +408,19 @@ sub transform {
     return $self;
 }
 
-=item $content->transform_rel(%opts)
+=head3 transform_rel
+
+    $content->transform_rel(%opts)
+
+=over
 
 Makes transformations similarly to C<transform>, except that it I<adds>
 to the previously set values, rather than I<replacing> them (except for 
 I<scale>, which B<multiplies> the new values with the old).
 
 Unlike C<transform>, C<matrix> and C<point> are not supported.
+
+=back
 
 =cut
 
@@ -420,21 +454,27 @@ sub transform_rel {
     return $self;
 }
 
-=item $content->matrix($a, $b, $c, $d, $e, $f)
+=head3 matrix
+
+    $content->matrix($a, $b, $c, $d, $e, $f)
+
+=over
 
 I<(Advanced)> Sets the current transformation matrix manually. Unless
 you have a particular need to enter transformations manually, you
 should use the C<transform> method instead.
 
- $a = cos(rot) * scale factor for X 
- $b = sin(rot) * tan(skew for X)
- $c = -sin(rot) * tan(skew for Y)
- $d = cos(rot) * scale factor for Y 
- $e = translation for X
- $f = translation for Y
+    $a = cos(rot) * scale factor for X 
+    $b = sin(rot) * tan(skew for X)
+    $c = -sin(rot) * tan(skew for Y)
+    $d = cos(rot) * scale factor for Y 
+    $e = translation for X
+    $f = translation for Y
 
 In text mode, the text matrix is B<returned>. 
 In graphics mode, C<$self> is B<returned>.
+
+=back
 
 =cut
 
@@ -478,15 +518,15 @@ sub matrix {
     }
 }
 
-=back
-
 =head2 Graphics State Parameters
 
 The following calls also affect the B<text> state.
 
-=over
+=head3 linewidth, line_width
 
-=item $content->linewidth($width)
+    $content->linewidth($width)
+
+=over
 
 Sets the width of the stroke (in points). This is the line drawn in graphics 
 mode, or the I<outline> of a character in text mode (with appropriate C<render> 
@@ -496,6 +536,8 @@ width is being set, C<$self> is B<returned> so that calls may be chained.
 B<Alternate name:> C<line_width>
 
 This is provided for compatibility with PDF::API2.
+
+=back
 
 =cut
 
@@ -519,7 +561,11 @@ sub linewidth {
     return $self;
 }
 
-=item $content->linecap($style)
+=head3 linecap, line_cap
+
+    $content->linecap($style)
+
+=over
 
 Sets the style to be used at the end of a stroke. This applies to lines
 which come to a free-floating end, I<not> to "joins" ("corners") in 
@@ -550,6 +596,8 @@ If no C<$style> is given, the current setting is B<returned>. If the style is
 being set, C<$self> is B<returned> so that calls may be chained.
 
 Either a number or a string (case-insensitive) may be given.
+
+=back
 
 =cut
 
@@ -584,7 +632,11 @@ sub linecap {
     return $self;
 }
 
-=item $content->linejoin($style)
+=head3 linejoin, line_join
+
+    $content->linejoin($style)
+
+=over
 
 Sets the style of join to be used at corners of a path
 (within a multisegment polyline).
@@ -621,6 +673,8 @@ being set, C<$self> is B<returned> so that calls may be chained.
 
 Either a number or a string (case-insensitive) may be given.
 
+=back
+
 =cut
 
 sub _linejoin {
@@ -654,7 +708,11 @@ sub linejoin {
     return $self;
 }
 
-=item $content->miterlimit($ratio)
+=head3 miterlimit, miter_limit
+
+    $content->miterlimit($ratio)
+
+=over
 
 Sets the miter limit when the line join style is a I<miter> join.
 
@@ -674,6 +732,8 @@ B<Alternate name:> C<miter_limit>
 This is provided for compatibility with PDF::API2.
 Long ago, in a distant galaxy, this method was misnamed I<meterlimit>, but
 that was removed a while ago. Any code using that name should be updated!
+
+=back
 
 =cut
 
@@ -700,13 +760,17 @@ sub miterlimit {
 # Note: miterlimit was originally named incorrectly to meterlimit, renamed.
 # is available in PDF::API2
 
-=item $content->linedash()
+=head3 linedash, line_dash_pattern
 
-=item $content->linedash($length)
+    $content->linedash()
 
-=item $content->linedash($dash_length, $gap_length, ...)
+    $content->linedash($length)
 
-=item $content->linedash('pattern' => [$dash_length, $gap_length, ...], 'shift' => $offset)
+    $content->linedash($dash_length, $gap_length, ...)
+
+    $content->linedash('pattern' => [$dash_length, $gap_length, ...], 'shift' => $offset)
+
+=over
 
 Sets the line dash pattern.
 
@@ -737,6 +801,8 @@ be chained.
 B<Alternate name:> C<line_dash_pattern>
 
 This is provided for compatibility with PDF::API2.
+
+=back
 
 =cut
 
@@ -777,7 +843,11 @@ sub linedash {
     return $self;
 }
 
-=item $content->flatness($tolerance)
+=head3 flatness, flatness_tolerance
+
+    $content->flatness($tolerance)
+
+=over
 
 I<(Advanced)> Sets the maximum variation in output pixels when drawing
 curves. The defined range of C<$tolerance> is 0 to 100, with 0 meaning I<use 
@@ -794,6 +864,8 @@ tolerance is being set, C<$self> is B<returned> so that calls may be chained.
 B<Alternate name:> C<flatness_tolerance>
 
 This is provided for compatibility with PDF::API2.
+
+=back
 
 =cut
 
@@ -819,10 +891,16 @@ sub flatness {
     return $self;
 }
 
-=item $content->egstate($object)
+=head3 egstate
+
+    $content->egstate($object)
+
+=over
 
 I<(Advanced)> Adds an Extended Graphic State B<object> containing additional
 state parameters.
+
+=back
 
 =cut
 
@@ -835,17 +913,19 @@ sub egstate {
     return $self;
 }
 
-=back
-
 =head2 Path Construction (Drawing)
 
-=over
+=head3 move
 
-=item $content->move($x,$y)
+    $content->move($x,$y)
+
+=over
 
 Starts a new path at the specified coordinates.
 Note that multiple x,y pairs I<can> be given, although this isn't that useful
 (only the last pair would have an effect).
+
+=back
 
 =cut
 
@@ -879,10 +959,16 @@ sub move {
     return $self;
 }
 
-=item $content->close()
+=head3 close
+
+    $content->close()
+
+=over
 
 Closes and ends the current path by extending a line from the current
 position to the starting position.
+
+=back
 
 =cut
 
@@ -896,7 +982,11 @@ sub close {
     return $self;
 }
 
-=item $content->endpath()
+=head3 endpath, end
+
+    $content->endpath()
+
+=over
 
 Ends the current path without explicitly enclosing it.
 That is, unlike C<close>, there is B<no> line segment 
@@ -906,6 +996,8 @@ B<Alternate name:> C<end>
 
 This is provided for compatibility with PDF::API2. Do not confuse it with
 the C<$pdf-E<gt>end()> method!
+
+=back
 
 =cut
 
@@ -919,18 +1011,18 @@ sub endpath {
     return $self;
 }
 
-=back
-
 =head3 Straight line constructs
 
-B<Note:> None of these will actually be I<visible> until you call C<stroke> or 
-C<fill>. They are merely setting up the path to draw.
+B<Note:> None of these will actually be I<visible> until you call C<stroke>, 
+C<fill>, or C<fillstroke>. They are merely setting up the path to draw.
+
+=head4 line
+
+    $content->line($x,$y)
+
+    $content->line($x,$y, $x2,$y2,...)
 
 =over
-
-=item $content->line($x,$y)
-
-=item $content->line($x,$y, $x2,$y2,...)
 
 Extends the path in a line from the I<current> coordinates to the
 specified coordinates, and updates the current position to be the new
@@ -941,6 +1033,8 @@ line segments. Note that this is B<not> equivalent to a polyline (see C<poly>),
 because the first C<[$x,$y]> pair in a polyline is a I<move> operation.
 Also, the C<linecap> setting will be used rather than the C<linejoin>
 setting for treating the ends of segments.
+
+=back
 
 =cut
 
@@ -972,13 +1066,19 @@ sub line {
     return $self;
 }
 
-=item $content->hline($x)
+=head4 hline, vline
 
-=item $content->vline($y)
+    $content->hline($x)
+
+    $content->vline($y)
+
+=over
 
 Shortcuts for drawing horizontal and vertical lines from the current
 position. They are like C<line()>, but to the new x and current y (C<hline>),
 or to the the current x and new y (C<vline>).
+
+=back
 
 =cut
 
@@ -1010,7 +1110,11 @@ sub vline {
     return $self;
 }
 
-=item $content->polyline($x1,$y1, ..., $xn,$yn)
+=head4 polyline
+
+    $content->polyline($x1,$y1, ..., $xn,$yn)
+
+=over
 
 This is a shortcut for creating a polyline path from the current position. It 
 extends the path in line segments along the specified coordinates.
@@ -1022,6 +1126,8 @@ I<draw> order (unlike the I<move> order in C<poly>).
 
 Thus, while this is provided for compatibility with PDF::API2, it is I<not>
 really an alias or alternate name for C<poly>!
+
+=back
 
 =cut
 
@@ -1041,7 +1147,11 @@ sub polyline {
     return $self;
 }
 
-=item $content->poly($x1,$y1, ..., $xn,$yn)
+=head4 poly
+
+    $content->poly($x1,$y1, ..., $xn,$yn)
+
+=over
 
 This is a shortcut for creating a polyline path. It moves to C<[$x1,$y1]>, and
 then extends the path in line segments along the specified coordinates.
@@ -1057,6 +1167,8 @@ A critical distinction between the C<polyline> method and the C<poly> method
 is that in this (C<poly>), the first pair of coordinates are treated as a
 I<move> order.
 
+=back
+
 =cut
 
 sub poly {
@@ -1071,7 +1183,11 @@ sub poly {
     return $self;
 }
 
-=item $content = $content->rectangle($x1, $y1, $x2, $y2)
+=head4 rectangle
+
+    $content = $content->rectangle($x1, $y1, $x2, $y2)
+
+=over
 
 Creates a new rectangle-shaped path, between the two corner points C<[$x1, $y1]>
 and C<[$x2, $y2]>. The corner points are swapped if necessary, to make
@@ -1081,6 +1197,8 @@ The object (here, C<$content>) is returned, to permit chaining.
 B<Note> that this is I<not> an alias or alternate name for C<rect>. It handles
 only one rectangle, and takes corner coordinates for corner "2", rather than
 the width and height.
+
+=back
 
 =cut
 
@@ -1107,9 +1225,13 @@ sub rectangle {
     return $self;
 }
 
-=item $content = $content->rect($x,$y, $w,$h)
+=head4 rect
 
-=item $content = $content->rect($x1,$y1, $w1,$h1, ..., $xn,$yn, $wn,$hn)
+    $content = $content->rect($x,$y, $w,$h)
+
+    $content = $content->rect($x1,$y1, $w1,$h1, ..., $xn,$yn, $wn,$hn)
+
+=over
 
 This creates paths for one or more rectangles, with their lower left points
 at C<[$x,$y]> and specified widths (+x direction) and heights (+y direction). 
@@ -1122,6 +1244,8 @@ The object (here, C<$content>) is returned, to permit chaining.
 B<Note> that this differs from the C<rectangle> method in that multiple
 rectangles may be drawn in one call, and the second pair for each rectangle
 are the width and height, not the opposite corner coordinates. 
+
+=back
 
 =cut
 
@@ -1145,7 +1269,11 @@ sub rect {
     return $self;
 }
 
-=item $content->rectxy($x1,$y1, $x2,$y2)
+=head4 rectxy
+
+    $content->rectxy($x1,$y1, $x2,$y2)
+
+=over
 
 This creates a rectangular path, with C<[$x1,$y1]> and C<[$x2,$y2]>
 specifying I<opposite> corners. They can be Lower Left and Upper Right,
@@ -1155,6 +1283,8 @@ The current position is changed to the C<[$x1,$y1]> (first) pair.
 
 This is not I<quite> an alias or alternate name for C<rectangle>, as it 
 permits the corner points to be specified in any order.
+
+=back
 
 =cut
 
@@ -1168,19 +1298,21 @@ sub rectxy {
     return $self;
 }
 
-=back
-
 =head3 Curved line constructs
 
-B<Note:> None of these will actually be I<visible> until you call C<stroke> or 
-C<fill>. They are merely setting up the path to draw.
+B<Note:> None of these will actually be I<visible> until you call C<stroke>,
+C<fill>, or C<fillstroke>. They are merely setting up the path to draw.
+
+=head4 circle
+
+    $content->circle($xc,$yc, $radius)
 
 =over
 
-=item $content->circle($xc,$yc, $radius)
-
 This creates a circular path centered on C<[$xc,$yc]> with the specified
 radius. It does B<not> change the current position.
+
+=back
 
 =cut
 
@@ -1193,11 +1325,17 @@ sub circle {
     return $self;
 }
 
-=item $content->ellipse($xc,$yc, $rx,$ry)
+=head4 ellipse
+
+    $content->ellipse($xc,$yc, $rx,$ry)
+
+=over
 
 This creates a closed elliptical path centered on C<[$xc,$yc]>, with axis radii
 (semidiameters) specified by C<$rx> (x axis) and C<$ry> (y axis), respectively.
 It does not change the current position.
+
+=back
 
 =cut
 
@@ -1302,9 +1440,13 @@ sub _arctocurve {
     }
 }
 
-=item $content->arc($xc,$yc, $rx,$ry, $alpha,$beta, $move, $dir)
+=head4 arc
 
-=item $content->arc($xc,$yc, $rx,$ry, $alpha,$beta, $move)
+    $content->arc($xc,$yc, $rx,$ry, $alpha,$beta, $move, $dir)
+
+    $content->arc($xc,$yc, $rx,$ry, $alpha,$beta, $move)
+
+=over
 
 This extends the path along an arc of an ellipse centered at C<[$xc,$yc]>.
 The semidiameters of the elliptical curve are C<$rx> (x axis) and C<$ry> 
@@ -1319,6 +1461,8 @@ Use C<$rx == $ry> for a circular arc.
 The optional C<$dir> arc sweep direction defaults to 0 (I<false>), for a
 counter-clockwise/anti-clockwise sweep. Set to 1 (I<true>) for a clockwise
 sweep.
+
+=back
 
 =cut
 
@@ -1353,9 +1497,13 @@ sub arc {
     return $self;
 }
 
-=item $content->pie($xc,$yc, $rx,$ry, $alpha,$beta, $dir)
+=head4 pie
 
-=item $content->pie($xc,$yc, $rx,$ry, $alpha,$beta)
+    $content->pie($xc,$yc, $rx,$ry, $alpha,$beta, $dir)
+
+    $content->pie($xc,$yc, $rx,$ry, $alpha,$beta)
+
+=over
 
 Creates a pie-shaped path from an ellipse centered on C<[$xc,$yc]>.
 The x-axis and y-axis semidiameters of the ellipse are C<$rx> and C<$ry>,
@@ -1374,6 +1522,8 @@ sweep.
 This is a shortcut to draw a section of elliptical (or circular) arc and
 connect it to the center of the ellipse or circle, to form a pie shape.
 
+=back
+
 =cut
 
 sub pie {
@@ -1389,10 +1539,14 @@ sub pie {
     return $self;
 }
 
-=item $content->curve($cx1,$cy1, $cx2,$cy2, $x,$y)
+=head4 curve
+
+    $content->curve($cx1,$cy1, $cx2,$cy2, $x,$y)
+
+=over
 
 This extends the path in a curve from the current point to C<[$x,$y]>,
-using the two specified I<control> points to create a cubic Bezier curve, and
+using the two specified I<control> points to create a B<cubic Bezier curve>, and
 updates the current position to be the new point (C<[$x,$y]>).
 
 Within a B<text> object, the text's baseline follows the Bezier curve.
@@ -1400,6 +1554,8 @@ Within a B<text> object, the text's baseline follows the Bezier curve.
 Note that while multiple sets of three C<[x,y]> pairs are permitted, these
 are treated as I<independent> cubic Bezier curves. There is no attempt made to
 smoothly blend one curve into the next!
+
+=back
 
 =cut
 
@@ -1426,7 +1582,11 @@ sub curve {
     return $self;
 }
 
-=item $content->qbspline($cx1,$cy1, $x,$y)
+=head4 qbspline, spline
+
+    $content->qbspline($cx1,$cy1, $x,$y)
+
+=over
 
 This extends the path in a curve from the current point to C<[$x,$y]>,
 using the two specified points to create a quadratic Bezier curve, and updates 
@@ -1458,6 +1618,8 @@ This method is still named C<spline> in PDF::API2, so for compatibility, that
 name is usable here. Since there are both quadratic and cubic splines available
 in PDF, it is preferred to use more descriptive names such as C<qbspline> and
 C<cbspline> to minimize confusion.
+
+=back
 
 =cut
 
@@ -1491,7 +1653,11 @@ sub qbspline {
     return $self;
 }
 
-=item $content->bspline($ptsRef, %opts)
+=head4 bspline, cbspline
+
+    $content->bspline($ptsRef, %opts)
+
+=over
 
 This extends the path in a curve from the current point to the end of a list
 of coordinate pairs in the array referenced by C<$ptsRef>. Smoothly continuous
@@ -1628,9 +1794,9 @@ Bezier control points.
 
 =back
 
-=back
+B<Special cases>
 
-=head3 Special cases
+=over
 
 Adjacent points which are duplicates are consolidated. 
 An extra coordinate at the end of the input point list (not a full 
@@ -1663,10 +1829,14 @@ C<firstseg>, C<lastseg>, and C<colinear>.
 
 =back
 
+=back
+
 B<Alternate name:> C<cbspline>
 
 This is to emphasize that it is a I<cubic> Bezier spline, as opposed to a
 I<quadratic> Bezier spline (see C<qbspline> above).
+
+=back
 
 =cut
 
@@ -2281,15 +2451,17 @@ sub _sweep {
     return $result;
 }
 
+=head4 bogen
+
+    $content->bogen($x1,$y1, $x2,$y2, $radius, $move, $larger, $reverse)
+
+    $content->bogen($x1,$y1, $x2,$y2, $radius, $move, $larger)
+
+    $content->bogen($x1,$y1, $x2,$y2, $radius, $move)
+
+    $content->bogen($x1,$y1, $x2,$y2, $radius)
+
 =over
-
-=item $content->bogen($x1,$y1, $x2,$y2, $radius, $move, $larger, $reverse)
-
-=item $content->bogen($x1,$y1, $x2,$y2, $radius, $move, $larger)
-
-=item $content->bogen($x1,$y1, $x2,$y2, $radius, $move)
-
-=item $content->bogen($x1,$y1, $x2,$y2, $radius)
 
 (I<bogen> is German for I<bow>, as in a segment (arc) of a circle. This is a 
 segment of a circle defined by the intersection of two circles of a given 
@@ -2325,6 +2497,8 @@ The C<$radius> value cannot be smaller than B<half> the distance from
 C<[$x1,$y1]> to C<[$x2,$y2]>. If it is too small, the radius will be set to
 half the distance between the points (resulting in an arc that is a
 semicircle). This is a silent error.
+
+=back
 
 =cut
 
@@ -2410,15 +2584,18 @@ sub bogen {
     return $self;
 }
 
-=back
-
 =head2 Path Painting (Drawing)
+
+=head3 stroke
+
+    $content->stroke()
 
 =over
 
-=item $content->stroke()
+Strokes the current path. That is, it is drawing solid or dashed I<lines>, but
+B<not> filling areas.
 
-Strokes the current path.
+=back
 
 =cut
 
@@ -2434,11 +2611,15 @@ sub stroke {
     return $self;
 }
 
-=item $content->fill($use_even_odd_fill)
+=head3 fill
 
-=item $content->fill('rule' => $rule)
+    $content->fill($use_even_odd_fill)
 
-=item $content->fill()  # use default nonzero rule
+    $content->fill('rule' => $rule)
+
+    $content->fill()  # use default nonzero rule
+
+=over
 
 Fill the current path's enclosed I<area>. 
 It does I<not> stroke the enclosing path around the area.
@@ -2470,6 +2651,8 @@ for more details on filling.
 
 The "rule" parameter is added for PDF::API2 compatibility.
 
+=back
+
 =cut
 
 sub fill {
@@ -2491,11 +2674,15 @@ sub fill {
     return $self;
 }
 
-=item $content->fillstroke($use_even_odd_fill)
+=head3 fillstroke, paint, fill_stroke
 
-=item $content->fillstroke('rule' => $rule)
+    $content->fillstroke($use_even_odd_fill)
 
-=item $content->fillstroke()  # use default nonzero rule
+    $content->fillstroke('rule' => $rule)
+
+    $content->fillstroke()  # use default nonzero rule
+
+=over
 
 B<Fill> the current path's enclosed I<area> and then B<stroke> the enclosing 
 path around the area (possibly with a different color).
@@ -2532,6 +2719,8 @@ B<Alternate names:> C<paint> and C<fill_stroke>
 C<paint> is for compatibility with PDF::API2, while C<fill_stroke> is added
 for compatibility with many other PDF::API2-related renamed methods.
 
+=back
+
 =cut
 
 sub paint { return fillstroke(@_); } ## no critic
@@ -2557,11 +2746,15 @@ sub fillstroke {
     return $self;
 }
 
-=item $content->clip($use_even_odd_fill)
+=head3 clip
 
-=item $content->clip('rule' => $rule)
+    $content->clip($use_even_odd_fill)
 
-=item $content->clip()  # use default nonzero rule
+    $content->clip('rule' => $rule)
+
+    $content->clip()  # use default nonzero rule
+
+=over
 
 Modifies the current clipping path by intersecting it with the current
 path. Initially (a fresh page), the clipping path is the entire media. Each
@@ -2614,6 +2807,8 @@ See the object discussion in L<PDF::Builder::Docs/Rendering Order>.
 
 The "rule" parameter is added for PDF::API2 compatibility.
 
+=back
+
 =cut
 
 sub clip {
@@ -2635,7 +2830,11 @@ sub clip {
     return $self;
 }
 
-=item $content->shade($shade, @coord)
+=head3 shade
+
+    $content->shade($shade, @coord)
+
+=over
 
 Sets the shading matrix.
 
@@ -2649,6 +2848,8 @@ A hash reference that includes a C<name()> method for the shade name.
 
 An array of 4 items: X-translation, Y-translation, 
 X-scaled and translated, Y-scaled and translated.
+
+=back
 
 =back
 
@@ -2672,15 +2873,15 @@ sub shade {
     return $self;
 }
 
-=back
-
 =head2 Colors
 
+=head3 fillcolor, fill_color, strokecolor, stroke_color
+
+    $content->fillcolor($color)
+
+    $content->strokecolor($color)
+
 =over
-
-=item $content->fillcolor($color)
-
-=item $content->strokecolor($color)
 
 Sets the fill (enclosed area) or stroke (path) color. The interior of text
 characters are I<filled>, and (I<if> ordered by C<render>) the outline is
@@ -2752,6 +2953,8 @@ is B<returned>, otherwise C<$self> is B<returned>.
 B<Alternate names:> C<fill_color> and C<stroke_color>.
 
 These are provided for PDF::API2 compatibility.
+
+=back
 
 =cut
 
@@ -2922,23 +3125,23 @@ sub strokecolor {
     }
 }
 
-=back
-
 =head2 External Objects
 
-=over
+=head3 image
 
-=item $content->image($image_object, $x,$y, $width,$height)
+    $content->image($image_object, $x,$y, $width,$height)
 
-=item $content->image($image_object, $x,$y, $scale)
+    $content->image($image_object, $x,$y, $scale)
 
-=item $content->image($image_object, $x,$y)
+    $content->image($image_object, $x,$y)
 
-=item $content->image($image_object)
+    $content->image($image_object)
 
     # Example
     my $image_object = $pdf->image_jpeg($my_image_file);
     $content->image($image_object, 100, 200);
+
+=over
 
 Places an image on the page in the specified location (specifies the lower 
 left corner of the image). The default location is C<[0,0]>.
@@ -2952,6 +3155,8 @@ corner of the page, and C<$width> and C<$height> will be measured at
 For example, if you have a 600x600 image that you would like to be
 shown at 600dpi (i.e., one inch square), set the width and height to 72.
 (72 Big Points is one inch)
+
+=back
 
 =cut
 
@@ -2986,13 +3191,17 @@ sub image {
     return $self;
 }
 
-=item $content->formimage($form_object, $x,$y, $scaleX, $scaleY)
+=head3 formimage
 
-=item $content->formimage($form_object, $x,$y, $scale)
+    $content->formimage($form_object, $x,$y, $scaleX, $scaleY)
 
-=item $content->formimage($form_object, $x,$y)
+    $content->formimage($form_object, $x,$y, $scale)
 
-=item $content->formimage($form_object)
+    $content->formimage($form_object, $x,$y)
+
+    $content->formimage($form_object)
+
+=over
 
 Places an XObject on the page in the specified location (giving the lower
 left corner of the image) and scale (applied to the image's native height
@@ -3011,6 +3220,8 @@ by image width and height I<within> C<formimage>, and require scaling of
 1/width and 1/height in the call. So, we leave scaling alone within 
 C<formimage> and have the user manually scale I<images> by the image width and 
 height (in pixels) in the call to C<formimage>.
+
+=back
 
 =cut
 
@@ -3039,7 +3250,11 @@ sub formimage {
     return $self;
 }
 
-=item $content = $content->object($object, $x,$y, $scale_x,$scale_y)
+=head3 object
+
+    $content = $content->object($object, $x,$y, $scale_x,$scale_y)
+
+=over
 
 Places an image or other external object (a.k.a. XObject) on the page in the
 specified location.
@@ -3059,6 +3274,8 @@ above), the position and scale will be relative to the updated coordinates.
 
 If no coordinate transformations are needed, this method can be called directly
 from the L<PDF::Builder::Page> object instead.
+
+=back
 
 =cut
 
@@ -3091,8 +3308,6 @@ sub object {
     return $self;
 }
 
-=back
-
 =head2 Text 
 
 =head3 Text State Parameters
@@ -3101,9 +3316,11 @@ All of the following parameters that take a size are applied before
 any scaling takes place, so you don't need to adjust values to
 counteract scaling.
 
-=over
+=head4 charspace, character_spacing, char_space
 
-=item $spacing = $content->charspace($spacing)
+    $spacing = $content->charspace($spacing)
+
+=over
 
 Sets additional spacing between B<characters> in a line. This is in I<points>,
 and is initially zero.
@@ -3123,6 +3340,8 @@ B<Alternate names:> C<character_spacing> and C<char_space>
 I<character_spacing> is provided for compatibility with PDF::API2, while
 I<char_space> is provided to be consistent with many other method name
 changes in PDF::API2.
+
+=back
 
 =cut
 
@@ -3149,7 +3368,11 @@ sub charspace {
     }
 }
 
-=item $spacing = $content->wordspace($spacing)
+=head4 wordspace, word_spacing, word_space
+
+    $spacing = $content->wordspace($spacing)
+
+=over
 
 Sets additional spacing between B<words> in a line. This is in I<points> and
 is initially zero 
@@ -3169,6 +3392,8 @@ B<alternate names:> C<word_spacing> and C<word_space>
 I<word_spacing> is provided for compatibility with PDF::API2, while
 I<word_space> is provided to be consistent with many other method name
 changes in PDF::API2.
+
+=back
 
 =cut
 
@@ -3195,7 +3420,11 @@ sub wordspace {
     }
 }
 
-=item $scale = $content->hscale($scale)
+=head4 hscale
+
+    $scale = $content->hscale($scale)
+
+=over
 
 Sets the percentage of horizontal text scaling (relative sizing, I<not> 
 spacing). This is initally 100 (percent, i.e., no scaling). A scale of greater 
@@ -3210,6 +3439,8 @@ amount, as it will quickly make the text unreadable. If your objective is to
 justify text, you will usually be better off using C<charspace> and C<wordspace>
 to expand (or slightly condense) a line to fill a desired width. Also see 
 the C<text_justify()> calls for this purpose.
+
+=back
 
 =cut
 
@@ -3236,9 +3467,15 @@ sub hscale {
 # note that the private class data ' hspace' is no longer supported
 # PDF::API2 still provides 'hspace' and '_hspace'
 
-=item $leading = $content->leading($leading)
+# lead() and the associated lead variable have been replaced by leading()
 
-=item $leading = $content->leading()
+=head4 leading
+
+    $leading = $content->leading($leading)
+
+    $leading = $content->leading()
+
+=over
 
 Sets the text leading, which is the distance between baselines. This
 is initially B<zero> (i.e., the lines will be printed on top of each
@@ -3253,19 +3490,9 @@ text baseline distance, in points). In cold metal typesetting, I<leading> was
 usually the I<extra> spacing between lines beyond the font height itself, 
 created by inserting lead (type alloy) shims.
 
-=item $leading = $content->lead($leading)
-
-=item $leading = $content->lead()
-
-B<Deprecated,> to be removed after March 2023. Use C<leading()> now.
-
-Note that the C<$self-E<gt>{' lead'}> internal variable is no longer available,
-having been replaced by C<$self-E<gt>{' leading'}>.
+=back
 
 =cut
-
-# to be removed 3/2023 or later
-sub lead { return leading(@_); }
 
 sub _leading {
     my ($leading) = @_;
@@ -3286,7 +3513,11 @@ sub leading {
     }
 }
 
-=item $mode = $content->render($mode)
+=head4 render
+
+    $mode = $content->render($mode)
+
+=over
 
 Sets the text rendering mode.
 
@@ -3314,6 +3545,8 @@ If C<$mode> is given, the current setting is replaced by that value and
 C<$self> is B<returned> (to permit chaining).
 If C<$mode> is not given, the current setting is B<returned>.
 
+=back
+
 =cut
 
 sub _render {
@@ -3336,7 +3569,11 @@ sub render {
     }
 }
 
-=item $dist = $content->rise($dist)
+=head4 rise
+
+    $dist = $content->rise($dist)
+
+=over
 
 Adjusts the baseline up or down from its current location.  This is
 initially zero. A C<$dist> greater than 0 moves the baseline B<up> the page
@@ -3347,6 +3584,8 @@ adjustment to the font size).
 If C<$dist> is given, the current setting is replaced by that value and
 C<$self> is B<returned> (to permit chaining).
 If C<$dist> is not given, the current setting is B<returned>.
+
+=back
 
 =cut
 
@@ -3369,7 +3608,11 @@ sub rise {
     }
 }
 
-=item %state = $content->textstate(charspace => $value, wordspace => $value, ...)
+=head4 textstate
+
+    %state = $content->textstate(charspace => $value, wordspace => $value, ...)
+
+=over
 
 This is a shortcut for setting multiple text state parameters at once.
 If any parameters are set, an I<empty> hash is B<returned>.
@@ -3377,6 +3620,8 @@ This can also be used without arguments to retrieve the current text
 state settings (a hash of the state is B<returned>).
 
 B<Note:> This does not work with the C<save> and C<restore> commands.
+
+=back
 
 =cut
 
@@ -3425,7 +3670,11 @@ sub textstate {
     return %state;
 }
 
-=item $content->font($font_object, $size)
+=head4 font
+
+    $content->font($font_object, $size)
+
+=over
 
 Sets the font and font size. C<$font> is an object created by calling
 L<PDF::Builder/"font"> to add the font to the document.
@@ -3439,6 +3688,8 @@ L<PDF::Builder/"font"> to add the font to the document.
     $text->text('Hello, World!');
 
     $pdf->save('sample.pdf');
+
+=back
 
 =cut
 
@@ -3483,15 +3734,15 @@ sub _fontset {
     return $self;
 }
 
-=back
-
 =head3 Positioning Text
 
+=head4 position
+
+    $content = $content->position($x, $y) # Set (also returns object, for ease of chaining)
+
+    ($x, $y) = $content->position()  # Get
+
 =over
-
-=item $content = $content->position($x, $y) # Set (also returns object, for ease of chaining)
-
-=item ($x, $y) = $content->position()  # Get
 
 If called I<with> arguments (Set), moves to the start of the current line of 
 text, offset by C<$x> and C<$y> (right and up for positive values).
@@ -3501,6 +3752,8 @@ cursor (before the effects of any coordinate transformation methods).
 
 Note that this is very similar in function to C<distance()>, added recently 
 to PDF::API2 and added here for compatibility.
+
+=back
 
 =cut
 
@@ -3523,7 +3776,11 @@ sub position {
     return @{$self->{' textlinematrix'}};
 }
 
-=item ($tx,$ty) = $content->textpos()
+=head4 textpos, (see also) position
+
+    ($tx,$ty) = $content->textpos()
+
+=over
 
 B<Returns> the current text position on the page (where next write will happen) 
 as an array.
@@ -3532,6 +3789,8 @@ B<Note:> This does not affect the PDF in any way. It only tells you where the
 the next write will occur.
 
 B<Alternate name:> C<position> (added for compatibility with PDF::API2)
+
+=back
 
 =cut
 
@@ -3562,7 +3821,11 @@ sub textpos {
     return $self->_textpos(@{$self->{" textlinematrix"}});
 }
 
-=item $content->distance($dx,$dy)
+=head4 distance
+
+    $content->distance($dx,$dy)
+
+=over
 
 This moves to the start of the previously-written line, plus an offset by the 
 given amounts, which are both required. C<[0,0]> would overwrite the previous 
@@ -3574,6 +3837,8 @@ the beginning of the previous text write, not to the coordinate origin.
 B<Note> that subsequent text writes will be relative to this new starting
 (left) point and Y position! E.g., if you give a non-zero C<$dx>, subsequent
 lines will be indented by that amount.
+
+=back
 
 =cut
 
@@ -3588,11 +3853,15 @@ sub distance {
     return $self;
 }
 
-=item $content->cr()
+=head4 cr
 
-=item $content->cr($vertical_offset)
+    $content->cr()
 
-=item $content->cr(0)
+    $content->cr($vertical_offset)
+
+    $content->cr(0)
+
+=over
 
 If passed without an argument, moves (down) to the start of the I<next> line 
 (distance set by C<leading>). This is similar to C<nl()>.
@@ -3608,6 +3877,8 @@ That is, it acts as a simple carriage return, without a linefeed.
 
 Note that any setting for C<leading> is ignored. If you wish to account for
 the C<leading> setting, you may wish to use the C<crlf> method instead.
+
+=back
 
 =cut
 
@@ -3626,11 +3897,15 @@ sub cr {
     return $self;
 }
 
-=item $content->nl()
+=head4 nl
 
-=item $content->nl($indent)
+    $content->nl()
 
-=item $content->nl(0)
+    $content->nl($indent)
+
+    $content->nl(0)
+
+=over
 
 Moves to the start of the next line (see C<leading>). If C<$indent> is not given,
 or is 0, there is no indentation. Otherwise, indent by that amount (I<out>dent
@@ -3639,6 +3914,8 @@ space", or roughly 88 per em.
 
 Note that any setting for C<leading> is ignored. If you wish to account for
 the C<leading> setting, you may wish to use the C<crlf> method instead.
+
+=back
 
 =cut
 
@@ -3659,7 +3936,11 @@ sub nl {
     return $self;
 }
 
-=item $content = $content->crlf()
+=head4 crlf
+
+    $content = $content->crlf()
+
+=over
 
 Moves to the start of the next line, based on the L</"leading"> setting. It
 returns its own object, for ease of chaining.
@@ -3668,6 +3949,8 @@ If leading isn't set, a default distance of 120% of the font size will be used.
 
 Added for compatibility with PDF::API2 changes; may be used to replace both
 C<cr> and C<nl> methods.
+
+=back
 
 =cut
 
@@ -3687,7 +3970,14 @@ sub crlf {
     return $self;
 }
 
-=item $width = $content->advancewidth($string, %opts)
+=head4 advancewidth, text_width
+
+    $width = $content->advancewidth($string, %opts)
+
+=over
+
+Returns the number of points that will be used (horizontally) by the input
+string. This assumes all on one line (no line breaking).
 
 Options %opts:
 
@@ -3733,6 +4023,8 @@ B<Alternate name:> C<text_width>
 
 This is provided for compatibility with PDF::API2.
 
+=back
+
 =cut
 
 sub text_width { return advancewidth(@_); } ## no critic
@@ -3764,19 +4056,15 @@ sub advancewidth {
     return $advance;
 }
 
-=back
-
 =head3 Rendering Text
-
-=over 
-
-=back
 
 =head4 Single Lines
 
-=over
+=head4 text
 
-=item $width = $content->text($text, %opts)
+    $width = $content->text($text, %opts)
+
+=over
 
 Adds text to the page (left justified by default). 
 The width used (in points) is B<returned>.
@@ -3870,6 +4158,8 @@ Example:
 
 Defines the underline or strikethru line color, if different from the text
 color.
+
+=back
 
 =back
 
@@ -4107,7 +4397,11 @@ sub _metaEnd {
     return $self;
 }
 
-=item $width = $content->textHS($HSarray, $settings, %opts)
+=head4 textHS
+
+    $width = $content->textHS($HSarray, $settings, %opts)
+
+=over
 
 Takes an array of hashes produced by HarfBuzz::Shaper and outputs them to the
 PDF output file. HarfBuzz outputs glyph CIDs and positioning information. 
@@ -4252,13 +4546,15 @@ to HarfBuzz::Shaper (C<ttfont()> only, with .ttf or .otf files), and the font
 size must be the same. The appropriate location on the page must also already
 have been specified.
 
-B<NOTE:> as HarfBuzz::Shaper is still in its early days, it is possible that
-there will be major changes in its API. We hope that all changes will be 
-upwardly compatible, but do not control this package and cannot guarantee that
-there will not be any incompatible changes that in turn require changes to
-PDF::Builder (C<textHS()>).
+=back
 
 =cut
+#B<NOTE:> as HarfBuzz::Shaper is still in its early days, it is possible that
+#there will be major changes in its API. We hope that all changes will be 
+#upwardly compatible, but do not control this package and cannot guarantee that
+#there will not be any incompatible changes that in turn require changes to
+#PDF::Builder (C<textHS()>).
+#
 
 sub textHS {
     my ($self, $HSarray, $settings, %opts) = @_;
@@ -4556,7 +4852,11 @@ sub _outputCID {
     return;
 }
 
-=item $width = $content->advancewidthHS($HSarray, $settings, %opts)
+=head4 advancewidthHS, text_widthHS
+
+    $width = $content->advancewidthHS($HSarray, $settings, %opts)
+
+=over
 
 Returns text chunk width (in points) for Shaper-defined glyph array.
 This is the horizontal width for LTR and RTL direction, and the vertical
@@ -4600,7 +4900,7 @@ This is treated as 0 if an ax override setting is given.
 =item 'minKern' => amount (default 1)
 
 If the amount of kerning (font character width B<differs from> glyph I<ax> 
-value) is I<larger> than this many character grid units, use the unaltered ax 
+value) is I<larger> than this many character grid units, use the unaltered I<ax>
 for the width (C<textHS()> will output a kern amount in the TJ operation). 
 Otherwise, ignore kerning and use ax of the actual character width. The intent 
 is to avoid bloating the PDF code with unnecessary tiny kerning adjustments in 
@@ -4613,6 +4913,8 @@ the TJ operation.
 Returns total width in points.
 
 B<Alternate name:> C<text_widthHS>
+
+=back
 
 =cut
 
@@ -4695,19 +4997,21 @@ sub advancewidthHS {
     return $width; # height >0 for TTB and BTT
 }
 
-=back
-
 =head2 Advanced Methods
 
-=over
+=head3 save
 
-=item $content->save()
+    $content->save()
+
+=over
 
 Saves the current I<graphics> state on a PDF stack. See PDF definition 8.4.2 
 through 8.4.4 for details. This includes the line width, the line cap style, 
 line join style, miter limit, line dash pattern, stroke color, fill color,
 current transformation matrix, current clipping port, flatness, and dictname.
 This method applies to both I<text> and I<gfx/graphics> objects.
+
+=back
 
 =cut
 
@@ -4740,12 +5044,18 @@ sub save {
    return $self;
 }
 
-=item $content->restore()
+=head3 restore
+
+    $content->restore()
+
+=over
 
 Restores the most recently saved graphics state (see C<save>),
 removing it from the stack. You cannot I<restore> the graphics state (pop it off
 the stack) unless you have done at least one I<save> (pushed it on the stack).
 This method applies to both I<text> and I<gfx/graphics> objects.
+
+=back
 
 =cut
 
@@ -4763,7 +5073,11 @@ sub restore {
    return $self;
 }
 
-=item $content->add(@content)
+=head3 add
+
+    $content->add(@content)
+
+=over
 
 Add raw content (arbitrary string(s)) to the PDF stream. 
 You will generally want to use the other methods in this class instead,
@@ -4814,11 +5128,19 @@ PDF into a string and look for a certain pattern of "cm" output
 or similar, which is not within a save/restore (q/Q). If the stream is 
 already compressed, this might not be possible.
 
-=item $content->addNS(@content)
+=back
+
+=head3 addNS
+
+    $content->addNS(@content)
+
+=over
 
 Like C<add()>, but does B<not> make sure there is a space between each element
 and before and after the new content. It is up to I<you> to ensure that any
 necessary spaces in the PDF stream are placed there explicitly!
+
+=back
 
 =cut
 
@@ -4867,7 +5189,11 @@ sub _in_text_object {
     return $self->{' apiistext'};
 }
 
-=item $content->compressFlate()
+=head3 compressFlate
+
+    $content->compressFlate()
+
+=over
 
 Marks content for compression on output.  This is done automatically
 in nearly all cases, so you shouldn't need to call this yourself.
@@ -4875,6 +5201,8 @@ in nearly all cases, so you shouldn't need to call this yourself.
 The C<new()> call can set the B<compress> parameter to 'flate' (default) to
 compress all object streams, or 'none' to suppress compression and allow you
 to examine the output in an editor.
+
+=back
 
 =cut
 
@@ -4887,7 +5215,11 @@ sub compressFlate {
     return $self;
 }
 
-=item $content->textstart()
+=head3 textstart
+
+    $content->textstart()
+
+=over
 
 Starts a text object (ignored if already in a text object). You will likely 
 want to use the C<text()> method (text I<context>, not text output) instead.
@@ -4895,6 +5227,8 @@ want to use the C<text()> method (text I<context>, not text output) instead.
 Note that calling this method, besides outputting a B<BT> marker, will reset
 most text settings to their default values. In addition, B<BT> itself will
 reset some transformation matrices.
+
+=back
 
 =cut
 
@@ -4929,12 +5263,18 @@ sub textstart {
     return $self;
 }
 
-=item $content->textend()
+=head3 textend
+
+    $content->textend()
+
+=over
 
 Ends a text object (ignored if not in a text object).
 
 Note that calling this method, besides outputting an B<ET> marker, will output
 any accumulated I<poststream> content.
+
+=back
 
 =cut
 
@@ -4949,10 +5289,6 @@ sub textend {
 
     return $self;
 }
-
-=back
-
-=cut
 
 # helper function for many methods
 sub resource {

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 use Carp;
 use PDF::Builder::Basic::PDF::Utils;
@@ -26,8 +26,6 @@ PDF::Builder::ViewerPreferences - How the PDF should be displayed or printed
 
 This has been split out from C<preferences()> in L<PDF::Builder>.
 
-=over
-
 =cut
 
 sub _snake_case {
@@ -47,9 +45,15 @@ sub _camel_case {
     return $name;
 }
 
-=item $self = $class->new($pdf)
+=head2 new
+
+    $self = $class->new($pdf)
+
+=over
 
 Creates a new ViewerPreferences object from a PDF::Builder object.
+
+=back
 
 =cut
 
@@ -60,10 +64,16 @@ sub new {
     return $self;
 }
 
-=item %preferences = $self->get_preferences()
+=head2 get_preferences
+
+    %preferences = $self->get_preferences()
+
+=over
 
 Returns a hash containing all of the viewer preferences that are defined in the
 PDF.
+
+=back
 
 =cut
 
@@ -107,10 +117,16 @@ sub get_preferences {
     return %values;
 }
 
-=item $value = $self->get_preference($name)
+=head2 get_preference
+
+    $value = $self->get_preference($name)
+
+=over
 
 Returns the value of the specified viewer preference if present, or C<undef> if
 not.
+
+=back
 
 =cut
 
@@ -120,10 +136,16 @@ sub get_preference {
     return $values{$name};
 }
 
-=item $self->set_preferences(%values)
+=head2 set_preferences
+
+    $self->set_preferences(%values)
+
+=over
 
 Sets one or more viewer preferences, as described in the preferences section
 below.
+
+=back
 
 =cut
 
@@ -215,8 +237,6 @@ sub set_preferences {
     return $self;
 }
 
-=back
-
 =head1 PREFERENCES
 
 Viewer Preferences describe how the document should be presented on screen or in
@@ -229,44 +249,44 @@ C<bleed_box>, C<trim_box>, or C<art_box>.
 
 =over
 
-=item hide_toolbar (boolean)
+    hide_toolbar (boolean)
 
 A flag specifying whether to hide the tool bars when the document is active.
 
-=item hide_menubar (boolean)
+    hide_menubar (boolean)
 
 A flag specifying whether to hide the menu bar when the document is active.
 
-=item hide_window_ui (boolean)
+    hide_window_ui (boolean)
 
 A flag specifying whether to hide the user interface elements in the document's
 window (such as scroll bars and navigation controls), leaving only the
 document's contents displayed.
 
-=item fit_window (boolean)
+    fit_window (boolean)
 
 A flag specifying whether to resize the document's window to fit the size of the
 first displayed page.
 
-=item center_window (boolean)
+    center_window (boolean)
 
 A flag specifying whether to position the document's window in the center of the
 screen.
 
-=item display_doc_title (boolean)
+    display_doc_title (boolean)
 
 A flag specifying whether the window's title bar should display the document
 title taken from the Title entry of the document information directory.  If
 false, the title bar should instead display the name of the PDF file containing
 the document.
 
-=item non_full_screen_page_mode (name)
+    non_full_screen_page_mode (name)
 
 The document's page mode, specifying how to display the document on exiting
 full-screen mode.  Options are the same as C<page_mode> in L<PDF::Builder>,
 except that the C<attachments> and C<full_screen> options aren't supported.
 
-=item direction ('l2r' or 'r2l')
+    direction ('l2r' or 'r2l')
 
 The predominant reading order for text (left-to-right or right-to-left).
 
@@ -274,52 +294,52 @@ This entry has no direct effect on the document's contents or page numbering but
 may be used to determine the relative positioning of pages when displayed
 side-by-side or printed n-up.
 
-=item view_area (bounding box)
+    view_area (bounding box)
 
 The name of the page boundary representing the area of a page that shall be
 displayed when viewing the document on the screen.
 
-=item view_clip (bounding box)
+    view_clip (bounding box)
 
 The name of the page boundary to which the contents of a page shall be clipped
 when viewing the document on the screen.
 
-=item print_area (bounding box)
+    print_area (bounding box)
 
 The name of the page boundary representing the area of a page that shall be
 rendered when printing the document.
 
-=item print_clip (bounding box)
+    print_clip (bounding box)
 
 The name of the page boundary to which the contents of a page shall be clipped
 when printing the document.
 
-=item print_scaling ('none' or 'app_default')
+    print_scaling ('none' or 'app_default')
 
 The page scaling option that shall be selected when a print dialog is displayed
 for this document.  C<none> represents no page scaling, and C<app_default>
 represents the reader's default print scaling.
 
-=item duplex ('simplex', 'duplex_short', or 'duplex_long')
+    duplex ('simplex', 'duplex_short', or 'duplex_long')
 
 The paper handling option that shall be used when printing the file from the
 print dialog.  The duplex values represent whether the page should be flipped on
 its short edge or long edge, respectively.
 
-=item pick_tray_by_pdf_size (boolean)
+    pick_tray_by_pdf_size (boolean)
 
 A flag specifying whether the PDF page size shall be used to select the input
 paper tray.  This setting influences only the preset values used to populate the
 print dialog presented by the reader.
 
-=item print_page_rage (an array of integer pairs)
+    print_page_rage (an array of integer pairs)
 
 The page numbers used to initialize the print dialog box when the file is
 printed.  The array shall contain an even number of integers to be interpreted
 in pairs, with each pair specifying the first and last pages in a sub-range of
 pages to be printed.  The first page of the PDF file shall be denoted by 1.
 
-=item num_copies (integer)
+    num_copies (integer)
 
 The number of copies that shall be printed when the print dialog is opened for
 this file.

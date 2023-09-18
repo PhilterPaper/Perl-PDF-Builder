@@ -158,7 +158,7 @@ The intent is to avoid expending unnecessary effort in supporting very old
 
 =head3 Anticipated Support Cutoff Dates
 
-B<Note that these are I<not> hard and fast dates. In particular, we develop
+B<Note that these are I<not> hard and fast dates.> In particular, we develop
 on Strawberry Perl, which sometimes falls a little behind the official Perl
 release!
 
@@ -264,9 +264,11 @@ PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 
 =head1 GENERAL PURPOSE METHODS
 
-=over
+=head2 new
 
-=item $pdf = PDF::Builder->new(%opts)
+    $pdf = PDF::Builder->new(%opts)
+
+=over
 
 Creates a new PDF object. 
 
@@ -327,6 +329,8 @@ B<Example:>
     $pdf = PDF::Builder->new(file => 'our/new.pdf');
     ...
     $pdf->save();
+
+=back
 
 =cut
 
@@ -417,9 +421,13 @@ sub new {
     return $self;
 } # end of new()
 
-=item $pdf->default_page_size($size); # Set
+=head2 default_page_size
 
-=item @rectangle = $pdf->default_page_size() # Get
+    $pdf->default_page_size($size); # Set
+
+    @rectangle = $pdf->default_page_size() # Get
+
+=over
 
 Set the default physical size for pages in the PDF.  If called without
 arguments, return the coordinates of the rectangle describing the default
@@ -429,6 +437,8 @@ This is essentially an alternate method of defining the C<mediabox()> call,
 and added for compatibility with PDF::API2.
 
 See L<PDF::Builder::Page/Page Sizes> for possible values.
+
+=back
 
 =cut
 
@@ -445,9 +455,13 @@ sub default_page_size {
     return @{$boundaries->{'media'}};
 }
 
-=item $pdf->default_page_boundaries(%boundaries); # Set
+=head2 default_page_boundaries
 
-=item %boundaries = $pdf->default_page_boundaries(); # Get
+    $pdf->default_page_boundaries(%boundaries); # Set
+
+    %boundaries = $pdf->default_page_boundaries(); # Get
+
+=over
 
 Set default prepress page boundaries for pages in the PDF.  If called without
 arguments, returns the coordinates of the rectangles describing each of the
@@ -455,6 +469,8 @@ supported page boundaries.
 
 See the equivalent C<page_boundaries> method in L<PDF::Builder::Page> for 
 details.
+
+=back
 
 =cut
 
@@ -520,13 +536,13 @@ sub default_page_boundaries {
 #    return $self->_bounding_box('ArtBox', page_size(@_));
 #}
 
-=back
-
 =head1 INPUT/OUTPUT METHODS
 
-=over
+=head2 open
 
-=item $pdf = PDF::Builder->open($pdf_file, %opts)
+    $pdf = PDF::Builder->open($pdf_file, %opts)
+
+=over
 
 Opens an existing PDF file. See C<new()> for options.
 
@@ -539,6 +555,8 @@ B<Example:>
     $pdf = PDF::Builder->open('our/to/be/updated.pdf');
     ...
     $pdf->update();
+
+=back
 
 =cut
 
@@ -575,7 +593,11 @@ sub open {  ## no critic
     return $self;
 } # end of open()
 
-=item $pdf = PDF::Builder->from_string($pdf_string, %opts)
+=head2 from_string, open_scalar, openScalar
+
+    $pdf = PDF::Builder->from_string($pdf_string, %opts)
+
+=over
 
 Opens a PDF contained in a string. See C<new()> for other options.
 
@@ -606,6 +628,8 @@ as C<openScalar>), and this older name is still
 valid as an alternative to C<from_string>. It is I<possible> that C<open_scalar>
 will be deprecated and then removed some time in the future, so it may be
 advisable to use C<from_string> in new work.
+
+=back
 
 =cut
 
@@ -704,7 +728,11 @@ sub from_string {
     return $self;
 } # end of from_string()
 
-=item $string = $pdf->to_string()
+=head2 to_string, stringify
+
+    $string = $pdf->to_string()
+
+=over
 
 Return the document as a string and remove the object structure from memory.
 
@@ -724,6 +752,8 @@ C<to_string> was formerly known as C<stringify>, and this older name is still
 valid as an alternative to C<to_string>. It is I<possible> that C<stringify>
 will be deprecated and then removed some time in the future, so it may be
 advisable to use C<to_string> in new work.
+
+=back
 
 =cut
 
@@ -763,7 +793,11 @@ sub to_string {
     return $string;
 }
 
-=item $pdf->finishobjects(@objects)
+=head2 finishobjects
+
+    $pdf->finishobjects(@objects)
+
+=over
 
 Force objects to be written to file if possible.
 
@@ -780,6 +814,8 @@ allows for objects to be written to disk in advance of finally
 saving and closing the file.  Otherwise, it's no different than just calling
 C<save()> when all changes have been made.  There's no memory advantage since
 C<ship_out> doesn't remove objects from memory.
+
+=back
 
 =cut
 
@@ -834,7 +870,11 @@ sub _proc_pages {
     return @pages;
 } # end of _proc_pages()
 
-=item $pdf->update()
+=head2 update
+
+    $pdf->update()
+
+=over
 
 Saves a previously opened document.
 
@@ -848,6 +888,8 @@ B<Note:> it is considered better to simply C<save()> the file, rather than
 calling C<update()>. They end up doing the same thing, anyway. This method
 may be deprecated in the future.
 
+=back
+
 =cut
 
 # obsolete, use save instead
@@ -857,7 +899,11 @@ sub update {
     return;
 }
 
-=item $pdf->saveas($file)
+=head2 saveas
+
+    $pdf->saveas($file)
+
+=over
 
 Save the document to $file and remove the object structure from memory.
 
@@ -870,6 +916,8 @@ B<Example:>
     $pdf = PDF::Builder->new();
     ...
     $pdf->saveas('our/new.pdf');
+
+=back
 
 =cut
 
@@ -893,9 +941,13 @@ sub saveas {
     return;
 }
 
-=item $pdf->save()
+=head2 save
 
-=item $pdf->save(filename)
+    $pdf->save()
+
+    $pdf->save(filename)
+
+=over
 
 Save the document to an already-defined file (or filename) and 
 remove the object structure from memory.
@@ -917,6 +969,8 @@ recent changes to PDF::API2. Unlike PDF::API2, we are not deprecating
 the C<saveas()> method, because in user interfaces, "save" normally means that
 the current filename is known and is to be used, while "saveas" normally means
 that (whether or not there is a current filename) a new filename is to be used.
+
+=back
 
 =cut
 
@@ -942,7 +996,11 @@ sub save {
     return;
 }
 
-=item $pdf->close();
+=head2 close, release, end
+
+    $pdf->close();
+
+=over
 
 Close an open file (if relevant) and remove the object structure from memory.
 
@@ -955,9 +1013,15 @@ files and not writing them.
 
 B<Alternate names:> C<release> and C<end>
 
+=back
+
 =cut
 
-=item $pdf->end()
+=head2 end
+
+    $pdf->end()
+
+=over
 
 Remove the object structure from memory. PDF::Builder contains circular
 references, so this call is necessary in long-running processes to
@@ -970,6 +1034,8 @@ files and not writing them.
 This (and I<release>) are older and now deprecated names formerly used in 
 PDF::API2 and PDF::Builder. You should try to avoid having to explicitly
 call them.
+
+=back
 
 =cut
 
@@ -989,17 +1055,19 @@ sub close {
     return;
 }
 
-=back
-
 =head2 METADATA METHODS
+
+=head3 title
+
+    $title = $pdf->title();
+
+    $pdf = $pdf->title($title);
 
 =over
 
-=item $title = $pdf->title();
-
-=item $pdf = $pdf->title($title);
-
 Get/set/clear the document's title.
+
+=back
 
 =cut
 
@@ -1008,11 +1076,17 @@ sub title {
     return $self->info_metadata('Title', @_);
 }
 
-=item $author = $pdf->author();
+=head3 author
 
-=item $pdf = $pdf->author($author);
+    $author = $pdf->author();
+
+    $pdf = $pdf->author($author);
+
+=over
 
 Get/set/clear the name of the person who created the document.
+
+=back
 
 =cut
 
@@ -1021,11 +1095,17 @@ sub author {
     return $self->info_metadata('Author', @_);
 }
 
-=item $subject = $pdf->subject();
+=head3 subject
 
-=item $pdf = $pdf->subject($subject);
+    $subject = $pdf->subject();
+
+    $pdf = $pdf->subject($subject);
+
+=over
 
 Get/set/clear the subject of the document.
+
+=back
 
 =cut
 
@@ -1034,11 +1114,17 @@ sub subject {
     return $self->info_metadata('Subject', @_);
 }
 
-=item $keywords = $pdf->keywords();
+=head3 keywords
 
-=item $pdf = $pdf->keywords($keywords);
+    $keywords = $pdf->keywords();
+
+    $pdf = $pdf->keywords($keywords);
+
+=over
 
 Get/set/clear a space-separated string of keywords associated with the document.
+
+=back
 
 =cut
 
@@ -1047,12 +1133,18 @@ sub keywords {
     return $self->info_metadata('Keywords', @_);
 }
 
-=item $creator = $pdf->creator();
+=head3 creator
 
-=item $pdf = $pdf->creator($creator);
+    $creator = $pdf->creator();
+
+    $pdf = $pdf->creator($creator);
+
+=over
 
 Get/set/clear the name of the product that created the document prior to its
 conversion to PDF.
+
+=back
 
 =cut
 
@@ -1061,14 +1153,20 @@ sub creator {
     return $self->info_metadata('Creator', @_);
 }
 
-=item $producer = $pdf->producer();
+=head3 producer
 
-=item $pdf = $pdf->producer($producer);
+    $producer = $pdf->producer();
+
+    $pdf = $pdf->producer($producer);
+
+=over
 
 Get/set/clear the name of the product that converted the original document to
 PDF.
 
 PDF::Builder fills in this field when creating a PDF.
+
+=back
 
 =cut
 
@@ -1077,9 +1175,13 @@ sub producer {
     return $self->info_metadata('Producer', @_);
 }
 
-=item $date = $pdf->created();
+=head3 created
 
-=item $pdf = $pdf->created($date);
+    $date = $pdf->created();
+
+    $pdf = $pdf->created($date);
+
+=over
 
 Get/set/clear the document's creation date.
 
@@ -1093,6 +1195,8 @@ the inconsistency of PDF standards on exactly what the date format should be!
 
 When setting the date, C<D:> will be prepended automatically if omitted.
 
+=back
+
 =cut
 
 sub created {
@@ -1100,15 +1204,21 @@ sub created {
     return $self->info_metadata('CreationDate', @_);
 }
 
-=item $date = $pdf->modified();
+=head3 modified
 
-=item $pdf = $pdf->modified($date);
+    $date = $pdf->modified();
+
+    $pdf = $pdf->modified($date);
+
+=over
 
 Get/set/clear the document's modification date.  The date format is as described
 in C<created> above.
 
 See comments in the internal function C<_is_date()> for more information on
 the inconsistency of PDF standards on exactly what the date format should be!
+
+=back
 
 =cut
 
@@ -1330,11 +1440,15 @@ sub _is_date {
     return 1;
 }
 
-=item %info = $pdf->info_metadata(); # Get all keys and values
+=head3 info_metadata
 
-=item $value = $pdf->info_metadata($key); # Get the value of one key
+    %info = $pdf->info_metadata(); # Get all keys and values
 
-=item $pdf = $pdf->info_metadata($key, $value); # Set the value of one key
+    $value = $pdf->info_metadata($key); # Get the value of one key
+
+    $pdf = $pdf->info_metadata($key, $value); # Set the value of one key
+
+=over
 
 Get/set/clear a key in the document's information dictionary.  The standard keys
 (title, author, etc.) have their own accessors, so this is primarily intended
@@ -1345,6 +1459,8 @@ Pass C<undef> as the value in order to remove the key from the dictionary.
 See comments in the internal function C<_is_date()> for more information on
 the inconsistency of PDF standards on exactly what the date format should be!
 This applies to CreationDate and ModDate keys.
+
+=back
 
 =cut
 
@@ -1404,9 +1520,13 @@ sub info_metadata {
     return $self->{'pdf'}->{'Info'}->{$field}->val();
 }
 
-=item %infohash = $pdf->info()
+=head3 info
 
-=item %infohash = $pdf->info(%infohash)
+    %infohash = $pdf->info()
+
+    %infohash = $pdf->info(%infohash)
+
+=over
 
 Gets/sets the info structure of the document.
 
@@ -1415,6 +1535,8 @@ of this method.
 
 B<Note:> this method is still available, for compatibility purposes. It is
 better to use individual accessors or C<info_metadata> instead.
+
+=back
 
 =cut
 
@@ -1452,9 +1574,13 @@ sub info {
     return %opt;
 } # end of info()
 
-=item @metadata_attributes = $pdf->infoMetaAttributes()
+=head3 infoMetaAttributes
 
-=item @metadata_attributes = $pdf->infoMetaAttributes(@metadata_attributes)
+    @metadata_attributes = $pdf->infoMetaAttributes()
+
+    @metadata_attributes = $pdf->infoMetaAttributes(@metadata_attributes)
+
+=over
 
 Gets/sets the supported info-structure tags.
 
@@ -1469,6 +1595,8 @@ B<Example:>
 B<Note:> this method is still available for compatibility purposes, but the
 use of C<info_metadata> instead is encouraged.
 
+=back
+
 =cut
 
 sub infoMetaAttributes {
@@ -1482,11 +1610,17 @@ sub infoMetaAttributes {
     return @{$self->{'infoMeta'}};
 }
 
-=item $xml = $pdf->xml_metadata();
+=head3 xml_metadata
 
-=item $pdf = $pdf->xml_metadata($xml);
+    $xml = $pdf->xml_metadata();
+
+    $pdf = $pdf->xml_metadata($xml);
+
+=over
 
 Gets/sets the document's XML metadata stream.
+
+=back
 
 =cut
 
@@ -1519,9 +1653,13 @@ sub xml_metadata {
     return $md->{' stream'};
 }
 
-=item $xml = $pdf->xmpMetadata()  # Get
+=head3 xmpMetadata
 
-=item $xml = $pdf->xmpMetadata($xml)  # Set (also returns $xml value)
+    $xml = $pdf->xmpMetadata()  # Get
+
+    $xml = $pdf->xmpMetadata($xml)  # Set (also returns $xml value)
+
+=over
 
 Gets/sets the XMP XML data stream.
 
@@ -1529,6 +1667,8 @@ See L<PDF::Builder::Docs/XMP XML example> section for an example of the use
 of this method.
 
 This method is considered B<obsolete>. Use C<xml_metadata> instead.
+
+=back
 
 =cut
 
@@ -1545,9 +1685,13 @@ sub xmpMetadata {
     return $self->xml_metadata();
 } 
 
-=item $val = $pdf->default($parameter)
+=head3 default
 
-=item $pdf->default($parameter, $value)
+    $val = $pdf->default($parameter)
+
+    $pdf->default($parameter, $value)
+
+=over
 
 Gets/sets the default value for a behavior of PDF::Builder.
 
@@ -1575,6 +1719,8 @@ B<CAUTION:> Perl::Critic (tools/1_pc.pl) has started flagging the name
 "default" as a reserved keyword in higher Perl versions. Use with caution, and
 be aware that this name I<may> have to be changed in the future.
 
+=back
+
 =cut
 
 sub default {
@@ -1592,9 +1738,13 @@ sub default {
     return $previous_value;
 }
 
-=item $version = $pdf->version() # Get
+=head3 version
 
-=item $version = $pdf->version($version) # Set (also returns newly set version)
+    $version = $pdf->version() # Get
+
+    $version = $pdf->version($version) # Set (also returns newly set version)
+
+=over
 
 Gets/sets the PDF version (e.g., 1.5). 
 For compatibility with earlier releases, if no decimal point is given, assume
@@ -1605,6 +1755,8 @@ might have already read in a higher level file, or used a higher level feature.
 
 See L<PDF::Builder::Basic::PDF::File> for additional information on the
 C<version> method.
+
+=back
 
 =cut
 
@@ -1675,13 +1827,19 @@ sub verCheckInput {
     }
 }
 
-=item $bool = $pdf->is_encrypted()
+=head3 is_encrypted, isEncrypted
+
+    $bool = $pdf->is_encrypted()
+
+=over
 
 Checks if the previously opened PDF is encrypted.
 
 B<Alternate name:> C<isEncrypted>
 
 This is the older name; it is kept for compatibility with PDF::API2.
+
+=back
 
 =cut
 
@@ -1692,13 +1850,13 @@ sub is_encrypted {
     return defined($self->{'pdf'}->{'Encrypt'}) ? 1 : 0;
 }
 
-=back
-
 =head1 INTERACTIVE FEATURE METHODS
 
-=over
+=head2 outline, outlines
 
-=item $otls = $pdf->outline()
+    $otls = $pdf->outline()
+
+=over
 
 Creates (if needed) and returns the document's 'outline' tree, which is also 
 known as its 'bookmarks' or the 'table of contents', depending on the 
@@ -1709,6 +1867,8 @@ To examine or modify the outline tree, see L<PDF::Builder::Outlines>.
 B<Alternate name:> C<outlines>
 
 This is the older name; it is kept for compatibility.
+
+=back
 
 =cut
 
@@ -1763,9 +1923,13 @@ sub outline {
 #    return $self;
 #}
 
-=item $layout = $pdf->page_layout();
+=head2 page_layout
 
-=item $pdf = $pdf->page_layout($layout);
+    $layout = $pdf->page_layout();
+
+    $pdf = $pdf->page_layout($layout);
+
+=over
 
 Gets/sets the page layout that should be used when the PDF is opened.
 
@@ -1802,6 +1966,8 @@ Display two pages at a time, with odd-numbered pages on the right.
 This has been split out from C<preferences()> for compatibility with PDF::API2.
 It also can both set (assign) and get (query) the settings used.
 
+=back
+
 =cut
 
 sub page_layout {
@@ -1834,9 +2000,13 @@ sub page_layout {
     return $self;
 }
 
-=item $mode = $pdf->page_mode(); # Get
+=head2 page_mode
 
-=item $pdf = $pdf->page_mode($mode); # Set
+    $mode = $pdf->page_mode(); # Get
+
+    $pdf = $pdf->page_mode($mode); # Set
+
+=over
 
 Gets/sets the page mode, which describes how the PDF should be displayed when
 opened.
@@ -1875,6 +2045,8 @@ Show the attachments panel.
 This has been split out from C<preferences()> for compatibility with PDF::API2.
 It also can both set (assign) and get (query) the settings used.
 
+=back
+
 =cut
 
 sub page_mode {
@@ -1907,15 +2079,21 @@ sub page_mode {
     return $self;
 }
 
-=item %preferences = $pdf->viewer_preferences(); # Get
+=head2 viewer_preferences
 
-=item $pdf = $pdf->viewer_preferences(%preferences); # Set
+    %preferences = $pdf->viewer_preferences(); # Get
+
+    $pdf = $pdf->viewer_preferences(%preferences); # Set
+
+=over
 
 Gets/sets PDF viewer preferences, as described in
 L<PDF::Builder::ViewerPreferences>.
 
 This has been split out from C<preferences()> for compatibility with PDF::API2.
 It also can both set (assign) and get (query) the settings used.
+
+=back
 
 =cut
 
@@ -1929,7 +2107,11 @@ sub viewer_preferences {
     return $prefs->set_preferences(@_);
 }
 
-=item $pdf->preferences(%opts)
+=head2 preferences
+
+    $pdf->preferences(%opts)
+
+=over
 
 Controls viewing preferences for the PDF, including the B<Page Mode>, 
 B<Page Layout>, B<Viewer>, and B<Initial Page> Options. See 
@@ -1939,6 +2121,8 @@ option groups, and L<PDF::Builder::Docs/Page Fit Options> for page positioning.
 
 B<Note:> the various preferences have been split out into their own methods.
 It is preferred that you use these specific methods.
+
+=back
 
 =cut
 
@@ -2127,15 +2311,15 @@ sub proc_pages {
     return @pages;
 }
 
-=back
-
 =head1 PAGE METHODS
 
+=head2 page
+
+    $page = $pdf->page()
+
+    $page = $pdf->page($page_number)
+
 =over
-
-=item $page = $pdf->page()
-
-=item $page = $pdf->page($page_number)
 
 Returns a I<new> page object.  By default, the page is added to the end
 of the document.  If you give an existing page number, the new page
@@ -2155,6 +2339,8 @@ B<Example:>
 
     # Add a new first page.  $page becomes page 2.
     $another_page = $pdf->page(1);
+
+=back
 
 =cut
 
@@ -2207,7 +2393,11 @@ sub page {
     return $page;
 } # end of page()
 
-=item $page = $pdf->open_page($page_number)
+=head2 open_page, openpage
+
+    $page = $pdf->open_page($page_number)
+
+=over
 
 Returns the L<PDF::Builder::Page> object of page $page_number.
 This is similar to C<< $page = $pdf->page() >>, except that C<$page> is 
@@ -2231,6 +2421,8 @@ B<Alternate name:> C<openpage>
 
 This is the older name; it is kept for compatibility until after June 2023
 (deprecated, as previously announced).
+
+=back
 
 =cut
 
@@ -2326,13 +2518,17 @@ sub open_page {
     return $page;
 } # end of open_page()
 
-=item $page = $pdf->import_page($source_pdf)
+=head2 import_page, importpage
 
-=item $page = $pdf->import_page($source_pdf, $source_page_number)
+    $page = $pdf->import_page($source_pdf)
 
-=item $page = $pdf->import_page($source_pdf, $source_page_number, $target_page_number)
+    $page = $pdf->import_page($source_pdf, $source_page_number)
 
-=item $page = $pdf->import_page($source_pdf, $source_page_number, $target_page_object)
+    $page = $pdf->import_page($source_pdf, $source_page_number, $target_page_number)
+
+    $page = $pdf->import_page($source_pdf, $source_page_number, $target_page_object)
+
+=over
 
 Imports a page from $source_pdf and adds it to the specified position
 in $pdf.
@@ -2359,6 +2555,12 @@ B<Example:>
     $pdf->saveas('sample.pdf');
 
 B<Note:> You can only import a page from an existing PDF file.
+
+B<Alternate name:> importpage
+
+This name is still valid in PDF::API2, so it is included here for compatiblity.
+
+=back
 
 =cut
 
@@ -2487,7 +2689,11 @@ sub import_page {
     return $t_page;
 } # end of import_page()
 
-=item $xoform = $pdf->embed_page($source_pdf, $source_page_number)
+=head2 embed_page, importPageIntoForm
+
+    $xoform = $pdf->embed_page($source_pdf, $source_page_number)
+
+=over
 
 Returns a Form XObject created by extracting the specified page from 
 C<$source_pdf>.
@@ -2521,6 +2727,8 @@ B<Note:> You can only import a page from an existing PDF file.
 B<Alternate name:> C<importPageIntoForm>
 
 This is the older name; it is kept for compatibility.
+
+=back
 
 =cut
 
@@ -2655,13 +2863,19 @@ sub _walk_obj {
     return $target_object;
 } # end of _walk_obj()
 
-=item $count = $pdf->page_count()
+=head2 page_count, pages
+
+    $count = $pdf->page_count()
+
+=over
 
 Returns the number of pages in the document.
 
 B<Alternate name:> C<pages>
 
 This is the old name; it is kept for compatibility.
+
+=back
 
 =cut
 
@@ -2672,7 +2886,11 @@ sub page_count {
     return scalar @{$self->{'pagestack'}};
 }
 
-=item $pdf->page_labels($page_number, %opts)
+=head2 page_labels, pageLabel
+
+    $pdf->page_labels($page_number, %opts)
+
+=over
 
 Sets page label numbering format, for the PDF Reader's page-selection slider 
 thumb (I<not> the outline/bookmarks). At this time, there is no method to 
@@ -2683,7 +2901,7 @@ show up in the reader control area as the current page number.
 
 B<CAUTIONS:> 
 
-B<1.> The given page index started at 0 for the old method (C<pageLabel>),
+B<1.> The given page index started at 0 for the old method (C<pageLabel()>),
 which is the internal PDF array index, while for the new method 
 (C<page_labels()>) it starts with 1, the visible page number! Don't get
 confused.
@@ -2841,6 +3059,8 @@ in it. Also remember that the page number (index) for C<pageLabel> starts at 0
 Finally, pageLabel() still permits you to define multiple page numbering schemes
 in one call.
 
+=back
+
 =cut
 
 # in the new method, parameters are organized a bit differently than in the 
@@ -2920,13 +3140,19 @@ sub pageLabel {
 
 # set global User Unit scale factor (default 1.0)
 
-=item $pdf->userunit($value)
+=head2 userunit
+
+    $pdf->userunit($value)
+
+=over
 
 Sets the global UserUnit, defining the scale factor to multiply any size or
 coordinate by. For example, C<userunit(72)> results in a User Unit of 72 points,
 or 1 inch.
 
 See L<PDF::Builder::Docs/User Units> for more information.
+
+=back
 
 =cut
 
@@ -3017,15 +3243,19 @@ sub _get_bbox {
 
 } # end of _get_bbox()
 
-=item $pdf->mediabox($name)
+=head2 mediabox
 
-=item $pdf->mediabox($name, 'orient' => 'orientation')
+    $pdf->mediabox($name)
 
-=item $pdf->mediabox($w,$h)
+    $pdf->mediabox($name, 'orient' => 'orientation')
 
-=item $pdf->mediabox($llx,$lly, $urx,$ury)
+    $pdf->mediabox($w,$h)
 
-=item ($llx,$lly, $urx,$ury) = $pdf->mediabox()
+    $pdf->mediabox($llx,$lly, $urx,$ury)
+
+    ($llx,$lly, $urx,$ury) = $pdf->mediabox()
+
+=over
 
 Sets (or gets) the global MediaBox, defining the width and height (or by 
 corner coordinates, or by standard name) of the output page itself, such as 
@@ -3033,6 +3263,8 @@ the physical paper size.
 
 See L<PDF::Builder::Docs/Media Box> for more information.
 The method always returns the current bounds (after any set operation).
+
+=back
 
 =cut
 
@@ -3046,21 +3278,27 @@ sub mediabox {
     return $self->_get_bbox('MediaBox');
 }
 
-=item $pdf->cropbox($name)
+=head2 cropbox
 
-=item $pdf->cropbox($name, 'orient' => 'orientation')
+    $pdf->cropbox($name)
 
-=item $pdf->cropbox($w,$h)
+    $pdf->cropbox($name, 'orient' => 'orientation')
 
-=item $pdf->cropbox($llx,$lly, $urx,$ury)
+    $pdf->cropbox($w,$h)
 
-=item ($llx,$lly, $urx,$ury) = $pdf->cropbox()
+    $pdf->cropbox($llx,$lly, $urx,$ury)
+
+    ($llx,$lly, $urx,$ury) = $pdf->cropbox()
+
+=over
 
 Sets (or gets) the global CropBox. This will define the media size to which 
 the output will later be clipped. 
 
 See L<PDF::Builder::Docs/Crop Box> for more information.
 The method always returns the current bounds (after any set operation).
+
+=back
 
 =cut
 
@@ -3074,21 +3312,27 @@ sub cropbox {
     return $self->_get_bbox('CropBox');
 }
 
-=item $pdf->bleedbox($name)
+=head2 bleedbox
 
-=item $pdf->bleedbox($name, 'orient' => 'orientation')
+    $pdf->bleedbox($name)
 
-=item $pdf->bleedbox($w,$h)
+    $pdf->bleedbox($name, 'orient' => 'orientation')
 
-=item $pdf->bleedbox($llx,$lly, $urx,$ury)
+    $pdf->bleedbox($w,$h)
 
-=item ($llx,$lly, $urx,$ury) = $pdf->bleedbox()
+    $pdf->bleedbox($llx,$lly, $urx,$ury)
+
+    ($llx,$lly, $urx,$ury) = $pdf->bleedbox()
+
+=over
 
 Sets (or gets) the global BleedBox. This is typically used for hard copy 
 printing where you want ink to go to the edge of the cut paper.
 
 See L<PDF::Builder::Docs/Bleed Box> for more information.
 The method always returns the current bounds (after any set operation).
+
+=back
 
 =cut
 
@@ -3102,21 +3346,27 @@ sub bleedbox {
     return $self->_get_bbox('BleedBox');
 }
 
-=item $pdf->trimbox($name)
+=head2 trimbox
 
-=item $pdf->trimbox($name, 'orient' => 'orientation')
+    $pdf->trimbox($name)
 
-=item $pdf->trimbox($w,$h)
+    $pdf->trimbox($name, 'orient' => 'orientation')
 
-=item $pdf->trimbox($llx,$lly, $urx,$ury)
+    $pdf->trimbox($w,$h)
 
-=item ($llx,$lly, $urx,$ury) = $pdf->trimbox()
+    $pdf->trimbox($llx,$lly, $urx,$ury)
+
+    ($llx,$lly, $urx,$ury) = $pdf->trimbox()
+
+=over
 
 Sets (or gets) the global TrimBox. This is supposed to be the actual 
 dimensions of the finished page (after trimming of the paper). 
 
 See L<PDF::Builder::Docs/Trim Box> for more information.
 The method always returns the current bounds (after any set operation).
+
+=back
 
 =cut
 
@@ -3130,21 +3380,27 @@ sub trimbox {
     return $self->_get_bbox('TrimBox');
 }
 
-=item $pdf->artbox($name)
+=head2 artbox
 
-=item $pdf->artbox($name, 'orient' => 'orientation')
+    $pdf->artbox($name)
 
-=item $pdf->artbox($w,$h)
+    $pdf->artbox($name, 'orient' => 'orientation')
 
-=item $pdf->artbox($llx,$lly, $urx,$ury)
+    $pdf->artbox($w,$h)
 
-=item ($llx,$lly, $urx,$ury) = $pdf->artbox()
+    $pdf->artbox($llx,$lly, $urx,$ury)
+
+    ($llx,$lly, $urx,$ury) = $pdf->artbox()
+
+=over
 
 Sets (or gets) the global ArtBox. This is supposed to define "the extent of 
 the page's I<meaningful> content". 
 
 See L<PDF::Builder::Docs/Art Box> for more information.
 The method always returns the current bounds (after any set operation).
+
+=back
 
 =cut
 
@@ -3157,8 +3413,6 @@ sub artbox {
 
     return $self->_get_bbox('ArtBox');
 }
-
-=back
 
 =head1 FONT METHODS
 
@@ -3173,15 +3427,19 @@ use the C<noembed> or C<nosubset> flags as appropriate. The PDF::Builder font
 routines currently have no means to automatically detect any embedding 
 limitations for a given font, and cannot default their behavior accordingly!
 
-=over
+=head3 corefont
 
-=item $font = $pdf->corefont($fontname, %opts)
+    $font = $pdf->corefont($fontname, %opts)
+
+=over
 
 Returns a new Adobe core font object. For details, 
 see L<PDF::Builder::Docs/Core Fonts>. Note that this is an Adobe-standard
 corefont I<name>, and not a file name.
 
 See also L<PDF::Builder::Resource::Font::CoreFont>.
+
+=back
 
 =cut
 
@@ -3206,9 +3464,11 @@ sub corefont {
     return $obj;
 }
 
-=item $font = $pdf->psfont($ps_file, %opts)
+=head3 psfont
 
-Returns a new Adobe Type1 ("PostScript") font object.
+    $font = $pdf->psfont($ps_file, %opts)
+
+Returns a new Adobe Type1 ("PostScript", "T1") font object.
 For details, see L<PDF::Builder::Docs/PS Fonts>.
 
 See also L<PDF::Builder::Resource::Font::Postscript>.
@@ -3236,10 +3496,16 @@ sub psfont {
     return $obj;
 }
 
-=item $font = $pdf->ttfont($ttf_file, %opts)
+=head3 ttfont
+
+    $font = $pdf->ttfont($ttf_file, %opts)
+
+=over
 
 Returns a new TrueType (or OpenType) font object.
 For details, see L<PDF::Builder::Docs/TrueType Fonts>.
+
+=back
 
 =cut
 
@@ -3266,12 +3532,19 @@ sub ttfont {
     return $obj;
 }
 
-=item $font = $pdf->bdfont($bdf_file, @opts)
+=head3 bdfont
+
+    $font = $pdf->bdfont($bdf_file, @opts)
+
+=over
 
 Returns a new BDF (bitmapped distribution format) font object, based on the 
-specified Adobe BDF file.
+specified Adobe BDF file. These are very low resolution fonts that appear to
+have come off a dot-matrix printer.
 
 See also L<PDF::Builder::Resource::Font::BdFont>
+
+=back
 
 =cut
 
@@ -3287,7 +3560,11 @@ sub bdfont {
     return $obj;
 }
 
-=item $font = $pdf->cjkfont($cjkname, %opts)
+=head3 cjkfont
+
+    $font = $pdf->cjkfont($cjkname, %opts)
+
+=over
 
 Returns a new CJK font object. These are TrueType-like fonts for East Asian
 languages (Chinese, Japanese, Korean).
@@ -3307,6 +3584,8 @@ base for synthetic fonts.
 
 See also L<PDF::Builder::Resource::CIDFont::CJKFont>
 
+=back
+
 =cut
 
 sub cjkfont {
@@ -3323,7 +3602,11 @@ sub cjkfont {
     return $obj;
 }
 
-=item $font = $pdf->font($name, %opts)
+=head3 font
+
+    $font = $pdf->font($name, %opts)
+
+=over
 
 A convenience function to add a font to the PDF without having to specify the
 format. Returns the font object, to be used by L<PDF::Builder::Content>.
@@ -3391,6 +3674,8 @@ this option to false to prevent the font from being embedded.
 
 =back
 
+=back
+
 =cut
 
 sub font {
@@ -3446,11 +3731,17 @@ sub font {
     }
 }
 
-=item @directories = PDF::Builder->font_path()
+=head3 font_path
+
+    @directories = PDF::Builder->font_path()
+
+=over
 
 Return the list of directories that will be searched (in order) in addition to
 the current directory when you add a font to a PDF without including the full
 path to the font file.
+
+=back
 
 =cut
 
@@ -3458,7 +3749,11 @@ sub font_path {
     return @font_path;
 }
 
-=item @directories = PDF::Builder::add_to_font_path('/my/fonts', '/path/to/fonts', ...)
+=head3 add_to_font_path, addFontDirs
+
+    @directories = PDF::Builder::add_to_font_path('/my/fonts', '/path/to/fonts', ...)
+
+=over
 
 Adds one or more directories to the list of paths to be searched for font files.
 
@@ -3468,6 +3763,8 @@ B<Alternate name:> C<addFontDirs>
 
 Prior to recent changes to PDF::API2, this method was addFontDirs(). This 
 method is still available, but may be deprecated some time in the future.
+
+=back
 
 =cut
 
@@ -3482,13 +3779,19 @@ sub add_to_font_path {
     return @font_path;
 }
 
-=item @directories = PDF::Builder->set_font_path('/my/fonts', '/path/to/fonts');
+=head3 set_font_path
+
+    @directories = PDF::Builder->set_font_path('/my/fonts', '/path/to/fonts');
+
+=over
 
 Replace the existing font search path. This should only be necessary if you
 need to remove a directory from the path for some reason, or if you need to
 reorder the list.
 
 Returns the font search path.
+
+=back
 
 =cut
 
@@ -3520,7 +3823,11 @@ sub _findFont {
     return;
 }
 
-=item $font = $pdf->synfont($basefont, %opts)
+=head3 synfont, synthetic_font
+
+    $font = $pdf->synfont($basefont, %opts)
+
+=over
 
 Returns a new synthetic font object. These are modifications to a core (or 
 PS/T1 or TTF/OTF) font, where the font may be replaced by a Type1 or Type3 
@@ -3539,6 +3846,8 @@ but to maintain compatibility, "synthetic_font" is available as an alias.
 There are also some minor option differences (incompatibilities) 
 discussed in C<SynFont>, including the value of 'bold' between the two entry
 points.
+
+=back
 
 =cut
 
@@ -3566,7 +3875,11 @@ sub synfont {
     return $obj;
 }
 
-=item $font = $pdf->unifont(@fontspecs, %opts)
+=head3 unifont
+
+    $font = $pdf->unifont(@fontspecs, %opts)
+
+=over
 
 Returns a new uni-font object, based on the specified fonts and options.
 
@@ -3581,6 +3894,8 @@ Valid options (C<%opts>) are:
 =item encode
 
 Changes the encoding of the font from its default.
+
+=back
 
 =back
 
@@ -3601,17 +3916,17 @@ sub unifont {
     return $obj;
 }
 
-=back
-
 =head2 Font Manager methods
 
 The Font Manager is automatically initialized.
 
+=head3 font_settings
+
+    @list = $pdf->font_settings()  # Get
+
+    $pdf->font_settings(%info)  # Set
+
 =over
-
-=item @list = $pdf->font_settings()  # Get
-
-=item $pdf->font_settings(%info)  # Set
 
 Change one or more default settings. 
 See L<PDF::Builder::FontManager>/font_settings for details.
@@ -3625,9 +3940,11 @@ sub font_settings {
     return $self->{' FM'}->font_settings(@_);
 }
 
-=over
+=head3 add_font_path
 
-=item $rc = $pdf->add_font_path("a directory path", %opts)
+    $rc = $pdf->add_font_path("a directory path", %opts)
+
+=over
 
 Add a search path for Font Manager font entries.
 See L<PDF::Builder::FontManager>/add_font_path for details.
@@ -3641,9 +3958,11 @@ sub add_font_path {
     return $self->{' FM'}->add_font_path(@_);
 }
 
-=over
+=head3 add_font
 
-=item $rc = $pdf->add_font(%info)
+    $rc = $pdf->add_font(%info)
+
+=over
 
 Add a font (face) definition to the Font Manager list.
 See L<PDF::Builder::FontManager>/add_font for details.
@@ -3657,11 +3976,13 @@ sub add_font {
     return $self->{' FM'}->add_font(@_);
 }
 
+=head3 get_font
+
+    @current = $pdf->get_font()  # Get
+
+    $font = $pdf->get_font(%info)  # Set
+
 =over
-
-=item @current = $pdf->get_font()  # Get
-
-=item $font = $pdf->get_font(%info)  # Set
 
 Retrieve a ready-to-use font, or find out what the current one is.
 See L<PDF::Builder::FontManager>/get_font for details.
@@ -3675,9 +3996,11 @@ sub get_font {
     return $self->{' FM'}->get_font(@_);
 }
 
-=over
+=head3 dump_font_tables
 
-=item $pdf->dump_font_tables()
+    $pdf->dump_font_tables()
+
+=over
 
 Dump all known font information to STDOUT.
 See L<PDF::Builder::FontManager>/dump_font_tables for details.
@@ -3693,9 +4016,11 @@ sub dump_font_tables {
 
 =head1 IMAGE METHODS
 
-=over
+=head2 image
 
-=item $object = $pdf->image($file, %opts);
+    $object = $pdf->image($file, %opts);
+
+=over
 
 A convenience function to attempt to determine the image type, and import a 
 file of that type and return an object that can be placed as part of a page's 
@@ -3741,6 +4066,8 @@ See the C<image_png> method for details.
 B<Note:> TIFF image processing is very slow if using the pure Perl decoder.
 We highly recommend using the Graphics::TIFF library to improve performance.
 See the C<image_tiff> method for details.
+
+=back
 
 =cut
 
@@ -3816,13 +4143,19 @@ sub _detect_image_format {
     return;
 }
 
-=item $jpeg = $pdf->image_jpeg($file, %opts)
+=head2 image_jpeg
+
+    $jpeg = $pdf->image_jpeg($file, %opts)
+
+=over
 
 Imports and returns a new JPEG image object. C<$file> may be either a filename 
 or a filehandle.
 
 See L<PDF::Builder::Resource::XObject::Image::JPEG> for additional information
 and C<examples/Content.pl> for some examples of placing an image on a page.
+
+=back
 
 =cut
 
@@ -3837,7 +4170,11 @@ sub image_jpeg {
     return $obj;
 }
 
-=item $tiff = $pdf->image_tiff($file, %opts)
+=head2 image_tiff
+
+    $tiff = $pdf->image_tiff($file, %opts)
+
+=over
 
 Imports and returns a new TIFF image object. C<$file> may be either a filename 
 or a filehandle.
@@ -3851,6 +4188,8 @@ the same).
 There is an optional TIFF library (TIFF_GT) described, that gives more
 capability than the default one. However, note that C<$file> can only be
 a filename when using this library.
+
+=back
 
 =cut
 
@@ -3897,7 +4236,11 @@ sub image_tiff {
     return $obj;
 }
 
-=item $rc = $pdf->LA_GT()
+=head3 LA_GT
+
+    $rc = $pdf->LA_GT()
+
+=over
 
 Returns 1 if the library name (package) Graphics::TIFF is installed, and 
 0 otherwise. For this optional library, this call can be used to know if it 
@@ -3908,6 +4251,8 @@ is safe to use certain functions. For example:
     } else {
         # not available. you will be running the old, pure PERL code
     }
+
+=back
 
 =cut
 
@@ -3930,7 +4275,11 @@ sub LA_GT {
     return $rc;
 }
 
-=item $pnm = $pdf->image_pnm($file, %opts)
+=head2 image_pnm
+
+    $pnm = $pdf->image_pnm($file, %opts)
+
+=over
 
 Imports and returns a new PNM image object. C<$file> may be either a filename 
 or a filehandle.
@@ -3938,6 +4287,8 @@ or a filehandle.
 See L<PDF::Builder::Resource::XObject::Image::PNM> for additional information
 and C<examples/Content.pl> for some examples of placing an image on a page
 (JPEG, but the principle is the same).
+
+=back
 
 =cut
 
@@ -3954,7 +4305,11 @@ sub image_pnm {
     return $obj;
 }
 
-=item $png = $pdf->image_png($file, %opts) 
+=head2 image_png
+
+    $png = $pdf->image_png($file, %opts) 
+
+=over
 
 Imports and returns a new PNG image object. C<$file> may be either 
 a filename or a filehandle.
@@ -3969,6 +4324,8 @@ the same).
 There is an optional PNG library (PNG_IPL) described, that gives more
 capability than the default one. However, note that C<$file> can only be
 a filename when using this library.
+
+=back
 
 =cut
 
@@ -4014,7 +4371,11 @@ sub image_png {
     return $obj;
 }
 
-=item $rc = $pdf->LA_IPL()
+=head3 LA_IPL
+
+    $rc = $pdf->LA_IPL()
+
+=over
 
 Returns 1 if the library name (package) Image::PNG::Libpng is installed, and 
 0 otherwise. For this optional library, this call can be used to know if it 
@@ -4025,6 +4386,8 @@ is safe to use certain functions. For example:
     } else {
         # not available. don't use 16bps or interlaced PNG image files
     }
+
+=back
 
 =cut
 
@@ -4047,7 +4410,11 @@ sub LA_IPL {
     return $rc;
 }
 
-=item $gif = $pdf->image_gif($file, %opts)
+=head2 image_gif
+
+    $gif = $pdf->image_gif($file, %opts)
+
+=over
 
 Imports and returns a new GIF image object. C<$file> may be either a filename 
 or a filehandle.
@@ -4055,6 +4422,8 @@ or a filehandle.
 See L<PDF::Builder::Resource::XObject::Image::GIF> for additional information
 and C<examples/Content.pl> for some examples of placing an image on a page 
 (JPEG, but the principle is the same).
+
+=back
 
 =cut
 
@@ -4068,13 +4437,19 @@ sub image_gif {
     return $obj;
 }
 
-=item $gdf = $pdf->image_gd($gd_object, %opts)
+=head2 image_gd
+
+    $gdf = $pdf->image_gd($gd_object, %opts)
+
+=over
 
 Imports and returns a new image object from Image::GD.
 
 See L<PDF::Builder::Resource::XObject::Image::GD> for additional information
 and C<examples/Content.pl> for some examples of placing an image on a page 
 (JPEG, but the principle is the same).
+
+=back
 
 =cut
 
@@ -4088,13 +4463,13 @@ sub image_gd {
     return $obj;
 }
 
-=back
-
 =head1 COLORSPACE METHODS
 
-=over
+=head2 colorspace
 
-=item $colorspace = $pdf->colorspace($type, @arguments)
+    $colorspace = $pdf->colorspace($type, @arguments)
+
+=over
 
 Colorspaces can be added to a PDF to either specifically control the output
 color on a particular device (spot colors, device colors) or to save space by
@@ -4186,6 +4561,8 @@ Device colorspaces are also needed if you want to blend spot colors:
 
 =back
 
+=back
+
 =cut
 
 sub colorspace {
@@ -4214,12 +4591,18 @@ sub colorspace {
     }
 }
 
-=item $cs = $pdf->colorspace_act($file)
+=head2 colorspace_act
+
+    $cs = $pdf->colorspace_act($file)
+
+=over
 
 Returns a new colorspace object based on an Adobe Color Table file.
 
 See L<PDF::Builder::Resource::ColorSpace::Indexed::ACTFile> for a
 reference to the file format's specification.
+
+=back
 
 =cut
 
@@ -4230,9 +4613,15 @@ sub colorspace_act {
     return PDF::Builder::Resource::ColorSpace::Indexed::ACTFile->new($self->{'pdf'}, $file);
 }
 
-=item $cs = $pdf->colorspace_web()
+=head2 colorspace_web
+
+    $cs = $pdf->colorspace_web()
+
+=over
 
 Returns a new colorspace-object based on the "web-safe" color palette.
+
+=back
 
 =cut
 
@@ -4243,11 +4632,17 @@ sub colorspace_web {
     return PDF::Builder::Resource::ColorSpace::Indexed::WebColor->new($self->{'pdf'});
 }
 
-=item $cs = $pdf->colorspace_hue()
+=head1 colorspace_hue
+
+    $cs = $pdf->colorspace_hue()
+
+=over
 
 Returns a new colorspace-object based on the hue color palette.
 
 See L<PDF::Builder::Resource::ColorSpace::Indexed::Hue> for an explanation.
+
+=back
 
 =cut
 
@@ -4258,7 +4653,11 @@ sub colorspace_hue {
     return PDF::Builder::Resource::ColorSpace::Indexed::Hue->new($self->{'pdf'});
 }
 
-=item $cs = $pdf->colorspace_separation($tint, $color)
+=head2 colorspace_separation
+
+    $cs = $pdf->colorspace_separation($tint, $color)
+
+=over
 
 Returns a new separation colorspace object based on the parameters.
 
@@ -4272,6 +4671,8 @@ I<$color> must be a valid color specification limited to: '#rrggbb',
 The colorspace model will automatically be chosen based on the
 specified color.
 
+=back
+
 =cut
 
 sub colorspace_separation {
@@ -4284,9 +4685,13 @@ sub colorspace_separation {
 							       @clr);
 }
 
-=item $cs = $pdf->colorspace_devicen(\@tintCSx, $samples)
+=head2 colorspace_devicen
 
-=item $cs = $pdf->colorspace_devicen(\@tintCSx)
+    $cs = $pdf->colorspace_devicen(\@tintCSx, $samples)
+
+    $cs = $pdf->colorspace_devicen(\@tintCSx)
+
+=over
 
 Returns a new DeviceN colorspace object based on the parameters.
 
@@ -4304,6 +4709,8 @@ B<Example:>
 The colorspace model will automatically be chosen based on the first
 colorspace specified.
 
+=back
+
 =cut
 
 sub colorspace_devicen {
@@ -4317,28 +4724,28 @@ sub colorspace_devicen {
 							    $samples);
 }
 
-=back
-
 =head1 BARCODE METHODS
-
-=over
 
 These are glue routines to the actual barcode rendering routines found
 elsewhere.
 
+=head2 xo_* Bar Code routines
+
+    $bc = $pdf->xo_codabar(%opts)
+
+    $bc = $pdf->xo_code128(%opts)
+
+    $bc = $pdf->xo_2of5int(%opts)
+
+    $bc = $pdf->xo_3of9(%opts)
+
+    $bc = $pdf->xo_ean13(%opts)
+
 =over
 
-=item $bc = $pdf->xo_codabar(%opts)
-
-=item $bc = $pdf->xo_code128(%opts)
-
-=item $bc = $pdf->xo_2of5int(%opts)
-
-=item $bc = $pdf->xo_3of9(%opts)
-
-=item $bc = $pdf->xo_ean13(%opts)
-
 Creates the specified barcode object as a form XObject.
+
+=back
 
 =cut
 
@@ -4398,17 +4805,17 @@ sub xo_ean13 {
     return $obj;
 }
 
-=back
-
-=back
-
 =head1 OTHER METHODS
+
+=head2 xo_form
+
+    $xo = $pdf->xo_form()
 
 =over
 
-=item $xo = $pdf->xo_form()
-
 Returns a new form XObject.
+
+=back
 
 =cut
 
@@ -4421,10 +4828,16 @@ sub xo_form {
     return $obj;
 }
 
-=item $egs = $pdf->egstate()
+=head2 egstate
+
+    $egs = $pdf->egstate()
+
+=over
 
 Returns a new extended graphics state object, as described
 in L<PDF::Builder::Resource::ExtGState>.
+
+=back
 
 =cut
 
@@ -4437,9 +4850,15 @@ sub egstate {
     return $obj;
 }
 
-=item $obj = $pdf->pattern(%opts)
+=head2 pattern
+
+    $obj = $pdf->pattern(%opts)
+
+=over
 
 Returns a new pattern object.
+
+=back
 
 =cut
 
@@ -4452,9 +4871,15 @@ sub pattern {
     return $obj;
 }
 
-=item $obj = $pdf->shading(%opts)
+=head2 shading
+
+    $obj = $pdf->shading(%opts)
+
+=over
 
 Returns a new shading object.
+
+=back
 
 =cut
 
@@ -4467,9 +4892,15 @@ sub shading {
     return $obj;
 }
 
-=item $ndest = $pdf->named_destination()
+=head2 named_destination
+
+    $ndest = $pdf->named_destination()
+
+=over
 
 Returns a new or existing named destination object.
+
+=back
 
 =cut
 
@@ -4504,10 +4935,6 @@ sub named_destination {
 
     return $obj;
 } # end of named_destination()
-
-=back
-
-=cut
 
 # ==================================================
 # input: level of checking, PDF as a string

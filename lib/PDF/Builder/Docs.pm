@@ -916,11 +916,11 @@ consider what readers and other PDF tools may be used with a PDF you produce!
 Also note that earlier Acrobat readers had coordinate limits as small as 3240
 User Units (45 inches), and I<minimum> media size of 72 or 3 User Units.
 
-=head3 User Units
+=head3 User Units (userunit)
+
+    $pdf->userunit($number)
 
 =over
-
-=item $pdf->userunit($number)
 
 The default User Unit in the PDF coordinate system is one point (1/72 inch). You
 can think of it as a scale factor to enable larger (or even, smaller) documents.
@@ -968,19 +968,19 @@ may be scaled down to the current User Unit.
 
 =back
 
-=head3 Media Box
+=head3 Media Box (mediabox)
+
+    $pdf->mediabox($name)
+
+    $pdf->mediabox($name, orient => 'orientation' )
+
+    $pdf->mediabox($w,$h)
+
+    $pdf->mediabox($llx,$lly, $urx,$ury)
+
+    ($llx,$lly, $urx,$ury) = $pdf->mediabox()
 
 =over
-
-=item $pdf->mediabox($name)
-
-=item $pdf->mediabox($name, orient => 'orientation' )
-
-=item $pdf->mediabox($w,$h)
-
-=item $pdf->mediabox($llx,$lly, $urx,$ury)
-
-=item ($llx,$lly, $urx,$ury) = $pdf->mediabox()
 
 Sets the global Media Box (or page's Media Box, if C<< $page-> >> instead). 
 This defines the width and height (or by corner
@@ -1060,19 +1060,19 @@ size as the full media (Media Box), and you don't mind their starting at 0,0.
 
 =back
 
-=head3 Crop Box
+=head3 Crop Box (cropbox)
+
+    $pdf->cropbox($name)
+
+    $pdf->cropbox($name, orient => 'orientation')
+
+    $pdf->cropbox($w,$h)
+
+    $pdf->cropbox($llx,$lly, $urx,$ury)
+
+    ($llx,$lly, $urx,$ury) = $pdf->cropbox()
 
 =over
-
-=item $pdf->cropbox($name)
-
-=item $pdf->cropbox($name, orient => 'orientation')
-
-=item $pdf->cropbox($w,$h)
-
-=item $pdf->cropbox($llx,$lly, $urx,$ury)
-
-=item ($llx,$lly, $urx,$ury) = $pdf->cropbox()
 
 Sets the global Crop Box (or page's Crop Box, if C<< $page-> >> instead). 
 This will define the media size to which the output will 
@@ -1127,19 +1127,19 @@ Crop Box (and other boxes).
 
 =back
 
-=head3 Bleed Box
+=head3 Bleed Box (bleedbox)
+
+    $pdf->bleedbox($name)
+
+    $pdf->bleedbox($name, orient => 'orientation')
+
+    $pdf->bleedbox($w,$h)
+
+    $pdf->bleedbox($llx,$lly, $urx,$ury)
+
+    ($llx,$lly, $urx,$ury) = $pdf->bleedbox()
 
 =over
-
-=item $pdf->bleedbox($name)
-
-=item $pdf->bleedbox($name, orient => 'orientation')
-
-=item $pdf->bleedbox($w,$h)
-
-=item $pdf->bleedbox($llx,$lly, $urx,$ury)
-
-=item ($llx,$lly, $urx,$ury) = $pdf->bleedbox()
 
 Sets the global Bleed Box (or page's Bleed Box, if C<< $page-> >> instead). 
 This is typically used in printing on paper, where you want 
@@ -1177,19 +1177,19 @@ the page Bleed Box (and other boxes).
 
 =back
 
-=head3 Trim Box
+=head3 Trim Box (trimbox)
+
+    $pdf->trimbox($name)
+
+    $pdf->trimbox($name, orient => 'orientation')
+
+    $pdf->trimbox($w,$h)
+
+    $pdf->trimbox($llx,$lly, $urx,$ury)
+
+    ($llx,$lly, $urx,$ury) = $pdf->trimbox()
 
 =over
-
-=item $pdf->trimbox($name)
-
-=item $pdf->trimbox($name, orient => 'orientation')
-
-=item $pdf->trimbox($w,$h)
-
-=item $pdf->trimbox($llx,$lly, $urx,$ury)
-
-=item ($llx,$lly, $urx,$ury) = $pdf->trimbox()
 
 Sets the global Trim Box (or page's Trim Box, if C<< $page-> >> instead). 
 This is supposed to be the actual dimensions of the 
@@ -1220,19 +1220,19 @@ the page Trim Box (and other boxes).
 
 =back
 
-=head3 Art Box
+=head3 Art Box (artbox)
+
+    $pdf->artbox($name)
+
+    $pdf->artbox($name, orient => 'orientation')
+
+    $pdf->artbox($w,$h)
+
+    $pdf->artbox($llx,$lly, $urx,$ury)
+
+    ($llx,$lly, $urx,$ury) = $pdf->artbox()
 
 =over
-
-=item $pdf->artbox($name)
-
-=item $pdf->artbox($name, orient => 'orientation')
-
-=item $pdf->artbox($w,$h)
-
-=item $pdf->artbox($llx,$lly, $urx,$ury)
-
-=item ($llx,$lly, $urx,$ury) = $pdf->artbox()
 
 Sets the global Art Box (or page's Art Box, if C<< $page-> >> instead). 
 This is supposed to define "the extent of the page's 
