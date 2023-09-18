@@ -34,9 +34,11 @@ sub new {
 
 =head2 Single Lines from a String
 
-=over
+=head3 text_left
 
-=item $width = $content->text_left($text, %opts)
+    $width = $content->text_left($text, %opts)
+
+=over
 
 Alias for C<text>. Implemented for symmetry, for those who use a lot of
 C<text_center> and C<text_right>, and desire a matching C<text_left>.
@@ -57,9 +59,11 @@ sub text_left {
     return $self->text($text, @opts, 'align'=>'l');
 }
 
-=over
+=head3 text_center
 
-=item $width = $content->text_center($text, %opts)
+    $width = $content->text_center($text, %opts)
+
+=over
 
 As C<text>, but I<centered> on the current point.
 
@@ -77,9 +81,11 @@ sub text_center {
     return $self->text($text, @opts, 'align'=>'c');
 }
 
-=over
+=head3 text_right
 
-=item $width = $content->text_right($text, %opts)
+    $width = $content->text_right($text, %opts)
+
+=over
 
 As C<text>, but right-aligned to the current point.
 
@@ -99,9 +105,11 @@ sub text_right {
     return $self->text($text, @opts, 'align'=>'r');
 }
 
-=over
+=head3 text_justified
 
-=item $width = $content->text_justified($text, $width, %opts)
+    $width = $content->text_justified($text, $width, %opts)
+
+=over
  
 As C<text>, but stretches text using C<wordspace>, C<charspace>, and (as a  
 last resort) C<hscale>, to fill the desired
@@ -318,7 +326,7 @@ The string is split at regular blanks (spaces), x20, to find the longest
 substring that will fit the C<$width>. 
 If a single word is longer than C<$width>, it will overflow. 
 To stay strictly within the desired bounds, set the option
-C<spillover>=>0 to disallow spillover.
+C<spillover>=E<gt>0 to disallow spillover.
 
 =head3 Hyphenation
 
@@ -334,7 +342,7 @@ There are hard coded minimums of 2 letters before the split, and 2 letters after
 the split. See C<Hyphenate_basic.pm>. Note that neither hyphenation nor simple
 line splitting makes any attempt to prevent widows and orphans, prevent 
 splitting of the last word in a column or page, or otherwise engage in 
-I<paragraph shaping>.
+more desirable I<paragraph shaping>.
 
 =over
 
@@ -568,16 +576,22 @@ sub _removeSHY {
     return $out;
 }
 
-=over
+=head4 text_fill_left, text_fill
 
-=item ($width, $leftover) = $content->text_fill_left($string, $width, %opts)
+    ($width, $leftover) = $content->text_fill_left($string, $width, %opts)
+
+=over
 
 Fill a line of 'width' with as much text as will fit, 
 and outputs it left justified.
 The width actually used, and the leftover text (that didn't fit), 
 are B<returned>.
 
-=item ($width, $leftover) = $content->text_fill($string, $width, %opts)
+=back
+
+    ($width, $leftover) = $content->text_fill($string, $width, %opts)
+
+=over
 
 Alias for text_fill_left().
 
@@ -602,9 +616,11 @@ sub text_fill {
     return $self->text_fill_left(@_); 
 }
 
-=over
+=head4 text_fill_center
 
-=item ($width, $leftover) = $content->text_fill_center($string, $width, %opts)
+    ($width, $leftover) = $content->text_fill_center($string, $width, %opts)
+
+=over
 
 Fill a line of 'width' with as much text as will fit, 
 and outputs it centered.
@@ -626,9 +642,11 @@ sub text_fill_center {
     return ($width, $ret);
 }
 
-=over
+=head4 text_fill_right
 
-=item ($width, $leftover) = $content->text_fill_right($string, $width, %opts)
+    ($width, $leftover) = $content->text_fill_right($string, $width, %opts)
+
+=over
 
 Fill a line of 'width' with as much text as will fit, 
 and outputs it right justified.
@@ -650,9 +668,11 @@ sub text_fill_right {
     return ($width, $ret);
 }
 
-=over
+=head4 text_fill_justified
 
-=item ($width, $leftover) = $content->text_fill_justified($string, $width, %opts)
+    ($width, $leftover) = $content->text_fill_justified($string, $width, %opts)
+
+=over
 
 Fill a line of 'width' with as much text as will fit, 
 and outputs it fully justified (stretched or condensed).
@@ -715,11 +735,13 @@ sub text_fill_justified {
 
 =head2 Larger Text Segments
 
+=head3 paragraph
+
+    ($overflow_text, $unused_height) = $txt->paragraph($text, $width,$height, $continue, %opts)
+
+    $overflow_text = $txt->paragraph($text, $width,$height, $continue, %opts)
+
 =over
-
-=item ($overflow_text, $unused_height) = $txt->paragraph($text, $width,$height, $continue, %opts)
-
-=item $overflow_text = $txt->paragraph($text, $width,$height, $continue, %opts)
 
 Print a single string into a rectangular area on the page, of given width and
 maximum height. The baseline of the first (top) line is at the current text
@@ -864,11 +886,13 @@ sub paragraph {
     return $text;
 }
 
+=head3 section, paragraphs
+
+    ($overflow_text, $continue, $unused_height) = $txt->section($text, $width,$height, $continue, %opts)
+
+    $overflow_text = $txt->section($text, $width,$height, $continue, %opts)
+
 =over
-
-=item ($overflow_text, $continue, $unused_height) = $txt->section($text, $width,$height, $continue, %opts)
-
-=item $overflow_text = $txt->section($text, $width,$height, $continue, %opts)
 
 The C<$text> contains a string with one or more paragraphs C<$width> wide, 
 starting at the current text position, with a newline \n between each 
@@ -897,6 +921,10 @@ will also be added after the last paragraph printed.
 =back
 
 See C<paragraph> for other C<%opts> you can use, such as C<align> and C<pndnt>.
+
+B<Alternate name:> paragraphs
+
+This is for compatibiity with PDF::API2.
 
 =back
 
@@ -951,9 +979,11 @@ sub section {
     return $overflow;
 }
 
-=over
+=head3 textlabel
 
-=item $width = $txt->textlabel($x,$y, $font, $size, $text, %opts)
+    $width = $txt->textlabel($x,$y, $font, $size, $text, %opts)
+
+=over
 
 Place a line of text at an arbitrary C<[$x,$y]> on the page, with various text 
 settings (treatments) specified in the call.
@@ -1112,9 +1142,11 @@ sub textlabel {
 
 =head2 Complex Column Output with Markup
 
-=over
+=head3 column
 
-=item ($rc, $next_y, $unused) = $text->column($page, $text, $grfx, $markup, $txt, %opts)
+    ($rc, $next_y, $unused) = $text->column($page, $text, $grfx, $markup, $txt, %opts)
+
+=over
 
 This method fills out a column of text on a page, returning any unused portion
 that could not be fit, and where it left off on the page.
