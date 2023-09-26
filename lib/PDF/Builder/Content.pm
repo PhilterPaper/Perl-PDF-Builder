@@ -2496,27 +2496,42 @@ clockwise arcs. An arc is B<always> drawn from I<P1> to I<P2>; the direction
 The C<$radius> value cannot be smaller than B<half> the distance from 
 C<[$x1,$y1]> to C<[$x2,$y2]>. If it is too small, the radius will be set to
 half the distance between the points (resulting in an arc that is a
-semicircle). This is a silent error.
+semicircle). This is a silent error, as even if the points are correct, due
+to rounding etc. they may not fall I<exactly> on the two circles.
+
+You can think of "looking" from I<P1> to I<P2>. In the dengenerate case, where
+the radius is exactly half the distance between the points, there is no
+difference between "small" and "large" arcs, and both cirles will coincide
+with their center half way between I<P1> and I<P2>. Only the direction matters.
+Once the radius is any larger, the two circles become distinct. The primary 
+circle is centered to your right, whose small arc is CW on your left; the 
+secondary circle is centered to your left, whose small arc is CCW on your 
+right. The "large" arcs are the arcs using the remainder of the circles: CW 
+large is part of the left (secondary) circle, and CCW large is part of the 
+right (primary) circle.
 
 =back
 
 =cut
 
 sub bogen {
-    my ($self, $x1,$y1, $x2,$y2, $r, $move, $larc, $spf) = @_;
+    my ($self, $x1,$y1, $x2,$y2, $r, $move, $larc, $dir) = @_;
+    # in POD description, dir is "reverse" flag
 
     my ($p0_x,$p0_y, $p1_x,$p1_y, $p2_x,$p2_y, $p3_x,$p3_y);
-    my ($dx,$dy, $x,$y, $alpha,$beta, $alpha_rad, $d,$z, $dir, @points);
+    my ($dx,$dy, $x,$y, $alpha,$beta, $alpha_rad, $d,$z, @points);
 
     if ($x1 == $x2 && $y1 == $y2) {
         die "bogen requires two distinct points";
+	# SVG def of (arc) merely leaves it as a point
     }
     if ($r <= 0.0) {
         die "bogen requires a positive radius";
+	# SVG def of (arc) merely takes absolute value
     }
     $move = 0 if !defined $move;
     $larc = 0 if !defined $larc;
-    $spf  = 0 if !defined $spf;
+    $dir  = 0 if !defined $dir;
 
     $dx = $x2 - $x1;
     $dy = $y2 - $y1;
@@ -2528,7 +2543,7 @@ sub bogen {
     $alpha = rad2deg($alpha_rad);
     # use the complementary angle for flipped arc (arc center on other side)
     # effectively clockwise draw from P2 to P1
-    $alpha -= 180 if $spf;
+    $alpha -= 180 if $dir;
 
     $d = 2*$r;
     # z/d must be no greater than 1.0 (arcsine arg)
@@ -2546,7 +2561,7 @@ sub bogen {
     # note that start and end could be well out of +/-360 degree range
     @points = _arctocurve($r,$r, 90+$alpha+$beta/2,90+$alpha-$beta/2, 1);
 
-    if ($spf) {  # flip order of points for reverse arc
+    if ($dir) {  # flip order of points for reverse arc
         my @pts = @points;
         @points = ();
         while (@pts) {
@@ -3259,6 +3274,9 @@ sub formimage {
 Places an image or other external object (a.k.a. XObject) on the page in the
 specified location.
 
+Up to four optional arguments may be given, with their defaults as described
+below.
+
 If C<$x> and C<$y> are omitted, the object will be placed at C<[0, 0]>.
 
 For images, C<$scale_x> and C<$scale_y> represent the width and height of the
@@ -3279,11 +3297,15 @@ from the L<PDF::Builder::Page> object instead.
 
 =cut
 
-# Behavior based on argument count
-# 0: Place at 0, 0, 100%
-# 2: Place at X, Y, 100%
-# 3: Place at X, Y, scaled
-# 4: Place at X, Y, scale_w, scale_h
+# Behavior based on argument count. xo, x,y, scale_x/w,scale_y/h
+# 1: Place at 0, 0, 100%
+# 2: Place at x, 0, 100%
+# 3: Place at X, Y, 100%
+# 4: Place at X, Y, scaled
+# 5: Place at X, Y, scale_w, scale_h
+# TBD: size=>'points' or 'scale' to override Image usage. can do by finding
+#        an element 'size' (string) and inserting undef's before it to fill
+#        out @_ to 7+ in length.
 
 sub object {
     my ($self, $object, $x, $y, $scale_x, $scale_y) = @_;

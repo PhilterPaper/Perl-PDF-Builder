@@ -2,10 +2,10 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-09-17   UNRELEASED
- * = still in progress
+3.026     2023-09-25   UNRELEASED
+ * = work still in progress
 
- *  (most .pm files)
+    (most .pm files)
      Reformat POD to make navigation easier, including the listing of all user-
       accessible methods in a POD's Table of Contents at the top.
 
@@ -46,11 +46,11 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
  *   Rewrite of list processing (<ol> and <ul>) to fix problem with marker
       color. Add "reversed" (boolean) to <ol> to count down instead of up 
       (needs "start" value to make sense). 
-   * test ol reversed
-  * check entire code: why outline called 15 times for 8 pages? what does a BT
-    reinitialize? just text matrix? why so many unnecessary font changes? 
-    ul/ol deep check. text-align: right not processed (treats as default left).
-    why so many duplicate operations?
+ *   test ol reversed, ul/ol deep check
+ *   check entire code: why outline called 15 times for 8 pages? what does a BT
+      reinitialize? just text matrix? why so many unnecessary font changes? 
+     text-align: right not processed (treats as default left).
+     why so many duplicate operations?
 
     lib/PDF/Builder/Content/Text.pm
      A number of minor fixes: explicitly make paragraph <p> a block level, 

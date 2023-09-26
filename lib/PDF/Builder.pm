@@ -158,7 +158,7 @@ The intent is to avoid expending unnecessary effort in supporting very old
 
 =head3 Anticipated Support Cutoff Dates
 
-B<Note that these are I<not> hard and fast dates.> In particular, we develop
+B<Note> that these are I<not> hard and fast dates. In particular, we develop
 on Strawberry Perl, which sometimes falls a little behind the official Perl
 release!
 
@@ -2714,7 +2714,7 @@ B<Example:>
     my $page = $pdf->page();                      # place to be actually updated
 
     # Import Page 2 from the source PDF
-    my $object = $pdf->embed_page($source, 2);
+    my $xo = $pdf->embed_page($source, 2);
 
     # Add it to the new PDF's first page at 1/2 scale
     my ($x, $y) = (0, 0);
