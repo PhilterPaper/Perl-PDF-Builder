@@ -34,6 +34,11 @@ default()       method in Builder.pm
    May be renamed in the future, as is flagged by Perl::Critic as reserved.
    Use with caution.
 
+width(w),height(h)  methods in Resource/XObject/Image.pm
+   The ability to SET an image's width and/or height is scheduled to be removed
+   after October 2025. This setting ability appears not to work, but in case
+   someone IS using it in some manner, it has not been immediately removed.
+
 *** If I have missed any deprecated interfaces, please let me know! ***
 
 ======= Deprecated items that already have been removed ======================

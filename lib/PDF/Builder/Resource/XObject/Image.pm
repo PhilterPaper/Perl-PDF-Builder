@@ -40,11 +40,18 @@ sub new {
 
 =head2 width
 
-    $width = $image->width($width)
+    $width = $image->width()
 
 =over
 
-Get or set the width value for the image object.
+Get the width (in points) of the image object.
+
+B<Note> that this function also has the ability to I<set> the width,
+by giving the new width (in points), but it appears that it never 
+worked correctly. The I<set> capability has been B<deprecated>, and 
+is scheduled to be removed some time after October, 2025. If you are
+using the C<width()> method in some manner to I<set> the image width,
+please let us know, so we can plan to keep it enabled!
 
 =back
 
@@ -59,11 +66,18 @@ sub width {
 
 =head2 height
 
-    $height = $image->height($height)
+    $height = $image->height()
 
 =over
 
-Get or set the height value for the image object.
+Get the height (in points) of the image object.
+
+B<Note> that this function also has the ability to I<set> the height,
+by giving the new height (in points), but it appears that it never 
+worked correctly. The I<set> capability has been B<deprecated>, and 
+is scheduled to be removed some time after October, 2025. If you are
+using the C<height()> method in some manner to I<set> the image height,
+please let us know, so we can plan to keep it enabled!
 
 =back
 
@@ -75,6 +89,28 @@ sub height {
     $self->{'Height'} = PDFNum(shift()) if scalar @_;
     return $self->{'Height'}->val();
 }
+
+## probably not useful, so do not add, for now
+#=head2 bbox
+#
+#    ($x1,$x2, $w,$h) = $image->bbox()
+#
+#=over
+#
+#Get the image dimensions similarly to a form's I<bounding box>. 
+#Note that the C<$x1> and C<$x2> values will always be 0.
+#
+#This method is offered as an alternative to the C<width> and C<height> methods.
+#
+#=back
+#
+#=cut
+#
+#sub bbox {
+#    my $self = shift();
+#    my @bb = (0,0, $self->width(),$self->height());
+#    return @bb;
+#}
 
 =head2 smask
 

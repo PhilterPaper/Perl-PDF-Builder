@@ -7,14 +7,15 @@ A Perl library to facilitate the creation and modification of PDF files
 PDF::Builder is a **fork** of the popular PDF::API2 Perl library. It provides a 
 library of modules and functions so that a PDF file (document) may be built and 
 maintained from Perl programs. It is not a WYSIWYG editor; nor is it a canned 
-utility or converter. Rather, it is a set of building blocks with which you can 
-perform a wide variety of operations, ranging from basic operations such as 
-selecting a font face, to defining the document using a large subset of either 
-Markdown or HTML markup languages. You can call it from arbitrary Perl 
-programs, which may even create content on-the-fly (or read it in from another 
-source). Quite a few code examples are provided, to help you to get started 
-with the process of creating a PDF document. Many enhancements are in the 
-pipeline to make PDF::Builder even more powerful and versatile.
+utility or converter. It does _not_ have a GUI -- it is driven by your Perl 
+program. It is a set of **building blocks** with which you can perform a wide 
+variety of operations, ranging from basic operations such as selecting a font 
+face, to defining an entire page at a time in the document, using a large 
+subset of either Markdown or HTML markup languages. You can call it from 
+arbitrary Perl programs, which may even create content on-the-fly (or read it 
+in from other sources). Quite a few code examples are provided, to help you to 
+get started with the process of creating a PDF document. Many enhancements are 
+in the pipeline to make PDF::Builder even more powerful and versatile.
 
 [Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full), including Documentation and Examples.
 
@@ -197,8 +198,8 @@ and go to the `docs/` directory. Run `buildDoc.pl --all` to generate the full
 tree of documentation. There's a lot of additional information in the
 PDF::Builder::Docs module (it's all documentation).
 
-You may find it more convenient to point your browser to 
-https://www.catskilltech.com/FreeSW/product/PDF-Builder/title/PDF%3A%3ABuilder/freeSW\_full 
+You may find it more convenient to point your browser to our 
+[Home Page](https://www.catskilltech.com/FreeSW/product/PDF-Builder/title/PDF%3A%3ABuilder/freeSW_full)
 to see the full documentation build (as well as most of the example outputs).
 
 We admit that the documentation is a bit light on "how to" task orientation.

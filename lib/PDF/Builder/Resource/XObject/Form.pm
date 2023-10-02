@@ -45,7 +45,7 @@ sub new {
 
 =over
 
-Get or set the coordinates of the form object's bounding box
+Get or set the coordinates of the form object's bounding box.
 
 =back
 

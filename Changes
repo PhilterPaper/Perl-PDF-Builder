@@ -2,8 +2,15 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-09-25   UNRELEASED
+3.026     2023-10-02   UNRELEASED
  * = work still in progress
+
+    lib/PDF/Builder/Resource/XObject/Image.pm, INFO/DEPRECATED
+     Deprecate Image object methods width() and height() ability to SET the 
+      width and height of an image. This setting apparently has never worked 
+      properly, but in case someone is actually using it for some purpose, it 
+      has not been immediately removed. It is planned to be removed after
+      October, 2025, unless someone shows that they are using it.
 
     (most .pm files)
      Reformat POD to make navigation easier, including the listing of all user-
