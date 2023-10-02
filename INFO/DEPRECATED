@@ -15,12 +15,6 @@ NOTE for maintainer: update t/deprecations.t with tests for both old
 
 In order of scheduled removal date:
 
-get_*box()      methods in Page.pm
-   now *box() methods (both $pdf and $page) with no arguments return the 
-   global and current page bounding boxes (media, crop, bleed, trim, art).
-   The get routines are now obsolete, and may be removed on or after 
-   August, 2021.
-
 PDFStr()        method in Basic/PDF/Utils.pm
    NOT scheduled to be removed, but use PDFString() instead. 
 
@@ -166,4 +160,10 @@ elementsof()    method in a number of Basic/PDF/ routines
 removeobj()     method in Array.pm
    Not used internally and not documented. To be removed on or after August,
    2021. Replaced by remove_element(). [Removed September, 2023]
+
+get_*box()      methods in Page.pm
+   now *box() methods (both $pdf and $page) with no arguments return the 
+   global and current page bounding boxes (media, crop, bleed, trim, art).
+   The get routines are now obsolete, and may be removed on or after 
+   August, 2021. [Removed October, 2023]
 

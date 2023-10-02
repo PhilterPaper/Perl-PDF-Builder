@@ -5,6 +5,12 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
 3.026     2023-10-02   UNRELEASED
  * = work still in progress
 
+    lib/PDF/Builder/Page.pm, INFO/DEPRECATED, t/deprecations-page.t 
+     Obsolete and deprecated methods get_mediabox(), get_cropbox(), 
+      get_bleedbox(), get_trimbox(), and get_artbox() have been removed. Please
+      use the regular methods (in $pdf or $page) with no arguments, to retrieve
+      the current box values.
+
     lib/PDF/Builder/Resource/XObject/Image.pm, INFO/DEPRECATED
      Deprecate Image object methods width() and height() ability to SET the 
       width and height of an image. This setting apparently has never worked 
