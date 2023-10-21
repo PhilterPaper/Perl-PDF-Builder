@@ -144,6 +144,9 @@ PDF::API2 if you have a package or library intended to run on both!
    lib/PDF/Builder/Content.pm  [ref CTS 7] $text->save() and restore() are no
      longer no-ops, if you had them in your code. They issue the same q and Q
      commands as a graphics save() and restore().
+   *** Removed in release 3.26. save/restore are only for graphics context
+   *** and should not be used in text context (will see a one-time warning,
+   *** and the calls are now no-ops)
 
    lib/PDF/Builder.pm
    lib/PDF/Builder/Content.pm

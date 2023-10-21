@@ -159,6 +159,10 @@ sub dest {
     return $self;
 }
 
+# These targets are similar to what is given in Annotations, and are used to
+# provide an Action when the externally visible name is given to the PDF Reader
+# (see Named Destination issue #202 for #nameddest= ).
+
 =head2 Target Destinations
 
 =head3 link, goto

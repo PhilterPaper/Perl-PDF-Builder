@@ -980,20 +980,16 @@ at the first call to each object, so that you are starting from a known base.
 This may most easily be done by using $I<type>->restore() and ->save() just
 after creating $I<type>:
 
-=over
-
- $text1 = $page->text(); 
-   $text1->save();
- $grfx1 = $page->gfx();
-   $grfx1->restore();
-   $grfx1->save();
- $text2 = $page->text();
-   $text2->restore();
-   $text2->save();
- $grfx2 = $page->gfx();
-   $grfx1->restore();
-
-=back
+    $text1 = $page->text(); 
+      $text1->save();
+    $grfx1 = $page->gfx();
+      $grfx1->restore();
+      $grfx1->save();
+    $text2 = $page->text();
+      $text2->restore();
+      $text2->save();
+    $grfx2 = $page->gfx();
+      $grfx1->restore();
 
 B<Alternate name:> C<graphics>
 

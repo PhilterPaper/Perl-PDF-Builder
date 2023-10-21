@@ -3453,7 +3453,11 @@ sub corefont {
         if ($name =~ /^Times$/i) {
 	    # Accept Times as an alias for Times-Roman to follow the pattern 
 	    # set by Courier and Helvetica
-	    carp "Times is not a standard font; substituting Times-Roman";
+	    if (!$MSG_COUNT[3]) {
+		# one message (per run) reminding user
+	        carp "Times is not a standard font; substituting Times-Roman";
+	        $MSG_COUNT[3]++;
+	    }
             $name = 'Times-Roman';
         }
     }

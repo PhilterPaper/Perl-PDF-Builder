@@ -5031,7 +5031,12 @@ Saves the current I<graphics> state on a PDF stack. See PDF definition 8.4.2
 through 8.4.4 for details. This includes the line width, the line cap style, 
 line join style, miter limit, line dash pattern, stroke color, fill color,
 current transformation matrix, current clipping port, flatness, and dictname.
-This method applies to both I<text> and I<gfx/graphics> objects.
+
+This method applies to I<only> I<gfx/graphics> objects. If attempted with
+I<text> objects, you will receive a one-time (per run) warning message, and
+should update your code B<not> to do save() and restore() on a text object.
+Only save() generates the message, as presumably each restore() has already had
+a save() performed.
 
 =back
 
@@ -5059,9 +5064,16 @@ sub _save {
 sub save {
     my ($self) = shift;
 
-   #unless ($self->_in_text_object()) {
+    our @MSG_COUNT;
+    if ($self->_in_text_object()) {
+	# warning in text mode, no other effect
+	if (!$MSG_COUNT[2]) {
+	    print STDERR "Can not call save() or restore() on a text object.\n";
+	    $MSG_COUNT[2]++;
+	}
+    } else {
         $self->add(_save());
-   #}
+    }
 
    return $self;
 }
@@ -5088,9 +5100,11 @@ sub _restore {
 sub restore {
     my ($self) = shift;
 
-   #unless ($self->_in_text_object()) {
+    if ($self->_in_text_object()) {
+	# save() already gave any warning
+    } else {
         $self->add(_restore());
-   #}
+    }
 
    return $self;
 }

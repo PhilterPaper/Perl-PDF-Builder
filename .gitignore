@@ -7,6 +7,9 @@
 *~
 # ignore ViM editor swap files
 *.swp
+# ignore development/test versions
+*.old
+*.new
 # ignore leftover POD-to-HTML stuff
 pod2htmd.tmp
 # ignore .html documentation

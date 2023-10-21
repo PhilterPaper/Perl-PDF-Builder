@@ -632,8 +632,6 @@ Controls viewing preferences for the PDF.
 
 =over
 
-=over
-
 =item fullscreen
 
 Full-screen mode, with no menu bar, window controls, or any other window visible.
@@ -648,11 +646,7 @@ Document outline visible.
 
 =back
 
-=back
-
 =head3 Page Layout Options
-
-=over
 
 =over
 
@@ -674,11 +668,7 @@ Display the pages in two columns, with oddnumbered pages on the right.
 
 =back
 
-=back
-
 =head3 Viewer Options
-
-=over
 
 =over
 
@@ -731,8 +721,6 @@ Print duplex by default and flip on the short edge of the sheet.
 =item duplexfliplongedge
 
 Print duplex by default and flip on the long edge of the sheet.
-
-=back
 
 =back
 

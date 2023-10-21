@@ -2,8 +2,21 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-10-02   UNRELEASED
+3.026     2023-10-21   UNRELEASED
  * = work still in progress
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Content.pm, examples/060_transparency,
+      INFO/KNOWN_INCOMP, tools/1_pc.pl
+     Remove ability to generate save() ("q") and restore() ("Q") while in a
+      text object. If attempted in text, it is now a no-op with a one-time
+      (per run) warning message reminding users to update their code NOT to
+      attempt save and restore in text mode. This was prompted by PDF::TableX 
+      t-tests using text save and restore, which isn't permitted by the PDF
+      definition. Updated one PDF::Builder example that (unnecessarily) did a
+      save/restore in text mode. Thanks to Vadim Repin for troubleshooting this
+      and determining the problem and fix. While in here, make the warning 
+      message that a request for 'Times' core font is changed to 'Times-Roman'
+      a one-time (per run) output, rather than every time.
 
     lib/PDF/Builder/Page.pm, INFO/DEPRECATED, t/deprecations-page.t 
      Obsolete and deprecated methods get_mediabox(), get_cropbox(), 

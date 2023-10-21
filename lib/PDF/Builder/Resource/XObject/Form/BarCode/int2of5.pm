@@ -10,7 +10,7 @@ our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Resource::XObject::Form::BarCode::int2of5 - specific information for int 2-of-5 bar codes. Inherits from L<PDF::Builder::Resource::XObject::Form::BarCode>
+PDF::Builder::Resource::XObject::Form::BarCode::int2of5 - specific information for interleaved 2-of-5 bar codes. Inherits from L<PDF::Builder::Resource::XObject::Form::BarCode>
 
 =head1 METHODS
 
