@@ -294,6 +294,7 @@ sub open {
        # out inline comment and create a separate comment further along).
     }
 
+    # there should always be 'startxref' within 16*64 bytes of end
     $fh->seek(0, 2);            # go to end of file
     my $end = $fh->tell();
     $self->{' epos'} = $end;
@@ -307,7 +308,8 @@ sub open {
             warn "Malformed PDF file $filename"; #orig 'die'
         }
     }
-    my $xpos = $1;
+    my $xpos = $1; # offset given after 'startxref'
+    # should point to either xref table ('xref'), or object with xref stream
     $self->{' xref_position'} = $xpos;
 
     my $tdict = $self->readxrtr($xpos, %options);
@@ -1547,7 +1549,8 @@ sub _unpack_xref_stream {
 
 sub readxrtr {
     my ($self, $xpos, %options) = @_;
-    # $xpos SHOULD be pointing to "xref" keyword
+    # $xpos SHOULD be pointing to "xref" keyword 
+    #    UNLESS an xref stream is in use (v 1.5+)
     # copy dashed option names to preferred undashed names
     if (defined $options{'-diags'} && !defined $options{'diags'}) { $options{'diags'} = delete($options{'-diags'}); }
 
@@ -1567,7 +1570,7 @@ sub readxrtr {
    #    $buf = update($fh, $buf);
    #}
 
-    if ($buf =~ s/^xref$cr//i) {   # remove xrefEOL from buffer
+    if ($buf =~ s/^xref$cr//i) {   # xref table, remove xrefEOL from buffer
         # Plain XRef tables.
         #
         # look to match startobj# count# EOL of first (or only) subsection
@@ -1754,7 +1757,7 @@ sub readxrtr {
 
         ($tdict, $buf) = $self->readval($buf);
 
-    } elsif ($buf =~ m/^(\d+)\s+(\d+)\s+obj/i) {
+    } elsif ($buf =~ m/^(\d+)\s+(\d+)\s+obj/i) { # object for xref stream
         my ($xref_obj, $xref_gen) = ($1, $2);
 	$PDF::Builder::global_pdf->verCheckOutput(1.5, "importing cross-reference stream");
         # XRef streams

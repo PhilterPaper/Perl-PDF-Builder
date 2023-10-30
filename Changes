@@ -2,8 +2,14 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-10-21   UNRELEASED
+3.026     2023-10-29   UNRELEASED
  * = work still in progress
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Basic/PDF/File.pm
+     Improve upon the Integrity Check, acknowledging that missing objects
+      might be hidden in an object stream. The open() function was also 
+      sometimes seeing a class reference rather than a pure class, which has
+      been fixed. See issue #196 and especially #197.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Content.pm, examples/060_transparency,
       INFO/KNOWN_INCOMP, tools/1_pc.pl

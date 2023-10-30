@@ -59,7 +59,9 @@ my @font_path = __PACKAGE__->set_font_path(
 
 our @MSG_COUNT = (0,  # [0] Graphics::TIFF not installed
 	          0,  # [1] Image::PNG::Libpng not installed
-		  0,  # [2] TBD...
+		  0,  # [2] save/restore in text mode
+		  0,  # [3] Times-Roman core font substituted for Times
+		  0,  # [4] TBD...
 	         );
 our $outVer = 1.4; # desired PDF version for output, bump up w/ warning on read or feature output
 our $msgVer = 1;   # 0=don't, 1=do issue message when PDF output version is bumped up
@@ -643,6 +645,7 @@ sub from_string {
     if (defined $opts{'-compress'} && !defined $opts{'compress'}) { $opts{'compress'} = delete($opts{'-compress'}); }
     if (defined $opts{'-diaglevel'} && !defined $opts{'diaglevel'}) { $opts{'diaglevel'} = delete($opts{'-diaglevel'}); }
 
+    if (ref($class)) { $class = ref($class); }
     my $self = {};
     bless $self, $class;
     foreach my $parameter (keys %opts) {
@@ -4976,6 +4979,10 @@ sub IntegrityCheck {
     # intialize each element to [ 0 0 -1 -1 -1 [] ]
 
     return $Version if !length($string);  # nothing to examine?
+    # basic PDF version on line 1
+    if ($string =~ m/^%PDF-([\d.]+)/) {
+        $Version = $1;
+    }
     # even if $level 0, still want to get any higher /Version
     # build analysis data and issue errors/warnings at appropriate $level
     my @major = split /%%EOF/, $string; # typically [0] entire PDF [1] empty
@@ -5155,9 +5162,17 @@ sub IntegrityCheck {
     if (!defined $Root) {
 	print STDERR "$IC No Root object defined!\n" if $level >= $level_error;
     } else {
+	# Look for expected Root object
         if (!defined $objList{$Root}) {
+	    if ($Version > 1.4) {
+		# PDF 1.5 and up, Root could be hiding in an Object Stream
+		# TBD: disassemble object stream(s) to expose all objects
+	        print STDERR "$IC Root object $Root not found, but this may be\n  the result of putting it in an Object Stream.\n" if $level >= $level_warning;
+	    } else {
+		# PDF 1.4 or below, definitely an error if no Root found
+	        print STDERR "$IC Root object $Root not found!\n" if $level >= $level_error;
+	    }
 	    $objList{$Root} = [1, 0, -1, -1, -1, []];
-	    print STDERR "$IC Root object $Root not found!\n" if $level >= $level_error;
         }
         $objList{$Root}->[$idx_refcount]++;
     }
@@ -5168,7 +5183,15 @@ sub IntegrityCheck {
     } else {
         if (!defined $objList{$Info}) {
 	    $objList{$Info} = [1, 0, -1, -1, -1, []];
-	    print STDERR "$IC Info object $Info not found!\n" if $level >= $level_note;
+	    if ($Version > 1.4) {
+		# PDF 1.5 and up, Info could be hiding in an Object Stream
+		# TBD: disassemble object stream(s) to expose all objects
+	        print STDERR "$IC Info object $Root not found, but this may be\n  the result of putting it in an Object Stream, or it may have been deleted.\n" if $level >= $level_warning;
+	    } else {
+		# PDF 1.4 or below, definitely a warning if no Info found
+	        print STDERR "$IC Root object $Root not found!\n" if $level >= $level_warning;
+	    }
+	    print STDERR "$IC Info object $Info not found!\n" if $level >= $level_warning;
 	    # possibly in a deleted object (on free list)
         }
         $objList{$Info}->[$idx_refcount]++;
@@ -5186,7 +5209,11 @@ sub IntegrityCheck {
 	# was an object actually defined for this entry?
 	# missing Info and Root messages already given, so flag is 1 ("defined")
 	if ($objList{$thisObj}->[$idx_defined] == 0) {
-	    print STDERR "$IC object $thisObj referenced, but no entry found.\n" if $level >= $level_note;
+	    if ($Version > 1.4) {
+	        print STDERR "$IC object $thisObj referenced, but no entry found\n  (might be on the free list, or defined in an object stream).\n" if $level >= $level_note;
+	    } else {
+	        print STDERR "$IC object $thisObj referenced, but no entry found (might be on the free list).\n" if $level >= $level_warning;
+	    }
 	    # it's apparently OK if the missing object is on the free list --
 	    # it will just be ignored
 	}
