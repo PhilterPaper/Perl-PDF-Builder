@@ -259,10 +259,10 @@ sub add_page_recursively {
     my ($self, $page, $page_index) = @_;
 
     my $parent = $self;
-    my $max_kids_per_parent = 8; # Why 8?
+    my $max_kids_per_parent = 8; # Why 8? effort to somewhat balance tree?
     if (scalar $parent->{'Kids'}->elements() >= $max_kids_per_parent and 
         $parent->{'Parent'} and 
-        $page_index < 1) {
+        $page_index < 0) {
         my $grandparent = $parent->{'Parent'}->realise();
         $parent = $parent->new($parent->_pdf(), $grandparent);
 
