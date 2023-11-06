@@ -2,8 +2,14 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-11-04   UNRELEASED
+3.026     2023-11-06   UNRELEASED
  * = work still in progress
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/FontManager.pm, 
+      lib/PDF/Builder/Content/Text.pm, t/03-xrefstm-index.t
+     Continuing Issue #197, clean up handling of newly-created PDF object
+      in from_string() method (used by open() method). Also knock-on effects
+      on some t-tests.
 
     lib/PDF/Basic/PDF/Pages.pm
      Issue #203 a new page was being inserted in the wrong place. Thanks to

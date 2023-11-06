@@ -646,11 +646,12 @@ sub from_string {
     if (defined $opts{'-diaglevel'} && !defined $opts{'diaglevel'}) { $opts{'diaglevel'} = delete($opts{'-diaglevel'}); }
 
     if (ref($class)) { $class = ref($class); }
-    my $self = {};
-    bless $self, $class;
-    foreach my $parameter (keys %opts) {
-        $self->default($parameter, $opts{$parameter});
-    }
+#   my $self = {};
+#   bless $self, $class;
+#   foreach my $parameter (keys %opts) {
+#       $self->default($parameter, $opts{$parameter});
+#   }
+    my $self = $class->new(%opts);
 
     $self->{'content_ref'} = \$content;
     my $diaglevel = 2;

@@ -4003,7 +4003,7 @@ sub _revise_baseline {
 } # end of _revise_baseline()
 
 # just something to pause during debugging
-sub  _pause {
+sub _pause {
     print STDERR "====> Press Enter key to continue...";
     my $input = <>;
     return;

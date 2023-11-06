@@ -122,6 +122,7 @@ sub new {
    #$class = ref($class) if ref($class);
    #my $self = $class->SUPER::new($pdf);
     $self->{' pdf'} = $pdf;
+    weaken $self->{' pdf'};
 
     # current font is default font until face explicitly changed.
     # Times face should be element 0 of the font-list array.
