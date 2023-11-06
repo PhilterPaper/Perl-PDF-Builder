@@ -795,6 +795,9 @@ the reader software to form an even number of elements (pairs).
 If a single argument of B<-1> is given, the current setting is B<returned>. 
 This is an array consisting of two elements: an anonymous array containing the 
 dash pattern (default: empty), and the shift (offset) amount (default: 0). 
+It may be used directly in a linedash() call, as linedash will recognize the 
+special pattern [ array, number ].
+
 If the dash pattern is being I<set>, C<$self> is B<returned> so that calls may 
 be chained.
 
@@ -835,9 +838,21 @@ sub line_dash_pattern { return linedash(@_); } ## no critic
 sub linedash {
     my ($self, @pat) = @_;
 
+    # request existing pattern and offset?
     if (scalar @pat == 1 && $pat[0] == -1) {
 	return @{$self->{' linedash'}};
     }
+    # request to restore stored pattern and offset?
+    if (scalar @pat == 2 && ref($pat[0]) eq 'ARRAY' && ref($pat[1]) eq '') {
+        @{$self->{' linedash'}} = @pat;
+	if (@{$pat[0]}) {
+	    # not an empty array
+	    return ('[', floats(@{$pat[0]}), '] ', $pat[1], ' d');
+	} else {
+	    return ('[ ] 0 d');
+	}
+    }
+    # anything else, including empty pattern
     $self->add($self->_linedash(@pat));
 
     return $self;

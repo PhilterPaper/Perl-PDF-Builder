@@ -5,6 +5,11 @@ See also INFO/Changes_2021 for earlier version 3 release logs.
 3.026     2023-11-06   UNRELEASED
  * = work still in progress
 
+    lib/PDF/Builder/Content.pm
+     The linedash() method was not properly handling a restore of a saved
+      dash pattern, resulting in PDF "dash pattern" values that could be
+      unusable by a Reader.
+
     lib/PDF/Builder.pm, lib/PDF/Builder/FontManager.pm, 
       lib/PDF/Builder/Content/Text.pm, t/03-xrefstm-index.t
      Continuing Issue #197, clean up handling of newly-created PDF object
