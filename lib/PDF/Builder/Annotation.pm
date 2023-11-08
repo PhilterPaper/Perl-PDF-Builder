@@ -280,6 +280,8 @@ rectangle). The icon size is fixed, and its fill color set by C<color>.
 
 Additional options:
 
+=back
+
 =over
 
 =item icon => name_string
@@ -301,8 +303,6 @@ A I<reference> to an icon may be passed instead of a name.
 Define the opacity (non-transparency, opaqueness) of the icon. This value
 ranges from 0.0 (transparent) to 1.0 (fully opaque), and applies to both
 the outline and the fill color. The default is 1.0.
-
-=back
 
 =back
 
@@ -362,6 +362,8 @@ C<text> is the popup's label string, not to be confused with the main C<$text>.
 There is no icon. Instead, the annotated text marked by C<$PointList> is
 highlighted in one of four ways specified by C<$highlight>. 
 
+=back
+
 =over
 
 =item $PointList => [ 8n numbers ]
@@ -417,8 +419,6 @@ Named colors are not supported at this time.
 Define the opacity (non-transparency, opaqueness) of the icon. This value
 ranges from 0.0 (transparent) to 1.0 (fully opaque), and applies to both
 the outline and the fill color. The default is 1.0.
-
-=back
 
 =back
 
@@ -548,6 +548,8 @@ including the path, give the C<notrimpath> option.
 
 Options: 
 
+=back
+
 =over 
 
 =item icon => name_string
@@ -588,8 +590,6 @@ to be embedded, at this time PDF::Builder only permits a single file (format of
 your choice) to be embedded. If there is user demand for multiple file formats
 to be referenced and/or embedded, we could look into providing this, I<although
 separate OS version paths B<may> be considered obsolescent!>.
-
-=back
 
 =cut
 
@@ -702,14 +702,14 @@ The default clickable area is the icon itself.
 
 Defining option. I<Note that this "option" is actually B<required>.>
 
+=back
+
 =over
 
 =item rect => [LLx, LLy, URx, URy]
 
 Set annotation rectangle at C<[LLx,LLy]> to C<[URx,URy]> (lower left and
 upper right coordinates). LL to UR is customary, but any diagonal is allowed.
-
-=back
 
 =back
 
@@ -746,6 +746,8 @@ border C<[0 0 0]> (solid line of width 0, and thus invisible).
 
 Defining option:
 
+=back
+
 =over
 
 =item border => [CRh, CRv, W]
@@ -765,8 +767,6 @@ as one or more I<pairs>). The default is a solid line.
 The border vector seems to ignore the first two settings (corner radii), but 
 the line thickness works, on basic Readers. 
 The corner radii I<may> work on some other Readers.
-
-=back
 
 =back
 
@@ -828,14 +828,14 @@ already open for editing, while "closed" has to be clicked on to edit it.
 
 Defining option:
 
+=back
+
 =over
 
 =item open => boolean
 
 If true (1), the annotation will be marked as initially "open".
 If false (0), or the option is not given, the annotation is initially "closed".
-
-=back
 
 =back
 
@@ -941,7 +941,9 @@ is black.
 
 Defining option:
 
-Named colors are not supported at this time.
+Named colors (e.g., 'black') are not supported at this time.
+
+=back
 
 =over
 
@@ -964,8 +966,6 @@ yellow, and [ 1, 1, 1 ] is white.
 If I<c> (red), I<m> (magenta), I<y> (yellow), and I<k> (black) are all between 
 0.0 and 1.0, the fill color will be the defined CMYK hue. [ 0, 0, 0, 0 ] is
 white, [ 1, 0, 1, 0 ] is green, and [ 1, 1, 1, 1 ] is black.
-
-=back
 
 =back
 

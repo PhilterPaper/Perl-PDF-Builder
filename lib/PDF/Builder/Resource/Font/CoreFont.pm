@@ -50,12 +50,15 @@ Valid %options are:
 
 =over
 
-I<encode>
-... changes the encoding of the font from its default.
+=item encode
+
+Changes the encoding of the font from its default.
 See I<perl's Encode> for the supported values. B<Warning:> only single byte 
 encodings are permitted. Multibyte encodings such as 'utf8' are forbidden.
 
-I<pdfname> ... changes the reference-name of the font from its default.
+=item pdfname
+
+Changes the reference-name of the font from its default.
 The reference-name is normally generated automatically and can be
 retrieved via C<$pdfname=$font->name()>.
 
@@ -69,23 +72,19 @@ B<standard PDF types>
 
 =over
 
-=over
-
-=item * helvetica helveticaoblique helveticabold helvetiaboldoblique
+=item * helvetica, helveticaoblique, helveticabold, helvetiaboldoblique
 
 May have Arial substituted on some systems (e.g., Windows)
 
-=item * courier courieroblique courierbold courierboldoblique
+=item * courier, courieroblique, courierbold, courierboldoblique
 
 Fixed pitch, may have Courier New substituted on some systems (e.g., Windows)
 
-=item * timesroman timesitalic timesbold timesbolditalic
+=item * timesroman, timesitalic, timesbold, timesbolditalic
 
 May have Times New Roman substituted on some systems (e.g., Windows)
 
-=item * symbol zapfdingbats
-
-=back
+=item * symbol, zapfdingbats
 
 =back
 
@@ -93,21 +92,17 @@ B<Primarily Windows typefaces>
 
 =over
 
-=over
+=item * georgia, georgiaitalic, georgiabold, georgiabolditalic
 
-=item * georgia georgiaitalic georgiabold georgiabolditalic
+=item * verdana, verdanaitalic, verdanabold, verdanabolditalic
 
-=item * verdana verdanaitalic verdanabold verdanabolditalic
+=item * trebuchet, trebuchetitalic, trebuchetbold, trebuchetbolditalic
 
-=item * trebuchet trebuchetitalic trebuchetbold trebuchetbolditalic
+=item * bankgothic, bankgothicitalic, bankgothicbold, bankgothicitalic
 
-=item * bankgothic bankgothicitalic bankgothicbold bankgothicitalic
+Free versions of Bank Gothic are often only medium weight Roman (bankgothic).
 
-Free versions of Bank Gothic are often only medium weight.
-
-=item * webdings wingdings
-
-=back
+=item * webdings, wingdings
 
 =back
 

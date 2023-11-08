@@ -25,6 +25,7 @@ no_index:
 #  Image::PNG::Libpng: '0.57'
 #  Text::Markdown: '1.000031'
 #  HTML::TreeBuilder: '5.07'
+#  Pod::Simple::XHTML: '3.45'
 requires:
   Compress::Zlib: '1.0'
   Font::TTF: '1.04'

@@ -1691,6 +1691,8 @@ of the last line or curve drawn becomes the new current point.
 
 Options %opts:
 
+=back
+
 =over
 
 =item 'firstseg' => 'I<mode>'
@@ -1809,13 +1811,15 @@ Bezier control points.
 
 =back
 
-B<Special cases>
-
 =over
+
+B<Special cases>
 
 Adjacent points which are duplicates are consolidated. 
 An extra coordinate at the end of the input point list (not a full 
 C<[x,y]> pair) will, as usual, be ignored.
+
+=back
 
 =over
 
@@ -1844,7 +1848,7 @@ C<firstseg>, C<lastseg>, and C<colinear>.
 
 =back
 
-=back
+=over
 
 B<Alternate name:> C<cbspline>
 

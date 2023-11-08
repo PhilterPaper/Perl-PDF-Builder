@@ -107,6 +107,7 @@ functionality.
 * HarfBuzz::Shaper (0.024 or higher, needed for Latin script ligatures and kerning, as well as for any complex script such as Arabic, Indic scripts, or Khmer)
 * Text::Markdown (1.000031 or higher, needed if using 'md1' markup)
 * HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup)
+* Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc utility to create HTML documentation)
 
 If an optional package is needed, but not installed, sometimes PDF::Builder
 will be able to fall back to built-in partial functionality (TIFF and PNG 

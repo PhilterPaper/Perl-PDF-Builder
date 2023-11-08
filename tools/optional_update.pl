@@ -19,7 +19,7 @@ use List::Util 'any';
 # optional prerequisites, do not need to exclude unused optionals.
 
 our $VERSION = '3.025'; # VERSION
-our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 # master list of optional prerequisites:
 # make sure that any updates to patterns etc. keep the same order
@@ -29,6 +29,7 @@ my %options = (
 	'3' => ["HarfBuzz::Shaper",   "0.024"    ],
 	'4' => ["Text::Markdown",     "1.000031" ],
 	'5' => ["HTML::TreeBuilder",  "5.07"     ],
+	'6' => ["Pod::Simple::XHTML", "3.45"     ],
               );
 
 print "\nHere are the available optional libraries. Select 0 or more of\n";
@@ -86,6 +87,7 @@ sub update_Makefile {
                    "(\"HarfBuzz::Shaper\"\\s*=>\\s*)[\\d.]+,",
                    "(\"Text::Markdown\"\\s*=>\\s*)[\\d.]+,",
                    "(\"HTML::TreeBuilder\"\\s*=>\\s*)[\\d.]+,",
+                   "(\"Pod::Simple::XHTML\"\\s*=>\\s*)[\\d.]+,",
 	          );
 
     my $infile = "Makefile.PL";
@@ -163,6 +165,7 @@ sub update_META_json {
                    "(\"HarfBuzz::Shaper\"\\s*:\\s*)\"[\\d.]+\"",
                    "(\"Text::Markdown\"\\s*:\\s*)\"[\\d.]+\"",
                    "(\"HTML::TreeBuilder\"\\s*:\\s*)\"[\\d.]+\"",
+                   "(\"Pod::Simple::XHTML\"\\s*:\\s*)\"[\\d.]+\"",
 	          );
 
     my $infile = "META.json";
@@ -227,6 +230,7 @@ sub update_META_yml {
                    "(HarfBuzz::Shaper:\\s*)'[\\d.]+'",
                    "(Text::Markdown\\s*)'[\\d.]+'",
                    "(HTML::TreeBuilder\\s*)'[\\d.]+'",
+                   "(Pod::Simple::XHTML\\s*)'[\\d.]+'",
 	          );
 
     my $infile = "META.yml";

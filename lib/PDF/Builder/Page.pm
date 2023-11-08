@@ -279,7 +279,7 @@ sub mediabox {
     return _bbox('MediaBox', @_);
 }
 
-=head3 get_mediabox
+=head4 get_mediabox
 
     ($llx,$lly, $urx,$ury) = $page->get_mediabox()
 
@@ -288,7 +288,7 @@ sub mediabox {
 Gets the Media Box corner coordinates based on best estimates or the default.
 These are in the order given in a mediabox call (4 coordinates).
 
-This method is B<Deprecated>, and B<will> be removed in the future. Use
+This method is B<Deprecated>, and has been B<removed>. Use
 the global (C<$pdf>) or page (C<$page>) mediabox() call with no parameters
 instead.
 
@@ -296,10 +296,10 @@ instead.
 
 =cut
 
-sub get_mediabox {
-    my $self = shift();
-    return $self->mediabox();
-}
+#sub get_mediabox {
+#    my $self = shift();
+#    return $self->mediabox();
+#}
 
 =head3 cropbox
 
@@ -327,7 +327,7 @@ sub cropbox {
     return _bbox('CropBox', @_);
 }
 
-=head3 get_cropbox
+=head4 get_cropbox
 
     ($llx,$lly, $urx,$ury) = $page->get_cropbox()
 
@@ -335,7 +335,7 @@ sub cropbox {
 
 Gets the Crop Box based on best estimates or the default.
 
-This method is B<Deprecated>, and B<will> be removed in the future. Use
+This method is B<Deprecated>, and has been B<removed>. Use
 the global (C<$pdf>) or page (C<$page>) cropbox() call with no parameters
 instead.
 
@@ -343,10 +343,10 @@ instead.
 
 =cut
 
-sub get_cropbox {
-    my $self = shift();
-    return $self->cropbox();
-}
+#sub get_cropbox {
+#    my $self = shift();
+#    return $self->cropbox();
+#}
 
 =head3 bleedbox
 
@@ -374,7 +374,7 @@ sub bleedbox {
     return _bbox('BleedBox', @_);
 }
 
-=head3 get_bleedbox
+=head4 get_bleedbox
 
     ($llx,$lly, $urx,$ury) = $page->get_bleedbox()
 
@@ -382,7 +382,7 @@ sub bleedbox {
 
 Gets the Bleed Box based on best estimates or the default.
 
-This method is B<Deprecated>, and B<will> be removed in the future. Use
+This method is B<Deprecated>, and has been B<removed>. Use
 the global (C<$pdf>) or page (C<$page>) bleedbox() call with no parameters
 instead.
 
@@ -390,10 +390,10 @@ instead.
 
 =cut
 
-sub get_bleedbox {
-    my $self = shift();
-    return $self->bleedbox();
-}
+#sub get_bleedbox {
+#    my $self = shift();
+#    return $self->bleedbox();
+#}
 
 =head3 trimbox
 
@@ -421,7 +421,7 @@ sub trimbox {
     return _bbox('TrimBox', @_);
 }
 
-=head3 get_trimbox
+=head4 get_trimbox
 
     ($llx,$lly, $urx,$ury) = $page->get_trimbox()
 
@@ -429,7 +429,7 @@ sub trimbox {
 
 Gets the Trim Box based on best estimates or the default.
 
-This method is B<Deprecated>, and B<will> be removed in the future. Use
+This method is B<Deprecated>, and has been B<removed>. Use
 the global (C<$pdf>) or page (C<$page>) trimbox() call with no parameters
 instead.
 
@@ -437,10 +437,10 @@ instead.
 
 =cut
 
-sub get_trimbox {
-    my $self = shift();
-    return $self->trimbox();
-}
+#sub get_trimbox {
+#    my $self = shift();
+#    return $self->trimbox();
+#}
 
 =head3 artbox
 
@@ -468,7 +468,7 @@ sub artbox {
     return _bbox('ArtBox', @_);
 }
 
-=head3 get_artbox
+=head4 get_artbox
 
     ($llx,$lly, $urx,$ury) = $page->get_artbox()
 
@@ -476,7 +476,7 @@ sub artbox {
 
 Gets the Art Box based on best estimates or the default.
 
-This method is B<Deprecated>, and B<will> be removed in the future. Use
+This method is B<Deprecated>, and has been B<removed>. Use
 the global (C<$pdf>) or page (C<$page>) artbox() call with no parameters
 instead.
 
@@ -484,10 +484,10 @@ instead.
 
 =cut
 
-sub get_artbox {
-    my $self = shift();
-    return $self->artbox();
-}
+#sub get_artbox {
+#    my $self = shift();
+#    return $self->artbox();
+#}
 
 =head3 rotate, rotation
 

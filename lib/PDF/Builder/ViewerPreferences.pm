@@ -249,44 +249,44 @@ C<bleed_box>, C<trim_box>, or C<art_box>.
 
 =over
 
-    hide_toolbar (boolean)
+=item hide_toolbar (boolean)
 
 A flag specifying whether to hide the tool bars when the document is active.
 
-    hide_menubar (boolean)
+=item hide_menubar (boolean)
 
 A flag specifying whether to hide the menu bar when the document is active.
 
-    hide_window_ui (boolean)
+=item hide_window_ui (boolean)
 
 A flag specifying whether to hide the user interface elements in the document's
 window (such as scroll bars and navigation controls), leaving only the
 document's contents displayed.
 
-    fit_window (boolean)
+=item fit_window (boolean)
 
 A flag specifying whether to resize the document's window to fit the size of the
 first displayed page.
 
-    center_window (boolean)
+=item center_window (boolean)
 
 A flag specifying whether to position the document's window in the center of the
 screen.
 
-    display_doc_title (boolean)
+=item display_doc_title (boolean)
 
 A flag specifying whether the window's title bar should display the document
 title taken from the Title entry of the document information directory.  If
 false, the title bar should instead display the name of the PDF file containing
 the document.
 
-    non_full_screen_page_mode (name)
+=item non_full_screen_page_mode (name)
 
 The document's page mode, specifying how to display the document on exiting
 full-screen mode.  Options are the same as C<page_mode> in L<PDF::Builder>,
 except that the C<attachments> and C<full_screen> options aren't supported.
 
-    direction ('l2r' or 'r2l')
+=item direction ('l2r' or 'r2l')
 
 The predominant reading order for text (left-to-right or right-to-left).
 
@@ -294,52 +294,52 @@ This entry has no direct effect on the document's contents or page numbering but
 may be used to determine the relative positioning of pages when displayed
 side-by-side or printed n-up.
 
-    view_area (bounding box)
+=item view_area (bounding box)
 
 The name of the page boundary representing the area of a page that shall be
 displayed when viewing the document on the screen.
 
-    view_clip (bounding box)
+=item view_clip (bounding box)
 
 The name of the page boundary to which the contents of a page shall be clipped
 when viewing the document on the screen.
 
-    print_area (bounding box)
+=item print_area (bounding box)
 
 The name of the page boundary representing the area of a page that shall be
 rendered when printing the document.
 
-    print_clip (bounding box)
+=item print_clip (bounding box)
 
 The name of the page boundary to which the contents of a page shall be clipped
 when printing the document.
 
-    print_scaling ('none' or 'app_default')
+=item print_scaling ('none' or 'app_default')
 
 The page scaling option that shall be selected when a print dialog is displayed
 for this document.  C<none> represents no page scaling, and C<app_default>
 represents the reader's default print scaling.
 
-    duplex ('simplex', 'duplex_short', or 'duplex_long')
+=item duplex ('simplex', 'duplex_short', or 'duplex_long')
 
 The paper handling option that shall be used when printing the file from the
 print dialog.  The duplex values represent whether the page should be flipped on
 its short edge or long edge, respectively.
 
-    pick_tray_by_pdf_size (boolean)
+=item pick_tray_by_pdf_size (boolean)
 
 A flag specifying whether the PDF page size shall be used to select the input
 paper tray.  This setting influences only the preset values used to populate the
 print dialog presented by the reader.
 
-    print_page_rage (an array of integer pairs)
+=item print_page_rage (an array of integer pairs)
 
 The page numbers used to initialize the print dialog box when the file is
 printed.  The array shall contain an even number of integers to be interpreted
 in pairs, with each pair specifying the first and last pages in a sub-range of
 pages to be printed.  The first page of the PDF file shall be denoted by 1.
 
-    num_copies (integer)
+=item num_copies (integer)
 
 The number of copies that shall be printed when the print dialog is opened for
 this file.

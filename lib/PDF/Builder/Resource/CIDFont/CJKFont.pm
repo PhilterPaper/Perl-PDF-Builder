@@ -30,23 +30,39 @@ PDF::Builder::Resource::CIDFont::CJKFont - Base class for CJK fonts
 
 Returns a cjk-font object.
 
+=back
+
 =over
 
-* Traditional Chinese: Ming Ming-Bold Ming-Italic Ming-BoldItalic
+=item * 
 
-* Simplified Chinese: Song Song-Bold Song-Italic Song-BoldItalic
+Traditional Chinese: Ming, Ming-Bold, Ming-Italic, Ming-BoldItalic
 
-* Korean: MyungJo MyungJo-Bold MyungJo-Italic MyungJo-BoldItalic
+=item * 
 
-* Japanese (Mincho): KozMin KozMin-Bold KozMin-Italic KozMin-BoldItalic
+Simplified Chinese: Song, Song-Bold, Song-Italic, Song-BoldItalic
 
-* Japanese (Gothic): KozGo KozGo-Bold KozGo-Italic KozGo-BoldItalic
+=item * 
+
+Korean: MyungJo, MyungJo-Bold, MyungJo-Italic, MyungJo-BoldItalic
+
+=item * 
+
+Japanese (Mincho): KozMin, KozMin-Bold, KozMin-Italic, KozMin-BoldItalic
+
+=item * 
+
+Japanese (Gothic): KozGo, KozGo-Bold, KozGo-Italic, KozGo-BoldItalic
 
 =back
 
 Defined Options:
 
-    encode ... specify fonts encoding for non-utf8 text.
+=over
+
+=item encode
+
+specify fonts encoding for non-utf8 text.
 
 =back
 

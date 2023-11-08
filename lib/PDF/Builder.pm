@@ -14,6 +14,7 @@ my $HBShaperVer  = 0.024;    # minimum version of HarfBuzz::Shaper
 my $LpngVersion  = 0.57;     # minimum version of Image::PNG::Libpng
 my $TextMarkdown = 1.000031; # minimum version of Text::Markdown
 my $HTMLTreeBldr = 5.07;     # minimum version of HTML::TreeBuilder
+my $PodSimpleXHTML = 3.45;   # minimum version of Pod::Simple::XHTML
 
 use Carp;
 use Encode qw(:all);
@@ -166,19 +167,33 @@ release!
 
 =over
 
-=item * 5.26 current minimum supported version, until next PDF::Builder release after 23 June, 2024. This is currently the minimum tested version.
+=item * 
 
-=item * 5.28 future minimum supported version, until next PDF::Builder release after 22 May, 2025
+5.26 current minimum supported version, until next PDF::Builder release after 23 June, 2024. This is currently the minimum tested version.
 
-=item * 5.30 future minimum supported version, until next PDF::Builder release after 20 June, 2026
+=item * 
 
-=item * 5.32 future minimum supported version, until next PDF::Builder release after 20 May, 2027. This is currently our primary development version.
+5.28 future minimum supported version, until next PDF::Builder release after 22 May, 2025
 
-=item * 5.34 future minimum supported version, until next PDF::Builder release after 28 May, 2028
+=item * 
 
-=item * 5.36 future minimum supported version, until next PDF::Builder release after 02 Jul, 2029
+5.30 future minimum supported version, until next PDF::Builder release after 20 June, 2026
 
-=item * 5.38 future minimum supported version, until next PDF::Builder release some time after 02 Jul, 2029. This is currently the maximum tested version.
+=item * 
+
+5.32 future minimum supported version, until next PDF::Builder release after 20 May, 2027. This is currently our primary development version.
+
+=item * 
+
+5.34 future minimum supported version, until next PDF::Builder release after 28 May, 2028
+
+=item * 
+
+5.36 future minimum supported version, until next PDF::Builder release after 02 Jul, 2029
+
+=item * 
+
+5.38 future minimum supported version, until next PDF::Builder release some time after 02 Jul, 2029. This is currently the maximum tested version.
 
 =back
 
@@ -276,6 +291,8 @@ Creates a new PDF object.
 
 B<Options>
 
+=back
+
 =over
 
 =item file
@@ -331,8 +348,6 @@ B<Example:>
     $pdf = PDF::Builder->new(file => 'our/new.pdf');
     ...
     $pdf->save();
-
-=back
 
 =cut
 
@@ -550,6 +565,8 @@ Opens an existing PDF file. See C<new()> for options.
 
 B<Example:>
 
+=back
+
     $pdf = PDF::Builder->open('our/old.pdf');
     ...
     $pdf->saveas('our/new.pdf');
@@ -557,8 +574,6 @@ B<Example:>
     $pdf = PDF::Builder->open('our/to/be/updated.pdf');
     ...
     $pdf->update();
-
-=back
 
 =cut
 
@@ -603,6 +618,8 @@ sub open {  ## no critic
 
 Opens a PDF contained in a string. See C<new()> for other options.
 
+=back
+
 =over
 
 =item diags => 1
@@ -622,6 +639,8 @@ B<Example:>
     $pdf = PDF::Builder->from_string($pdf_string);
     ...
     $pdf->saveas('our/new.pdf');
+
+=over
 
 B<Alternate name:> C<open_scalar>
 
@@ -746,9 +765,13 @@ messages about "can't call method new_obj on an undefined value".
 
 B<Example:>
 
+=back
+
     $pdf = PDF::Builder->new();
     ...
     print $pdf->to_string();
+
+=over
 
 B<Alternate name:> C<stringify>
 
@@ -807,11 +830,15 @@ Force objects to be written to file if possible.
 
 B<Example:>
 
+=back
+
     $pdf = PDF::Builder->new(file => 'our/new.pdf');
     ...
     $pdf->finishobjects($page, $gfx, $txt);
     ...
     $pdf->save();
+
+=over
 
 B<Note:> this method is now considered obsolete, and may be deprecated. It
 allows for objects to be written to disk in advance of finally
@@ -884,9 +911,13 @@ Saves a previously opened document.
 
 B<Example:>
 
+=back
+
     $pdf = PDF::Builder->open('our/to/be/updated.pdf');
     ...
     $pdf->update();
+
+=over
 
 B<Note:> it is considered better to simply C<save()> the file, rather than
 calling C<update()>. They end up doing the same thing, anyway. This method
@@ -917,11 +948,11 @@ messages about "can't call method new_obj on an undefined value".
 
 B<Example:>
 
+=back
+
     $pdf = PDF::Builder->new();
     ...
     $pdf->saveas('our/new.pdf');
-
-=back
 
 =cut
 
@@ -963,9 +994,13 @@ messages about "can't call method new_obj on an undefined value".
 
 B<Example:>
 
+=back
+
     $pdf = PDF::Builder->new(file => 'file_to_output');
     ...
     $pdf->save();
+
+=over
 
 B<Note:> now that C<save()> can take a filename as an argument, it effectively
 is interchangeable with C<saveas()>. This is strictly for compatibility with
@@ -1590,11 +1625,15 @@ Gets/sets the supported info-structure tags.
 
 B<Example:>
 
+=back
+
     @attributes = $pdf->infoMetaAttributes;
     print "Supported Attributes: @attr\n";
 
     @attributes = $pdf->infoMetaAttributes('CustomField1');
     print "Supported Attributes: @attributes\n";
+
+=over
 
 B<Note:> this method is still available for compatibility purposes, but the
 use of C<info_metadata> instead is encouraged.
@@ -1701,6 +1740,8 @@ Gets/sets the default value for a behavior of PDF::Builder.
 
 B<Supported Parameters:>
 
+=back
+
 =over
 
 =item nounrotate
@@ -1718,6 +1759,8 @@ pages to preserve graphics-state for modification.
 enables importing of annotations (B<*EXPERIMENTAL*>).
 
 =back
+
+=over
 
 B<CAUTION:> Perl::Critic (tools/1_pc.pl) has started flagging the name 
 "default" as a reserved keyword in higher Perl versions. Use with caution, and
@@ -1939,6 +1982,8 @@ Gets/sets the page layout that should be used when the PDF is opened.
 
 C<$layout> is one of the following:
 
+=back
+
 =over
 
 =item single_page (or undef)
@@ -1966,6 +2011,8 @@ Display two pages at a time, with odd-numbered pages on the left.
 Display two pages at a time, with odd-numbered pages on the right.
 
 =back
+
+=over
 
 This has been split out from C<preferences()> for compatibility with PDF::API2.
 It also can both set (assign) and get (query) the settings used.
@@ -2017,6 +2064,8 @@ opened.
 
 C<$mode> is one of the following:
 
+=back
+
 =over
 
 =item none (or undef)
@@ -2045,6 +2094,8 @@ Show the optional content group panel.
 Show the attachments panel.
 
 =back
+
+=over
 
 This has been split out from C<preferences()> for compatibility with PDF::API2.
 It also can both set (assign) and get (query) the settings used.
@@ -2413,6 +2464,8 @@ If the requested page is out of range, the C<$page> returned will be undefined.
 
 B<Example:>
 
+=back
+
     $pdf  = PDF::Builder->open('our/99page.pdf');
     $page = $pdf->open_page(1);   # returns the first page
     $page = $pdf->open_page(99);  # returns the last page
@@ -2420,6 +2473,8 @@ B<Example:>
     $page = $pdf->open_page(999); # returns undef
     $page = $pdf->open_page(0);   # returns the last page
     $page = $pdf->open_page();    # returns the last page
+
+=over
 
 B<Alternate name:> C<openpage>
 
@@ -2550,6 +2605,8 @@ existing page.
 
 B<Example:>
 
+=back
+
     my $pdf = PDF::Builder->new();
     my $source = PDF::Builder->open('source.pdf');
 
@@ -2557,6 +2614,8 @@ B<Example:>
     my $page = $pdf->import_page($source, 2);
 
     $pdf->saveas('sample.pdf');
+
+=over
 
 B<Note:> You can only import a page from an existing PDF file.
 
@@ -2710,6 +2769,8 @@ document.
 
 B<Example:>
 
+=back
+
     # take page 2 of source.pdf and add to empty doc sample.pdf at half size
     # note that sample.pdf could be an existing document!
     #
@@ -2725,6 +2786,8 @@ B<Example:>
     $page->object($xo, $x, $y, 0.5);
 
     $pdf->save('sample.pdf');
+
+=over
 
 B<Note:> You can only import a page from an existing PDF file.
 
@@ -2905,21 +2968,33 @@ show up in the reader control area as the current page number.
 
 B<CAUTIONS:> 
 
-B<1.> The given page index started at 0 for the old method (C<pageLabel()>),
+=back
+
+=over
+
+=item 1.
+
+The given page index started at 0 for the old method (C<pageLabel()>),
 which is the internal PDF array index, while for the new method 
 (C<page_labels()>) it starts with 1, the visible page number! Don't get
 confused.
 
-B<2.> Options for the old method (C<pageLabel>) were a hashref, while for the
+=item 2.
+
+Options for the old method (C<pageLabel>) were a hashref, while for the
 new method (C<page_labels>) it is a hash. This permits pageLabel() to accept
 I<multiple> page number schemes in one call, rather than one per call as per
 page_labels().
 
-B<3.> Many PDF readers do not support page labels; they simply (at most)
+=item 3.
+
+Many PDF readers do not support page labels; they simply (at most)
 label the sliding thumb with the physical page number. Adobe Acrobat Reader 
 (free version) appears to have a bug in some versions, where if the only
 page label is 'decimal' (the default), it labels the thumb as though no page 
 labels were defined ("Page I<m> of I<n>").
+
+=back
 
     # Generate a 30-page PDF
     my $pdf = PDF::Builder->new();
@@ -2975,6 +3050,8 @@ the counter).
 
 =back
 
+=over
+
 B<Dotted inserted page numbers>
 
 To easily insert a range of pages, e.g., 3 pages between existing pages 37 and 
@@ -2990,6 +3067,8 @@ else (the C<prefix>) is a constant string. At worst, you might have to define
 a page label for each individual page.
 
 B<Example:>
+
+=back
 
     # Start with lowercase Roman Numerals at the 1st page, starting with i (1)
     $pdf->page_labels(1, 
@@ -3052,6 +3131,8 @@ B<Example:>
         'style' => 'nocounter',
         'prefix' => 'Index '
     );
+
+=over
 
 B<Alternate name:> C<pageLabel>
 
@@ -3399,7 +3480,9 @@ sub trimbox {
 =over
 
 Sets (or gets) the global ArtBox. This is supposed to define "the extent of 
-the page's I<meaningful> content". 
+the page's I<meaningful> content". What is considered "meaningful" is up to 
+the author of the page, but would usually exclude "decorative" graphics and
+such; and possibly titles, headers, footers, and page numbers.
 
 See L<PDF::Builder::Docs/Art Box> for more information.
 The method always returns the current bounds (after any set operation).
@@ -3476,10 +3559,14 @@ sub corefont {
 
     $font = $pdf->psfont($ps_file, %opts)
 
+=over
+
 Returns a new Adobe Type1 ("PostScript", "T1") font object.
 For details, see L<PDF::Builder::Docs/PS Fonts>.
 
 See also L<PDF::Builder::Resource::Font::Postscript>.
+
+=back
 
 =cut
 
@@ -3626,6 +3713,8 @@ There are 15 additional core fonts on a Windows system.
 Note that the exact name of a core font needs to be given.
 The file extension (if path given) determines what type of font file it is.
 
+=back
+
     my $pdf = PDF::Builder->new();
     my $font1 = $pdf->font('Helvetica-Bold');
     my $font2 = $pdf->font('/path/to/ComicSans.ttf');
@@ -3642,6 +3731,8 @@ The file extension (if path given) determines what type of font file it is.
 
     $pdf->saveas('sample.pdf');
 
+=over
+
 The path can be omitted if the font file is in the current directory or one of
 the directories returned by C<font_path>.
 
@@ -3649,6 +3740,8 @@ TrueType (ttf/otf), Adobe PostScript Type 1 (pfa/pfb), and Adobe Glyph Bitmap
 Distribution Format (bdf) fonts are supported.
 
 The following options (C<%opts>) are available:
+
+=back
 
 =over
 
@@ -3679,8 +3772,6 @@ the encode option.
 Fonts are embedded in the PDF by default, which is required to ensure that they
 can be viewed properly on a device that doesn't have the font installed. Set
 this option to false to prevent the font from being embedded.
-
-=back
 
 =back
 
@@ -3897,13 +3988,13 @@ See also L<PDF::Builder::Resource::UniFont>.
 
 Valid options (C<%opts>) are:
 
+=back
+
 =over
 
 =item encode
 
 Changes the encoding of the font from its default.
-
-=back
 
 =back
 
@@ -4034,6 +4125,8 @@ A convenience function to attempt to determine the image type, and import a
 file of that type and return an object that can be placed as part of a page's 
 content:
 
+=back
+
     my $pdf = PDF::Builder->new();
     my $page = $pdf->page();
 
@@ -4041,6 +4134,8 @@ content:
     $page->object($image, 100, 100);
 
     $pdf->save('sample.pdf');
+
+=over
 
 C<$file> may be either a file name, a filehandle, or a 
 L<PDF::Builder::Resource::XObject::Image::GD> object.
@@ -4254,13 +4349,13 @@ Returns 1 if the library name (package) Graphics::TIFF is installed, and
 0 otherwise. For this optional library, this call can be used to know if it 
 is safe to use certain functions. For example:
 
+=back
+
     if ($pdf->LA_GT() {
         # is installed and usable
     } else {
         # not available. you will be running the old, pure PERL code
     }
-
-=back
 
 =cut
 
@@ -4389,13 +4484,13 @@ Returns 1 if the library name (package) Image::PNG::Libpng is installed, and
 0 otherwise. For this optional library, this call can be used to know if it 
 is safe to use certain functions. For example:
 
+=back
+
     if ($pdf->LA_IPL() {
         # is installed and usable
     } else {
         # not available. don't use 16bps or interlaced PNG image files
     }
-
-=back
 
 =cut
 
@@ -4487,6 +4582,8 @@ file).
 Once added to the PDF, they can be used in place of regular hex codes or named
 colors:
 
+=back
+
     my $pdf = PDF::Builder->new();
     my $page = $pdf->page();
     my $content = $page->graphics();
@@ -4507,13 +4604,15 @@ colors:
 
     $pdf->save('sample.pdf');
 
+=over
+
 The following types of colorspaces are supported
+
+=back
 
 =over
 
 =item spot
-
-    my $spot = $pdf->colorspace('spot', $tint, $alt_color);
 
 Spot colors are used to instruct a device (usually a printer) to use or emulate
 a particular ink color (C<$tint>) for parts of the document. An C<$alt_color>
@@ -4522,29 +4621,49 @@ named color. It can either be an approximation of the color in RGB, CMYK, or
 HSV formats, or a wildly different color (e.g. 100% magenta, C<%0F00>) to make
 it clear if the spot color isn't being used as expected.
 
-=item web
+=back
 
-    my $web = $pdf->colorspace('web');
+    my $spot = $pdf->colorspace('spot', $tint, $alt_color);
+
+=over
+
+=item web
 
 The web-safe color palette is a historical collection of colors that was used
 when many display devices only supported 256 colors.
 
-=item act
+=back
 
-    my $act = $pdf->colorspace('act', $filename);
+    my $web = $pdf->colorspace('web');
+
+=over
+
+=item act
 
 An Adobe Color Table (ACT) file provides a custom palette of colors that can be
 referenced by PDF graphics and text drawing commands.
 
-=item device
+=back
 
-    my $devicen = $pdf->colorspace('device', @colorspaces);
+    my $act = $pdf->colorspace('act', $filename);
+
+=over
+
+=item device
 
 A device-specific colorspace allows for precise color output on a given device
 (typically a printing press), bypassing the normal color interpretation
 performed by raster image processors (RIPs).
 
+=back
+
+    my $devicen = $pdf->colorspace('device', @colorspaces);
+
+=over
+
 Device colorspaces are also needed if you want to blend spot colors:
+
+=back
 
     my $pdf = PDF::Builder->new();
     my $page = $pdf->page();
@@ -4566,10 +4685,6 @@ Device colorspaces are also needed if you want to blend spot colors:
     $content->paint();
 
     $pdf->save('sample.pdf');
-
-=back
-
-=back
 
 =cut
 
@@ -4640,7 +4755,7 @@ sub colorspace_web {
     return PDF::Builder::Resource::ColorSpace::Indexed::WebColor->new($self->{'pdf'});
 }
 
-=head1 colorspace_hue
+=head2 colorspace_hue
 
     $cs = $pdf->colorspace_hue()
 
@@ -4705,6 +4820,8 @@ Returns a new DeviceN colorspace object based on the parameters.
 
 B<Example:>
 
+=back
+
     $cy = $pdf->colorspace_separation('Cyan',    '%f000');
     $ma = $pdf->colorspace_separation('Magenta', '%0f00');
     $ye = $pdf->colorspace_separation('Yellow',  '%00f0');
@@ -4713,6 +4830,8 @@ B<Example:>
     $pms023 = $pdf->colorspace_separation('PANTONE 032CV', '%0ff0');
 
     $dncs = $pdf->colorspace_devicen( [ $cy,$ma,$ye,$bk, $pms023 ] );
+
+=over
 
 The colorspace model will automatically be chosen based on the first
 colorspace specified.

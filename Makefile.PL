@@ -110,6 +110,8 @@ my %WriteMakefileArgs =
     #  Text::Markdown => 1.000031,
     #  # 'md1' and 'html' markup
     #  HTML::TreeBuilder => 5.07,
+    #  # use of buildDoc.pl to build HTML documentation from POD
+    #  Pod::Simple::XHTML => 3.45,
     #},     
 
   }

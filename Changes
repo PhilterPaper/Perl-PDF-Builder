@@ -2,8 +2,15 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-11-06   UNRELEASED
+3.026     2023-11-08   UNRELEASED
  * = work still in progress
+
+    (many .pm files), META.yml, Makefile.PL, README.md, docs/buildDoc.pl,
+      t/00-all-usable.t, tools/optional_update.pl, version
+     Cleanup of POD so that unordered/bulleted lists, ordered/numbered lists,
+      definition/description lists, and indented paragraphs are properly
+      handled upon conversion to HTML. Change optional POD-to-HTML generation 
+      from the old pod2html to Pod::Simple::XHTML.
 
     lib/PDF/Builder/Content.pm
      The linedash() method was not properly handling a restore of a saved
