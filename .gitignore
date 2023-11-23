@@ -21,3 +21,11 @@ pod2htmd.tmp
 /pdfbpm.list
 # quick test files
 *-short
+# development stuff
+docs/PHP/
+misc/
+pm.list
+examples/Envelope.pl
+examples/Harmonic.pl
+.github/workflows/GD-test.yml.txt
+pm.list

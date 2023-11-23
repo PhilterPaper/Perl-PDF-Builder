@@ -478,7 +478,6 @@ do {
 	    }
 
 	    # write $htmlfile back out to its .html file ($target)
-#	    $htmlfile =~ s|</body>|<center>###</center></body>|;
 	    spew($htmlfile, $target);
             $file_list[$i]{'htmlname'} = $target;
 
@@ -568,8 +567,38 @@ for (my $i=0; $i<scalar @file_list; $i++) {
 	# rather than one long line that wraps to left side. div with
 	# display:inline-block almost does it, but if too long doesn't 
 	# wrap, but puts entire div onto next line
-       #print $fh " &nbsp; - &nbsp; <div>$file_list[$i]{'abstract'}</div>";
-	print $fh " &nbsp; - &nbsp; $file_list[$i]{'abstract'}";
+	#
+	# Pod::Simple::XHTML has expanded L<> to metacpan URL, want our own
+	#
+	# change links to https://metacpan.org/pod/PDF::Builder::... to
+	# ../.. etc. /PDF/Builder/... .html
+	# don't forget some will have #id anchor on the end
+	my $string = $file_list[$i]{'abstract'};
+	my $pos = 0;
+	while ($pos > -1) {
+	    $pos = index $string, "href=\"https://metacpan.org/pod/PDF::";
+	    if ($pos < 0) { last; }
+	    $pos += 6;
+	    # $pos points to start of a link to metacpan https://...
+            my $pos2 = index $string, "\">", $pos;
+	    # $pos2 points to closing "> (which we'll keep)
+	    my $strLink = substr($string, $pos+25, $pos2-$pos-25);
+	    # $strLink should contain something like "PDF::Builder::Content"
+	    # if it contains an anchor (#), split off #anchor_id move $pos2
+	    my $pos3 = index $strLink, "#";
+	    if ($pos3 >= 0) {
+                $pos2 -= length($strLink)-$pos3;  # should start at # now
+		$strLink = substr($strLink, 0, $pos3);
+	    }
+	    # change :: to directory structure
+	    $strLink =~ s#::#/#g;
+	    # go up by one level, leading PDF/ not needed at this level
+	    $strLink = go_up($file_list[$i]{'depth'}) . "../$strLink.html";
+	    $string = substr($string, 0, $pos) . $strLink . substr($string, $pos2);
+	}
+
+       #print $fh " &nbsp; - &nbsp; <div>$string</div>";
+	print $fh " &nbsp; - &nbsp; $string";
     }
     print $fh "<br>\n";
 }
@@ -585,8 +614,6 @@ print $fh "</body>\n</html>\n";
 close $fh;
 
 # cleanup
-#unlink "pod2htmd.tmp";
-#unlink "pod2html.stderr";
 
 # now that the individual HTML files and the master index are done,
 # 1) generate pmnameA array for each entry in @file_list
@@ -740,11 +767,12 @@ sub update_HTML{
         }
 
 	# bottom of page mark
-	$newstring .= "###\n";
+	$newstring .= "<h3>###</h3>\n";
         # write file back out
 	$string = substr($string, 0, $pos+1) . $newstring . substr($string, $pos+1);
 	# change links to https://metacpan.org/pod/PDF::Builder::... to
-	# /Documentation/PDF/Builder/... .html
+	# ../.. etc. /PDF/Builder/... .html
+	# don't forget some will have #id anchor on the end
 	$pos = 0;
 	while ($pos > -1) {
 	    $pos = index $string, "href=\"https://metacpan.org/pod/PDF::";
@@ -758,12 +786,12 @@ sub update_HTML{
 	    # if it contains an anchor (#), split off #anchor_id move $pos2
 	    my $pos3 = index $strLink, "#";
 	    if ($pos3 >= 0) {
-                $pos2 -= length($strLink)-$pos3+1;  # should start at # now
+                $pos2 -= length($strLink)-$pos3;  # should start at # now
 		$strLink = substr($strLink, 0, $pos3);
 	    }
 	    # change :: to directory structure
 	    $strLink =~ s#::#/#g;
-	    $strLink = "/Documentation/$strLink.html";
+	    $strLink = go_up($file_list[$i]{'depth'}) . "$strLink.html";
 	    $string = substr($string, 0, $pos) . $strLink . substr($string, $pos2);
 	}
 	# FIXUP of Pod::Simple::XHTML problems
@@ -1135,8 +1163,9 @@ sub toFP {
 sub help {
     my $message = <<"END_OF_TEXT";
 
-buildDoc.pl: build, using pod2html utility, all the .html documentation files
-  for a package, from all the .pm (or .pod) files in the package.
+buildDoc.pl: build, using the Pod::Simple::XHTML utility, all the .html 
+documentation files for a package, from all the .pm (or .pod) files in 
+the package.
 
 Using buildDoc.pl
 
@@ -1240,10 +1269,10 @@ in Builder/docs (also on the Desktop), run
 
     buildDoc.pl --leading='' --libtop=../../SVG-2.87/lib -rootname=SVG
 
-  The .pod or .pm file(s) are fed to pod2html utility (usually part of Perl 
-installation) to produce .html files stored in the current directory or below 
-(see configuration section). .html files with any links in them (L<> tag) are 
-fixed up to correct the href (path) to the referenced HTML files.
+  The .pod or .pm file(s) are fed to Pod::Simple::XHTML utility to produce 
+.html files stored in the current directory or below (see configuration 
+section). .html files with any links in them (L<> tag) are fixed up to correct 
+the href (path) to the referenced HTML files.
 
 If there are both .pod and .pm versions of a given filename, the .pod version
 will be preferably used. Presumably it has the documentation in it.
@@ -1290,7 +1319,7 @@ Messages:
   <filename> WARNING  top-level .pod or .pm file not readable
      One or more of the top level .pod or .pm files (<rootname> .pod or .pm) 
      was missing or not readable.
-  <filename> WARNING  internal POD errors reported by pod2html
+  <filename> WARNING  internal POD errors reported by Pod::Simple::XHTML
      At the end of the .html file, problems are listed. You should examine them 
      and attempt to correct the issue(s). Usually these are formatting issues.
   <filename> WARNING  is not a directory or file, ignored
@@ -1302,7 +1331,7 @@ Messages:
      and cannot be an empty string. It must be a name.
   <filename> ERROR  no <rootname> .pod or .pm files found
      The specified file(s) were not found.
-  <filename> ERROR  POD errors reported by pod2html
+  <filename> ERROR  POD errors reported by Pod::Simple::XHTML
      One or more error messages were written to STDERR. You should examine them 
      and attempt to correct the issue(s).
   <PMname> ERROR  does not appear to exist, called from <sourcefile>

@@ -2992,7 +2992,8 @@ Many PDF readers do not support page labels; they simply (at most)
 label the sliding thumb with the physical page number. Adobe Acrobat Reader 
 (free version) appears to have a bug in some versions, where if the only
 page label is 'decimal' (the default), it labels the thumb as though no page 
-labels were defined ("Page I<m> of I<n>").
+labels were defined ("Page I<m> of I<n>"). You may be able to get around this
+problem by using an explicit B<start> option value, e.g., C<'start' =E<gt> 1>.
 
 =back
 

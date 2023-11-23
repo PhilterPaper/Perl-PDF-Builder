@@ -2,8 +2,15 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-11-08   UNRELEASED
+3.026     2023-11-23   UNRELEASED
  * = work still in progress
+
+    devtools/
+     A collection of various utilities I use to build PDF::Builder (the CPAN
+      package), as well as the PHP conversion of HTML code for the web page
+      display of documentation (see catskilltech.com). Note that buildDoc.pl
+      (to build all the HTML files from POD) is already shipped with the
+      package.
 
     (many .pm files), META.yml, Makefile.PL, README.md, docs/buildDoc.pl,
       t/00-all-usable.t, tools/optional_update.pl, version
