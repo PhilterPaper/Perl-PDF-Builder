@@ -2,8 +2,13 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-11-23   UNRELEASED
+3.026     2023-12-01   UNRELEASED
  * = work still in progress
+
+    lib/PDF/Builder/Content.pm
+     Add some POD notes about the use of charspace for tracking adjustments,
+      and the interaction with wordspace adjustments for a more balanced
+      appearance of justified text.
 
     devtools/
      A collection of various utilities I use to build PDF::Builder (the CPAN

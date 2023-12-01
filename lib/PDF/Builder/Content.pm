@@ -3371,10 +3371,28 @@ If C<$spacing> is given, the current setting is replaced by that value and
 C<$self> is B<returned> (to permit chaining).
 If C<$spacing> is not given, the current setting is B<returned>.
 
+One use for character spacing is to adjust I<tracking> in a line of text.
+It is common to adjust inter-word spacing (e.g., TeX "glue" length) to justify 
+a line (see C<wordspace>), but in cases where the result is words too close 
+together (or too far apart), you may want to adjust tracking in order to force 
+spaces back to a more "reasonable" standard size. For example, if you have a 
+fairly "loose" line, with wide spaces between words, you could add a little 
+character spacing between the letters of words, and shrink the spaces down to a 
+more reasonable size. Don't overdo it, and make the words themselves difficult
+to read! You also would want to take care to "drive" the resulting spaces 
+towards a consistent width throughout a document (or at least, a paragraph).
+
+You may also choose to use character spacing for special effects, such as a
+high-level heading expanded with extra space. This is a decorative effect, and
+should be used with restraint.
+
 B<CAUTION:> be careful about using C<charspace> if you are using a connected
-font. This might include Arabic, Devanagari, Latin cursive handwriting, and so 
-on. You don't want to leave gaps between characters, or cause overlaps. For 
-such fonts and typefaces, set the C<charspace> spacing to 0.
+("script") font. This might include Arabic, Devanagari, Latin cursive 
+handwriting, and so on. You don't want to leave gaps between characters, or 
+cause overlaps. For such fonts and typefaces, you I<may> need to explicitly set 
+the C<charspace> spacing to 0, if you have set it to non-zero elsewhere. 
+PDF::Builder may not be able to determine that a given font is a connected
+script font, and automatically suppress non-zero character spacing.
 
 B<Alternate names:> C<character_spacing> and C<char_space>
 
@@ -3422,6 +3440,10 @@ to close up sentences a bit.
 If C<$spacing> is given, the current setting is replaced by that value and
 C<$self> is B<returned> (to permit chaining).
 If C<$spacing> is not given, the current setting is B<returned>.
+
+See the note in C<charspace> in regards to I<tracking> adjustment, and its
+effect on C<wordspace>. The two calls may often be used together for optimal
+results (although resulting in a somewhat increased PDF file size).
 
 Note that it is a limitation of the PDF specification (as of version 1.7, 
 section 9.3.3) that only spacing with an ASCII space (x20) is adjusted. Neither

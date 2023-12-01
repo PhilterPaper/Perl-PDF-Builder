@@ -2765,7 +2765,8 @@ This is useful if you want to transpose the imported page somewhat
 differently onto a page (e.g. two-up, four-up, etc.).
 
 If C<$source_page_number> is 0 or -1, it will return the last page in the
-document.
+document. The B<default> value for the C<$source_page_number> is 0 (return
+last page).
 
 B<Example:>
 
