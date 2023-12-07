@@ -91,7 +91,7 @@ my (@example_list, @example_results);
   push @example_results, "create examples/050_pagelabels.pdf, showing a number of pages, each with its\n own page label in different formats. You will see them when you drag the\n vertical scroll thumb and you see a thumbnail of each page,\n each with its own label.\n";
 
   push @example_list, "055_outlines";
-  push @example_results, "create examples/055_outlines.sample_55.pdf, showing a 12 page document.\n Click on the \"bookmark\" icon to see three pages in the outline, where you\n can click to jump to any of them.\n";
+  push @example_results, "create examples/055_outlines.sample_55.pdf, showing a 12 page document.\n Click on the \"bookmark\" or \"outline\" icon to see three pages in the\n outline, where you\n can click to jump to any of them.\n";
 
   push @example_list, "060_transparency";
   push @example_results, "create examples/060_transparency.pdf, showing 2 pages with red opaque text\n partly covered by 40% transparent black text.\n";

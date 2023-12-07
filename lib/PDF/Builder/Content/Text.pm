@@ -739,7 +739,11 @@ sub text_fill_justified {
 
     ($overflow_text, $unused_height) = $txt->paragraph($text, $width,$height, $continue, %opts)
 
+    ($overflow_text, $unused_height) = $txt->paragraph($text, $width,$height, %opts)
+
     $overflow_text = $txt->paragraph($text, $width,$height, $continue, %opts)
+
+    $overflow_text = $txt->paragraph($text, $width,$height, %opts)
 
 =over
 
@@ -751,6 +755,10 @@ Apply the text within the rectangle and B<return> any leftover text (if could
 not fit all of it within the rectangle). If called in an array context, the 
 unused height is also B<returned> (may be 0 or negative if it just filled the 
 rectangle).
+
+C<$continue> is optional, with a default value of 0. An C<%opts> list may be
+given after the fixed parameters, whether or not C<$continue> is explicitly
+given.
 
 If C<$continue> is 1, the first line does B<not> get special treatment for
 indenting or outdenting, because we're printing the continuation of the 
@@ -1274,6 +1282,7 @@ Sorry!
 
 Supported CSS properties: 
 
+    border-* TBD
     color (foreground color)
     display (inline/block)
     font-family (name as defined to FontManager, e.g. Times)
@@ -1284,9 +1293,11 @@ Supported CSS properties:
     list-style-position (outside) TBD inside
     list-style-type (marker description, see also _marker-before/after)
     margin-top/right/bottom/left (pt, bare number = pt, % of font-size)
+      margin TBD update four margin-* properties
     text-decoration (none, underline, line-through, overline)
     text-height (leading, as ratio of baseline-spacing to font-size)
     text-indent (pt, bare number = pt, % of current font-size)
+    text-align (left/right) TBD, future also center/justify?
     width (pt, bare number) width of horizontal rule
 
 Non-standard CSS "properties". You may want to set these in CSS:
@@ -1678,6 +1689,60 @@ It contains nothing to be used.
 
 =cut
 
+# TBD, future:
+#  * = not official HTML5 or CSS (i.e., extension)
+# perhaps 3.027?  
+#   arbitrary paragraph shapes (path)
+#   at a minimum, hyphenate-basic usage including &SHY;
+#   <hr>, <img>, <sup>, <sub>, <pre>, <nobr>, <br>, <dl>/<dt>/<dd>, <center>*
+#   <big>*, <bigger>*, <smaller>*, <small> 
+#   <cite>, <q>, <code>, <kbd>, <samp>, <var>
+#   CSS _expand* to call hscale() and/or condensed/expanded type in get_font()
+#        (if not doing synfont() call)
+#   CSS text transform, such as uppercase and lowercase flavors
+#   CSS em and ex sizes relative to current font size (like %), 
+#        other absolute sizes such as in, cm, mm, px (?)
+#
+#  possibly...
+#   <abbr>, <base>, <wbr>
+#   <article>, <aside>, <section>  as predefined page areas?
+#
+#  extensions to HTML and CSS...
+#   <sl>* simple list (no markers)
+#   <sc>* preprocess: around runs of lowercase put <span style="font-size: 80%;
+#        expand: 110%"> and fold to UPPER CASE. this is post-mytext creation!
+#   <pc>* (Petite case) like <sc> but 1ex font-size, expand 120%
+#   <dc>* drop caps
+#   <ovl>* overline (similar to underline) using CSS text-decoration: overline
+#   <k>* kern text (shift left or right) with CSS _kern, or general positioning:
+#     ability to form (La)TeX logo through character positioning
+#        what to do at HTML level? x+/- %fs, y+/- %fs
+#     also useful for <sup>4</sup><sub>2</sub>He notation
+#   <vfrac>* vulgar fraction, using sup, sup, kern
+#   HTML attributes to tune (force end) of something, such as early </sc> 
+#        after X words and/or end of line. flag to ignore next </sc> coming up,
+#        or just make self-closing with children?
+#   <endc>* force end of column here (at this y, while still filling line)
+#        e.g., to prevent an orphan. optional conditional (e.g., less than 1"
+#        of vertical space left in column)
+#   <keep>* material to keep together, such as headings and paragraph text
+#   leading (line-height) as a dimension instead of a ratio, convert to ratio
+#
+# 3.028 or later?
+#  left/right auto margins? <center> may need this
+#  Text::KnuthLiang hyphenation
+#  <hyp>*, <nohyp>* control hypenation in a word (and remember
+#        rules when see this word again)
+#  <lang>* define language of a span of text, for hyphenation/audio purposes
+#  Knuth-Plass paragraph shaping (with proper hyphenation) 
+#  HarfBuzz::Shaper for ligatures, callout of specific glyphs (not entities), 
+#        RTL and non-Western language support. <bdi>, <bdo>
+#  <nolig></nolig>* forbid ligatures in this range
+#  <lig gid='nnn'> </lig>* replace character(s) by a ligature
+#  <alt gid='nnn'> </alt>* replace character(s) by alternate glyph
+#        such as a swash. font-dependent
+#  <eqn>* (needs image support, SVG processing)
+
 sub column {
     my ($self, $page, $text, $grfx, $markup, $txt, %opts) = @_;
     my $pdf = $self->{' api'}->{' FM'}->{' pdf'};
@@ -1855,11 +1920,12 @@ sub _default_css {
     $style{'body'}->{'_left'} = '0'; 
     $style{'body'}->{'_right'} = '0'; 
     $style{'body'}->{'text-indent'} = '0'; 
-   #$style{'body'}->{'text-align'} = 'left'; # center, right
+   #$style{'body'}->{'text-align'} = 'left'; # TBD center, right
    #$style{'body'}->{'text-transform'} = 'none'; # capitalize, uppercase, lowercase
-   #$style{'body'}->{'border-style'} = 'none'; # solid, dotted, dashed...
+   #$style{'body'}->{'border-style'} = 'none'; # solid, dotted, dashed... TBD
    #$style{'body'}->{'border-width'} = '1pt'; 
    #$style{'body'}->{'border-color'} = 'inherit'; 
+   #   TBD border-* individually specify for top/right/bottom/left
     $style{'body'}->{'text-decoration'} = 'none';
     $style{'body'}->{'display'} = 'block'; 
     $style{'body'}->{'width'} = '-1';  # TBD currently unused
@@ -1882,12 +1948,12 @@ sub _default_css {
     $style{'ul'}->{'display'} = 'block'; 
     $style{'ul'}->{'margin-bottom'} = '50%'; 
     $style{'ol'}->{'list-style-type'} = '.o'; # decimal, lower-roman, upper-roman, lower-alpha, upper-alpha, none
-    $style{'ol'}->{'list-style-position'} = 'outside'; # inside
+    $style{'ol'}->{'list-style-position'} = 'outside'; # inside TBD
     $style{'ol'}->{'display'} = 'block'; 
     $style{'ol'}->{'margin-bottom'} = '50%'; 
     $style{'ol'}->{'_marker-before'} = ''; # content to add before marker
     $style{'ol'}->{'_marker-after'} = '.'; # content to add after marker
-   #$style{'sl'}->{'list-style-type'} = 'none';
+   #$style{'sl'}->{'list-style-type'} = 'none'; TBD
     $style{'li'}->{'display'} = 'block';  # should inherit from ul or ol
     $style{'li'}->{'margin-top'} = '50%';  # relative to text's font-size
 
@@ -1949,12 +2015,12 @@ sub _default_css {
     $style{'del'}->{'display'} = 'inline';
     $style{'del'}->{'text-decoration'} = 'line-through';
 
-    # non-standard tag for overline
+    # non-standard tag for overline TBD
    #$style{'ovl'}->{'display'} = 'inline';
    #$style{'ovl'}->{'text-decoration'} = 'overline';
     
     # non-standard tag for kerning (+ font-size fraction to move left, - right)
-    # e.g., for vulgar fraction adjust / and denominator <sub>
+    # e.g., for vulgar fraction adjust / and denominator <sub> TBD
    #$style{'k'}->{'display'} = 'inline';
    #$style{'k'}->{'_kern'} = '0.2';
 
@@ -1972,9 +2038,9 @@ sub _default_css {
     $style{'blockquote'}->{'text-height'} = '1.00'; # close spacing
     $style{'blockquote'}->{'font-size'} = '80%'; # smaller type
 
-   #$style{'sc'}->{'font-size'} = '80%'; # smaller type
+   #$style{'sc'}->{'font-size'} = '80%'; # smaller type TBD
    #$style{'sc'}->{'_expand'} = '110%'; # wider type   TBD _expand
-   #likewise for pc (petite caps)
+   #likewise for pc (petite caps) TBD
 
     return \%style;
 } # end of _default_css()
@@ -2092,6 +2158,7 @@ sub _output_text {
     my $start = 1; # counter for ordered lists
     my $list_depth = 0; # nesting level of ol and ul
     my $list_marker = ''; # li marker text
+    my $reversed_ol = 0; # count down from start
 
     my $phrase='';
     my $remainder='';
@@ -2222,11 +2289,20 @@ sub _output_text {
 		    $list_depth++;
 		}
 	        if ($tag eq 'ol') { 
+		    # save any existing start and reversed_ol values
+		    $properties[-2]->{'_start'} = $start; # current start
+		    $properties[-2]->{'_reversed_ol'} = $reversed_ol; # cur flag
+
 	            $start = 1;
 	            if (defined $mytext[$el]->{'start'}) {
 	                $start = $mytext[$el]->{'start'};
 		    }
-		    $list_depth++;
+		    if (defined $mytext[$el]->{'reversed'}) {
+			$reversed_ol = 1;
+		    } else {
+			$reversed_ol = 0;
+		    }
+                    $list_depth++;
 	        }
 	        if ($tag eq 'li') {
 		    # paragraph, but label depends on parent (list-style-type)
@@ -2244,7 +2320,11 @@ sub _output_text {
 			# it's a bullet character
 		    } else {
 			# fully formatted ordered list item
-		        $start++;
+			if ($reversed_ol) {
+		            $start--;
+			} else {
+		            $start++;
+			}
 		    }
 		    # sl: use normal marker width, marker is blank. position
 		    #     is always outside (ignore inside if given)
@@ -2373,6 +2453,11 @@ sub _output_text {
 		if ($tag eq 'ol' || $tag eq 'ul') { $list_depth--; }
 		# note that current_prop should be all up to date by the
 		# time you hit the end tag
+		if ($tag eq 'ol') {
+		    # restore any saved start and reversed_ol values
+		    $start = $properties[-2]->{'_start'}; # current start
+		    $reversed_ol = $properties[-2]->{'_reversed_ol'}; # cur flag
+                }
 
 		# ready to pick larger of top and bottom margins (block display)
 		$botm = $current_prop->{'margin-bottom'};
@@ -2457,6 +2542,9 @@ sub _output_text {
 	    # any size as a percentage of font-size will use the current fs
 	    my $fs = $current_prop->{'font-size'};
 
+	    # uncommon to only change font size without also changing something
+	    # else, so make font selection call at the same time, besides,
+	    # there is very little involved in just returning current font.
 	    if ($call_get_font) {
                 $text->font($pdf->get_font(
 		    'face' => $current_prop->{'font-family'}, 
@@ -2531,7 +2619,7 @@ sub _output_text {
 	    $remainder = '';
 
 	    # for now, all whitespace convert to single blanks 
-	    # TBD blank preserve for <code> or <pre>
+	    # TBD blank preserve for <code> or <pre> (CSS white-space)
 	    $phrase =~ s/\s+/ /g;
 
 	    # a phrase may have multiple words. see if entire thing fits, and if
@@ -2635,8 +2723,7 @@ sub _output_text {
 			# it's a symbol for <ul>. 50% size, +y by 33% size
 			# add doubled space at end (font size 50%).
 			# TBD url image and other character symbols (possibly
-			#     in other than Zapf Dingbats), including 
-			#     arbitrary text strings. 
+			#     in other than Zapf Dingbats). 
 			if      ($list_marker eq '.disc') {
 			    $list_marker = chr(108).'  ';
 			} elsif ($list_marker eq '.circle') {
@@ -3747,6 +3834,25 @@ sub _size2pt {
 # for ordered, returns $prefix.formatted_value.$suffix.blank
 # for unordered, returns string .disc, .circle, .square, or .box
 #   (.box is nonstandard marker)
+#
+# TBD check that 'none' works properly (as <sl>?)
+# TBD for ol, there are many other formats: cjk-decimal, decimal-leading-zero,
+#      lower-greek, upper-greek?, lower-latin = lower-alpha, upper-latin =
+#      upper-alpha, arabic-indic, -moz-arabic-indic, armenian, [-moz-]bengali, 
+#      cambodian (khmer), [-moz-]cjk-earthly-branch, [-moz-]cjk-heavenly-stem, 
+#      cjk-ideographic, [-moz-]devanagari, ethiopi-numeric, georgian,
+#      [-moz-]gujarati, [-moz-]gurmukhi, hebrew, hiragana, hiragana-iroha, 
+#      japanese-formal, japanese-informal, [-moz-]kannada, katakana, 
+#      katakana-iroha, korean-hangul-formal, korean-hanja-formal, 
+#      korean-hanja-informal, [-moz-]lao, lower-armenian, upper-armenian, 
+#      [-moz-]malayalam, mongolian, [-moz-]myanmar, [-moz-]oriya, 
+#      [-moz-]persian, simp-chinese-formal, simp-chinese-informal, [-moz-]tamil,
+#      [-moz-]telugu, [-moz-]thai, tibetan, trad-chinese-formal, 
+#      trad-chinese-informal, disclosure-open, disclosure-closed
+# TBD for ol, some browser-specific formats: -moz-ethiopic-halehame,
+#      -moz-ethiopic-halehame-am, [-moz-]ethiopic-halehame-ti-et, [-moz-]hangul,
+#      [-moz-]hangul-consonant, [-moz-]urdu
+# TBD for ul, ability to select images and possibly other characters
 sub _marker {
     my ($type, $depth, $value, $prefix, $suffix) = @_; 
                                      # type = list-style-type, 

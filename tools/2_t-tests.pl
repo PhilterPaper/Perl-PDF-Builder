@@ -89,6 +89,10 @@ if      (scalar @ARGV == 0) {
 }
 
 foreach my $file (@test_list) {
+    if ($file eq 'tiff') {
+	print "\nNote: t/tiff.t takes quite a bit longer than the others to run. Don't Panic!";
+    }
+
     my @results = `perl t/$file.t`;
     # TBD: detect if a FAILED test, and remark at end if any failures
     print "\nt/$file.t\n";

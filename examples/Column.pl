@@ -7,7 +7,7 @@ use PDF::Builder;
 # $Data::Dumper::Sortkeys = 1; # hash keys in sorted order
 
 # VERSION
-our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
 
 my $use_Table = 1; # if 1, use PDF::Table for table example
 # TBD automatically check if PDF::Table available, and if so, use it
@@ -447,6 +447,23 @@ $content = <<"END_OF_CONTENT";
 
 A Perl library to facilitate the creation and modification of PDF files
 
+## What is it?
+
+PDF::Builder is a **fork** of the popular PDF::API2 Perl library. It provides a 
+library of modules and functions so that a PDF file (document) may be built and 
+maintained from Perl programs. It is not a WYSIWYG editor; nor is it a canned 
+utility or converter. It does _not_ have a GUI -- it is driven by your Perl 
+program. It is a set of **building blocks** with which you can perform a wide 
+variety of operations, ranging from basic operations such as selecting a font 
+face, to defining an entire page at a time in the document, using a large 
+subset of either Markdown or HTML markup languages. You can call it from 
+arbitrary Perl programs, which may even create content on-the-fly (or read it 
+in from other sources). Quite a few code examples are provided, to help you to 
+get started with the process of creating a PDF document. Many enhancements are 
+in the pipeline to make PDF::Builder even more powerful and versatile.
+
+[Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full), including Documentation and Examples.
+
 [![Open Issues](https://img.shields.io/github/issues/PhilterPaper/Perl-PDF-Builder)](https://github.com/PhilterPaper/Perl-PDF-Builder/issues)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/PhilterPaper/Perl-PDF-Builder/graphs/commit-activity)
@@ -529,11 +546,13 @@ matters, especially if an optional package fails to install. You can always
 manually install them later, if you desire to make use of their added 
 functionality.
 
+* Perl::Critic (1.150 or higher, need if running tools/1\_pc.pl)
 * Graphics::TIFF (19 or higher, recommended if using TIFF image functions)
 * Image::PNG::Libpng (0.57 or higher, recommended for enhanced PNG image function processing)
 * HarfBuzz::Shaper (0.024 or higher, needed for Latin script ligatures and kerning, as well as for any complex script such as Arabic, Indic scripts, or Khmer)
 * Text::Markdown (1.000031 or higher, needed if using 'md1' markup)
 * HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup)
+* Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc utility to create HTML documentation)
 
 If an optional package is needed, but not installed, sometimes PDF::Builder
 will be able to fall back to built-in partial functionality (TIFF and PNG 
@@ -591,11 +610,24 @@ redistribute and/or modify this software (those portions under LGPL) at an
 LGPL version greater than 2.1. See INFO/LICENSE for more information on the
 licenses and warranty statement.
 
+### Carrying On...
+
+PDF::Builder is Open Source software, built upon the efforts not only of the
+current maintainer, but also of many people before me. Therefore, it's perfectly
+fair to make use of the algorithms and even code (within the terms of the
+LICENSE). That's exactly how the State of the
+Art progresses! Just please be considerate and acknowledge the work of others
+that you are building on, as well as pointing back to this package. Drop us a
+note with news of your project (if based on the code and algorithms in
+PDF::Builder, or even just heavily inspired by it) and we'll be happy to make
+a pointer to your work. The more cross-pollination, the better!
+
 ## See Also
 
-* INFO/RoadMap file for the PDF::Builder road map
 * CONTRIBUTING file for how to contribute to the project
 * LICENSE file for more on the license term
+* INFO/RoadMap file for the PDF::Builder road map
+* INFO/ACKNOWLEDGE.md for "thank yous" to those who contributed to this product
 * INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues 
 * INFO/DEPRECATED file for information on deprecated features
 * INFO/KNOWN\_INCOMP file for known incompatibilities with PDF::API2
@@ -611,6 +643,10 @@ To build the full HTML documentation (all the POD), get the full installation
 and go to the `docs/` directory. Run `buildDoc.pl --all` to generate the full
 tree of documentation. There's a lot of additional information in the
 PDF::Builder::Docs module (it's all documentation).
+
+You may find it more convenient to point your browser to our 
+[Home Page](https://www.catskilltech.com/FreeSW/product/PDF-Builder/title/PDF%3A%3ABuilder/freeSW_full)
+to see the full documentation build (as well as most of the example outputs).
 
 We admit that the documentation is a bit light on "how to" task orientation.
 We hope to more fully address this in the future, but for now, get the full
@@ -775,8 +811,53 @@ if ($rc) {
     print STDERR "list example overflowed column!\n";
 }
 
-# block quotes and font extent changes
+# Counting down (reversed) ordered lists
 print "======================================================= pg 11\n";
+print "---- Count down list examples\n";
+$page = $pdf->page();
+$text = $page->text();
+$grfx = $page->gfx();
+
+$content = <<"END_OF_CONTENT";
+<h2>Test reversed ordered lists</h2>
+<ol reversed="1" start="10">
+  <li>ten</li>
+  <li>nine</li>
+  <li>eight</li>
+  <li>seven</li>
+  <li>six</li>
+  <li>five
+  <ol>
+    <li>holding</li>
+    <li>resume countdown</li>
+  </ol></li>
+  <li>four</li>
+  <li>three</li>
+  <li>two</li>
+  <li>one</li>
+</ol>
+<h2>Reversed ordered list run past 1</h2>
+<ol reversed="1" start="3">
+  <li>three</li>
+  <li>two</li>
+  <li>one</li>
+  <li>zero... blast off!</li>
+  <li>minus one... the clock is running</li>
+</ol>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[50,750, 500,450], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ] );
+if ($rc) {
+    print STDERR "list example overflowed column!\n";
+}
+
+
+# block quotes and font extent changes
+print "======================================================= pg 12\n";
 print "---- Block quotes\n";
 $page = $pdf->page();
 $text = $page->text();
@@ -842,7 +923,7 @@ if ($rc) {
 }
 
 # setting your own CSS for Markdown or none
-print "======================================================= pg 12\n";
+print "======================================================= pg 13\n";
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();

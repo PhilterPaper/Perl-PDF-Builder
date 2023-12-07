@@ -2301,7 +2301,7 @@ I<Numbered> (decimal and hexadecimal) entities are supported, as well as I<named
 
 =head3 Current CSS supported
 
-Note that the default CSS applies to Markdown, unless you give a C<style =E<gt>> entry to the column() call to revise the CSS.
+Note that the default CSS also applies to Markdown, unless you give a C<style =E<gt>> entry to the column() call to revise the CSS.
 
 In HTML, you can define B<<styleE<gt>> tags, but B<caution:> these are pulled out into a global style block (cumulative and global, as though they had all been given in the B<<headE<gt>>), applied after the CSS property defaults are defined and then any column() global C<style =E<gt> 'CSS list'> has been applied.
 
