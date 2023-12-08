@@ -2,7 +2,9 @@ See also INFO/Changes-ver_2 for changes released for PDF::API2, and
 incorporated into PDF::Builder.
 See also INFO/Changes_2021 for earlier version 3 release logs.
 
-3.026     2023-12-07   UNRELEASED
+3.027     2023-12-07  UNRELEASED
+
+3.026     2023-12-07
 
     lib/PDF/Builder/Content/Text.pm, examples/Column.pl
      Add HTML "reversed" (boolean) to <ol> tag to count down instead of up 

@@ -18,7 +18,7 @@ my ($VERSION, $PERL_V, $MAKE_MAKER, $TEST_EXCEPTION, $TEST_MEMORY_CYCLE,
 	$IMAGE_PNG_LIBPNG, $TEXT_MARKDOWN, $HTML_TREEBUILDER, 
 	$POD_SIMPLE_XHTML) 
           = read_version("./version");
-print "**** file 'version' contains following versions.\n";
+print "**** file 'version' contains following minimum versions.\n";
 print 
 "VERSION = $VERSION\n" . 
 "PERL_V = $PERL_V\n" . 
@@ -31,7 +31,7 @@ print
 "HARFBUZZ_SHAPER = $HARFBUZZ_SHAPER\n" . 
 "IMAGE_PNG_LIBPNG = $IMAGE_PNG_LIBPNG\n" .
 "TEXT_MARKDOWN = $TEXT_MARKDOWN\n" .
-"HTML_TREEBUILDER = $HTML_TREEBUILDER\n"; 
+"HTML_TREEBUILDER = $HTML_TREEBUILDER\n" .
 "POD_SIMPLE_XHTML = $POD_SIMPLE_XHTML\n"; 
 # PERL_V in format 5.020000
 # if needed, create PERL_V_DOT in format 5.20.0
@@ -148,7 +148,7 @@ if_OK();
 #                   IMAGE_PNG_LIBPNG, TEXT_MARKDOWN, HTML_TREEBUILDER, 
 #                   VERSION, POD_SIMPLE_XHTML
 update_optional();  
-print "**** optional_update.pl should have had updates.\n";
+print "**** tools/optional_update.pl should have had updates.\n";
 if_OK();
 
 print "**** .pl and .pm files update to latest version\n";
@@ -158,7 +158,7 @@ system("mkdir $temp\\INFO");
 system("mkdir $temp\\INFO\\old");
 system("xcopy /s .\\*.p? $temp");
 system("xcopy .\\.gitignore $temp");
-system("xcopy .\\CONTRIBUTING $temp");
+system("xcopy .\\CONTRIBUTING.md $temp");
 system("xcopy .\\INFO\\CONVERSION $temp\\INFO\\");
 system("xcopy .\\INFO\\RoadMap $temp\\INFO\\");
 system("xcopy .\\INFO\\old\\*.* $temp\\INFO\\old\\");
@@ -168,7 +168,7 @@ system("xcopy /s .\\examples\\*.* $temp\\examples\\");
 
 # all other .pm and .pl files should just have an empty '# VERSION' line
 print "calling PDFversion.pl\n";
-system("PDFversion.pl . $VERSION");
+system("devtools\\PDFversion.pl . $VERSION");
 
 system('for /R %G in (*.pl) do dos2unix "%G"');
 system('for /R %G in (*.pm) do dos2unix "%G"');
@@ -178,7 +178,7 @@ if_OK();
 
 ##system("dos2unix INFO\\old\\dist.ini.old");
 system("dos2unix .gitignore");
-system("dos2unix CONTRIBUTING");
+system("dos2unix CONTRIBUTING.md");
 system("dos2unix examples\\*.*");
 # consider replacing pod2htmd.temp (no longer produced by Pod::Simple::XHTML)
 #   with some other trivial text file
@@ -196,7 +196,9 @@ print "**** build Makefile\n";
 #system("attrib +R Makefile.PL");  # didn't seem to help
 system("Makefile.PL");
 ##print "**** edit Makefile to insert VERSION update (and erase Makefile~)\n";
-##print "(tab)PDFversion.pl \$(DISTVNAME) \$(VERSION)\n";
+##print "(tab)devtools\\PDFversion.pl \$(DISTVNAME) \$(VERSION)\n";
+# gzip -> devtools/gzip
+update2_Makefile();
 print "**** Check Makefile.\n";
 if_OK();
 
@@ -255,11 +257,13 @@ print "**** rename (restore X suffix) t/filter-ccittfaxdecode.t,\n lib/PDF/Build
 sub to_continue {
   print "+++++ Press Enter to continue...";
   my $response = <>;
+  print "\n";
   return;
 }
 sub if_OK {
   print "+++++ If OK, press Enter to continue...";
   my $response = <>;
+  print "\n";
   return;
 }
 
@@ -643,7 +647,7 @@ sub update_VERSION {
 sub read_version {
     my $filename = shift();
 
-    my @var_list = qw(version perl_v make_maker test_exception test_memory_cycle compress_zlib font_ttf graphics_tiff harfbuzz_shaper image_png_libpng text_markdown html_treebuilder);
+    my @var_list = qw(version perl_v make_maker test_exception test_memory_cycle compress_zlib font_ttf graphics_tiff harfbuzz_shaper image_png_libpng text_markdown html_treebuilder pod_simple_xhtml);
 
     my $VER;  # file handle for version input
     unless (open($VER, "<version")) {
@@ -821,6 +825,43 @@ sub update_Makefile {
     system("copy $outtemp $infile");
     unlink($outtemp);
 } # end update_Makefile()
+
+sub update2_Makefile {
+    # file should be ./Makefile
+    # gzip --best --> devtools\gzip --best
+    my @pattern = (
+		   "gzip --best",
+	          );
+    my @newpat  = (
+		   "devtools\\gzip --best",
+	          );
+
+    my $infile = "Makefile";
+    my $outtemp = "xxxx.tmp";
+    unless (open(IN, "<$infile")) {
+	die "Unable to read $infile for update\n";
+    }
+    unless (open(OUT, ">$outtemp")) {
+	die "Unable to write temporary output file for $infile update\n";
+    }
+
+    my ($line, $i, @frags);
+    while ($line = <IN>) {
+	# $line still has line-end \n
+	for ($i=0; $i<scalar(@pattern); $i++) {
+	    if ($line =~ m/$pattern[$i]/) {
+	        $line =~ s/$pattern[$i]/$newpat[$i]/;
+		last;
+	    }
+	}
+	print OUT $line;
+    }
+
+    close(IN);
+    close(OUT);
+    system("copy $outtemp $infile");
+    unlink($outtemp);
+} # end update2_Makefile()
 
 # ---------------------
 # META.*: update fields VERSION, PERL_V, MAKE_MAKER, TEST_EXCEPTION, 

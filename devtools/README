@@ -37,3 +37,19 @@ produce .zip files.
   dos2unix.exe is a utility found on the web (IIRC, as part of a local Git
 installation), and installed under \Program Files\Git. It reformats DOS style
 text file line-ends (CRLF) to Unix style (NL).
+
+When running devtools\PDFbuild.pl in your local Desktop\PDF-Builder\, and are
+asked yes/no/all for a group copy or other action, answer 'all'. When all is 
+done, and you're satisfied that a usable .tar.gz package file has been 
+created, you will then delete several directories (Desktop\temp\, blib\) and
+a bunch of newly created files (PDF-Builder-x.xxx.tar, Makefile, MYMETA.*, 
+pm2blib, etc.), AFTER moving PDF-Builder-x.xxx.tar.gz to a safe place. 
+PDFbuild.pl is the script to run to produce the .tar.gz file -- the rest are 
+called from it (except for docs/buildDoc.pl to create HTML documentation, and
+html2php.pl to create PHP for website use). Notice that several files will be 
+updated with VERSION numbers, prerequisite versions, etc., and they will need 
+to be updated in your Git (or other source) repository.
+
+The use of gzip.bat in the produced Makefile gets updated in PDFbuild.pl to get 
+an explicit "devtools\" path prepended to it. On a Linux system, you may have 
+to brew up something different (may not even need a gzip.bat).
