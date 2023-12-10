@@ -4,11 +4,11 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Resource::Colors - translate color names into RGB settings
+PDF::Builder::Resource::Colors - Translate color names into RGB settings
 
 =head1 SYNOPSIS
 

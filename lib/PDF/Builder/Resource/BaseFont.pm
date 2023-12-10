@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use Compress::Zlib;
 #use Encode qw(:all);
@@ -17,6 +17,8 @@ use Scalar::Util qw(weaken);
 =head1 NAME
 
 PDF::Builder::Resource::BaseFont - Base class for font resources
+
+Inherits from L<PDF::Builder::Resource>
 
 =head1 METHODS
 

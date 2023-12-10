@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Util;
@@ -14,8 +14,9 @@ use Scalar::Util qw(weaken);
 
 =head1 NAME
 
-PDF::Builder::Resource::ColorSpace::DeviceN - colorspace handling for Device 
-CMYK. Inherits from L<PDF::Builder::Resource::ColorSpace>
+PDF::Builder::Resource::ColorSpace::DeviceN - Colorspace handling for Device CMYK
+
+Inherits from L<PDF::Builder::Resource::ColorSpace>
 
 =head2 new
 

@@ -21,13 +21,13 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Basic::PDF::Bool - A special form of 
-L<PDF::Builder::Basic::PDF::String> which holds the strings
-B<true> or B<false>
+PDF::Builder::Basic::PDF::Bool - Holds the strings B<true> or B<false>
+
+Inherits from L<PDF::Builder::Basic::PDF::String>
 
 =head1 METHODS
 

@@ -263,11 +263,11 @@ h1, h2, h3 { text-align: center; }
 	$string = 
 "  \$page_title = \"$package$name$xtitle\";\n" . $string;
 
+        my $parents_string = parents($base);
         $string =
 "<?php 
-  // expected NOT to be in /dir4
   \$file_mtime = \"/../Documentation/$base.php\";
-  include_once(\"../../dir4/utils/appl_top.php\");
+  include_once(\"${parents_string}dir4/utils/appl_top.php\");
 
 " . $string;
     }
@@ -282,6 +282,21 @@ h1, h2, h3 { text-align: center; }
 
     # write back out to PHP output file
     spew($string, $output);
+}
+
+# ==================================
+# return ../ (repeated) to get to root where dir4 lives
+# e.g. $base = 'PDF/Builder/Annotation' returns '../../../'
+sub parents {
+    my ($base) = @_;
+
+    my $numslashes = $base;
+    $numslashes = scalar(split /\//, $base);
+    my $output = '';
+    for (my $i=0; $i<$numslashes; $i++) {
+	$output .= '../';
+    }
+    return $output;
 }
 
 # ==================================

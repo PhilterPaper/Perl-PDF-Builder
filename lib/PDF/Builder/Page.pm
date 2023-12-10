@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use Carp;
 use POSIX qw(floor);
@@ -20,6 +20,8 @@ use PDF::Builder::Util;
 =head1 NAME
 
 PDF::Builder::Page - Methods to interact with individual pages
+
+Inherits from L<PDF::Builder::Basic::PDF::Pages>
 
 =head1 SYNOPSIS
 

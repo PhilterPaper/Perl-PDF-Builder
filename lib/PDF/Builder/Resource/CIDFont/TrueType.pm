@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Resource::CIDFont::TrueType::FontFile;
@@ -15,6 +15,10 @@ use PDF::Builder::Util;
 =head1 NAME
 
 PDF::Builder::Resource::CIDFont::TrueType - TrueType font support
+
+Inherits from L<PDF::Builder::Resource::CIDFont>
+
+Generally also usable for OTF (Open Type) fonts
 
 =head1 METHODS
 

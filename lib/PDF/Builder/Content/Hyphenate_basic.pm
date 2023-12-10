@@ -6,11 +6,13 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.025'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
 PDF::Builder::Content::Hyphenate_basic - Simple hyphenation capability
+
+Inherits from L<PDF::Builder::Content::Text>
 
 =head1 SYNOPSIS
 

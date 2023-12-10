@@ -6,11 +6,13 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Resource::Pattern - support stub for patterns. Inherits from L<PDF::Builder::Resource>
+PDF::Builder::Resource::Pattern - Support stub for fill patterns
+
+Inherits from L<PDF::Builder::Resource>
 
 =head1 METHODS
 

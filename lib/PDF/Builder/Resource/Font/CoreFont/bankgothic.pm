@@ -4,12 +4,13 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.013'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Resource::Font::CoreFont::bankgothic - font-specific information for Bank Gothic font
-(I<not> standard PDF core)
+PDF::Builder::Resource::Font::CoreFont::bankgothic - Font-specific information for Bank Gothic font
+
+I<Not> a standard PDF core font
 
 =cut
 

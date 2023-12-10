@@ -10,11 +10,13 @@ use List::Util qw(min max);
 #  $Data::Dumper::Sortkeys = 1;  # hash keys in sorted order
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Content::Text - additional specialized text-related formatting methods. Inherits from L<PDF::Builder::Content>
+PDF::Builder::Content::Text - Additional specialized text-related formatting methods
+
+Inherits from L<PDF::Builder::Content>
 
 B<Note:> If you have used some of these methods in PDF::Builder with a 
 I<graphics> 

@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use Compress::Zlib;
 
@@ -20,6 +20,8 @@ use Graphics::TIFF ':all';  # have already confirmed the appropriate version exi
 
 PDF::Builder::Resource::XObject::Image::TIFF_GT - TIFF image support
 (Graphics::TIFF enabled)
+
+Inherits from L<PDF::Builder::Resource::XObject::Image>
 
 =head1 METHODS
 

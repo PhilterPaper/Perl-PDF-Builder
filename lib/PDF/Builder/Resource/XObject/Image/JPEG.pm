@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use IO::File;
 use PDF::Builder::Util;
@@ -15,7 +15,9 @@ use Scalar::Util qw(weaken);
 
 =head1 NAME
 
-PDF::Builder::Resource::XObject::Image::JPEG - support routines for JPEG image library. Inherits from L<PDF::Builder::Resource::XObject::Image>
+PDF::Builder::Resource::XObject::Image::JPEG - Support routines for JPEG image library
+
+Inherits from L<PDF::Builder::Resource::XObject::Image>
 
 =head1 METHODS
 

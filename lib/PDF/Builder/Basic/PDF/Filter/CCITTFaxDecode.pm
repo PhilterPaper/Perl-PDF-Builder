@@ -12,7 +12,7 @@ no if $] >= 5.018, warnings => 'experimental::smartmatch';
 use base 'PDF::Builder::Basic::PDF::Filter::FlateDecode';
 
 # VERSION
-my $LAST_UPDATE = '3.024';    # manually update whenever code is changed
+our $LAST_UPDATE = '3.027';    # manually update whenever code is changed
 
 sub codeword {
     my ($bits) = @_;
@@ -747,8 +747,11 @@ __END__
 
 =head1 NAME
 
-PDF::Builder::Basic::PDF::Filter::CCITTFaxDecode - compress and uncompress
-stream filters for CCITTFax as defined by https://tools.ietf.org/pdf/rfc804.pdf
+PDF::Builder::Basic::PDF::Filter::CCITTFaxDecode - Compress and uncompress stream filters for CCITTFax - NOT FULLY IMPLEMENTED
+
+Filters as defined by https://tools.ietf.org/pdf/rfc804.pdf
+
+Inherits from L<PDF::Builder::Basic::PDF::Filter::FlateDecode>
 
 See also
 https://www.itu.int/rec/T-REC-T.4-200307-I/en

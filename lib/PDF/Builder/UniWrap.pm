@@ -4,11 +4,11 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::UniWrap - support routines for finding line breakpoints with Unicode text
+PDF::Builder::UniWrap - Support routines for finding line breakpoints with Unicode text
 
 =cut
 

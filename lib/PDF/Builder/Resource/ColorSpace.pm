@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Util;
@@ -15,6 +15,8 @@ use Scalar::Util qw(weaken);
 =head1 NAME
 
 PDF::Builder::Resource::ColorSpace - Base class for PDF color spaces
+
+Inherits from L<PDF::Builder::Basic::PDF::Array>
 
 =head1 METHODS
 

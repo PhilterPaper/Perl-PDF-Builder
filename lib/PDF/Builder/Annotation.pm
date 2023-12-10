@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 use List::Util qw(min max);
@@ -15,6 +15,8 @@ use Carp;
 =head1 NAME
 
 PDF::Builder::Annotation - Add annotations to a PDF
+
+Inherits from L<PDF::Builder::Basic::PDF::Dict>
 
 =head1 SYNOPSIS
 

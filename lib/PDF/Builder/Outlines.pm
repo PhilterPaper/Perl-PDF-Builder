@@ -6,13 +6,15 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 
 =head1 NAME
 
-PDF::Builder::Outlines - further Outline handling. Inherits from L<PDF::Builder::Outline>
+PDF::Builder::Outlines - Further Outline handling
+
+Inherits from L<PDF::Builder::Outline>
 
 =cut
 

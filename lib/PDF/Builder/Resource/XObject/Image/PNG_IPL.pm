@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use Compress::Zlib;
 use POSIX qw(ceil floor);
@@ -20,8 +20,9 @@ use Scalar::Util qw(weaken);
 
 =head1 NAME
 
-PDF::Builder::Resource::XObject::Image::PNG_IPL - support routines for PNG 
-image library (using Image::PNG::Libpng). 
+PDF::Builder::Resource::XObject::Image::PNG_IPL - Support routines for PNG 
+image library (using Image::PNG::Libpng) 
+
 Inherits from L<PDF::Builder::Resource::XObject::Image>
 
 =head1 METHODS

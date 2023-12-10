@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use Carp;
 use Compress::Zlib qw();
@@ -25,6 +25,8 @@ use PDF::Builder::Content::Text;
 =head1 NAME
 
 PDF::Builder::Content - Methods for adding graphics and text to a PDF
+
+Inherits from L<PDF::Builder::Basic::PDF::Dict>
 
 =head1 SYNOPSIS
 

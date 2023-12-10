@@ -8,11 +8,11 @@ use Readonly;
 Readonly my $BITS_PER_BYTE => 8;
 
 # VERSION
-my $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Basic::PDF::Filter::CCITTFaxDecode::Writer - compress stream filters for CCITT 1 bit fax formats
+PDF::Builder::Basic::PDF::Filter::CCITTFaxDecode::Writer - Compress stream filters for CCITT 1 bit fax formats - NOT FULLY IMPLEMENTED
 
 =cut
 

@@ -6,11 +6,13 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Resource::XObject::Form::BarCode::ean13 - specific information for EAN-13 bar codes. Inherits from L<PDF::Builder::Resource::XObject::Form::BarCode>
+PDF::Builder::Resource::XObject::Form::BarCode::ean13 - Specific information for EAN-13 bar codes
+
+Inherits from L<PDF::Builder::Resource::XObject::Form::BarCode>
 
 =head1 METHODS
 

@@ -4,12 +4,13 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.018'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Resource::Font::CoreFont::georgiabolditalic - font-specific information for bold weight + italic Georgia font
-(I<not> standard PDF core)
+PDF::Builder::Resource::Font::CoreFont::georgiabolditalic - Font-specific information for bold weight + italic Georgia font
+
+I<Not> a standard PDF core font
 
 =cut
 

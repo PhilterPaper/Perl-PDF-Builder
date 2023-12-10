@@ -4,14 +4,14 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use IO::File;
 use Graphics::TIFF ':all';  # already confirmed to be installed
 
 =head1 NAME
 
-PDF::Builder::Resource::XObject::Image::TIFF::File_GT - support routines for TIFF image library (Graphics::TIFF enabled)
+PDF::Builder::Resource::XObject::Image::TIFF::File_GT - Support routines for TIFF image library (Graphics::TIFF enabled)
 
 =head1 METHODS
 

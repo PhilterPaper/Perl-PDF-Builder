@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use Carp qw(croak);
 use PDF::Builder::Basic::PDF::Utils;
@@ -15,6 +15,8 @@ use Scalar::Util qw(weaken);
 =head1 NAME
 
 PDF::Builder::Outline - Manage PDF outlines (a.k.a. I<bookmarks>)
+
+Inherits from L<PDF::Builder::Basic::PDF::Dict>
 
 =head1 SYNOPSIS
 

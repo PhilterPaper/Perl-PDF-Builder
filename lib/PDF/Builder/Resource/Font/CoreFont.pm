@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use File::Basename;
 
@@ -19,7 +19,9 @@ our $subs;
 
 =head1 NAME
 
-PDF::Builder::Resource::Font::CoreFont - Module for using the 14 standard PDF built-in Fonts (plus 15 Windows Fonts).
+PDF::Builder::Resource::Font::CoreFont - Module for using the 14 standard PDF built-in Fonts (plus 15 Windows Fonts)
+
+Inherits from L<PDF::Builder::Resource::Font>
 
 =head1 SYNOPSIS
 

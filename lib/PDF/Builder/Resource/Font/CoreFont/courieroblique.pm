@@ -4,11 +4,11 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.019'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Resource::Font::CoreFont::courieroblique - font-specific information for slanted Courier font
+PDF::Builder::Resource::Font::CoreFont::courieroblique - Font-specific information for slanted Courier font
 
 =cut
 

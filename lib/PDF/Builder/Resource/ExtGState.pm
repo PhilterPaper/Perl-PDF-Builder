@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Util;
@@ -14,6 +14,8 @@ use PDF::Builder::Util;
 =head1 NAME
 
 PDF::Builder::Resource::ExtGState - Graphics state dictionary support
+
+Inherits from L<PDF::Builder::Resource>
 
 =head1 METHODS
 

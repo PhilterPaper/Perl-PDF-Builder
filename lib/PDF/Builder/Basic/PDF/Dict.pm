@@ -21,7 +21,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 our $mincache = 16 * 1024 * 1024;
 
@@ -32,8 +32,9 @@ use PDF::Builder::Basic::PDF::Name;
 
 =head1 NAME
 
-PDF::Builder::Basic::PDF::Dict - PDF Dictionaries and Streams. Inherits from 
-L<PDF::Builder::Basic::PDF::Objind>
+PDF::Builder::Basic::PDF::Dict - PDF Dictionaries and Streams
+
+Inherits from L<PDF::Builder::Basic::PDF::Objind>
 
 =head1 INSTANCE VARIABLES
 

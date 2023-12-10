@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use PDF::Builder::Util;
 use PDF::Builder::Basic::PDF::Utils;
@@ -15,7 +15,9 @@ our $BmpNum = 0;
 
 =head1 NAME
 
-PDF::Builder::Resource::Font::BdFont - Module for using bitmapped Fonts.
+PDF::Builder::Resource::Font::BdFont - Module for using bitmapped Fonts
+
+Inherits from L<PDF::Builder::Resource::Font>
 
 =head1 SYNOPSIS
 

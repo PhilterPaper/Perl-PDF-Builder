@@ -4,11 +4,11 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.024'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Resource::Glyphs - preparsed uniglyph.txt file information
+PDF::Builder::Resource::Glyphs - Preparsed uniglyph.txt file information
 
 =head1 SYNOPSIS
 

@@ -4,11 +4,11 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.019'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Resource::Font::CoreFont::timesitalic - font-specific information for italic Times font
+PDF::Builder::Resource::Font::CoreFont::timesitalic - Font-specific information for italic Times font
 
 =cut
 

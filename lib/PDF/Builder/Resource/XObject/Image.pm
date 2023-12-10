@@ -6,13 +6,15 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Utils;
 
 =head1 NAME
 
 PDF::Builder::Resource::XObject::Image - Base class for external raster image objects
+
+Inherits from L<PDF::Builder::Resource::XObject>
 
 =head1 METHODS
 

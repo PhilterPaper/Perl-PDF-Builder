@@ -21,7 +21,7 @@ use warnings;
 use base 'PDF::Builder::Basic::PDF::Dict';
 
 # VERSION
-my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::Array;
 use PDF::Builder::Basic::PDF::Dict;
@@ -33,7 +33,8 @@ our %inst = map {$_ => 1} qw(Parent Type);
 
 =head1 NAME
 
-PDF::Builder::Basic::PDF::Pages - a PDF pages hierarchical element. 
+PDF::Builder::Basic::PDF::Pages - PDF pages hierarchical element
+
 Inherits from L<PDF::Builder::Basic::PDF::Dict>
 
 =head1 DESCRIPTION

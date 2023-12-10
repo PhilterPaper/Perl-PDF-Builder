@@ -685,12 +685,12 @@ sub update_HTML{
 			 "</ul>\n</div>";
             $string = substr($string, 0, $pos) . $newstring . substr($string, $pos+36);
 	}
-	$pos = index $string, "<h1 id=\"NAME\">";
+	$pos = index $string, "<ul id=\"index\">";
 	if ($pos < 0) {
 	    print "ERROR: can't find link index in file $fname.\n";
 	    next;
 	}
-	$pos -= 8; # new last item in top level list
+	$pos += 15; # new first item in top level list
 	
         $newstring =  "  <li><a href=\"#NAVIGATION-LINKS\">NAVIGATION LINKS</a>\n" .
 	              "    <ul>\n" .

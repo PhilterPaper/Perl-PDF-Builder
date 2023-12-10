@@ -4,11 +4,11 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Resource::PaperSizes - list of standard paper sizes and their dimensions
+PDF::Builder::Resource::PaperSizes - List of standard paper sizes and their dimensions
 
 =head2 Information and Usage
 

@@ -7,9 +7,6 @@ use File::Path qw(make_path);
  
 my $ourLAST = 1;  # T: change my $LAST_UPDATE to our $LAST_UPDATE
 
-print "rename (X suffix) t/filter-ccittfaxdecode.t,\n lib/PDF/Builder/Basic/PDF/Filter/CCITTFaxDecode.pm, lib/PDF/Builder/Basic/PDF/Filter/CCITTFaxDecode/*\n";
-to_continue();
-
 print "**** check https://en.wikipedia.org/wiki/Leap_second to see if any\n     leap seconds have been added since 12/31/2016. Update Builder.pm.\n";
 to_continue();
 
@@ -232,7 +229,6 @@ print "**** git update with latest changes\n";
 print "**** version update\n";
 print "**** Changes update next version\n";
 print "**** update documentation on catskilltech.com\n";
-print "**** rename (restore X suffix) t/filter-ccittfaxdecode.t,\n lib/PDF/Builder/Basic/PDF/Filter/CCITTFaxDecode.pm, lib/PDF/Builder/Basic/PDF/Filter/CCITTFaxDecode/*\n";
 
 # not (yet) generating .html from POD
 #print "Proceeding. Ignore error messages \"Cannot find PDF::Builder...\" in podpath.\n";

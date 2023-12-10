@@ -4,13 +4,13 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 # originally part of Builder.pm, it was split out due to its length
 
 =head1 NAME
 
-PDF::Builder::Docs - additional documentation for Builder module
+PDF::Builder::Docs - Additional documentation for Builder module
 
 =head1 SOME SPECIAL NOTES
 

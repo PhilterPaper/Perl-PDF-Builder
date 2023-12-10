@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use Math::Trig;    # CAUTION: deg2rad(0) = deg2rad(360) = 0!
 use Unicode::UCD 'charinfo';
@@ -19,7 +19,9 @@ use PDF::Builder::Basic::PDF::Utils;
  
 =head1 NAME
 
-PDF::Builder::Resource::Font::SynFont - Module for creating temporary synthetic Fonts.
+PDF::Builder::Resource::Font::SynFont - Module for creating temporary synthetic Fonts
+
+Inherits from L<PDF::Builder::Resource::Font>
 
 =head1 SYNOPSIS
 

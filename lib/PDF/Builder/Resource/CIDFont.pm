@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use Encode qw(:all);
 
@@ -16,6 +16,8 @@ use PDF::Builder::Util;
 =head1 NAME
 
 PDF::Builder::Resource::CIDFont - Base class for CID fonts
+
+Inherits from L<PDF::Builder::Resource::BaseFont>
 
 =head1 METHODS
 

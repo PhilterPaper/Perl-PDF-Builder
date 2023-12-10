@@ -6,11 +6,13 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '2.029'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Basic::PDF::Filter::ASCIIHexDecode - compress and uncompress stream filters for ASCII-Hex
+PDF::Builder::Basic::PDF::Filter::ASCIIHexDecode - Compress and uncompress stream filters for ASCII-Hex
+
+Inherits from L<PDF::Builder::Basic::PDF::Filter>
 
 =cut
 

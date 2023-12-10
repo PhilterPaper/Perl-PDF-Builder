@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use Encode qw(:all);
 use IO::File qw();
@@ -16,7 +16,9 @@ use PDF::Builder::Basic::PDF::Utils;
 
 =head1 NAME
 
-PDF::Builder::Resource::Font::Postscript - support routines for using PostScript fonts. Inherits from L<PDF::Builder::Resource::Font>
+PDF::Builder::Resource::Font::Postscript - Support routines for using PostScript (Type 1) fonts
+
+Inherits from L<PDF::Builder::Resource::Font>
 
 =head1 METHODS
 

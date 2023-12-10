@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use PDF::Builder::Util;
 use PDF::Builder::Basic::PDF::Utils;
@@ -19,6 +19,11 @@ our $subs;
 =head1 NAME
 
 PDF::Builder::Resource::CIDFont::CJKFont - Base class for CJK fonts
+
+Inherits from L<PDF::Builder::Resource::CIDFont>
+
+B<Note:> CJK font support is somewhat obsolete. Try directly using an
+up-to-date TTF or OTF font instead.
 
 =head1 METHODS
 

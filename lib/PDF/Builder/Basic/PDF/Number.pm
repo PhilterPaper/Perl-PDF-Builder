@@ -21,11 +21,13 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Basic::PDF::Number - Numbers in PDF. Inherits from L<PDF::Builder::Basic::PDF::String>
+PDF::Builder::Basic::PDF::Number - Numbers in PDF
+
+Inherits from L<PDF::Builder::Basic::PDF::String>
 
 =head1 METHODS
 

@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use Compress::Zlib;
 
@@ -18,6 +18,8 @@ use Scalar::Util qw(weaken);
 =head1 NAME
 
 PDF::Builder::Resource::XObject::Image::TIFF - TIFF image support
+
+Inherits from L<PDF::Builder::Resource::XObject::Image>
 
 =head1 METHODS
 

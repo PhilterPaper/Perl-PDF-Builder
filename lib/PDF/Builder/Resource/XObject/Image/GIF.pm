@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use IO::File;
 use PDF::Builder::Util;
@@ -15,7 +15,9 @@ use Scalar::Util qw(weaken);
 
 =head1 NAME
 
-PDF::Builder::Resource::XObject::Image::GIF - support routines for GIF image library. Inherits from L<PDF::Builder::Resource::XObject::Image>
+PDF::Builder::Resource::XObject::Image::GIF - Support routines for GIF image library
+
+Inherits from L<PDF::Builder::Resource::XObject::Image>
 
 =head2 History
 

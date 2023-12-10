@@ -6,11 +6,13 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Resource::XObject::Form::BarCode::codabar - specific information for CodaBar bar codes. Inherits from L<PDF::Builder::Resource::XObject::Form::BarCode>
+PDF::Builder::Resource::XObject::Form::BarCode::codabar - Specific information for CodaBar bar codes
+
+Inherits from L<PDF::Builder::Resource::XObject::Form::BarCode>
 
 =head1 METHODS
 

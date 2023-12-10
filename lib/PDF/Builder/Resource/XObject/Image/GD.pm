@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use PDF::Builder::Util;
 use PDF::Builder::Basic::PDF::Utils;
@@ -14,7 +14,9 @@ use Scalar::Util qw(weaken);
 
 =head1 NAME
 
-PDF::Builder::Resource::XObject::Image::GD - support routines for Graphics Development image library. Inherits from L<PDF::Builder::Resource::XObject::Image>
+PDF::Builder::Resource::XObject::Image::GD - Support routines for Graphics Development image library
+
+Inherits from L<PDF::Builder::Resource::XObject::Image>
 
 =head1 METHODS
 
