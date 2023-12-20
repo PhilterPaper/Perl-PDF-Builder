@@ -1,10 +1,76 @@
-Note that INFO/Changes-ver_2 (for changes released for PDF::API2, and 
-incorporated into PDF::Builder) is NOT being updated any longer. You may
-assume that any change logged for API2 has also been incorporated into
-Builder, with any exceptions or differences noted here.
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2023-12-10  UNRELEASED
+3.027     2023-12-17  UNRELEASED
+* = work in progress (not all may make it into this release!)
+
+*   elliptical bogen and rotated ellipses/arcs/ebogens. Probably a new
+       examples/Bogens.pl with circular bogen stuff moved over from Content.pl 
+       and replaced by rotated arc examples in Content.pl. elliptical bogen
+       examples in Bogens.pl
+
+*   lc() all tags and attribute names in column() no need to do CSS properties
+       (would not expect to be anything but lower case) although should also
+       lc() tag names in <style> and global CSS inputs. make sure unsupported
+       tags and CSS properties reported (at first occurrence, with flag to 
+       suppress reporting... just ignore).
+
+*   cleanup of column(), including list markers, dead code, CSS text-align
+       before outputting font changes for <li>, output a 
+       <span style="display:block;">marker text</span> before the <li>
+       should use the <ul><ol> etc. font properties for the marker since is
+       outside of <li></li> block. at some point, new extended properties
+       for markers (default to ul, ol, etc. properties).
+
+*   column() fix growth of font size in <a>. confirm that indentation etc.
+       correct when crossing column boundaries
+
+*   add <img> to column(), with positioning (as CSS compatible as possible) to
+       align top/center/baseline/bottom with current text/line ascender-top/
+       baseline/descender-bottom plus arbitrary point displacement dx and dy
+       from current baseline starting point or from vertical alignment 
+       setting). Don't forget to expand line max extents as needed.
+
+*   some new tag and CSS support in column() esp white-space, pre, br #195
+       <sl> and <dl> might be easy enough, too, once I'm happy with lists.
+       <code>, <kbd>, <samp>, <var> so PDF::Table code display request done.
+
+*   any margin-top at column top should be ignored, not just for <p>
+
+*   extend CSS for list marker styling (bold italic, color, font, size, etc.).
+       default to current ol, ul etc. styling property values.
+
+*   avoid marooning ( ) etc. at end of line when under different tags (adjacent
+       text/no space still splitting because tag changed near end of line)
+
+*   GnuPlot support (depends on SVG image or PNG image). can do before SVG in.
+       build GP file on the fly and/or extend an existing one. temp file for GP,
+       temp file for output from gnuplot -- flag to name and preserve, or to
+       discard temp file(s).
+
+*   SVG support for image, once SVGPDF finalized. make sure GnuPlot now
+       allows SVG output, not just PNG.
+
+*   MathJax support (depends on SVG image). <eqn> tag in column(). as with
+       GnuPlot, name and preserve temp output (SVG file) or discard.
+
+*   make sure Docs.pm, Content::Text, and #195 list of supported tags, CSS
+       properties, etc. are kept in synch with column() capabilities, as well 
+       as changes to examples/ being transferred to site Examples section
+
+*   vector (list) set AND get of transform matrix #200
+
+*   remove leading 0's in various integers if encountered #198. test first to
+       see if problem in PDF::Builder or in various Readers. Builder should not
+       be creating such integers, but should modify them if read in from an
+       external producer.
+
+*   rationalize and document Named Destination support #202
+
+*   precision of coordinate dimensions #196
+
+*   revised bar code support (depends on new barcode library and SVG image) #48
+       probably put off to 3.028, as requires new product release of large
+       1D and 2D barcode SVG generator (as optional prereq for Builder).
 
     (most .pm files) update POD for more consistent appearance.
     docs/buildDoc.pl put NAVIGATION at top of TOC, since usually now much 
@@ -13,4 +79,9 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
     devtools/html2php.pl updates found to be needed.
     MANIFEST add INFO/Changes_2023.
 
-(see INFO/Changes_2021 for earlier changes)
+(see INFO/Changes_2023 for earlier changes)
+
+Note that INFO/Changes-ver_2 (for changes released for PDF::API2, and 
+incorporated into PDF::Builder) is NOT being updated any longer. You may
+assume that any change logged for API2 has also been incorporated into
+Builder, with any exceptions or differences noted here.

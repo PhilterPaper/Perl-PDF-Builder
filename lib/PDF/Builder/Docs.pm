@@ -7,6 +7,9 @@ use warnings;
 our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 # originally part of Builder.pm, it was split out due to its length
+#
+# WARNING: be sure to keep in synch with changes to POD elsewhere, especially
+#   for column() markup! (also list in #195 and in Content::Text)
 
 =head1 NAME
 

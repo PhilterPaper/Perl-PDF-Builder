@@ -1149,6 +1149,9 @@ sub textlabel {
     }
     return $wht;
 }
+ 
+# WARNING: be sure to keep in synch with changes to POD elsewhere, especially
+#   list in #195 and Docs.pm
 
 =head2 Complex Column Output with Markup
 
