@@ -6,7 +6,7 @@ use warnings;
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
 our $VERSION = '3.026'; # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 # updated during CPAN build
 my $GrTFversion  = 19;       # minimum version of Graphics::TIFF
@@ -2990,11 +2990,12 @@ page_labels().
 =item 3.
 
 Many PDF readers do not support page labels; they simply (at most)
-label the sliding thumb with the physical page number. Adobe Acrobat Reader 
+label the sliding thumb with the physical page number. B<Adobe Acrobat Reader> 
 (free version) appears to have a bug in some versions, where if the only
 page label is 'decimal' (the default), it labels the thumb as though no page 
-labels were defined ("Page I<m> of I<n>"). You may be able to get around this
-problem by using an explicit B<start> option value, e.g., C<'start' =E<gt> 1>.
+labels were defined ("Page I<m> of I<n>"). You should be able to get around 
+this problem by always using an explicit B<start> option value, e.g., 
+C<'start' =E<gt> 1>, and not counting on the default value.
 
 =back
 
@@ -4164,7 +4165,7 @@ C<gif>, C<jpeg>, C<png>, C<pnm>, or C<tiff>.
 B<Note:> PNG images that include an alpha (transparency) channel go through a
 relatively slow process of splitting the image into separate RGB and alpha
 components as is required by images in PDFs. If you're having performance
-issues, install Image::PNG::Libpng to speed this process up by
+issues, install Image::PNG::Libpng to speed up this process by
 an order of magnitude; either module will be used automatically if available.
 See the C<image_png> method for details.
 
@@ -4181,10 +4182,9 @@ sub image {
 
     my $format = lc($opts{'format'} // '');
 
-    if (ref($file) eq 'GD::Image') {
+    if      (ref($file) eq 'GD::Image') {
         return $self->image_gd($file, %opts);
-    }
-    elsif (ref($file)) {
+    } elsif (ref($file)) {
         $format ||= _detect_image_format($file);
 	# JPEG, PNG, GIF, and P*M files can be detected
 	# TIFF files cannot currently be detected
@@ -4199,31 +4199,23 @@ sub image {
 	# GD images are created on-the-fly and don't have files
     }
 
-    if ($format eq 'jpeg') {
+    if      ($format eq 'jpeg') {
         return $self->image_jpeg($file, %opts);
-    }
-    elsif ($format eq 'png') {
+    } elsif ($format eq 'png') {
         return $self->image_png($file, %opts);
-    }
-    elsif ($format eq 'gif') {
+    } elsif ($format eq 'gif') {
         return $self->image_gif($file, %opts);
-    }
-    elsif ($format eq 'tiff') {
+    } elsif ($format eq 'tiff') {
         return $self->image_tiff($file, %opts);
-    }
-    elsif ($format eq 'pnm') {
+    } elsif ($format eq 'pnm') {
         return $self->image_pnm($file, %opts);
-    }
-    elsif ($format) {
+    } elsif ($format) {
         croak "Unrecognized image format: $format";
-    }
-    elsif (ref($file)) {
+    } elsif (ref($file)) {
         croak "Unspecified image format";
-    }
-    elsif ($file =~ /(\..*)$/) {
+    } elsif ($file =~ /(\..*)$/) {
         croak "Unrecognized image extension: $1";
-    }
-    else {
+    } else {
         croak "Unrecognized image: $file";
     }
 }
@@ -4231,12 +4223,19 @@ sub image {
 # if passed a filehandle, attempt to read the format header to determine type
 sub _detect_image_format {
     my $fh = shift();
-    $fh->seek(0, 0);
-    binmode $fh, ':raw';
+    if (ref($fh) ne 'SCALAR') {
+        $fh->seek(0, 0);
+        binmode $fh, ':raw';
+    }
 
-    my $test;
-    my $bytes_read = $fh->read($test, 8);
-    $fh->seek(0, 0);
+    my ($test, $bytes_read);
+    if (ref($fh) eq 'SCALAR') {
+        $test = substr($$fh, 0, 8);
+        $bytes_read = length($test);
+    } else {
+        $bytes_read = $fh->read($test, 8);
+        $fh->seek(0, 0);
+    }
     return unless $bytes_read and $bytes_read == 8;
 
     return 'gif'  if $test =~ /^GIF\d\d[a-z]/;

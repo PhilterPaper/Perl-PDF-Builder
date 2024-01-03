@@ -33,9 +33,35 @@ sub new {
 
     my $self = {};
     bless ($self, $class);
-    die "Error: $file not found\n" unless -r $file;
+    my $file_is_temp = 0;
+    if (! -r $file) {
+	# if a file was requested, it wasn't found. if a GLOB (opened 
+	# filehandle), try outputting to a temp file and using that
+	if (ref($file) eq 'GLOB') {
+	    # treat $file as an open filehandle
+	    local $/;
+	    use File::Temp qw/ tempfile /;
+	    my $tempdata = <$file>;
+	    my ($fh, $tempname) = tempfile();
+	    binmode($fh);
+	    print $fh $tempdata;
+	    close($fh);
+	    $file_is_temp = 1;
+	    $file = $tempname; # presumably existing $file no longer needed
+	} else {
+	    # presumably requested a real file, but couldn't find it
+	    die "Error: $file not found\n";
+	}
+    }
     $self->{'object'} = Graphics::TIFF->Open($file, 'r');
     $self->readTags();
+    # if temporary file, get rid of it
+    if ($file_is_temp) { 
+	$file =~ s#\\#/#g; # on Windows, \ separators may cause problems
+	if (!unlink($file)) {
+	    print "Note: failed to erase temporary file $file\n";
+	}
+    }
 
     return $self;
 }

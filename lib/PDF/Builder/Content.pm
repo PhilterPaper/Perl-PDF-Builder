@@ -3298,7 +3298,14 @@ specified location.
 Up to four optional arguments may be given, with their defaults as described
 below.
 
-If C<$x> and C<$y> are omitted, the object will be placed at C<[0, 0]>.
+C<$x> and C<$y> are the I<upper left> corner of the object. If they are 
+omitted, the object will be placed with its I<lower left> corner at C<[0, 0]>.
+B<Note> that if the object's bounding box has the fourth value (maximum
+ascender) greater than 0, you may need to subtract that value from C<y> to get
+the desired vertical position! A typical application will have a bounding box
+of C<[0, -height, width, 0]>, and no correction is needed. If the bounding box
+is C<[0, -max_descender, width, max_ascender]>, you may need to add the
+correction.
 
 For images, C<$scale_x> and C<$scale_y> represent the width and height of the
 image on the page, in points. If C<$scale_x> is omitted, it will default to 72
