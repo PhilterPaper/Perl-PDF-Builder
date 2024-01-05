@@ -34,7 +34,7 @@ sub new {
     my $self = {};
     bless ($self, $class);
     my $file_is_temp = 0;
-    if (! -r $file) {
+    if (ref($file)) {
 	# if a file was requested, it wasn't found. if a GLOB (opened 
 	# filehandle), try outputting to a temp file and using that
 	if (ref($file) eq 'GLOB') {
@@ -46,11 +46,17 @@ sub new {
 	    binmode($fh);
 	    print $fh $tempdata;
 	    close($fh);
+	    $file->seek(0, 0);
 	    $file_is_temp = 1;
 	    $file = $tempname; # presumably existing $file no longer needed
 	} else {
 	    # presumably requested a real file, but couldn't find it
-	    die "Error: $file not found\n";
+	    die "Error: unknown handle type ".ref($file)."\n";
+	}
+    } else {
+	# presumably a file path sent in. see if exists and can read
+	if (! -r $file) {
+	    die "Error: requested TIFF file $file not found";
 	}
     }
     $self->{'object'} = Graphics::TIFF->Open($file, 'r');

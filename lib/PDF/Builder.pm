@@ -4242,8 +4242,10 @@ sub _detect_image_format {
     return 'jpeg' if $test =~ /^\xFF\xD8\xFF/;
     return 'png'  if $test =~ /^\x89PNG\x0D\x0A\x1A\x0A/;
     return 'pnm'  if $test =~ /^\s*P[1-6]/;
-    # potentially could handle TIFF, except that libtiff cannot accept
-    # a filehandle as input for image_tiff(). GD images do not have files.
+    # II4200 | MM0042 for TIFF
+    return 'tiff' if $test =~ /^II\x2A\x00/;
+    return 'tiff' if $test =~ /^MM\x00\x2A/;
+    # GD images do not have files.
     return;
 }
 
@@ -4290,8 +4292,9 @@ and C<examples/Content.pl>
 for some examples of placing an image on a page (JPEG, but the principle is
 the same). 
 There is an optional TIFF library (TIFF_GT) described, that gives more
-capability than the default one. However, note that C<$file> can only be
-a filename when using this library.
+capability than the default one.
+See the TIFF_GT documentation for further information on using this library, 
+particularly when passing a I<filehandle> for the file.
 
 =back
 
@@ -4426,8 +4429,9 @@ for some examples of placing an image on a page (JPEG, but the principle is
 the same). 
 
 There is an optional PNG library (PNG_IPL) described, that gives more
-capability than the default one. However, note that C<$file> can only be
-a filename when using this library.
+capability than the default one.
+See the PNG_IPL documentation for further information on using this library, 
+particularly when passing a I<filehandle> for the file.
 
 =back
 

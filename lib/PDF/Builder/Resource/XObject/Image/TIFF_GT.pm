@@ -73,6 +73,12 @@ look into adding it as an option. According to Graphic::TIFF's owner
 (ticket RT 133955), this is coming directly from libtiff (as write to STDERR), 
 so he can't do anything about it!
 
+Finally, while Graphics::TIFF does not directly support passing in a filehandle
+(usually a GLOB), PDF::Builder will attempt to detect this issue and write the
+content (from the filehandle) to a temporary file, and pass that in as a
+normal file. Some operating systems appear to have trouble erasing this
+temporary file, so be aware that such files may build up over time!
+
 =back
 
 =cut

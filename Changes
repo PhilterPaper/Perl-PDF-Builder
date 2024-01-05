@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2023-12-27  UNRELEASED
+3.027     2024-01-04  UNRELEASED
 * = work in progress (not all may make it into this release!)
 
 *   elliptical bogen and rotated ellipses/arcs/ebogens. Probably a new
@@ -107,6 +107,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
        legacy code, which didn't work that well).
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/PNG_IPL.pm,
+      lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm,
       lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm
      Update Image::PNG::Libpng handling so that SVGPDF library will be able
       to handle inlined PNG images by passing an IO::String "filehandle" from
@@ -114,7 +115,10 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       accept filehandles (at least, "GLOB" type) as input, and write out a
       temporary file to use. Certain operating systems seem to have trouble
       erasing the temporary file, so temps may build up over time! This area of
-      filehandle inputs is still being actively investigated.
+      filehandle inputs is still being actively investigated. It appears that
+      all image formats except GD (GIF, JPEG, TIFF, TIFF with Graphics::TIFF, 
+      PNM, PNG, and PNG with Image::PNG::Libpng) can now be given either a 
+      filepath and name, or a Perl filehandle.
 
     examples/RMtutorial.pl
      Correct font 'Times' to 'Times-Roman' to avoid warning messages.
