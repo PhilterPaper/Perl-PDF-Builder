@@ -7,7 +7,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 my $PDFname = $0;
    $PDFname =~ s/\..*$//;  # remove extension such as .pl

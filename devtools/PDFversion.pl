@@ -1,4 +1,4 @@
-my $ourLAST = 1;  # T: change my $LAST_UPDATE to our $LAST_UPDATE
+#my $ourLAST = 1;  # T: change my $LAST_UPDATE to our $LAST_UPDATE
 
     my $src = $ARGV[0];  # directory root to work in for this call
     my $VERSION = $ARGV[1];  # version to use (e.g., 3.005)
@@ -65,9 +65,9 @@ if ($name =~ m/ - Copy/) { next; }
         while ($line = <IN>) {
 	    # $line still has line-end \n
             $line =~ s/$pattern/$newVer/;
-	    if ($ourLAST) {
-		$line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
-	    }
+	   #if ($ourLAST) {
+	   #    $line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
+	   #}
 	    print OUT $line;
         }
    

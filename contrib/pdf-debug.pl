@@ -5,7 +5,7 @@ use warnings;
 use PDF::Builder::Basic::PDF::File;
 
 # VERSION
-my $LAST_UPDATE = '3.010'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 my $file = shift(@ARGV);
 unless ($file) {

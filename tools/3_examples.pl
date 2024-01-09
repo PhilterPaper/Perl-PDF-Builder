@@ -9,7 +9,7 @@ use strict;
 use warnings;
 
 # VERSION
-my $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 # dependent on optional packages:
 my $HS_installed = 1; # HarfBuzz::Shaper IS installed and you want to use it.

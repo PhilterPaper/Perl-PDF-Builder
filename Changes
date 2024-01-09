@@ -1,7 +1,7 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2024-01-04  UNRELEASED
-* = work in progress (not all may make it into this release!)
+3.027     2024-01-09  UNRELEASED
+* = work planned or in progress (not all may make it into this release!)
 
 *   elliptical bogen and rotated ellipses/arcs/ebogens. Probably a new
        examples/Bogens.pl with circular bogen stuff moved over from Content.pl 
@@ -9,15 +9,23 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
        examples in Bogens.pl. most of the new code and examples already exists.
        bogen() allow old style "extra" settings, but encourage use of new
        hash list as used in bogen_ellip() and add to rotation of elliptical
-       arcs and ellipses. update MANIFEST with any new examples.
+       arcs and ellipses. update MANIFEST with any new examples. work done for
+       SVGPDF package use, so might as well reuse it here.
 
 *   lc() all tags and attribute names in column() no need to do CSS properties
        (would not expect to be anything but lower case) although should also
-       lc() tag names in <style> and global CSS inputs. make sure unsupported
-       tags and CSS properties reported (at first occurrence, with flag to 
-       suppress reporting... just ignore). do we do just first capital tag
-       encountered, or do we give a message for each different one we find 
-       (would need global list of such tags to see which has been flagged)?
+       lc() tag names in <style> and global CSS inputs. do just first capital 
+       tag encountered, rather than giving a message for each different one we 
+       find (would need global list of such tags to see which has been flagged 
+       already). flag to suppress even this one message.
+
+*   warning that unrecognized HTML tag or CSS property will be ignored (at 
+       first occurrence, with flag to suppress reporting... just ignore). it 
+       may be possible to salvage child text and just ignore the tag or the 
+       property, but in any case, the user should be notified that it's not 
+       being processed quite the way they want it to be. what to do if tag
+       itself is not supported/recognized, but style settings within it are?
+       treat it as a <span>?
 
 *   cleanup of column(), including list markers, dead code (wait to output
        font information, positioning/scale, color, etc. until last moment), 
@@ -31,7 +39,8 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
        not just for <p>
 
 *   column() fix growth of font size in <a>. confirm that indentation etc.
-       remains correct when crossing column boundaries
+       remains correct when crossing column boundaries (separate column()
+       calls with continuation of text).
 
 *   add <img> to column(), with positioning (as CSS compatible as possible) to
        align top/center/baseline/bottom with current text/line ascender-top/
@@ -40,10 +49,11 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
        setting). Don't forget to expand line max extents as needed.
 
 *   line vertical extents grow as necessary... do we stack them, in case we 
-       need to back out text already put down (see marooned text below)? 
+       need to back out text already put down (e.g., see marooned text below)? 
        consider a stack of status information: indices of tags and text used, 
        extents at entry to a tag, etc. wait to delete tags/text elements until 
-       line is REALLY finalized -- will need to restore state if back out text.
+       line is REALLY finalized -- will need to restore state (including font,
+       size, and color) if back out text.
 
 *   some new tag and CSS support in column() esp white-space, pre, br #195
        <sl> and <dl> might be easy enough, too, once I'm happy with lists.
@@ -74,7 +84,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
        Makefile.PL, etc. and docs is updated with SVGPDF and anything else.
 
 *   MathJax support (depends on SVG image). <eqn> tag in column(). as with
-       GnuPlot, name and preserve temp output (SVG file) or discard.
+       GnuPlot, name and preserve or discard temp output (SVG file).
 
 *   replace all $obj->isa("kind") with UNIVERSAL::isa($obj, "kind"), as it will
        handle simple scalars correctly without blowing up ("isa" against an
@@ -90,7 +100,12 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 
 *   rationalize and document Named Destination support #202
 
-*   precision of coordinate dimensions #196
+*   control of precision of coordinate dimensions #196
+
+*   per API2 detect if trying to open a R/O document for writing. also look
+       into opening password-protected docs (another API2 ticket?)
+
+---- likely 3.028 or later ---------
 
 *   avoid marooning ( ) etc. at end of line when under different tags (adjacent
        text/no space still splitting because tag changed near end of line). if
@@ -98,13 +113,29 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
        status (vertical extents, etc.) and NOT erase tag and text runs when
        used, until line is finalized and this run of tags/text is either output
        or is deferred to the next line. will depend on whether text can be
-       split or otherwise hyphenated. lots of work, probably not til 3.028!
+       split or otherwise hyphenated. consider first scanning @mytext to find 
+       adjacent text, and insert some sort of <nobr> tag into stream? note that 
+       a word may still be hyphenated at the end of a line, so <nobr> should 
+       only apply to adjacent text and not within words.
 
 *   revised bar code support (depends on new barcode library and SVG image) #48
-       probably put off to 3.028, as requires new product release of large
-       1D and 2D barcode SVG generator (as optional prereq for Builder). 
-       replace bar code examples with new library anyway (no need to keep
-       legacy code, which didn't work that well).
+       requires new product release of large 1D and 2D barcode SVG generator 
+       library (as optional prereq for Builder).  replace bar code examples 
+       with new library anyway (no need to keep legacy code, which didn't work 
+       that well).
+
+*   proper hyphenation (language-dependent), using a new hyphenation library
+       as well as tag support for <lang> and <nobr>.
+
+*   real paragraph shaping, perhaps using Text::KnuthPlass.
+
+---- DONE --------------------------
+
+    README.md, contrib/*, examples/*, tools/*, devtools/PDFbuild.pl, 
+      devtools/PDFversion.pl, docs/buildDoc.pl
+     Bite the bullet and change "my $LAST_UPDATE" to "our $LAST_UPDATE", and
+      remove the build-time edit of all these files. .pm file instances were
+      already changed earlier during POD structure updates.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/PNG_IPL.pm,
       lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm,

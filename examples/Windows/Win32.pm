@@ -5,7 +5,7 @@ use warnings;
 #no warnings qw[ deprecated recursion uninitialized ];
 
 # VERSION
-my $LAST_UPDATE = '3.021'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 use Win32::TieRegistry qw( :KEY_ );  # creates $Registry, et al.
 

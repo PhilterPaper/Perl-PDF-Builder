@@ -5,7 +5,7 @@
 #
 use File::Path qw(make_path);
  
-my $ourLAST = 1;  # T: change my $LAST_UPDATE to our $LAST_UPDATE
+#my $ourLAST = 1;  # T: change my $LAST_UPDATE to our $LAST_UPDATE  # s/b no longer needed
 
 print "**** check https://en.wikipedia.org/wiki/Leap_second to see if any\n     leap seconds have been added since 12/31/2016. Update Builder.pm.\n";
 to_continue();
@@ -526,9 +526,14 @@ sub update_with_version {
 ##  my @pattern = ('^(\s*my \$version\s*=\s*\')\d\.\d{3}(\';.*)$',
 ##  		   '^(our \$VERSION = \')\d\.\d{3}(\'; # VERSION)',
 ##	           '^(version = )\d\.\d{3}(\s)$');
-    my @name = ('Makefile.PL', "lib\\PDF\\Builder.pm");
+    my @name = ('Makefile.PL',
+                "lib\\PDF\\Builder.pm",
+                "README.md",
+               );
     my @pattern = ('^(\s*my \$version\s*=\s*\')\d\.\d{3}(\';.*)$',
-    		   '^(our \$VERSION = \')\d\.\d{3}(\'; # VERSION)');
+    		   '^(our \$VERSION = \')\d\.\d{3}(\'; # VERSION)',
+                   '^(# PDF::Builder release )\d\.\d{3}(.*)$',
+                  );
 
     foreach $f (0 .. $#name) {
        #if ($f == 0) { system("attrib -R $name[0]"); }
@@ -541,9 +546,9 @@ sub update_with_version {
    
         while ($line = <IN>) {
             $line =~ s/$pattern[$f]/$1$VERSION$2/;
-	    if ($ourLAST) {
-		$line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
-	    }
+	   #if ($ourLAST) {
+	   #    $line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
+	   #}
 	    print OUT $line;
         }
    
@@ -613,9 +618,9 @@ sub update_VERSION {
    
         while ($line = <IN>) {
             $line =~ s/$pattern/$newVer/;
-	    if ($ourLAST) {
-		$line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
-	    }
+	   #if ($ourLAST) {
+	   #    $line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
+	   #}
 	    print OUT $line;
         }
    
@@ -736,9 +741,9 @@ sub update_Builder {
 		last;
             }
 	}
-	if ($ourLAST) {
-	    $line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
-	}
+       #if ($ourLAST) {
+       #    $line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
+       #}
 	print OUT $line;
     }
 
@@ -1071,9 +1076,9 @@ sub update_optional {
 	        last;
 	    }
 	}
-        if ($ourLAST) {
-            $line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
-        }
+       #if ($ourLAST) {
+       #    $line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
+       #}
 	# whether ^# VERSION or already expanded our $VERSION, rewrite
 	if ($line =~ m/# VERSION/) {
 	    $line = "our \$VERSION = '$VERSION'; # VERSION\n";

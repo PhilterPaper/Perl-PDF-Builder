@@ -22,7 +22,7 @@ my $bleedbox_adj = 36/pt;  # in from crop box on top and right for printer inst.
 my $cropbox_adj = 0.25/in;  # in from media edge
 
 # VERSION
-my $LAST_UPDATE = '3.023'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 my $PDFname = $0;
    $PDFname =~ s/\..*$//;  # remove extension such as .pl
