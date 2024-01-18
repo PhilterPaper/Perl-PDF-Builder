@@ -1,7 +1,56 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2024-01-09  UNRELEASED
+3.027     2024-01-18  UNRELEASED
 * = work planned or in progress (not all may make it into this release!)
+
+    lib/PDF/Builder/Docs-Outlines-Outline.pm
+      Clarify and extend the documentation for creating and maintaining
+       outlines (bookmarks), including how to create multilevel (nested)
+       bookmarks. Remove '$prev' entry from Outline's constructor, as it
+       appears to have never functioned as intended. Instead, use the methods
+       insert_before() and insert_after() to place a bookmark within an
+       existing list. If you *are* successfully using '$prev', please describe
+       how you are using it so I can document it and restore it to the code!
+
+    README.md, contrib/*, examples/*, tools/*, devtools/PDFbuild.pl, 
+      devtools/PDFversion.pl, docs/buildDoc.pl
+     Bite the bullet and change "my $LAST_UPDATE" to "our $LAST_UPDATE", and
+      remove the build-time edit of all these files. .pm file instances were
+      already changed earlier during POD structure updates.
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/PNG_IPL.pm,
+      lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm,
+      lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm
+     Update Image::PNG::Libpng handling so that SVGPDF library will be able
+      to handle inlined PNG images by passing an IO::String "filehandle" from
+      File::LoadLines, etc. Also, TIFF (with Graphics::TIFF usage) will now
+      accept filehandles (at least, "GLOB" type) as input, and write out a
+      temporary file to use. Certain operating systems seem to have trouble
+      erasing the temporary file, so temps may build up over time! This area of
+      filehandle inputs is still being actively investigated. It appears that
+      all image formats except GD (GIF, JPEG, TIFF, TIFF with Graphics::TIFF, 
+      PNM, PNG, and PNG with Image::PNG::Libpng) can now be given either a 
+      filepath and name, or a Perl filehandle.
+
+    examples/RMtutorial.pl
+     Correct font 'Times' to 'Times-Roman' to avoid warning messages.
+
+    lib/PDF/Builder/Content.pm
+     Correct placement of content of "object" and in POD elaborate on necessary
+      corrections that may be needed.
+
+    lib/PDF/Builder.pm
+     Recommend workaround for problems with Adobe Acrobat Reader when 
+      displaying decimal (only) page labels (need to specify "start").
+
+    (most .pm files) update POD for more consistent appearance.
+    docs/buildDoc.pl put NAVIGATION at top of TOC, since usually now much 
+      more in the Table of Contents.
+    devtools/PDFbuild.pl updates found to be needed in 3.026 build.
+    devtools/html2php.pl updates found to be needed.
+    MANIFEST add INFO/Changes_2023.
+
+---- try to get into 3.027 ---------
 
 *   elliptical bogen and rotated ellipses/arcs/ebogens. Probably a new
        examples/Bogens.pl with circular bogen stuff moved over from Content.pl 
@@ -33,7 +82,9 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
        <span style="display:block;">marker text</span> before the <li>
        should use the <ul><ol> etc. font properties for the marker since is
        outside of <li></li> block. at some point, new extended properties
-       for markers (default to ul, ol, etc. properties).
+       for markers (default to ul, ol, etc. properties). is the x and y text
+       position always meaningful for text-align, or is some sort of 
+       positioning needed?
 
 *   any margin-top or pending margin-bottom at column top should be ignored, 
        not just for <p>
@@ -103,7 +154,8 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 *   control of precision of coordinate dimensions #196
 
 *   per API2 detect if trying to open a R/O document for writing. also look
-       into opening password-protected docs (another API2 ticket?)
+       into opening password-protected docs (API2 #48 ticket) or at least
+       fail gracefully
 
 ---- likely 3.028 or later ---------
 
@@ -125,49 +177,11 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
        that well).
 
 *   proper hyphenation (language-dependent), using a new hyphenation library
-       as well as tag support for <lang> and <nobr>.
+       as well as tag support for <lang> and <nobr>. at a minimum Basic
+       hyphenation used everywhere, including column() 
+       (non-language-dependent).
 
 *   real paragraph shaping, perhaps using Text::KnuthPlass.
-
----- DONE --------------------------
-
-    README.md, contrib/*, examples/*, tools/*, devtools/PDFbuild.pl, 
-      devtools/PDFversion.pl, docs/buildDoc.pl
-     Bite the bullet and change "my $LAST_UPDATE" to "our $LAST_UPDATE", and
-      remove the build-time edit of all these files. .pm file instances were
-      already changed earlier during POD structure updates.
-
-    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/PNG_IPL.pm,
-      lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm,
-      lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm
-     Update Image::PNG::Libpng handling so that SVGPDF library will be able
-      to handle inlined PNG images by passing an IO::String "filehandle" from
-      File::LoadLines, etc. Also, TIFF (with Graphics::TIFF usage) will now
-      accept filehandles (at least, "GLOB" type) as input, and write out a
-      temporary file to use. Certain operating systems seem to have trouble
-      erasing the temporary file, so temps may build up over time! This area of
-      filehandle inputs is still being actively investigated. It appears that
-      all image formats except GD (GIF, JPEG, TIFF, TIFF with Graphics::TIFF, 
-      PNM, PNG, and PNG with Image::PNG::Libpng) can now be given either a 
-      filepath and name, or a Perl filehandle.
-
-    examples/RMtutorial.pl
-     Correct font 'Times' to 'Times-Roman' to avoid warning messages.
-
-    lib/PDF/Builder/Content.pm
-     Correct placement of content of "object" and in POD elaborate on necessary
-      corrections that may be needed.
-
-    lib/PDF/Builder.pm
-     Recommend workaround for problems with Adobe Acrobat Reader when 
-      displaying decimal (only) page labels (need to specify "start").
-
-    (most .pm files) update POD for more consistent appearance.
-    docs/buildDoc.pl put NAVIGATION at top of TOC, since usually now much 
-      more in the Table of Contents.
-    devtools/PDFbuild.pl updates found to be needed in 3.026 build.
-    devtools/html2php.pl updates found to be needed.
-    MANIFEST add INFO/Changes_2023.
 
 (see INFO/Changes_2023 for earlier changes)
 

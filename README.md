@@ -4,18 +4,20 @@ A Perl library to facilitate the creation and modification of PDF files
 
 ## What is it?
 
-PDF::Builder is a **fork** of the popular PDF::API2 Perl library. It provides a 
-library of modules and functions so that a PDF file (document) may be built and 
-maintained from Perl programs. It is not a WYSIWYG editor; nor is it a canned 
-utility or converter. It does _not_ have a GUI -- it is driven by your Perl 
-program. It is a set of **building blocks** with which you can perform a wide 
-variety of operations, ranging from basic operations such as selecting a font 
-face, to defining an entire page at a time in the document, using a large 
-subset of either Markdown or HTML markup languages. You can call it from 
-arbitrary Perl programs, which may even create content on-the-fly (or read it 
-in from other sources). Quite a few code examples are provided, to help you to 
-get started with the process of creating a PDF document. Many enhancements are 
-in the pipeline to make PDF::Builder even more powerful and versatile.
+PDF::Builder is a **fork** of the popular PDF::API2 Perl library. It provides a
+library of modules and functions so that a PDF file (document) may be built and
+maintained from Perl programs (it can also read in, modify, and write back out
+existing PDF files). It is not a WYSIWYG editor; nor is it a canned
+utility or converter. It does _not_ have a GUI or command line interface -- it
+is driven by your Perl program. It is a set of **building blocks** (methods)
+with which you can perform a wide variety of operations, ranging from basic
+operations such as selecting a font face, to defining an entire page at a time
+in the document, using a large subset of either Markdown or HTML markup
+languages. You can call it from arbitrary Perl programs, which may even create
+content on-the-fly (or read it in from other sources). Quite a few code
+examples are provided, to help you to get started with the process of creating
+a PDF document. Many enhancements are in the pipeline to make PDF::Builder even
+more powerful and versatile.
 
 [Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full), including Documentation and Examples.
 
@@ -96,9 +98,9 @@ These libraries should be automatically installed...
 
 These libraries are _recommended_ for improved functionality and performance.
 The default behavior is **not** to attempt to install them during PDF::Builder
-installation, in order to speed up the testing process and not clutter up 
-matters, especially if an optional package fails to install. You can always 
-manually install them later, if you desire to make use of their added 
+installation, in order to speed up the testing process and not clutter up
+matters, especially if an optional package fails to install. You can always
+manually install them later, if you desire to make use of their added
 functionality.
 
 * Perl::Critic (1.150 or higher, need if running tools/1\_pc.pl)
@@ -110,9 +112,9 @@ functionality.
 * Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc utility to create HTML documentation)
 
 If an optional package is needed, but not installed, sometimes PDF::Builder
-will be able to fall back to built-in partial functionality (TIFF and PNG 
-images), but other times will fail. After installing the missing package, you 
-may wish to then run the t-test suite for that library to confirm that it is 
+will be able to fall back to built-in partial functionality (TIFF and PNG
+images), but other times will fail. After installing the missing package, you
+may wish to then run the t-test suite for that library to confirm that it is
 properly running, as well as running the examples.
 
 Other than an installer for standard CPAN packages (such as 'cpan' on
@@ -123,7 +125,7 @@ done during the install process, only copying of .pm Perl module files.
 
 ## Manually building
 
-As is the usual practice with building such a package (from the command line), 
+As is the usual practice with building such a package (from the command line),
 the steps are:
 
 1. perl Makefile.PL
@@ -131,11 +133,11 @@ the steps are:
 1. make test
 1. make install
 
-If you have your system configured to run Perl for a .pl/.PL file, you may be 
-able to omit "perl" from the first command, which creates a Makefile. "make" 
-is the generic command to run (it feeds on the Makefile), but your system may 
-have it under a different name, such as dmake (Strawberry Perl on Windows), 
-gmake, or nmake.
+If you have your system configured to run Perl for a .pl/.PL file, you may be
+able to omit "perl" from the first command, which creates a Makefile. "make"
+is the generic command to run (it feeds on the Makefile produced by
+Makefile.PL), but your system may have it under a different name, such as
+dmake, gmake (e.g., Strawberry Perl on Windows), or nmake.
 
 PDF::Builder does not currently compile and link anything, so `gcc`, `g++`,
 etc. will not be used. The build process merely copies .pm files around, and
@@ -183,7 +185,7 @@ a pointer to your work. The more cross-pollination, the better!
 * LICENSE file for more on the license term
 * INFO/RoadMap file for the PDF::Builder road map
 * INFO/ACKNOWLEDGE.md for "thank yous" to those who contributed to this product
-* INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues 
+* INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues
 * INFO/DEPRECATED file for information on deprecated features
 * INFO/KNOWN\_INCOMP file for known incompatibilities with PDF::API2
 * INFO/CONVERSION file for how to convert from PDF::API2 to PDF::Builder
@@ -199,7 +201,7 @@ and go to the `docs/` directory. Run `buildDoc.pl --all` to generate the full
 tree of documentation. There's a lot of additional information in the
 PDF::Builder::Docs module (it's all documentation).
 
-You may find it more convenient to point your browser to our 
+You may find it more convenient to point your browser to our
 [Home Page](https://www.catskilltech.com/FreeSW/product/PDF-Builder/title/PDF%3A%3ABuilder/freeSW_full)
 to see the full documentation build (as well as most of the example outputs).
 

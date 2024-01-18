@@ -1438,6 +1438,101 @@ widths (8.26 inches, 595 Points) would be effective.
 The I<given> dimensions of a box are returned on query (get), not the 
 I<effective> dimensions clipped by the Media Box.
 
+=head2 Outlines (Bookmarks)
+
+It is possible to create I<outlines> (a.k.a. I<bookmarks>) in a PDF document.
+You are not limited to entire pages as targets, but can adjust the destination 
+C<dest()> to bring up a specific part of a page.
+
+=head3 Simple Single-Level set of Outline
+
+Inserts three outlines (at the same level) in a simple list of 12 pages
+(055_outlines example):
+
+    my $doc = PDF::Builder-> open($infile);
+
+    $doc-> outlines
+        -> outline
+            -> dest( $doc-> openpage( 1 ))
+            -> title( '1st page (i)' );
+
+    $doc-> outlines
+        -> outline
+            -> dest( $doc-> openpage( 4 ))
+            -> title( '4th page (1)' );
+
+    $doc-> outlines
+        -> outline
+            -> dest( $doc-> openpage( 11 ))
+            -> title( '11th page (7)' );
+
+C<dest()> by default is a link to an entire page (given as the ordinal page
+number, I<not> the document's formatted page number). The C<title()> is what
+you see in the Outline or Bookmark section of your PDF Reader.
+
+=head3 A Multi-level example Outline
+
+It is also possible to define nested (multiple level) outlines. For the same 
+set of pages as above, we will add two pages nested under B<page i> and three
+pages nested under B<page 1>. Note that it is common practice to make the top
+level I<sections> (e.g., I<preface, body, end matter>) and put all the real 
+pages under them, but you still need to have each section "heading" map to a 
+real page. Thus I<preface> might point to page B<i>, and have outlines to 
+B<i, ii,> and B<iii> nested below it.
+
+    my $doc = PDF::Builder-> open($infile);
+    my $root =  # Outlines object (root of whole thing)
+        $doc-> outlines();
+
+    my $top0 =  # Outline object at top level, initially collapsed (closed)
+    $root -> outline($root)
+            -> is_open(0)        
+            -> dest( $doc-> openpage( 1 ))
+            -> title( '1st page (i)' );
+
+    my $top1 =  # Outline object at top level
+    $root -> outline($root)
+            -> dest( $doc-> openpage( 4 ))
+            -> title( '4th page (1)' );
+
+    my $top2 =  # Outline object at top level. no children
+    $root -> outline($root)
+            -> dest( $doc-> openpage( 11 ))
+            -> title( '11th page (7)' );
+
+    # add lower level bookmarks here. there's no reason that they couldn't be
+    # mixed in with the higher levels above, provided that they come after
+    # their parent is defined.
+
+    # two pages under the first top-level page (i)
+    $top0 -> outline($top0)
+              -> dest( $doc-> openpage( 2 ))
+              -> title( '2nd page (ii)' );
+ 
+    $top0 -> outline($top0)
+              -> dest( $doc-> openpage( 3 ))
+              -> title( '3rd page (iii)' );
+
+    # three pages under the second top-level page (1). the third is
+    # inserted after the first and before the second.
+    my $first =
+    $top1 -> outline($top1)
+              -> dest( $doc-> openpage( 5 ))
+              -> title( '5th page (2)' );
+ 
+    $top1 -> outline($top1)
+              -> dest( $doc-> openpage( 6 ))
+              -> title( '6th page (3)' );
+ 
+    $first -> insert_after()
+              -> dest( $doc-> openpage( 7 ))
+              -> title( '7th page (4)' );
+ 
+It is possible to define a single outline (link) as B<closed>, in which case
+all the outlines nested under it will be hidden (with a "closed" twistor). 
+Try to avoid going more than two levels deep (one level of nesting), as the
+Outlines/Bookmarks column is usually fairly narrow.
+
 =head2 FONT METHODS
 
 =head3 Core Fonts
