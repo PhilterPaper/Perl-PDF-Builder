@@ -106,6 +106,8 @@ sub type {
     return $self->{'Type'}->val();
 }
 
+# TBD per API2 PR #28, *may* need to copy sub find_prop from Page.pm to here
+
 =head2 filter
 
     @filters = $d->filter(@filters)

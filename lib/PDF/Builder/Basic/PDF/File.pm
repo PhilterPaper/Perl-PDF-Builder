@@ -210,6 +210,7 @@ sub new {
         $root->{'Type'} = PDFName('Catalog');
     }
     $self->new_obj($root);
+
     $self->{'Root'} = $root;
 
     return $self;
@@ -244,8 +245,8 @@ even a program B<crash>) may happen further along. If you experience crashes
 when reading in a PDF file, try running with C<diags> and see what is reported.
 
 There are many PDF files out "in the wild" which, while failing to conform to
-Adobe's standards, appear to be tolerated by PDF Readers. Thus, Builder will no
-longer fail on them, but merely comment on their existence.
+Adobe's standards, appear to be tolerated by PDF Readers. Thus, Builder will 
+not fail on them, but merely comment on their existence.
 
 =back
 
@@ -270,8 +271,14 @@ sub open {
         }
         $fh = $filename;
     } else {
-        die "File '$filename' does not exist!" unless -f $filename;
+        die "PDF file '$filename' to open does not exist!"  unless -f $filename;
+        die "PDF file '$filename' to open is not readable!" unless -r $filename;
+	# requesting to update (write) to file? needs to be r/w
+        if ($update) {
+            die "PDF file '$filename' to update is not writable!" unless -w $filename;
+        }
         $fh = IO::File->new(($update ? '+' : '') . "<$filename") || return;
+	    die "File '$filename' unable to open! $!";
         $self->{' INFILE'} = $fh;
         if ($update) {
             $self->{' update'} = 1;
@@ -305,7 +312,7 @@ sub open {
     }
     unless ($buffer =~ m/startxref[^\d]+([0-9]+)($cr|\s*)\%\%eof.*?/i) {
 	if ($options{'diags'} == 1) {
-            warn "Malformed PDF file $filename"; #orig 'die'
+            warn "Malformed PDF file $filename";
         }
     }
     my $xpos = $1; # offset given after 'startxref'
@@ -622,11 +629,13 @@ sub append_file {
     }
     $tdict->{'Size'} = $self->{'Size'};
 
+
     foreach my $key (grep { $_ !~ m/^\s/ } keys %$self) {
         $tdict->{$key} = $self->{$key} unless defined $tdict->{$key};
     }
 
     $fh->seek($self->{' epos'}, 0);
+
     $self->out_trailer($tdict, $self->{' update'});
     close $self->{' OUTFILE'};
 
@@ -721,6 +730,8 @@ sub close_file {
     # NO! Don't do that thing! In fact, let out_trailer do the opposite!
 
     $tdict->{'Size'} = $self->{'Size'} || PDFNum(1);
+
+
     $tdict->{'Prev'} = PDFNum($self->{' loc'}) if $self->{' loc'};
     if ($self->{' update'}) {
         foreach my $key (grep { $_ !~ m/^[\s\-]/ } keys %$self) {
@@ -730,6 +741,8 @@ sub close_file {
         my $fh = $self->{' INFILE'};
         $fh->seek($self->{' epos'}, 0);
     }
+
+
 
     $self->out_trailer($tdict, $self->{' update'});
     close($self->{' OUTFILE'});
@@ -1151,6 +1164,7 @@ sub new_obj {
     }
 
     $i = $self->{' maxobj'}++;
+
     if (defined $base) {
         $self->add_obj($base, $i, 0);
         $self->out_obj($base);
@@ -1583,6 +1597,7 @@ sub readxrtr {
         while ($buf =~ m/^$ws_char*([0-9]+)$ws_char+([0-9]+)$ws_char*$cr(.*?)$/s) {
             my $old_buf = $buf;
             $xmin = $1;   # starting object number of this subsection
+
             $xnum = $2;   # number of entries in this subsection 
             $buf  = $3;   # remainder of buffer
             $subsection_count++;
@@ -1655,6 +1670,7 @@ sub readxrtr {
                     }
                 }
                 $xmin++;
+
             } # traverse one subsection for objects xmin through xmin+xnum-1 
             # go back for next subsection (if any)
         } # loop through xref subsections
@@ -1781,6 +1797,7 @@ sub readxrtr {
             @index = map { $_->val() } @{$tdict->{'Index'}->val()};
         } else {
             @index = (0, $tdict->{'Size'}->val());
+
         }
 
         while (scalar @index) {
@@ -1827,6 +1844,7 @@ sub readxrtr {
     $tdict->{' loc'} = $xpos;
     $tdict->{' xref'} = $xlist;
     $self->{' maxobj'} = $xmin + 1 if $xmin + 1 > $self->{' maxobj'};
+
     $tdict->{' prev'} = $self->readxrtr($tdict->{'Prev'}->val(), %options)
         if (defined $tdict->{'Prev'} and $tdict->{'Prev'}->val() != 0);
     delete $tdict->{' prev'} unless defined $tdict->{' prev'};
@@ -1859,7 +1877,14 @@ sub out_trailer {
         $self->ship_out();
     }
 
-    $tdict->{'Size'} = PDFNum($self->{' maxobj'});
+    if (defined $self->{'Size'}) {
+        $tdict->{'Size'} = PDFNum($self->{' maxobj'} -1 );
+
+    } else {
+        $tdict->{'Size'} = PDFNum($self->{' maxobj'}    );
+
+    }
+
 
     my $tloc = $fh->tell();
 ##  $fh->print("xref\n");
@@ -1934,6 +1959,7 @@ sub out_trailer {
             @a == 2 ? push @index, @a : push @stream, \@a;
         }
         my $i = $self->{' maxobj'}++;
+
         $self->add_obj($tdict, $i, 0);
         $self->out_obj($tdict);
 
@@ -1963,6 +1989,7 @@ sub out_trailer {
         }
 	# build a dictionary for the cross reference stream
         $tdict->{'Size'} = PDFNum($i + 1);
+
         $tdict->{'Index'} = PDFArray(map { PDFNum($_) } @index);
         $tdict->{'W'} = PDFArray(map { PDFNum($_) } 1, $len, 1);
         $tdict->{'Filter'} = PDFName('FlateDecode');
@@ -2011,6 +2038,7 @@ sub _new {
     $self->{' outlist'}       = [];
     $self->{' outlist_cache'} = {};     # A cache of what's in the 'outlist'
     $self->{' maxobj'}        = 1;
+
     $self->{' objcache'}      = {};
     $self->{' objects'}       = {};
 
