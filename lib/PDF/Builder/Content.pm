@@ -999,35 +999,6 @@ sub close {
     return $self;
 }
 
-=head3 endpath, end
-
-    $content->endpath()
-
-=over
-
-Ends the current path without explicitly enclosing it.
-That is, unlike C<close>, there is B<no> line segment 
-drawn back to the starting position.
-
-B<Alternate name:> C<end>
-
-This is provided for compatibility with PDF::API2. Do not confuse it with
-the C<$pdf-E<gt>end()> method!
-
-=back
-
-=cut
-
-sub end { return endpath(@_); } ## no critic
-
-sub endpath {
-    my ($self) = shift;
-
-    $self->add('n');
-
-    return $self;
-}
-
 =head3 Straight line constructs
 
 B<Note:> None of these will actually be I<visible> until you call C<stroke>, 
@@ -2866,6 +2837,35 @@ sub clip {
     return $self;
 }
 
+=head3 endpath, end
+
+    $content->endpath()
+
+=over
+
+Ends the current path without explicitly enclosing it.
+That is, unlike C<close>, there is B<no> line segment 
+drawn back to the starting position.
+
+B<Alternate name:> C<end>
+
+This is provided for compatibility with PDF::API2. Do not confuse it with
+the C<$pdf-E<gt>end()> method!
+
+=back
+
+=cut
+
+sub end { return endpath(@_); } ## no critic
+
+sub endpath {
+    my ($self) = shift;
+
+    $self->add('n');
+
+    return $self;
+}
+
 =head3 shade
 
     $content->shade($shade, @coord)
@@ -3744,11 +3744,13 @@ sub textstate {
 
 =head4 font
 
-    $content->font($font_object, $size)
+    $content->font($font_object, $size)  # Set
+
+    ($font_object, $size) = $content->font()  # Get
 
 =over
 
-Sets the font and font size. C<$font> is an object created by calling
+Sets or gets the font and font size. C<$font> is an object created by calling
 L<PDF::Builder/"font"> to add the font to the document.
 
     # Example (12 point Helvetica)
@@ -3760,6 +3762,13 @@ L<PDF::Builder/"font"> to add the font to the document.
     $text->text('Hello, World!');
 
     $pdf->save('sample.pdf');
+
+Or, get the current font object and size setting:
+
+    my ($font, $size) = $text->font();
+
+Results ($font and $size) are indeterminate if font() was not previously called
+using them.
 
 =back
 
@@ -3778,6 +3787,13 @@ sub _font {
 sub font {
     my ($self, $font, $size) = @_;
 
+    if (!defined $font) { # Get
+	$font = $self->{' font'}; 
+	$size = $self->{' fontsize'};
+	return ($font, $size);
+    }
+
+    # otherwise Set
     unless ($size) {
         croak q{A font size is required};
     }
@@ -4398,6 +4414,7 @@ sub text {
     my $indent = 0; # default
     if (defined $opts{'indent'}) {
 	$indent = $opts{'indent'};
+	# indent may be negative to "outdent" a line
 	# TBD: later may define indentation for RTL/bidirectional
     }
 
@@ -4418,13 +4435,16 @@ sub text {
     my $ulxy1 = [$self->_textpos2()]; # x,y start of under/thru line
 
     if ($indent) {
-	# now indent is positive >0 to move left. convert to milliems and scale
+	# indent is positive >0 to move right (explicit 'indent' optional 
+	# amount plus left adjustment for centered or right alignment). 
+	# convert to milliems and scale
         $self->add(
 	    $self->{' font'}->text(
 		$text, 
 		$self->{' fontsize'}, 
 	        -$indent*(1000/$self->{' fontsize'})*(100/$self->hscale()) ));
     } else {
+	# indent ended up 0
         $self->add(
 	    $self->{' font'}->text(
 		$text, 
@@ -4432,6 +4452,8 @@ sub text {
     }
 
     $self->matrix_update($wd, 0); # move current position right to end of text
+    # regardless of alignment used.
+    # TBD need to check if will be left end for RTL/bidirectional
 
     my $ulxy2 = [$self->_textpos2()]; # x,y end of under/thru line
 

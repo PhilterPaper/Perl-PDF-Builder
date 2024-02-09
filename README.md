@@ -145,7 +145,7 @@ runs the "t" tests to confirm the proper installation.
 
 ## Copyright
 
-This software is Copyright (c) 2017-2023 by Phil M. Perry.
+This software is Copyright (c) 2017-2024 by Phil M. Perry.
 
 Previous copyrights are held by others (Steve Simms, Alfred Reibenschuh, et al.). See The HISTORY section of the documentation for more information.
 

@@ -8,6 +8,9 @@ use Carp;
 use List::Util qw(min max);
 #use Data::Dumper;  # for debugging
 #  $Data::Dumper::Sortkeys = 1;  # hash keys in sorted order
+ 
+# when update column() tags and CSS, also update #195 list and Docs.pm.
+# any examples/ changes update Examples on website
 
 # VERSION
 our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
@@ -1258,8 +1261,10 @@ and CSS. Currently, HTML tags
     'sup', 'sub' (TBD superscript and subscript)
     's', 'strike', 'del' (line-through)
     'u', 'ins' (underline)
-    'ovl' (TBD -- non-HTML, overline)
-    'k' (TBD -- non-HTML, kerning left/right shift)
+    'ovl' (TBD -- non-standard HTML, overline)
+    'k' (TBD -- non-standard HTML, kerning left/right shift)
+    'marker' (non-standard HTML, gives ability to modify list markers.
+           if given, must be immediately before a <li>)
     'blockquote' (block quote)
 
 are supported (fully or in part I<unless> "TBD"), along with limited CSS for 
@@ -1297,18 +1302,27 @@ Supported CSS properties:
     height (pt, bare number) thickness of horizontal rule
     list-style-position (outside) TBD inside
     list-style-type (marker description, see also _marker-before/after)
+    list-style-image TBD
     margin-top/right/bottom/left (pt, bare number = pt, % of font-size)
       margin TBD update four margin-* properties
-    text-decoration (none, underline, line-through, overline)
+    text-decoration (none, underline, line-through, overline, may use more
+      than one (except 'none') separated by spaces)
     text-height (leading, as ratio of baseline-spacing to font-size)
     text-indent (pt, bare number = pt, % of current font-size)
-    text-align (left/right) TBD, future also center/justify?
+    text-align (left/center/right)
+      note that center and right not fully implemented
     width (pt, bare number) width of horizontal rule
 
 Non-standard CSS "properties". You may want to set these in CSS:
 
-    _marker-before (text to insert before <ol> marker, default nothing)
-    _marker-after (text to insert after <ol> marker, default period)
+    _marker-before (constant text to insert before <ol> marker, default nothing)
+    _marker-after (constant text to insert after <ol> marker, default period)
+    _marker-text (define text to use as marker instead of default)
+    _marker-color (change color from default, such as color-coded ul bullets)
+    _marker-font (change marker font face)
+    _marker-style (change marker font style, e.g., italic)
+    _marker-size (change marker font size)
+    _marker-weight (change marker font weight)
 
 Non-standard CSS "properties". You normally would not set these in CSS:
 
@@ -1713,7 +1727,7 @@ It contains nothing to be used.
 #   <article>, <aside>, <section>  as predefined page areas?
 #
 #  extensions to HTML and CSS...
-#   <sl>* simple list (no markers)
+#   <sl>* simple list (markers are ' ')
 #   <sc>* preprocess: around runs of lowercase put <span style="font-size: 80%;
 #        expand: 110%"> and fold to UPPER CASE. this is post-mytext creation!
 #   <pc>* (Petite case) like <sc> but 1ex font-size, expand 120%
@@ -1820,7 +1834,7 @@ sub column {
     # process style attributes, tag attributes, style tags, column() options,
     # and fixed default attributes in that order to fill in each tag's
     # attribute list. on exit from tag, set attributes to restore settings
-    _tag_attributes(@mytext);
+    @mytext = _tag_attributes(@mytext);
 
     ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $page, $text, $grfx, $restore, $para, $font_size, $marker_width, $leading, @mytext);
 
@@ -1849,24 +1863,24 @@ sub column {
 sub _default_css {
     my ($pdf, $text, $font_size, $leading, %opts) = @_;
 
-    my @cur_font = $pdf->get_font();
-    my @cur_color = $text->fillcolor();
-    my $current_color;
-   #my $cur_color = 'black';
-    if (@cur_color == 1) { 
-	# 'name', '#rrggbb' etc. suitable for CSS usage
+   #my @cur_font = $pdf->get_font();
+   #my @cur_color = $text->fillcolor();
+    my $current_color = 'black';
+    my $cur_color = 'black';
+   #if (@cur_color == 1) { 
+   	# 'name', '#rrggbb' etc. suitable for CSS usage
 	# TBD: single gray scale value s/b changed to '#rrggbb'
 	#       (might be 0..1, 0..100, 0..ff)?
-	$current_color = $cur_color[0];
-    } else {
+   #	$current_color = $cur_color[0];
+   #} else {
 	# returned an array of values, unsuitable for CSS
 	# TBD: 3 values 0..1 turn into #rrggbb
 	# TBD: 3 values 0..100 turn into #rrggbb
 	# TBD: 3 values 0..ff turn into #rrggbb
 	# TBD: 4 values like 3, but CMYK
 	# for now, default to 'black'
-	$current_color = 'black';
-    }
+   #	$current_color = 'black';
+   #}
 
     my %style;
     $style{'tag'} = 'defaults';
@@ -1912,9 +1926,10 @@ sub _default_css {
     $style{'body'}->{'color'} = $color;
 
     # now for fixed settings
-    $style{'body'}->{'font-family'} = $cur_font[0]; # face
+   #$style{'body'}->{'font-family'} = $cur_font[0]; # face
    #$style{'body'}->{'font-style'} = $cur_font[1]? 'italic': 'normal';
    #$style{'body'}->{'font-weight'} = $cur_font[2]? 'bold': 'normal';
+    $style{'body'}->{'font-family'} = 'Times';
     $style{'body'}->{'font-style'} = 'normal';
     $style{'body'}->{'font-weight'} = 'normal';
    #$style{'body'}->{'font-variant'} = 'normal'; # small-caps
@@ -1925,7 +1940,7 @@ sub _default_css {
     $style{'body'}->{'_left'} = '0'; 
     $style{'body'}->{'_right'} = '0'; 
     $style{'body'}->{'text-indent'} = '0'; 
-   #$style{'body'}->{'text-align'} = 'left'; # TBD center, right
+    $style{'body'}->{'text-align'} = 'left';
    #$style{'body'}->{'text-transform'} = 'none'; # capitalize, uppercase, lowercase
    #$style{'body'}->{'border-style'} = 'none'; # solid, dotted, dashed... TBD
    #$style{'body'}->{'border-width'} = '1pt'; 
@@ -1951,16 +1966,17 @@ sub _default_css {
     $style{'ul'}->{'list-style-type'} = '.u'; # disc, circle, square, box, none
     $style{'ul'}->{'list-style-position'} = 'outside'; # inside
     $style{'ul'}->{'display'} = 'block'; 
+    $style{'ul'}->{'margin-top'} = '50%';  # relative to text's font-size
     $style{'ul'}->{'margin-bottom'} = '50%'; 
     $style{'ol'}->{'list-style-type'} = '.o'; # decimal, lower-roman, upper-roman, lower-alpha, upper-alpha, none
     $style{'ol'}->{'list-style-position'} = 'outside'; # inside TBD
     $style{'ol'}->{'display'} = 'block'; 
+    $style{'ol'}->{'margin-top'} = '50%';  # relative to text's font-size
     $style{'ol'}->{'margin-bottom'} = '50%'; 
     $style{'ol'}->{'_marker-before'} = ''; # content to add before marker
     $style{'ol'}->{'_marker-after'} = '.'; # content to add after marker
    #$style{'sl'}->{'list-style-type'} = 'none'; TBD
-    $style{'li'}->{'display'} = 'block';  # should inherit from ul or ol
-    $style{'li'}->{'margin-top'} = '50%';  # relative to text's font-size
+    $style{'li'}->{'display'} = 'inline';  # should inherit from ul or ol
 
    #$style{'h6'}->{'text-transform'} = 'uppercase'; # heading this level CAPS
     $style{'h6'}->{'font-weight'} = 'bold'; # all headings bold
@@ -2047,12 +2063,18 @@ sub _default_css {
    #$style{'sc'}->{'_expand'} = '110%'; # wider type   TBD _expand
    #likewise for pc (petite caps) TBD
 
+    $style{'marker'}->{'display'} = 'block'; 
+    $style{'marker'}->{'text-align'} = 'right'; 
+   #  can set properties in <ol> or <ul> to apply to entire list (inherited)
+    
     return \%style;
 } # end of _default_css()
 
 # make sure each tag's attributes are proper property names 
 # consolidate attributes and style attribute (if any)
 # mark empty tags (no explicit end tag will be found)
+#
+# also insert <marker> tag before evey <li> lacking an explicit one
 sub _tag_attributes {
     my (@mytext) = @_;
     
@@ -2061,13 +2083,13 @@ sub _tag_attributes {
 	if (ref($mytext[$el]) ne 'HASH') { next; }
 	if ($mytext[$el]->{'tag'} eq '') { next; }
 
-        my $tag = $mytext[$el]->{'tag'};
+        my $tag = lc($mytext[$el]->{'tag'});
 	if (!defined $tag) { next; }
 	if ($tag =~ m#^/#) { next; }
 
 	# we have a tag that might have one or more attributes that may
 	# need to be renamed as a CSS property
-	if ($tag eq 'font') {
+	if      ($tag eq 'font') {
 	    if (defined $mytext[$el]->{'face'}) {
 		$mytext[$el]->{'font-family'} = delete($mytext[$el]->{'face'});
 	    }
@@ -2076,32 +2098,44 @@ sub _tag_attributes {
 		# TBD some sizes may need to be converted to points. for now,
 		#   assume is a bare number (pt), pt, or % like font-size CSS
 	    }
-	}
-	if ($tag eq 'ol') {
+	} elsif ($tag eq 'ol') {
 	    if (defined $mytext[$el]->{'type'}) {
 	        $mytext[$el]->{'list-style-type'} = delete($mytext[$el]->{'type'});
 	    }
-	}
-	if ($tag eq 'ul') {
+	} elsif ($tag eq 'ul') {
 	    if (defined $mytext[$el]->{'type'}) {
 	        $mytext[$el]->{'list-style-type'} = delete($mytext[$el]->{'type'});
 	    }
-	}
-	if ($tag eq 'li') {
+	} elsif ($tag eq 'li') {
 	    if (defined $mytext[$el]->{'type'}) {
 	        $mytext[$el]->{'list-style-type'} = delete($mytext[$el]->{'type'});
 	    }
-	}
-	if ($tag eq 'a') {
+	    # if user did not explicitly give a <marker> just before <li>,
+	    # insert one to "even up" with any in the source. 
+	    if ($mytext[$el-1]->{'tag'} ne '/marker') {
+		# we haven't added or expanded a <marker> here yet
+	        if ($mytext[$el-1]->{'tag'} ne 'marker') {
+		    splice(@mytext, $el, 0, {'tag'=>'marker', 'text'=>''});
+		    $el ++; # since we just inserted one element
+	        }
+	        # then for any <marker> (which SHOULD be there, whether 
+		# original or just added), add blank text (to be updated 
+		# later), and </marker>
+	        splice(@mytext, $el, 0, {'tag'=>'', 'text'=>''},
+		                        {'tag'=>'/marker', 'text'=>''});
+	        $el += 2; # since we just inserted two more elements
+	    }
+	    # $el should still point to <li> element
+	} elsif ($tag eq 'a') {
 	    if (defined $mytext[$el]->{'href'}) {
 	        $mytext[$el]->{'_href'} = delete($mytext[$el]->{'href'});
 	    }
-	}
-	if ($tag eq 'hr') {
+	} elsif ($tag eq 'hr') {
 	    if (defined $mytext[$el]->{'size'}) {
 	        $mytext[$el]->{'height'} = delete($mytext[$el]->{'size'});
 	    }
 	}
+	# add any additional tag attributes -> CSS property here
 	 
 	# process any style attribute and override attribute values
 	if (defined $mytext[$el]->{'style'}) {
@@ -2113,10 +2147,33 @@ sub _tag_attributes {
 	    }
 	}
 
+	# list-style-type for ol/ul/li needs fleshing out
+	if (defined $mytext[$el]->{'list-style-type'}) {
+	    if      ($mytext[$el]->{'list-style-type'} eq '1') {
+	        $mytext[$el]->{'list-style-type'} = 'decimal';
+	    } elsif ($mytext[$el]->{'list-style-type'} eq 'A') {
+	        $mytext[$el]->{'list-style-type'} = 'upper-alpha';
+	    } elsif ($mytext[$el]->{'list-style-type'} eq 'a') {
+	        $mytext[$el]->{'list-style-type'} = 'lower-alpha';
+	    } elsif ($mytext[$el]->{'list-style-type'} eq 'I') {
+	        $mytext[$el]->{'list-style-type'} = 'upper-roman';
+	    } elsif ($mytext[$el]->{'list-style-type'} eq 'i') {
+	        $mytext[$el]->{'list-style-type'} = 'lower-roman';
+	    } elsif ($mytext[$el]->{'list-style-type'} eq 'upper-latin') {
+	        $mytext[$el]->{'list-style-type'} = 'upper-alpha';
+	    } elsif ($mytext[$el]->{'list-style-type'} eq 'lower-latin') {
+	        $mytext[$el]->{'list-style-type'} = 'lower-alpha';
+	    }
+	    # note that there are dozens more valid order list formats that
+	    # are NOT currenty supported (TBD). also, although upper/lower-
+	    # latin is valid, the code is expecting alpha
+	}
+
 	# VOID elements (br, hr, img, area, base, col, embed, input,
 	# link, meta, source, track, wbr) do not have a separate end
 	# tag. also incude style and defaults in this list in case a stray 
-	# one shows up (does not have an end tag)
+	# one shows up (does not have an end tag). this is NOT really
+	# "self-closing", although the terms are often used interchangeably.
 	if ($tag eq 'br' || $tag eq 'hr' || $tag eq 'img' || $tag eq 'area' ||
 	    $tag eq 'base' || $tag eq 'col' || $tag eq 'embed' || 
 	    $tag eq 'input' || $tag eq 'link' || $tag eq 'meta' ||
@@ -2124,8 +2181,8 @@ sub _tag_attributes {
             $tag eq 'defaults' || $tag eq 'style') {
 	    $mytext[$el]->{'empty_element'} = 1;
         }
-    }
-    return;
+    } # for loop through all user-defined elements
+    return @mytext;
 } # end of _tag_attributes()
 
 # the workhorse of the library: output text (modified by tags) in @mytext
@@ -2174,6 +2231,9 @@ sub _output_text {
     my @properties = ({}); # stack of properties from tags
     _update_properties($properties[0], $mytext[0], 'body');
     my $call_get_font = 0;
+    my %bad_tags; # keep track of invalid HTML tags
+    my $x_adj = 0;  # ul, ol list marker move left from right-align position
+    my $y_adj = 0;  # ul list marker elevation
 
     # mytext[0] should be default css values
     # mytext[1] should be any <style> tags (consolidated)
@@ -2183,7 +2243,7 @@ sub _output_text {
 	if (ref($mytext[$el]) ne 'HASH') { next; }
 	if (!keys %{$mytext[$el]}) { next; }
 	
-	if ($mytext[$el]->{'text'} eq '') {
+	if ($mytext[$el]->{'tag'} ne '') {
             # ===================================== tags/end-tags
 	    # should be a tag or end-tag element defined
 	    # for the most part, just set properties at stack top. sometimes
@@ -2191,7 +2251,7 @@ sub _output_text {
 	    # <hr> or <img>). remember that the properties stack includes
 	    # any units (%, pt, etc.), while current_prop has been converted
 	    # to points.
-	    my $tag = $mytext[$el]->{'tag'};
+	    my $tag = lc($mytext[$el]->{'tag'});
 
 	    if (substr($tag, 0, 1) ne '/') {
 	        # take care of 'beginning' tags. dup the top of the properties
@@ -2263,8 +2323,16 @@ sub _output_text {
 		    # change stack top into 'inline'
 		    $properties[-1]->{'display'} = 'inline';
 	        }
+
 		# handle specific kinds of tags' special processing
-	        if ($tag eq 'p') {
+		# if no code for a tag, yet uncommented, it's supported
+		#   (just no special processing at this point)
+		# in many cases, all that was needed was to set properties,
+		#   and normal text output takes care of the rest
+		#
+		# current font size (pt) before properties applied
+		my $fs = $current_prop->{'font-size'};
+	        if      ($tag eq 'p') {
                     # para=1 we're at top of column (no extra margin)
 		    # per $para (or default), drop down a line?, indent?
 		    # if CSS changed to display=inline for some reason, what to do?
@@ -2282,18 +2350,19 @@ sub _output_text {
 	            if (defined $mytext[$el]->{'cont'} && $mytext[$el]->{'cont'}) {
                         $add_x = $add_y = 0;
                     }
-	        }
-	       #if ($tag eq 'i') { } 
-	       #if ($tag eq 'em') { }
-	       #if ($tag eq 'b') { }
-	       #if ($tag eq 'strong') { }
-	       #if ($tag eq 'font') { } face already renamed to font-family,
-	       #                        size already renamed to font-size, color
-	       #if ($tag eq 'span') { } needs style= or <style> to be useful
-	        if ($tag eq 'ul') { 
+	        } elsif ($tag eq 'i') {
+	        } elsif ($tag eq 'em') {
+		} elsif ($tag eq 'b') {
+	        } elsif ($tag eq 'strong') {
+	        } elsif ($tag eq 'font') { # face already renamed to
+	            # font-family, size already renamed to font-size, color
+	        } elsif ($tag eq 'span') { 
+		    # needs style= or <style> to be useful
+	        } elsif ($tag eq 'ul') { 
 		    $list_depth++;
-		}
-	        if ($tag eq 'ol') { 
+		    # indent each list level by same amount
+	            $properties[-1]->{'_left'} += $marker_width;
+		} elsif ($tag eq 'ol') { 
 		    # save any existing start and reversed_ol values
 		    $properties[-2]->{'_start'} = $start; # current start
 		    $properties[-2]->{'_reversed_ol'} = $reversed_ol; # cur flag
@@ -2308,54 +2377,26 @@ sub _output_text {
 			$reversed_ol = 0;
 		    }
                     $list_depth++;
-	        }
-	        if ($tag eq 'li') {
-		    # paragraph, but label depends on parent (list-style-type)
-		    # type and value attributes can override parent 
-		    # list-style-type and start
-		    if (defined $mytext[$el]->{'value'}) {
-		        $start =  $mytext[$el]->{'value'}; # used only for ol
-		    }
-		    # for time-being, treat position of marker as 'outside' TBD
-		    $list_marker = _marker($properties[-1]->{'list-style-type'},
-			$list_depth, $start, 
-			$properties[-1]->{'_marker-before'}, 
-			$properties[-1]->{'_marker-after'});
-		    if (substr($list_marker, 0, 1) eq '.') {
-			# it's a bullet character
-		    } else {
-			# fully formatted ordered list item
-			if ($reversed_ol) {
-		            $start--;
-			} else {
-		            $start++;
-			}
-		    }
-		    # sl: use normal marker width, marker is blank. position
-		    #     is always outside (ignore inside if given)
-		    # dl: variable length marker width, minimum size given,
-		    #     which is where dd left margin is
-	        }
-	       #if ($tag eq 'img') { } TBD, hspace and vspace already margins,
-	       #                            width, height
-	       #if ($tag eq 'a') { } 
-	       #if ($tag eq 'pre') { } TBD
-	       #if ($tag eq 'code') { } TBD font-family sans-serif + 
-	       #                        constant width 75% font-size
-	       #if ($tag eq 'blockquote') { } 
-                if ($tag eq 'li') {
 		    # indent each list level by same amount
 	            $properties[-1]->{'_left'} += $marker_width;
-                }
-               # treat headings as paragraphs
-	       #if ($tag eq 'h1') { }  align
-	       #if ($tag eq 'h2') { }
-	       #if ($tag eq 'h3') { }
-	       #if ($tag eq 'h4') { }
-	       #if ($tag eq 'h5') { }
-	       #if ($tag eq 'h6') { }
-	        if ($tag eq 'hr') { 
-		    my $fs = $current_prop->{'font-size'};
+	        } elsif ($tag eq 'img') { # hspace and vspace already 
+		    # margins, width, height
+		    # TBD for 3.027
+	        } elsif ($tag eq 'a') {
+	       #} elsif ($tag eq 'pre') { # TBD
+	        } elsif ($tag eq 'code') { # font-family sans-serif + 
+	            # constant width 75% font-size
+		    # TBD for 3.027
+	        } elsif ($tag eq 'blockquote') {
+		} elsif ($tag eq 'li') {
+                } elsif ($tag eq 'h1') { # TBD align
+                    # treat headings as paragraphs
+	        } elsif ($tag eq 'h2') {
+	        } elsif ($tag eq 'h3') {
+	        } elsif ($tag eq 'h4') {
+	        } elsif ($tag eq 'h5') {
+	        } elsif ($tag eq 'h6') {
+	        } elsif ($tag eq 'hr') { 
 		    # actually draw a horizontal line
 		    $start_y = $next_y;
 		    my $oldcolor = $grfx->strokecolor();
@@ -2389,53 +2430,185 @@ sub _output_text {
 		    # restore changed values
 		    $grfx->linewidth($oldlinewidth);
 		    $grfx->strokecolor($oldcolor);
-		} 
-	       #if ($tag eq 'br') { } TBD force new line
-	       #if ($tag eq 'sup') { } TBD
-	       #if ($tag eq 'sub') { } TBD
-	       #if ($tag eq 'del') { } 
-	       #if ($tag eq 'ins') { }
-	       #if ($tag eq 's') { } 
-	       #if ($tag eq 'strike') { } 
-	       #if ($tag eq 'u') { } 
+	       #} elsif ($tag eq 'br') { # TBD force new line
+	       #} elsif ($tag eq 'sup') { # TBD
+	       #} elsif ($tag eq 'sub') { # TBD
+	        } elsif ($tag eq 'u') {
+	        } elsif ($tag eq 'ins') {
+	        } elsif ($tag eq 's') {
+	        } elsif ($tag eq 'strike') {
+	        } elsif ($tag eq 'del') {
 	        
-	       #if ($tag eq 'blockquote') { } 
-    
 	       # tags maybe some time in the future TBD
-	       #if ($tag eq 'address') { } inline formatting
-	       #if ($tag eq 'article') { } discrete section
-	       #if ($tag eq 'aside') { } discrete section 
-	       #if ($tag eq 'base') { } 
-	       #if ($tag eq 'basefont') { } 
-	       #if ($tag eq 'big') { }  font-size 125%
+	       #} elsif ($tag eq 'address') { # inline formatting
+	       #} elsif ($tag eq 'article') { # discrete section
+	       #} elsif ($tag eq 'aside') { # discrete section 
+	       #} elsif ($tag eq 'base') {
+	       #} elsif ($tag eq 'basefont') {
+	       #} elsif ($tag eq 'big') { #  font-size 125%
 	       # already taken care of head, body
-	       #if ($tag eq 'canvas') { } 
-	       #if ($tag eq 'caption') { } 
-	       #if ($tag eq 'center') { }  margin-left/right auto
-	       #if ($tag eq 'cite') { } quotes, face?
-	       #if ($tag eq 'dl') { }  similar to ul/li
-	       #if ($tag eq 'dt') { } 
-	       #if ($tag eq 'dd') { } 
-	       #if ($tag eq 'div') { }  # requires width, height, left, etc.
-	       #if ($tag eq 'figure') { }
-	       #if ($tag eq 'figcap') { }
-	       #if ($tag eq 'footer') { } discrete section
-	       #if ($tag eq 'header') { } discrete section
-	       #if ($tag eq 'kbd') { }  font-family sans-serif + constant width
-	       #                        75% font-size
-	       #if ($tag eq 'mark') { }
-	       #if ($tag eq 'nav') { } discrete section
-	       #if ($tag eq 'nobr') { } treat all spaces within as NBSPs?
-	       #if ($tag eq 'q') { }  ldquo/rdquo quotes around
-	       #if ($tag eq 'samp') { } font-family sans-serif + constant width
-	       #                        75% font-size
-	       #if ($tag eq 'section') { } discrete section
-	       #if ($tag eq 'small') { } font-size 75%
-	       #if ($tag eq 'summary') { } discrete section
-	        if ($tag eq 'style') {
+	       #} elsif ($tag eq 'canvas') {
+	       #} elsif ($tag eq 'caption') {
+	       #} elsif ($tag eq 'center') { #  margin-left/right auto
+	       #} elsif ($tag eq 'cite') { # quotes, face?
+	       #} elsif ($tag eq 'dl') { #  similar to ul/li
+	       #} elsif ($tag eq 'dt') {
+	       #} elsif ($tag eq 'dd') {
+	       #} elsif ($tag eq 'div') {  # requires width, height, left, etc.
+	       #} elsif ($tag eq 'figure') {
+	       #} elsif ($tag eq 'figcap') {
+	       #} elsif ($tag eq 'footer') { # discrete section
+	       #} elsif ($tag eq 'header') { # discrete section
+	       #} elsif ($tag eq 'kbd') { # font-family sans-serif +
+	       #    constant width 75% font-size
+	       #} elsif ($tag eq 'mark') {
+	       #} elsif ($tag eq 'nav') { # discrete section
+	       #} elsif ($tag eq 'nobr') { # treat all spaces within as NBSPs?
+	       #} elsif ($tag eq 'q') { # ldquo/rdquo quotes around
+	       #} elsif ($tag eq 'samp') { # font-family sans-serif + 
+	       #    constant width 75% font-size
+	       #} elsif ($tag eq 'section') { # discrete section
+	       #} elsif ($tag eq 'small') { # font-size 75%
+	       #} elsif ($tag eq 'summary') { # discrete section
+                } elsif ($tag eq 'style') {
 		    # sometimes some stray empty style tags seem to come 
 		    # through...  can be ignored
-	        }
+	        } elsif ($tag eq 'marker') {
+		    # at this point, all properties are set in usual way. only
+		    # tasks remaining are to 1) determine the text,
+		    # 2) set CSS properties to default marker conventions.
+		    # 3) override text, color, etc. from _marker-* properties.
+		    #
+		    # paragraph, but label depends on parent (list-style-type)
+		    # type and value attributes can override parent 
+		    # list-style-type and start
+		    if (defined $properties[-1]->{'_marker-text'} &&
+		        $properties[-1]->{'_marker-text'} ne '') {
+			# explicitly-defined _marker-text overrides all else
+			$list_marker = $properties[-1]->{'_marker-text'};
+		    } else {
+		        if (defined $mytext[$el]->{'value'}) {
+		            $start =  $mytext[$el]->{'value'}; # used only for ol
+		        }
+		        # for time-being, treat position of marker as 'outside'
+			# regardless of list-style-position TBD
+		        $list_marker = _marker(
+			    $properties[-1]->{'list-style-type'},
+			    $list_depth, $start, 
+			    $properties[-1]->{'_marker-before'}, 
+			    $properties[-1]->{'_marker-after'});
+		        if (substr($list_marker, 0, 1) eq '.') {
+			    # it's a bullet character
+		        } else {
+			    # fully formatted ordered list item
+			    if ($reversed_ol) {
+		                $start--;
+			    } else {
+		                $start++;
+			    }
+		        }
+		        # sl: use normal marker width, marker is blank. position
+		        #     is always outside (ignore inside if given)
+		        # dl: variable length marker width, minimum size given,
+		        #     which is where dd left margin is
+		    }
+
+		    # override any other property with corresponding _marker-*
+		    # properties-to-PDF-calls have NOT yet been done
+		    if (defined $properties[-1]->{'_marker-color'} &&
+		        $properties[-1]->{'_marker-color'} ne '') {
+                        $properties[-1]->{'color'} = 
+			    $properties[-1]->{'_marker-color'};
+		    }
+		    if (defined $properties[-1]->{'_marker-font'} &&
+		        $properties[-1]->{'_marker-font'} ne '') {
+                        $properties[-1]->{'font-family'} = 
+			    $properties[-1]->{'_marker-font'};
+		    }
+		    if (defined $properties[-1]->{'_marker-style'} &&
+		        $properties[-1]->{'_marker-style'} ne '') {
+                        $properties[-1]->{'font-style'} = 
+			    $properties[-1]->{'_marker-style'};
+		    }
+		    if (defined $properties[-1]->{'_marker-size'} &&
+		        $properties[-1]->{'_marker-size'} ne '') {
+                        $properties[-1]->{'font-size'} = 
+			    $properties[-1]->{'_marker-size'};
+		    }
+		    if (defined $properties[-1]->{'_marker-weight'} &&
+		        $properties[-1]->{'_marker-weight'} ne '') {
+                        $properties[-1]->{'font-weight'} = 
+			    $properties[-1]->{'_marker-weight'};
+		    }
+                    $fs = $properties[-1]->{'font-size'};
+		
+		    # finally, update the text within the marker
+		    if ($list_marker ne '') {
+		        # list marker should be nonblank for <ol> and <ul>,
+		        # blank for <sl> (just leave marker text alone)
+		        # without this increase of _left, lists don't nest
+
+		        # output the marker. x,y is the upper left baseline of
+		        #   the <li> text, so text_right() the marker
+		        if ($list_marker =~ m/^\./) {
+			    # it's a symbol for <ul>. 50% size, +y by 33% size
+			    # TBD url image and other character symbols 
+			    #     (possibly in other than Zapf Dingbats). 
+			    if      ($list_marker eq '.disc') {
+			        $list_marker = chr(108);
+			    } elsif ($list_marker eq '.circle') {
+			        $list_marker = chr(109);
+			    } elsif ($list_marker eq '.square') {
+			        $list_marker = chr(110);
+			    } elsif ($list_marker eq '.box') {
+			        $list_marker = chr(111); # non-standard
+			    }
+			    # ul defaults
+			    $properties[-1]->{'font-family'} = 'ZapfDingbats';
+			    $properties[-1]->{'font-style'} = 'normal';
+			    $properties[-1]->{'font-weight'} = 'bold';
+			    $properties[-1]->{'font-size'} = "50%";
+			     
+			    # x_adj (- to left) .3em+2pt for gap marker to text
+			    $x_adj = -(0.3 * $fs + 2);
+		            # figure y_adj for ul marker (raise, since smaller)
+			    $y_adj = -0.33*_fs2pt($properties[-1]->{'font-size'}, $fs)/$fs + 0.33;
+			    $y_adj *= $fs;
+		        } else {
+			    # it's a formatted count for <ol>
+			    # ol defaults
+			   #$properties[-1]->{'font-family'} = unchanged;
+			    $properties[-1]->{'font-style'} = 'normal';
+			    $properties[-1]->{'font-weight'} = 'bold';
+			   #$properties[-1]->{'font-size'} = unchanged;
+			    # x_adj (- to left) .3em for gap marker to text
+			    $x_adj = -(0.3 * $fs);
+			    $y_adj = 0; # marker is full size text
+		        }
+
+		    } else {
+			# '' list-marker for sl, change to ' '
+			$list_marker = ' ';
+			# no change to font attributes
+		    }
+		    # insert list_marker into text field at $el+1 and end
+		    # of marker at $el+2. no need to change $el.
+		    $mytext[$el+1]->{'text'} = $list_marker;
+		    $list_marker = '';
+
+	       #} elsif ($tag eq 'ovl') { # TBD
+	       #} elsif ($tag eq 'k') { # TBD
+
+		} else {
+		    # unsupported or invalid tag found
+		    # keep list of those found, error message once per tag
+		    if (!defined $bad_tags{$tag}) {
+		        print STDERR "Tag '$tag' either invalid or currently unsupported.\n";
+			$bad_tags{$tag} = 1;
+		    }
+		    # treat as <span>
+	            $tag = $mytext[$el]->{'tag'} = 'span';
+		}
 
 	        if (defined $mytext[$el]->{'empty_element'}) {
 	            # empty/void tag, no end tag, pop property stack
@@ -2453,7 +2626,7 @@ sub _output_text {
 		# take care of 'end' tags. some end tags need some special 
 		# processing if they do something that isn't just a 
 		# property change. current_prop should be up to date.
-		$tag = substr($tag, 1); # discard /
+		$tag = lc(substr($tag, 1)); # discard /
 
 		if ($tag eq 'ol' || $tag eq 'ul') { $list_depth--; }
 		# note that current_prop should be all up to date by the
@@ -2502,6 +2675,10 @@ sub _output_text {
 
 	} else {
             # ===================================== text to output
+            # normally text is not empty '', but sometimes such may come
+	    # through. a blank text is still valid
+	    if ($mytext[$el]->{'text'} eq '') { next; }
+
 	    # we should be at a new text entry ("phrase")
 	    # we have text to output on the page, using properties at the
 	    # properties stack top. compare against current properties to
@@ -2578,6 +2755,7 @@ sub _output_text {
 	    # property lengths should always be in pts (no labeled dimensions).
 	    $current_prop->{'text-indent'} = _size2pt($properties[-1]->{'text-indent'}, $fs);
 	    $current_prop->{'text-decoration'} = $properties[-1]->{'text-decoration'};
+	    $current_prop->{'text-align'} = $properties[-1]->{'text-align'};
 	    $current_prop->{'margin-top'} = _size2pt($properties[-1]->{'margin-top'}, $fs);
 	    # the incremental right margin, and the running total
 	    $current_prop->{'margin-right'} = _size2pt($properties[-1]->{'margin-right'}, $fs);
@@ -2716,56 +2894,6 @@ sub _output_text {
 		    $phrase =~ s/^\s+//;
 	        }
     	
-		# if this is a <li>, there may be non-empty $list_marker to add
-		if ($list_marker ne '') {
-		    # we have a <li> list marker to add (bold for <ol>, Symbol
-		    # font for <ul>, blank for <sl>)
-		    # without this increase of _left, lists don't nest
-
-		    # output the marker. x,y is the upper left baseline of
-		    #   the <li> text, so text_right() the marker
-		    if ($list_marker =~ m/^\./) {
-			# it's a symbol for <ul>. 50% size, +y by 33% size
-			# add doubled space at end (font size 50%).
-			# TBD url image and other character symbols (possibly
-			#     in other than Zapf Dingbats). 
-			if      ($list_marker eq '.disc') {
-			    $list_marker = chr(108).'  ';
-			} elsif ($list_marker eq '.circle') {
-			    $list_marker = chr(109).'  ';
-			} elsif ($list_marker eq '.square') {
-			    $list_marker = chr(110).'  ';
-			} elsif ($list_marker eq '.box') {
-			    $list_marker = chr(111).'  '; # non-standard
-			}
-                        $text->font($pdf->get_font(
-		            'face' => 'ZapfDingbats',
-		            'italic' => 0, 'bold' => 0,
-		                                  ), 0.5*$fs); 
-			$text->translate($x,$y+0.15*$fs);
-			$text->text_right($list_marker);
-		    } elsif ($list_marker eq '' || $list_marker eq ' ') {
-			# simple list, no marker
-		    } else {
-			# it's a count for <ol>. use bold. TBD CSS for weight
-                        $text->font($pdf->get_font(
-		            'face' => $current_prop->{'font-family'},
-		            'italic' => 0, 'bold' => 1,
-		                                  ), $fs); 
-			$text->translate($x,$y);
-			$text->text_right($list_marker);
-		    }
-
-		    # clear the marker so must be redefined for next <li>
-		    $list_marker = '';
-		    # restore font to requested one
-                    $text->font($pdf->get_font(
-		        'face' => $current_prop->{'font-family'}, 
-		        'italic' => ($current_prop->{'font-style'} eq 'normal')? 0: 1, 
-		        'bold' => ($current_prop->{'font-weight'} eq 'normal')? 0: 1, 
-		                              ), $fs); 
-		}
-
 		# have a phrase to attempt to add to output, and an
 		#   x,y to start it at (tentative if start of line)
 	        my $w = $text->advancewidth($phrase);
@@ -2773,7 +2901,7 @@ sub _output_text {
 	        if ($x + $w <= $endx) {
 		    my $rc;
 	            # no worry, the entire phrase fits (case 1.)
-	            $text->translate($x,$y);
+	            $text->translate($x+$x_adj,$y+$y_adj);
 		    # y (and possibly x) might change if extents change
 		    my $w = $text->advancewidth($phrase);
 		    if ($current_prop->{'text-decoration'} ne 'none') {
@@ -2794,7 +2922,8 @@ sub _output_text {
 			}
 
 			$stroke_ydist *= $fs/1000;
-			$text->add('q');
+			# TBD consider whether to draw lines in graphics
+			#  context instead (could end up with text under line)
 			$text->add('ET'); # go into graphics mode
 			$text->add("$strokethickness w");
 			# baseline is x,y to x+w,y, ydist is < 0
@@ -2815,9 +2944,10 @@ sub _output_text {
 			    $text->add("$x ".($y+$stroke_ydist)." m");
 			    $text->add(($x+$w-$trail)." ".($y+$stroke_ydist)." l");
 			}
-			$text->add('S');
+			$text->add('S'); # always stroke the line
 			$text->add('BT'); # back into text mode
-			$text->add('Q');
+			# after BT, need to restore position
+			$text->translate($x,$y);
 		    }
 		    # before writing a new phrase with possibly increased
 		    # extents, see if new baseline needed
@@ -2837,7 +2967,13 @@ sub _output_text {
 		    # if rc == 2, current written line doesn't fit narrower line
 		    # if rc == 3, revised line won't fit in column! (vertically)
 		    # TBD need to check $rc once column width can vary
-	            $text->text($phrase);
+		    my $align = $properties[-1]->{'text-align'};
+	            $text->text($phrase, 'align'=>$align);
+		    # if adjusted x and/or y, undo it and zero out
+		    if ($x_adj || $y_adj) {
+			$text->translate($x, $y);
+			$x_adj = $y_adj = 0;
+		    }
 
                     if ($current_prop->{'_href'} ne '') {
 			# this text is a link, so need to make an annot. link
@@ -2915,7 +3051,17 @@ sub _output_text {
 			        'rect'=>$rect, 'border'=>[0,0,0]);
 		        }
 		    }
-	            $x += $w;
+		    if ($align eq 'left' || $align eq 'l') {
+			# need to move current x to right end of text
+			# TBD: revise if RTL/bidirectional
+	                $x += $w;
+		    } elsif ($align eq 'center' || $align eq 'c') {
+			# current x should be w/2 to right of original alignment
+			$x += $w/2;
+		    } else { # right align
+			# current x should be at original alignment x
+		    }
+
 		    $full_line = 0;
 		    $need_line = 0;
 		    # change current property display to inline
@@ -3142,7 +3288,7 @@ sub _init_current_prop {
     $cur_prop->{'font-size'} = -1;
     $cur_prop->{'text-height'} = 0;
     $cur_prop->{'text-indent'} = 0;
-    $cur_prop->{'color'} = 'black'; # PDF default
+    $cur_prop->{'color'} = 'snork'; # PDF default is black
     $cur_prop->{'font-family'} = 'yoMama';  # force a change
     $cur_prop->{'font-weight'} = 'abnormal';
     $cur_prop->{'font-style'} = 'abnormal';
@@ -3151,7 +3297,7 @@ sub _init_current_prop {
     $cur_prop->{'margin-right'} = '0'; 
     $cur_prop->{'margin-bottom'} = '0'; 
     $cur_prop->{'margin-left'} = '0'; 
-   #$cur_prop->{'text-align'} = 'left';
+    $cur_prop->{'text-align'} = 'left';
    #$cur_prop->{'text-transform'} = 'none';
    #$cur_prop->{'border-style'} = 'none';
    #$cur_prop->{'border-width'} = '1pt'; 
@@ -3266,7 +3412,7 @@ sub _get_column_outline {
     my $scale_y = 1;
     if (defined $opts{'relative'}) {
         my @relative = @{ $opts{'relative'} };
-        croak "column: invalid number of elements in 'relative' list" 
+        croak "column: invalid number of elements in 'relative' list"
             if (@relative < 2 || @relative > 4);
 
         $off_x = $relative[0];
@@ -3542,6 +3688,15 @@ sub _html_hash {
     if (!defined $rc) { $rc = 0; }  # not available
 
     if ($rc) {
+	# TEMPORARY WORKAROUND: HTML::TreeBuilder seems to have problem with
+	# <ins> and <del> tags causing paragraph breaks. For the time being,
+	# just convert to <u> and <s> tags. When fixed, remove this and up
+	# minimum level of HTML::TreeBuilder.
+	$text =~ s#<ins>#<u>#ig;
+	$text =~ s#</ins>#</u>#ig;
+	$text =~ s#<del>#<s>#ig;
+	$text =~ s#</del>#</s>#ig;
+	
 	# HTML converter appears to be installed, so use it
 	my $tree = HTML::TreeBuilder->new();
 	$tree->ignore_unknown(0);  # don't discard non-HTML recognized tags
@@ -3873,7 +4028,7 @@ sub _marker {
 
     my $output = '';
     if      ($type eq 'decimal') {
-	$output = "$prefix$value$suffix ";
+	$output = "$prefix$value$suffix";
     } elsif ($type eq 'upper-roman' || $type eq 'lower-roman') {
 	while ($value >= 1000) { $output .= 'M';  $value -= 1000; }
 	if ($value >= 900)     { $output .= 'CM'; $value -= 900;  }
@@ -3889,7 +4044,7 @@ sub _marker {
 	if ($value == 4)       { $output .= 'IV'; $value -= 4;    }
 	while ($value >= 1)    { $output .= 'I';  $value -= 1;    }
         if ($type eq 'lower-roman') { $output = lc($output); }
-	$output = "$prefix$output$suffix ";
+	$output = "$prefix$output$suffix";
     } elsif ($type eq 'upper-alpha' || $type eq 'lower-alpha') {
 	my $n;
 	while ($value) {
@@ -3899,7 +4054,7 @@ sub _marker {
 	    $value /= 26;
 	}
         if ($type eq 'lower-alpha') { $output = lc($output); }
-	$output = "$prefix$output$suffix ";
+	$output = "$prefix$output$suffix";
     } elsif ($type eq 'disc') {
 	$output = '.disc';
     } elsif ($type eq 'circle') {
@@ -3919,7 +4074,7 @@ sub _marker {
 	    $output = '.square';
         }
     } elsif ($type eq '.o') { # default for ordered list at this depth
-	$output = "$prefix$value$suffix "; # decimal
+	$output = "$prefix$value$suffix"; # decimal
     } else {
 	# unknown. use disc
 	$output =  '.disc';

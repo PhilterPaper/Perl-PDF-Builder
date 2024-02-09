@@ -77,6 +77,8 @@ examples/BarCode.pl
 examples/Boxes.pl
 examples/Bspline.pl
 examples/Column.pl
+examples/Column_lists.pl
+#examples/Column_layouts.pl
 examples/Content.pl
 examples/ContentText.pl
 examples/examples.output

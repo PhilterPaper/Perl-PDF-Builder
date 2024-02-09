@@ -3,18 +3,20 @@
 use warnings;
 use strict;
 use PDF::Builder;
-#use Data::Dumper; # for debugging
-# $Data::Dumper::Sortkeys = 1; # hash keys in sorted order
+use Data::Dumper; # for debugging
+ $Data::Dumper::Sortkeys = 1; # hash keys in sorted order
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 my $use_Table = 1; # if 1, use PDF::Table for table example
 # TBD automatically check if PDF::Table available, and if so, use it
 
-my $pdf = PDF::Builder->new();
+#my $pdf = PDF::Builder->new();
+my $pdf = PDF::Builder->new('compress'=>'none');
 my $content;
 my ($page, $text, $grfx);
+my $page_num = 0;
 
 my $name = $0;
 $name =~ s/\.pl/.pdf/; # write in examples directory
@@ -27,6 +29,7 @@ print "======================================================= pg 1\n";
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
+footer(++$page_num, $pdf, $text);
 
 print "---- single string entries\n";
 $text->column($page, $text, $grfx, 'none', 
@@ -89,6 +92,7 @@ print "======================================================= pg 2\n";
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
+footer(++$page_num, $pdf, $text);
 
 print "---- single string entries\n";
  
@@ -160,6 +164,7 @@ print "======================================================= pg 3\n";
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
+footer(++$page_num, $pdf, $text);
 
 # as an array of strings
 my @ALoremIpsum = (
@@ -228,6 +233,7 @@ print "---- Customer sample Markdown and Table\n";
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
+footer(++$page_num, $pdf, $text);
 
 $content = <<"END_OF_CONTENT";
 Example of Markdown that needs to be supported in document text blocks. There is no need to support this within tables, although it would be a "nice" feature.
@@ -441,26 +447,30 @@ print "---- A README.md file for PDF::Builder\n";
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
+footer(++$page_num, $pdf, $text);
 #  might need two or even three pages
+#  three <img> calls (GitHub buttons), several `code` 
 $content = <<"END_OF_CONTENT";
-# PDF::Builder
+# PDF::Builder release 3.026
 
 A Perl library to facilitate the creation and modification of PDF files
 
 ## What is it?
 
-PDF::Builder is a **fork** of the popular PDF::API2 Perl library. It provides a 
-library of modules and functions so that a PDF file (document) may be built and 
-maintained from Perl programs. It is not a WYSIWYG editor; nor is it a canned 
-utility or converter. It does _not_ have a GUI -- it is driven by your Perl 
-program. It is a set of **building blocks** with which you can perform a wide 
-variety of operations, ranging from basic operations such as selecting a font 
-face, to defining an entire page at a time in the document, using a large 
-subset of either Markdown or HTML markup languages. You can call it from 
-arbitrary Perl programs, which may even create content on-the-fly (or read it 
-in from other sources). Quite a few code examples are provided, to help you to 
-get started with the process of creating a PDF document. Many enhancements are 
-in the pipeline to make PDF::Builder even more powerful and versatile.
+PDF::Builder is a **fork** of the popular PDF::API2 Perl library. It provides a
+library of modules and functions so that a PDF file (document) may be built and
+maintained from Perl programs (it can also read in, modify, and write back out
+existing PDF files). It is not a WYSIWYG editor; nor is it a canned
+utility or converter. It does _not_ have a GUI or command line interface -- it
+is driven by your Perl program. It is a set of **building blocks** (methods)
+with which you can perform a wide variety of operations, ranging from basic
+operations such as selecting a font face, to defining an entire page at a time
+in the document, using a large subset of either Markdown or HTML markup
+languages. You can call it from arbitrary Perl programs, which may even create
+content on-the-fly (or read it in from other sources). Quite a few code
+examples are provided, to help you to get started with the process of creating
+a PDF document. Many enhancements are in the pipeline to make PDF::Builder even
+more powerful and versatile.
 
 [Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full), including Documentation and Examples.
 
@@ -578,9 +588,9 @@ the steps are:
 
 If you have your system configured to run Perl for a .pl/.PL file, you may be 
 able to omit "perl" from the first command, which creates a Makefile. "make" 
-is the generic command to run (it feeds on the Makefile), but your system may 
-have it under a different name, such as dmake (Strawberry Perl on Windows), 
-gmake, or nmake.
+is the generic command to run (it feeds on the Makefile produced by 
+Makefile.PL), but your system may have it under a different name, such as 
+dmake, gmake (e.g., Strawberry Perl on Windows), or nmake.
 
 PDF::Builder does not currently compile and link anything, so gcc, g++, etc.
 will not be used. The build process merely copies .pm files around, and
@@ -588,7 +598,7 @@ runs the "t" tests to confirm the proper installation.
 
 ## Copyright
 
-This software is Copyright (c) 2017-2023 by Phil M. Perry.
+This software is Copyright (c) 2017-2024 by Phil M. Perry.
 
 Previous copyrights are held by others (Steve Simms, Alfred Reibenschuh, et al.). See The HISTORY section of the documentation for more information.
 
@@ -655,213 +665,36 @@ code that may help you figure out how to do things. The installation tests in
 the `t/` and `xt/` directories might also be useful to you.
 END_OF_CONTENT
 
-restore_props($text, $grfx);
+restore_props($text,$grfx);
+# page 5
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ] );
+# pages 6-8
 while ($rc) { 
-    # new page
+    # new page. uses fixed column template, no headers/footers/page numbers
     $page = $pdf->page();
     $text = $page->text();
     $grfx = $page->gfx();
+    footer(++$page_num, $pdf, $text);
 
+#print Dumper($unused) if $page_num == 7;
     ($rc, $next_y, $unused) =
         $text->column($page, $text, $grfx, 'pre', $unused, 
 		      'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
 		      'para'=>[ 0, 5 ] );
 }
 
-# a variety of lists over multiple pages
-print "======================================================= pg 9\n";
-print "---- A variety of lists\n";
-$page = $pdf->page();
-$text = $page->text();
-$grfx = $page->gfx();
-
-$content = <<"END_OF_CONTENT";
-<h2>Unordered (bulleted) lists with various markers</h2>
-<ul> <!-- default disc -->
-  <li>Unordered 1A, disc and here is a bunch more text to try to cause a spill to a second line. Looks like we need a bit more filler here.</li>
-  <li>Unordered 1B
-  <ul> <!-- default circle -->
-    <li>Unordered 2A, circle</li>
-    <li>Unordered 2B and here is a bunch more text to try to cause a spill to a second line. Looks like we need a bit more filler here.
-    <ul> <!-- default (filled) square -->
-      <li>Unordered 3A, square</li>
-      <li>Unordered 3B
-      <ul style="list-style-type: box"> <!-- box (open square) -->
-        <li>Unordered 4A, box. A &ldquo;box&rdquo; marker is non-standard &mdash; it is an empty square marker. A bit more filler here. How about a <i>lot</i> more, driving it to three lines in all? Oh yeah, that's the ticket!</li>
-        <li>Unordered 4B
-        <ul style="list-style-type: disc"> <!-- and back to disc -->
-          <li>Unordered 5A, disc</li>
-          <li>Unordered 5B</li>
-	</ul>
-	<ul> <!-- default (filled) square) -->
-          <li>Unordered 6A, square</li>
-          <li>Unordered 6B</li>
-	</ul></li>
-      </ul></li>
-    </ul></li>
-  </ul></li>
-</ul>
-
-<h2>Ordered (numbered) lists with various markers</h2>
-<ol> <!-- default decimal -->
-  <li>Ordered 1A, decimal 1., 2.</li>
-  <li>Ordered 1B
-  <ol style="list-style-type: upper-roman"> <!-- I, II, III, IV -->
-    <li>Ordered 2A, upper-roman I., II.</li>
-    <li>Ordered 2B
-    <ol style="list-style-type: upper-alpha"> <!-- A, B, C, D -->
-      <li>Ordered 3A, upper-alpha A., B.</li>
-      <li>Ordered 3B
-      <ol style="list-style-type: lower-roman"> <!-- i, ii, iii, iv -->
-        <li>Ordered 4A, lower-roman i., ii.</li>
-        <li>Ordered 4B
-        <ol style="list-style-type: lower-alpha"> <!-- a, b, c, d -->
-          <li>Ordered 5A lower-alpha a., b.</li>
-          <li>Ordered 5B</li>
-	</ol>
-        <ol> <!-- default decimal -->
-          <li>Ordered 6A, decimal 1., 2.</li>
-          <li>Ordered 6B</li>
-	</ol></li>
-      </ol></li>
-    </ol></li>
-  </ol></li>
-</ol>
-END_OF_CONTENT
-
-restore_props($text, $grfx);
-($rc, $next_y, $unused) =
-    $text->column($page, $text, $grfx, 'html', $content, 
-	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
-		  'para'=>[ 0, 0 ] );
-if ($rc) {
-    print STDERR "list example overflowed column!\n";
-}
-
-print "======================================================= pg 10\n";
-print "---- More list examples\n";
-$page = $pdf->page();
-$text = $page->text();
-$grfx = $page->gfx();
-
-$content = <<"END_OF_CONTENT";
-<h2>Mixture of ordered and unordered with default markers</h2>
-<ol> <!-- default decimal -->
-  <li>Ordered 1A, decimal 1., 2.</li>
-  <li>Ordered 1B
-  <ul> <!-- default circle -->
-    <li>Unordered 2A, circle</li>
-    <li>Unordered 2B
-    <ol> <!-- default decimal -->
-      <li>Ordered 3A, decimal 1., 2.</li>
-      <li>Ordered 3B
-      <ul> <!-- default (filled) square -->
-        <li>Unordered 4A, square</li>
-        <li>Unordered 4B
-        <ol> <!-- default decimal -->
-          <li>Ordered 5A, decimal 1., 2.</li>
-          <li>Ordered 5B</li>
-	</ol>
-        <ul> <!-- default (filled) square -->
-          <li>Unordered 6A, square</li>
-          <li>Unordered 6B</li>
-	</ul></li>
-      </ul></li>
-    </ol></li>
-  </ul></li>
-</ol>
-
-<!-- TBD position inside/outside
-<h2>list-style-position inside and outside, with multiline li's</h2>
--->
-END_OF_CONTENT
-
-restore_props($text, $grfx);
-($rc, $next_y, $unused) =
-    $text->column($page, $text, $grfx, 'html', $content, 
-	          'rect'=>[50,750, 500,450], 'outline'=>$magenta, 
-		  'para'=>[ 0, 0 ] );
-if ($rc) {
-    print STDERR "list example overflowed column!\n";
-}
-
-# try nesting in Markdown
-$content = <<"END_OF_CONTENT";
-## Try nested Markdown entries (manually indent items)
-
-1. This is a numbered list unnested.
-2. This is another item in the numbered list.
-   - This is a first nested level bulleted list.
-     - This is a further nested bulleted list.
-     - And a second item.
-   - Back to first nested level bulleted list
-3. One last numbered list item
-END_OF_CONTENT
-
-restore_props($text, $grfx);
-($rc, $next_y, $unused) =
-    $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[50,250, 500,200], 'outline'=>$magenta, 
-		  'para'=>[ 0, 0 ] );
-if ($rc) {
-    print STDERR "list example overflowed column!\n";
-}
-
-# Counting down (reversed) ordered lists
-print "======================================================= pg 11\n";
-print "---- Count down list examples\n";
-$page = $pdf->page();
-$text = $page->text();
-$grfx = $page->gfx();
-
-$content = <<"END_OF_CONTENT";
-<h2>Test reversed ordered lists</h2>
-<ol reversed="1" start="10">
-  <li>ten</li>
-  <li>nine</li>
-  <li>eight</li>
-  <li>seven</li>
-  <li>six</li>
-  <li>five
-  <ol>
-    <li>holding</li>
-    <li>resume countdown</li>
-  </ol></li>
-  <li>four</li>
-  <li>three</li>
-  <li>two</li>
-  <li>one</li>
-</ol>
-<h2>Reversed ordered list run past 1</h2>
-<ol reversed="1" start="3">
-  <li>three</li>
-  <li>two</li>
-  <li>one</li>
-  <li>zero... blast off!</li>
-  <li>minus one... the clock is running</li>
-</ol>
-END_OF_CONTENT
-
-restore_props($text, $grfx);
-($rc, $next_y, $unused) =
-    $text->column($page, $text, $grfx, 'html', $content, 
-	          'rect'=>[50,750, 500,450], 'outline'=>$magenta, 
-		  'para'=>[ 0, 0 ] );
-if ($rc) {
-    print STDERR "list example overflowed column!\n";
-}
-
+# for various lists, see Column_lists.pl
 
 # block quotes and font extent changes
-print "======================================================= pg 12\n";
+print "======================================================= pg 9\n";
 print "---- Block quotes\n";
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
+footer(++$page_num, $pdf, $text);
 
 $content = <<"END_OF_CONTENT";
 <h2>Block Quote (left and right margins)</h2>
@@ -916,17 +749,18 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
-	          'rect'=>[50,400, 500,350], 'outline'=>$magenta, 
+	          'rect'=>[50,425, 500,380], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ] );
 if ($rc) { 
     print STDERR "Font size changes example overflowed column!\n";
 }
 
 # setting your own CSS for Markdown or none
-print "======================================================= pg 13\n";
+print "======================================================= pg 10\n";
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
+footer(++$page_num, $pdf, $text);
 
 print "---- default CSS for Markdown\n";
 $content = <<"END_OF_CONTENT";
@@ -962,7 +796,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[50,650, 500,100], 'outline'=>$magenta, 
+	          'rect'=>[50,640, 500,100], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	          'style'=>"
         ol { _marker-before: '(' ; _marker-after: ')' ; }
@@ -996,7 +830,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[50,525, 500,125], 'outline'=>$magenta, 
+	          'rect'=>[50,520, 500,125], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
 if ($rc) { 
@@ -1019,7 +853,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
-	          'rect'=>[50,400, 500,185], 'outline'=>$magenta, 
+	          'rect'=>[50,385, 500,185], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
 if ($rc) { 
@@ -1038,14 +872,15 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[50,200, 500,100], 'outline'=>$magenta, 
+	          'rect'=>[50,180, 500,100], 'outline'=>$magenta, 
 		  'para'=>[ 0, 10 ],
 	         );
 if ($rc) { 
     print STDERR "PDF links example overflowed column!\n";
 }
 
-# might have to go to a column2.pl!
+# Column_layouts.pl TBD
+# TBD figure out a good way to fall back for unavailable fonts
 # demonstrate balanced columns two long columns and one short, first pass
 #   fill blindly, overflowing to column 2 then 3, then by trial-and-error
 #   shorten long two columns until short one just fills (show initial and
@@ -1065,6 +900,22 @@ if ($rc) {
 # ---------------------------------------------------------------------------
 # end of program
 $pdf->saveas($name);
+# -----------------------
+ 
+sub footer {
+    my ($page_num, $pdf, $text) = @_;
+    # columns are generally 50 - 500 so center page number there
+    # save current font and size
+    my ($cur_font, $cur_fs) = $text->font();
+
+    $text->font($pdf->get_font('face'=>'sans-serif', 'italic'=>0, 'bold'=>0), 10);
+    $text->translate((500-50)*0.5+50, 10);
+    $text->text("- $page_num -", 'align'=>'center');
+
+    # restore font conditions on entry (if they were ever set)
+    $text->font($cur_font, $cur_fs) if $cur_fs > 0;
+    return;
+}
 # -----------------------
 
 sub multicol {

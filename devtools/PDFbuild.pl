@@ -7,7 +7,12 @@ use File::Path qw(make_path);
  
 #my $ourLAST = 1;  # T: change my $LAST_UPDATE to our $LAST_UPDATE  # s/b no longer needed
 
-print "**** check https://en.wikipedia.org/wiki/Leap_second to see if any\n     leap seconds have been added since 12/31/2016. Update Builder.pm.\n";
+print "**** check https://en.wikipedia.org/wiki/Leap_second to see if any\n
+     leap seconds have been added since 12/31/2016. Update Builder.pm.\n";
+to_continue();
+print "**** check README.md for copyright year, minimum Perl version, current\n
+     Builder version, current mandatory and optional prerequisites. Copy to \n
+     examples/Content.pl if anything has changed, and test the formatting.\n";
 to_continue();
 
 my ($VERSION, $PERL_V, $MAKE_MAKER, $TEST_EXCEPTION, $TEST_MEMORY_CYCLE,

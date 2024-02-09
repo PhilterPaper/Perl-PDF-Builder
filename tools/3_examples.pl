@@ -108,6 +108,9 @@ my (@example_list, @example_results);
   push @example_list, "Column.pl";
   push @example_results, "create examples/Column.pdf, showing multiple pages demonstrating the\n capabilities of the Content/Text.pm column() library methods\n";
 
+  push @example_list, "Column_lists.pl";
+  push @example_results, "create examples/Column_lists.pdf, showing examples of the various list\n capabilities of the Content/Text.pm column() library methods\n";
+
   push @example_list, "Content.pl";
   push @example_results, "create examples/Content.pdf, showing multiple pages demonstrating the\n capabilities of the Content.pm library methods (graphics and text).\n";
 
