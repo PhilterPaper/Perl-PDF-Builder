@@ -17,6 +17,7 @@ pod2htmd.tmp
 # local build process
 /latest_release
 /Changes_new
+/UPDATE_195.txt
 /comp.list
 /pdfbpm.list
 # quick test files

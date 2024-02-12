@@ -45,6 +45,8 @@ contrib/pdf-deoptimize.pl
 contrib/pdf-optimize.pl
 contrib/text2pdf.pl
 docs/buildDoc.pl
+examples/README
+examples/examples.output
 examples/resources/040_annotation.pdf
 examples/resources/aptfrontview.jpg
 examples/resources/sample_55.pdf
@@ -63,7 +65,6 @@ examples/023_cjkfonts
 examples/024_bdffonts
 examples/025_unifonts
 examples/026_unifont2
-# examples/027_winfont
 examples/030_colorspecs
 examples/031_color_hsv
 examples/032_separation
@@ -81,13 +82,11 @@ examples/Column_lists.pl
 #examples/Column_layouts.pl
 examples/Content.pl
 examples/ContentText.pl
-examples/examples.output
+examples/FontManager.pl
 examples/HarfBuzz.pl
-examples/README
 examples/RMtutorial.pl
 examples/Rotated.pl
 examples/ShowFont.pl
-examples/FontManager.pl
 examples/Windows/027_winfont
 examples/Windows/Win32.pm
 lib/PDF/Builder.pm
