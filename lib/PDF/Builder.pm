@@ -3525,6 +3525,7 @@ limitations for a given font, and cannot default their behavior accordingly!
 =over
 
 Returns a new Adobe core font object. For details, 
+including supported C<%opts>,
 see L<PDF::Builder::Docs/Core Fonts>. Note that this is an Adobe-standard
 corefont I<name>, and not a file name.
 
@@ -3578,8 +3579,14 @@ sub psfont {
     my ($self, $psf, %opts) = @_;
     # copy dashed name options to preferred undashed format
     if (defined $opts{'-afmfile'} && !defined $opts{'afmfile'}) { $opts{'afmfile'} = delete($opts{'-afmfile'}); }
+    if (defined $opts{'-afm_file'} && !defined $opts{'afm_file'}) { $opts{'afm_file'} = delete($opts{'-afm_file'}); }
     if (defined $opts{'-pfmfile'} && !defined $opts{'pfmfile'}) { $opts{'pfmfile'} = delete($opts{'-pfmfile'}); }
+    if (defined $opts{'-pfm_file'} && !defined $opts{'pfm_file'}) { $opts{'pfm_file'} = delete($opts{'-pfm_file'}); }
     if (defined $opts{'-unicodemap'} && !defined $opts{'unicodemap'}) { $opts{'unicodemap'} = delete($opts{'-unicodemap'}); }
+
+    # preferred option names
+    if (defined %opts{'afm_file'}) { $opts{'afmfile'} = delete($opts{'afm_file'}); }
+    if (defined %opts{'pfm_file'}) { $opts{'pfmfile'} = delete($opts{'pfm_file'}); }
 
     foreach my $o (qw(afmfile pfmfile)) {
         next unless defined $opts{$o};
@@ -3602,7 +3609,9 @@ sub psfont {
 =over
 
 Returns a new TrueType (or OpenType) font object.
-For details, see L<PDF::Builder::Docs/TrueType Fonts>.
+For details, including supported C<%opts>, 
+see L<PDF::Builder::Docs/TrueType Fonts>.
+See also L<PDF::Builder::Resource::CIDFont::TrueType>.
 
 =back
 
@@ -3667,7 +3676,8 @@ sub bdfont {
 
 Returns a new CJK font object. These are TrueType-like fonts for East Asian
 languages (Chinese, Japanese, Korean).
-For details, see L<PDF::Builder::Docs/CJK Fonts>.
+For details, including supported C<%opts>, see L<PDF::Builder::Resource::CIDFont::CJKFont>,
+as well as L<PDF::Builder::Docs/CJK Fonts>.
 
 B<NOTE:> C<cjkfont> is quite old and is not well supported. We recommend that
 you try using C<ttfont> (or another font routine, if not TTF/OTF) with the
@@ -3712,7 +3722,7 @@ format. Returns the font object, to be used by L<PDF::Builder::Content>.
 
 The font C<$name> is either the name of one of the standard 14 fonts 
 (L<PDF::Builder::Resource::Font::CoreFont/STANDARD FONTS>), such as
-Helvetica or the path to a font file.
+C<Helvetica> or the path to a font file (including an extension/filetype).
 There are 15 additional core fonts on a Windows system.
 Note that the exact name of a core font needs to be given.
 The file extension (if path given) determines what type of font file it is.
@@ -3740,8 +3750,8 @@ The file extension (if path given) determines what type of font file it is.
 The path can be omitted if the font file is in the current directory or one of
 the directories returned by C<font_path>.
 
-TrueType (ttf/otf), Adobe PostScript Type 1 (pfa/pfb), and Adobe Glyph Bitmap
-Distribution Format (bdf) fonts are supported.
+Core, TrueType (ttf/otf), Adobe PostScript Type 1 (pfa/pfb/t1), and Adobe Glyph 
+Bitmap Distribution Format (bdf) fonts are supported.
 
 The following options (C<%opts>) are available:
 
@@ -3752,30 +3762,18 @@ The following options (C<%opts>) are available:
 =item format
 
 The font format is normally detected automatically based on the file's
-extension.  If you're using a font with an atypical extension, you can set
+extension (if one is given, as in non-core fonts). If you're using a font with 
+an atypical extension, you can set
 C<format> to one of C<truetype> (TrueType or OpenType), C<type1> (PostScript
-Type 1), or C<bitmap> (Adobe Bitmap).
+Type 1), or C<bitmap> (Adobe Bitmap). There is no C<format> entry for Core
+fonts, as the name must be an exact match.
 
-=item dokern
+=item (other options)
 
-Kerning (automatic adjustment of space between pairs of characters) is enabled
-by default if the font includes this information.  Set this option to false to
-disable.
-
-=item afm_file (PostScript Type 1 fonts only)
-
-Specifies the location of the font metrics file.
-
-=item pfm_file (PostScript Type 1 fonts only)
-
-Specifies the location of the printer font metrics file.  This option overrides
-the encode option.
-
-=item embed (TrueType fonts only)
-
-Fonts are embedded in the PDF by default, which is required to ensure that they
-can be viewed properly on a device that doesn't have the font installed. Set
-this option to false to prevent the font from being embedded.
+The C<%opts> entries are passed on to the appropriate font format routine
+(C<corefont()>, C<ttfont()>, etc.), so they can be used here. These include 
+'encode', 'pdfname', 'pfmfile', 'dokern', etc. See the appropriate font routine 
+for a full list of the supported options.
 
 =back
 
@@ -3784,12 +3782,9 @@ this option to false to prevent the font from being embedded.
 sub font {
     my ($self, $name, %opts) = @_;
     # copy dashed name options to preferred undashed format
-    if (defined $opts{'-encode'} && !defined $opts{'encode'}) { $opts{'encode'} = delete($opts{'-encode'}); }
     if (defined $opts{'-kerning'} && !defined $opts{'kerning'}) { $opts{'kerning'} = delete($opts{'-kerning'}); }
     if (defined $opts{'-dokern'} && !defined $opts{'dokern'}) { $opts{'dokern'} = delete($opts{'-dokern'}); }
     if (defined $opts{'-embed'} && !defined $opts{'embed'}) { $opts{'embed'} = delete($opts{'-embed'}); }
-    if (defined $opts{'-afmfile'} && !defined $opts{'afmfile'}) { $opts{'afmfile'} = delete($opts{'-afmfile'}); }
-    if (defined $opts{'-pfmfile'} && !defined $opts{'pfmfile'}) { $opts{'pfmfile'} = delete($opts{'-pfmfile'}); }
 
     if (exists $opts{'kerning'}) {
         $opts{'dokern'} = delete $opts{'kerning'};
@@ -3816,12 +3811,7 @@ sub font {
         $opts{'embed'} //= 1;
         return $self->ttfont($name, %opts);
     } elsif ($format eq 'type1') {
-        if (exists $opts{'afm_file'}) {
-            $opts{'afmfile'} = delete $opts{'afm_file'};
-        }
-        if (exists $opts{'pfm_file'}) {
-            $opts{'pfmfile'} = delete $opts{'pfm_file'};
-        }
+        # psfont routine will check for afmfile and pfmfile
         return $self->psfont($name, %opts);
     } elsif ($format eq 'bitmap') {
         return $self->bdfont($name, %opts);

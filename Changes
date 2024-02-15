@@ -1,8 +1,7 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2024-02-08  UNRELEASED
-* = work planned or in progress (not all may make it into this release!)
----- done in 3.027 -----------------
+3.027     2024-02-14  UNRELEASED
+* = work in progress
 
     lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Docs.pm, 
       lib/PDF/Builder/Content.pm, MANIFEST, README.md, tools/3_examples.pl, 
@@ -29,19 +28,26 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       Split out list examples from Column.pl examples, into Column_lists.pl.
 *     CSS text-align property for left, center, and right added. Not fully imp.
 * _marker-* properties not fully tested yet
-* remember to update Docs.pm, #195 (after release!)
+* superfluous marker(s) when splitting a <li> across columns. did <marker>
+  get deleted once ink hit paper, as it should have?
+* remember to update Docs.pm, #195 (after release!) see UPDATE_195.txt
 
     lib/PDF/Builder/Content/Text.pm, examples/Column.pl
      Fold all HTML tags to lower case (to support <P> etc.), detect 
       unsupported or invalid tags and give error message (just once for each, 
       per column() call). Treat unknown tags as <span> tag. In Column.pl,
-*     change a few tags to upper case, add some bogus tags (expect error msg).
+*     change a few tags to upper case, add some bogus tags (expect error msg)?
 
     lib/PDF/Builder/Content/Text.pm
      Due to an apparent bug in HTML::TreeBuilder (HTML::Tree #8), where <ins> 
       and <del> tags cause unwanted paragraph breaks, these tags are 
       temporarily changed to <u> and <s> instead. Needless to say, if you use
       <ins> and <del>, you will not be able to modify them in CSS styling.
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm, 
+      lib/PDF/Builder/Resoure/Font/BdFont-CoreFont-Postscript-SynFont.pm
+     Rearrange some of the documentation and update some "Options" lists to
+      make looking up font options more straightforward and complete.
 
     lib/PDF/Builder/Content.pm
       Move end/endpath description (POD) to a more appropriate section.
@@ -99,257 +105,6 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
     devtools/PDFbuild.pl updates found to be needed in 3.026 build.
     devtools/html2php.pl updates found to be needed.
     MANIFEST add INFO/Changes_2023.
-
----- try to get into 3.027 ---------
-when get to May or June, w/o SVG or <img> in yet, that may be a good point
-  for 3.027 release. save SVG and <img> etc. (<eqn>, GNUplot, etc.) for 3.028 
-  later in year, and 3.029 with remaining stuff later (early 2025?).
-make sure Docs.pm, Content::Text, and #195 (after next release) list of 
-supported tags, CSS properties, etc. are kept in synch with column() 
-capabilities, as well as changes to examples/ being transferred to site 
-Examples section as well as tools/3_examples.pl
-
-*   per SVGPDF (#4) fix "require" of external libraries so oddly formatted
-       VERSION numbers don't derail PDF::Builder loading. Builder was blowing
-       up when Image::PNG::Libpng went to version 0.57_01 (development version).
-       if specify minimum version, put in 'require' statement itself rather 
-       than separate get-VERSION-and-compare.
-
-*   per #207 get outlines update working
-
-*   per API2 (#41) check behavior of new(file=>'name') on existing file, (at
-       least) document if overwrites even w/o save operation (warning). add 
-       check if file already exists, and issue run-time warning (with flag to 
-       suppress this warning, and optionally to make it fatal). might as well 
-       also check that existing file is R/W (see open() with "update").
-
-*   per #208 investigate very small "last B curves" on all arc/curve producing
-       calls (including bogen()). may be able to examine list of B curves and
-       merge "tiny" ones into a larger neighbor? provide fix to SVGPDF.
-
-*   elliptical bogen and rotated ellipses/arcs/ebogens. Probably a new
-       examples/Bogens.pl with circular bogen stuff moved over from Content.pl 
-       and replaced by rotated arc examples in Content.pl. elliptical bogen
-       examples into Bogens.pl. bogen() allow old style "extra" settings, but 
-       encourage use of new hash list as used in bogen_ellip() and add to 
-       rotation of elliptical arcs and ellipses. update MANIFEST with any new 
-       examples. work done for SVGPDF package use, so might as well reuse it 
-       here. most of the new code and examples already exist. remember to
-       update tools/3_examples.pl.
-
-*   any margin-top or pending margin-bottom at column top should be ignored, 
-       not just for <p>. check that margin-top and -bottom are only applied
-       to display=block everywhere?
-
-*   cleanup of column(), including dead PDF code removal (wait to output font 
-       information, positioning/scale, color, etc. until last moment). see if
-       get_font() call for e.g., sans-serif to replace Helvetica (when ss is
-       defined to be Helvetica) generates a redundant Tf command. scan through
-       output streams looking for (e.g.,) a Tf command and then another before
-       we have seen Tx command to output text. similar for Tm command.
-
-*   text-align=center|right (align=center|right text() call) in column() 
-       doesn't work in CSS (except for list markers) b/c x position starts at 
-       left edge of column. need to adjust x to center of column or right edge 
-       of column. would it be sufficient to see if align is not l/left and 
-       change it? suppress this for list markers, which already update x 
-       position ($el-1 = 'marker'). any times that we wouldn't want alignment 
-       x to be thusly? if NOT fixed, put warning in documentation not to use 
-       text-align? does text-align make any sense if not at starting point of 
-       column (x at left edge)? maybe only apply if display=block (ex. marker), 
-       ignore text-align otherwise.
-
-*   some new tag and CSS support in column() esp white-space, pre, br #195
-       <sl> and <dl> might be easy enough, too, once I'm happy with lists.
-       some sort of _content-before and _content-after to use in <dt>, similar
-       to <ol> and <ul> marker control (just use _marker-before and 
-       _marker_after?). list-style-position=inside too?  <code>, <kbd>, <samp>, 
-       <var> so PDF::Table code display request done. decide what to do about 
-       tabs (if proportional font, only absolute distance settings, not 
-       character counts, make sense). tabs are really something you should use 
-       a table for, but should there be some simple legacy tab support?
-       Must get in <code>, as Column.pl README.md example provokes warnings.
-
-*   replace all $obj->isa("kind") with UNIVERSAL::isa($obj, "kind"), as it will
-       handle simple scalars correctly without blowing up ("isa" against an
-       unblessed object).
-
-*   vector (list) set AND get of transform matrix #200
-
-*   column() fix growth of font size in <a>. confirm that indentation etc.
-       remains correct when crossing column boundaries (separate column()
-       calls with continuation of text). might combine fix with using CSS em 
-       and ex sizes, as well as other absolute sizes.
-
-*   add <img> to column(), with positioning (as CSS compatible as possible) to
-       vertically align image top/center/baseline (default, if exists)/bottom 
-       (default) with current text/line ascender-top/ baseline (default)/
-       descender-bottom PLUS arbitrary points displacement dx and dy (default 
-       0,0) from current vertical alignment setting. don't forget to expand 
-       line max extents as needed. Must get in, as Column.pl README.md example
-       throws warning about <img> unsupported (uses URL to image file, so
-       need to do that).
-
-*   line vertical extents grow as necessary... do we stack them, in case we 
-       need to back out text already put down (e.g., see marooned text below)? 
-       consider a stack of status information: indices of tags and text used, 
-       extents at entry to a tag, etc. wait to delete tags/text elements until 
-       line is REALLY finalized -- will need to restore state (including font,
-       size, and color) if back out text.
-
-*   check behavior of extraneous spaces, such as before indented <li> tags -- 
-       they should normally collapse to a single space, but is that space 
-       output (bad) or is it eliminated somewhere (good)?
-
-*   seen in Knuth-Plass where a <li> is split across pages -- gets an 
-       unnecessary list marker (bullet) before resuming the <li> content.
-
-*   GnuPlot support (depends on SVG image or PNG image). can do before SVG in.
-       build GP file on the fly and/or extend an existing one. temp file for GP,
-       temp file for output from gnuplot -- flag to name and preserve, or to
-       discard temp file(s).
-
-*   SVG support for image, once SVGPDF finalized and released to CPAN. make 
-       sure GnuPlot now allows SVG output, not just PNG. Make sure prereqs list 
-       in README.md, Makefile.PL, etc. and docs is updated with SVGPDF and 
-       anything else. image_svg() implement font selection callback for using 
-       SVGPDF.
-
-*   MathJax support (depends on SVG image). primarily using new 
-       <eqn mode="display|inline"> tag in column(). any reason to support 
-       standalone production of an SVG file? as with GnuPlot, name and preserve 
-       or discard temp output (SVG file).
-
-*   column() implement nonrectangular outlines. examples/Column_layouts.pl to
-       demonstrate what can be done.
-
-*   remove leading 0's in various integers if encountered #198. test first to
-       see if problem in PDF::Builder or in various Readers. Builder should not
-       be creating such integers, but should modify them if read in from an
-       external producer. The problem is that some decimal integers with 
-       leading 0's MAY be misread as OCTAL integers (Perl DOES do that).
-
-*   rationalize and document Named Destination support #202
-
-*   control of precision of coordinate dimensions #196
-
-*   per API2 (#48) look into opening password-protected (encrypted) docs,
-       or at least fail gracefully
-
-*   do something about much larger font-related data in a PDF produced by
-       Builder, as compared to API2
-
-*   <cite>, <q>, <big>, <bigger>, <small>, <smaller> font control in column(), 
-       <sub>, <sup>, <hr> align, <center>? text-transform for CSS, including
-       small and petite caps?
-
-*   <ul> support images as markers (CSS list-style-image: url() )
-
-*   hooks to call user code to place headers, footers, page numbers, etc. when 
-       column() overflow to a new page. possibly also choose from page layout 
-       templates (e.g., even, odd pages). integrate with non-column page
-       numbering, even/odd actions, headers/footers, outline and page thumb
-       consistent page labels. maybe new_page() call that returns all the
-       necessary information ($page, $text, $grfx, current page number, left/
-       right page, etc.) and outputs information based on that data and user
-       defined template.
-
----- likely 3.028 or later ---------
-
-*   extend column ordered lists to direct "inheriting" of parent (enclosing)
-       ordered list marker. inherit="." says that the marker for this list 
-       will be _marker-before above-list-marker-content inherit-glue-char
-       normal-marker-text-at-this-level _marker-after. E.g.,
-          1. First Section
-            1.1  First subsection ("1" inherited from above)
-            1.2  Second subsection ("1" inherited, "." is glue)
-          2. Second Section
-       need to stack "last used marker text at this level" so can pop out.
-       also transfer from one column to the next in the middle of processing.
-       much simpler to use than official CSS column-reset, column-increment.
-       remember to update Column_lists.pl with many examples.
-
-*   avoid marooning ( ) etc. at end of line when under different tags (adjacent
-       text/no space still splitting because tag changed near end of line). if
-       a piece of text is NOT followed by breakable whitespace, need to 
-       remember line status (vertical extents, etc.) and NOT erase tag and 
-       text runs when used, until line is finalized and this run of tags/text 
-       is either output or is deferred to the next line. will depend on whether 
-       text can be split or otherwise hyphenated. consider first scanning 
-       @mytext to find adjacent text, and insert some sort of <nobr> tag into 
-       stream? note that a word may still be hyphenated at the end of a line, 
-       so <nobr> should only apply to adjacent text and not within words.
-
-       possible solution: after @mytext created and updated, go through and
-       look at all adjacent pairs of non-empty text elements. If a text string
-       ends with a breakable (space and other whitespace) and/or the next
-       string starts with a breakable, we can break there so no problem. 
-       otherwise, mark left text as "nobreakonright" and right text as 
-       "nobreakonleft". when walking mytext list, if "nobreakonright", save
-       the rendering state including properties, current properties, extents,
-       etc. as well as current output stream positions. do this only for the
-       first of a series of "nobreaks". if need to back out text because can't
-       tentatively fit text in line (even after hyphenation attempt), can
-       restore tags and text marked "eligible for deletion" and trim off 
-       output streams at the stake in the ground. that way don't have to back
-       out changes to font, color, size, etc. -- just delete them from the
-       streams. don't forget to delete newly created image objects, etc. (or
-       remember them to use in next line, rather than recreating them). don't
-       immediately delete tags and text after rendering -- just mark "eligible
-       for deletion". remember that a long word may end up being hyphenated
-       in the middle, or a text string may be breakable in the middle, but
-       "nobreaks" at the ends still apply.
-
-*   allow comments /* */ within CSS (<style> and style="")
-
-*   <div> support, so can e.g., center a block or line of complex text (not
-       just simple text)
-
-*   revised bar code support (depends on new barcode library and SVG image) #48
-       requires new product release of large 1D and 2D barcode SVG generator 
-       library (as optional prereq for Builder). replace bar code examples 
-       with new library anyway (no need to keep legacy code, which didn't work 
-       that well). include hooks for companies to add proprietary barcodes (in
-       new barcode library?) and allow use in PDF::Builder. include sample of
-       each character done in binary (constant space, narrow/wide bar for 0/1).
-       reminder in QR code that putting a little image in the center is actually
-       damaging the code, so redundancy is reduced.
-
-*   proper hyphenation (language-dependent), using a new hyphenation library
-       as well as tag support for <lang> and <nobr>. at a minimum Basic
-       hyphenation used everywhere, including column() (non-language-dependent 
-       word splitting). TBD if use new hyphenation library outside of Knuth-
-       Plass usage (probably better than nothing).
-
-*   real paragraph shaping, perhaps using Text::KnuthPlass. awaits new
-       hyphenation library. remember than line lengths will vary, and may
-       change depending on leading changes due to line content.
-
-*   consider global settings such as color, font, font-size, etc. that are
-       automatically carried over from page to page (unless overridden for page
-       or rest of document). just cuts down on the busywork for each page. in
-       other words, carry forward the current state of a page to the next one.
-
-*   consider "roll printer" output (indefinite length, but fixed width, page).
-       might have to flip coordinate system (cm command), as you don't know at 
-       the beginning of output what the maximum size is going to be (global 
-       flag: y grows upward (default) or downward). needs to update all 
-       routines that assume y grows upwards. an alternative is to build output 
-       in conventional manner; each time extend page (update mediabox call at 
-       page top) go through and update all coordinates (expensive!) in streams 
-       this page. or, just keep going more and more negative, and at the end, 
-       add a fixed offset to all values to make them positive. keep track of 
-       any desired bottom margin and allow for that. should this be limited to 
-       one page output, or allow multiple indefinite- (and varying) length 
-       pages?
-
-*   per Text::KnuthPlass "Article" example, think about a way to embed arbitrary
-       code between chunks of markup without calling column() over and over.
-       Article example embeds live KP-formatted text in many places. need to
-       keep track of page position, use only get_font() to change fonts, etc.
-
-*   BMP image support, possibly using Image::BMP package. I think this is
-       different from PxM format. 
 
 (see INFO/Changes_2023 for earlier changes)
 

@@ -48,24 +48,6 @@ Inherits from L<PDF::Builder::Resource::Font>
 
 Returns a corefont object.
 
-Valid %options are:
-
-=over
-
-=item encode
-
-Changes the encoding of the font from its default.
-See I<perl's Encode> for the supported values. B<Warning:> only single byte 
-encodings are permitted. Multibyte encodings such as 'utf8' are forbidden.
-
-=item pdfname
-
-Changes the reference-name of the font from its default.
-The reference-name is normally generated automatically and can be
-retrieved via C<$pdfname=$font->name()>.
-
-=back
-
 =back
 
 =head2 Supported typefaces
@@ -125,7 +107,38 @@ character positioning. There is no guarantee that a given font file includes
 all the desired glyphs, nor that the widths will be absolutely the same, even
 in different releases of the same font.
 
+=head2 Options
+
+=over
+
+=item encode
+
+Changes the encoding of the font from its default. Notice that the encoding
+(I<not> the entire font's glyph list) is shown in a PDF object (record), listing
+256 glyphs associated with this encoding (I<and> that are available in this 
+font). 
+
+See I<perl's Encode> for the supported values. B<Warning:> only single byte 
+encodings are permitted. Multibyte encodings such as 'utf8' are forbidden.
+
+=item dokern
+
+Enables kerning if data is available.
+
+C<kerning> is an older name for this option, and is still available as
+an B<alternative> to C<dokern>.
+
+=item I<pdfname>
+
+Changes the reference-name of the font from its default.
+The reference-name is normally generated automatically and can be
+retrieved via $pdfname=$font->name().
+
+=back
+
 =cut
+
+# TBD metrics option -- how used? 
 
 sub _look_for_font {
     my $fname = shift;
@@ -184,6 +197,7 @@ sub new {
     if (defined $opts{'-encode'} && !defined $opts{'encode'}) { $opts{'encode'} = delete($opts{'-encode'}); }
     if (defined $opts{'-metrics'} && !defined $opts{'metrics'}) { $opts{'metrics'} = delete($opts{'-metrics'}); }
     if (defined $opts{'-dokern'} && !defined $opts{'dokern'}) { $opts{'dokern'} = delete($opts{'-dokern'}); }
+    if (defined $opts{'-kerning'} && !defined $opts{'kerning'}) { $opts{'kerning'} = delete($opts{'-dokern'}); }
     if (defined $opts{'-pdfname'} && !defined $opts{'pdfname'}) { $opts{'pdfname'} = delete($opts{'-pdfname'}); }
 
     $opts{'encode'} //= 'latin1';

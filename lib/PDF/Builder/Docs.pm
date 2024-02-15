@@ -1563,23 +1563,6 @@ B<Examples:>
     $font3 = $pdf->corefont('Helvetica');
     $font4 = $pdf->corefont('ZapfDingbats');
 
-Valid %options are:
-
-=over
-
-=item encode
-
-Changes the encoding of the font from its default. Notice that the encoding
-(I<not> the entire font's glyph list) is shown in a PDF object (record), listing
-256 glyphs associated with this encoding (I<and> that are available in this 
-font). 
-
-=item dokern
-
-Enables kerning if data is available.
-
-=back
-
 B<Notes:> 
 
 Even though these are called "core" fonts, they are I<not> shipped
@@ -1664,33 +1647,6 @@ B<Examples:>
     $font1 = $pdf->psfont('Times-Book.pfa', afmfile => 'Times-Book.afm');
     $font2 = $pdf->psfont('/fonts/Synest-FB.pfb', pfmfile => '/fonts/Synest-FB.pfm');
 
-Valid %options are:
-
-=over
-
-=item encode
-
-Changes the encoding of the font from its default. Notice that the encoding
-(I<not> the entire font's glyph list) is shown in a PDF object (record), listing
-256 glyphs associated with this encoding (I<and> that are available in this 
-font). 
-
-=item afmfile
-
-Specifies the location of the I<ASCII> font metrics file (.afm). It may be used
-with either an ASCII (.pfa) or binary (.pfb) glyph file.
-
-=item pfmfile
-
-Specifies the location of the I<binary> font metrics file (.pfm). It may be used
-with either an ASCII (.pfa) or binary (.pfb) glyph file.
-
-=item dokern
-
-Enables kerning if data is available.
-
-=back
-
 B<Note:> these T1 (Type1) fonts are I<not> shipped with PDF::Builder, but are 
 expected to be found on the machine with the PDF reader. Most PDF readers do 
 not install T1 fonts, and it is up to the user of the PDF reader to install
@@ -1740,6 +1696,8 @@ text searching and screen reading will not be possible.
 =item dokern
 
 Enables kerning if data is available.
+
+C<kerning> is still accepted as an (older) B<alternative> to C<dokern>.
 
 =item noembed
 
@@ -1875,16 +1833,6 @@ B<Examples:>
     $font = $pdf->cjkfont('korean');
     $font = $pdf->cjkfont('traditional');
 
-Valid %options are:
-
-=over
-
-=item encode
-
-Changes the encoding of the font from its default.
-
-=back
-
 B<Warning:> Unlike C<ttfont>, the font file is I<not> embedded in the output 
 PDF file. This is
 evidently behavior left over from the early days of CJK fonts, where the 
@@ -1917,47 +1865,6 @@ B<Examples:>
     $sf  = $pdf->synfont($cf, condense => 0.85);   # compressed 85%
     $sfb = $pdf->synfont($cf, bold => 1);          # embolden by 10em
     $sfi = $pdf->synfont($cf, oblique => -12);     # italic at -12 degrees
-
-Valid %options are:
-
-=over
-
-=item condense
-
-Character width condense/expand factor (0.1-0.9 = condense, 1 = normal/default, 
-1.1+ = expand). It is the multiplier to apply to the width of each character.
-
-=item oblique
-
-Italic angle (+/- degrees, default 0), sets B<skew> of character box.
-
-=item bold
-
-Emboldening factor (0.1+, bold = 1, heavy = 2, ...), additional thickness to
-draw outline of character (with a heavier B<line width>) before filling.
-
-=item space
-
-Additional character spacing in milliems (0-1000)
-
-=item caps
-
-0 for normal text, 1 for small caps. 
-Implemented by asking the font what the uppercased translation (single 
-character) is for a given character, and outputting it at 80% height and
-88% width (heavier vertical stems are better looking than a straight 80%
-scale).
-
-Note that only lower case letters which appear in the "standard" font (plane 0
-for core fonts and PS fonts) will be small-capped. This may include eszett
-(German sharp s), which becomes SS, and dotless i and j which become I and J
-respectively. There are many other accented Latin alphabet letters which I<may> 
-show up in planes 1 and higher. Ligatures (e.g., ij and ffl) do not have
-uppercase equivalents, nor does a long s. If you have text which includes such
-characters, you may want to consider preprocessing it to replace them with
-Latin character expansions (e.g., i+j and f+f+l) before small-capping.
-
-=back
 
 Note that I<CJK> fonts (created with the C<cjkfont> method) do B<not> work
 properly with C<synfont>. This is due to a different internal structure of the

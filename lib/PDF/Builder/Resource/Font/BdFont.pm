@@ -54,6 +54,7 @@ Returns a BmpFont object.
 
 =cut
 
+# TBD? not implemented
 #I<encode>
 #... changes the encoding of the font from its default.
 #See I<Perl's Encode> for the supported values.
