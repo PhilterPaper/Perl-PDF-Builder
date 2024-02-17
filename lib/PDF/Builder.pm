@@ -3518,6 +3518,8 @@ use the C<noembed> or C<nosubset> flags as appropriate. The PDF::Builder font
 routines currently have no means to automatically detect any embedding 
 limitations for a given font, and cannot default their behavior accordingly!
 
+=head2 Font-related Methods
+
 =head3 corefont
 
     $font = $pdf->corefont($fontname, %opts)
@@ -3526,10 +3528,10 @@ limitations for a given font, and cannot default their behavior accordingly!
 
 Returns a new Adobe core font object. For details, 
 including supported C<%opts>,
-see L<PDF::Builder::Docs/Core Fonts>. Note that this is an Adobe-standard
-corefont I<name>, and not a file name.
+see L<PDF::Builder::Resource::Font::CoreFont>. 
+Note that this is an Adobe-standard corefont I<name>, and not a file name.
 
-See also L<PDF::Builder::Resource::Font::CoreFont>.
+See also L<PDF::Builder::Docs/Core Fonts> for additional information.
 
 =back
 
@@ -3566,10 +3568,10 @@ sub corefont {
 
 =over
 
-Returns a new Adobe Type1 ("PostScript", "T1") font object.
-For details, see L<PDF::Builder::Docs/PS Fonts>.
+Returns a new Adobe Type1 ("PostScript", "T1") font object. For details, 
+including supported C<%opts>, see L<PDF::Builder::Resource::Font::Postscript>.
 
-See also L<PDF::Builder::Resource::Font::Postscript>.
+See also L<PDF::Builder::Docs/PS Fonts> for additional information.
 
 =back
 
@@ -3585,8 +3587,8 @@ sub psfont {
     if (defined $opts{'-unicodemap'} && !defined $opts{'unicodemap'}) { $opts{'unicodemap'} = delete($opts{'-unicodemap'}); }
 
     # preferred option names
-    if (defined %opts{'afm_file'}) { $opts{'afmfile'} = delete($opts{'afm_file'}); }
-    if (defined %opts{'pfm_file'}) { $opts{'pfmfile'} = delete($opts{'pfm_file'}); }
+    if (defined $opts{'afm_file'}) { $opts{'afmfile'} = delete($opts{'afm_file'}); }
+    if (defined $opts{'pfm_file'}) { $opts{'pfmfile'} = delete($opts{'pfm_file'}); }
 
     foreach my $o (qw(afmfile pfmfile)) {
         next unless defined $opts{$o};
@@ -3610,8 +3612,9 @@ sub psfont {
 
 Returns a new TrueType (or OpenType) font object.
 For details, including supported C<%opts>, 
-see L<PDF::Builder::Docs/TrueType Fonts>.
-See also L<PDF::Builder::Resource::CIDFont::TrueType>.
+see L<PDF::Builder::Resource::CIDFont::TrueType>.
+
+See also L<PDF::Builder::Docs/TrueType Fonts>.
 
 =back
 
@@ -3648,7 +3651,8 @@ sub ttfont {
 
 Returns a new BDF (bitmapped distribution format) font object, based on the 
 specified Adobe BDF file. These are very low resolution fonts that appear to
-have come off a dot-matrix printer.
+have come off a dot-matrix printer, and should only be used for decorative
+or novelty purposes.
 
 See also L<PDF::Builder::Resource::Font::BdFont>
 
@@ -3690,8 +3694,6 @@ C<ttfont> instead.
 Among other things, C<cjkfont> selections are limited, as they require CMAP
 files; they may or may not subset correctly; and they can not be used as the
 base for synthetic fonts.
-
-See also L<PDF::Builder::Resource::CIDFont::CJKFont>
 
 =back
 
@@ -3753,9 +3755,9 @@ the directories returned by C<font_path>.
 Core, TrueType (ttf/otf), Adobe PostScript Type 1 (pfa/pfb/t1), and Adobe Glyph 
 Bitmap Distribution Format (bdf) fonts are supported.
 
-The following options (C<%opts>) are available:
-
 =back
+
+The following options (C<%opts>) are available:
 
 =over
 
@@ -3979,16 +3981,6 @@ Returns a new uni-font object, based on the specified fonts and options.
 B<BEWARE:> This is not a true PDF-object, but a virtual/abstract font definition!
 
 See also L<PDF::Builder::Resource::UniFont>.
-
-Valid options (C<%opts>) are:
-
-=back
-
-=over
-
-=item encode
-
-Changes the encoding of the font from its default.
 
 =back
 

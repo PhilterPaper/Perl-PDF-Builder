@@ -359,7 +359,7 @@ do {
 
             # POD conversion errors reported? already in index section
 	    # empty string if no valid POD at all
-	    if ($htmlfile =~ m#id="POD_ERRORS"#) {
+	    if ($htmlfile =~ m#id="POD-ERRORS"#) {
 		print "$source ERROR  POD errors reported\n";
 		$file_list[$i]{'status'} = 3;
 	    }

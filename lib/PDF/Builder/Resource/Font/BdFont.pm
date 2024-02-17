@@ -44,7 +44,7 @@ for body text!
 
 =head2 new
 
-    $font = PDF::Builder::Resource::Font::BdFont->new($pdf, $font, %options)
+    $font = PDF::Builder::Resource::Font::BdFont->new($pdf, $font, %opts)
 
 =over
 
@@ -65,14 +65,14 @@ Returns a BmpFont object.
 
 =pod
 
-Valid %options are:
+Valid options (%opts) are:
 
 =over
 
 =item I<style> 
 
-A value of 'block' (default) assembles a character from
-contiguous square blocks. A value of 'dot' assembles a character from 
+A value of 'B<block>' (the default) assembles a character from
+contiguous square blocks. A value of 'B<dot>' assembles a character from 
 overlapping filled circles, in the style of a dot matrix printer.
 
 =back

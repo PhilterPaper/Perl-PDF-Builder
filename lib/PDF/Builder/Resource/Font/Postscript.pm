@@ -58,6 +58,12 @@ with either an ASCII (.pfa) or binary (.pfb) glyph file.
 
 C<pfm_file> is still accepted as an (older) B<alternative> to C<pfmfile>.
 
+=item pdfname
+
+Changes the reference-name of the font from its default.
+The reference-name is normally generated automatically and can be
+retrieved via $pdfname=$font->name().
+
 =item dokern
 
 Enables kerning if data is available.
@@ -71,33 +77,38 @@ C<kerning> is still accepted as an (older) B<alternative> to C<dokern>.
 =cut
 
 # TBD what is an xfm file? was xfm_file option ever supported?
+#     currently, xfmfile is a dummy stub, and not listed in POD
 
 sub new {
     my ($class, $pdf, $psfile, %opts) = @_;
     # copy dashed option names to preferred undashed names
     if (defined $opts{'-encode'} && !defined $opts{'encode'}) { $opts{'encode'} = delete($opts{'-encode'}); }
     if (defined $opts{'-afmfile'} && !defined $opts{'afmfile'}) { $opts{'afmfile'} = delete($opts{'-afmfile'}); }
+      if (defined $opts{'-afm_file'} && !defined $opts{'afm_file'}) { $opts{'afm_file'} = delete($opts{'-afm_file'}); }
     if (defined $opts{'-pfmfile'} && !defined $opts{'pfmfile'}) { $opts{'pfmfile'} = delete($opts{'-pfmfile'}); }
+      if (defined $opts{'-pfm_file'} && !defined $opts{'pfm_file'}) { $opts{'pfm_file'} = delete($opts{'-pfm_file'}); }
     if (defined $opts{'-xfmfile'} && !defined $opts{'xfmfile'}) { $opts{'xfmfile'} = delete($opts{'-xfmfile'}); }
+      if (defined $opts{'-xfm_file'} && !defined $opts{'xfm_file'}) { $opts{'xfm_file'} = delete($opts{'-xfm_file'}); }
     if (defined $opts{'-pdfname'} && !defined $opts{'pdfname'}) { $opts{'pdfname'} = delete($opts{'-pdfname'}); }
     if (defined $opts{'-nocomps'} && !defined $opts{'nocomps'}) { $opts{'nocomps'} = delete($opts{'-nocomps'}); }
     if (defined $opts{'-dokern'} && !defined $opts{'dokern'}) { $opts{'dokern'} = delete($opts{'-dokern'}); }
-    if (defined $opts{'-kerning'} && !defined $opts{'kerning'}) { $opts{'kerning'} = delete($opts{'-kerning'}); }
+      if (defined $opts{'-kerning'} && !defined $opts{'kerning'}) { $opts{'kerning'} = delete($opts{'-kerning'}); }
 
     my ($self);
     my ($data);
 
     # preferred option names
-    if (defined $opts{'kerning'}) { $opts{'dokern'} = delete($opts{'kerning'}); }
-    if (defined $opts{'afm_file'}) { $opts{'afmfile'} = delete($opts{'afm_file'}); }
-    if (defined $opts{'pfm_file'}) { $opts{'pfmfile'} = delete($opts{'pfm_file'}); }
+    if (defined $opts{'kerning'} && !defined $opts{'dokern'}) { $opts{'dokern'} = delete($opts{'kerning'}); }
+    if (defined $opts{'afm_file'} && !defined $opts{'afmfile'}) { $opts{'afmfile'} = delete($opts{'afm_file'}); }
+    if (defined $opts{'pfm_file'} && !defined $opts{'pfmfile'}) { $opts{'pfmfile'} = delete($opts{'pfm_file'}); }
+    if (defined $opts{'xfm_file'} && !defined $opts{'xfmfile'}) { $opts{'xfmfile'} = delete($opts{'xfm_file'}); }
 
     if (defined $opts{'afmfile'}) {
         $data = $class->readAFM($opts{'afmfile'});
     } elsif (defined $opts{'pfmfile'}) {
         $data = $class->readPFM($opts{'pfmfile'});
-    } elsif (defined $opts{'xfmfile'}) {
-        $data = $class->readXFM($opts{'xfmfile'});
+    } elsif (defined $opts{'xfmfile'}) { # TBD what is it?
+        $data = $class->readXFM($opts{'xfmfile'}); # dummy stub
     } else {
         die "No proper font-metrics file specified for PostScript file '$psfile'.";
     }

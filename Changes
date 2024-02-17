@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2024-02-14  UNRELEASED
+3.027     2024-02-17  UNRELEASED
 * = work in progress
 
     lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Docs.pm, 
@@ -44,8 +44,10 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       temporarily changed to <u> and <s> instead. Needless to say, if you use
       <ins> and <del>, you will not be able to modify them in CSS styling.
 
-    lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm, 
-      lib/PDF/Builder/Resoure/Font/BdFont-CoreFont-Postscript-SynFont.pm
+    lib/PDF/Builder.pm, docs/buildDoc.pl, lib/PDF/Builder/Docs.pm, 
+      lib/PDF/Builder/Resource/UniFont.pm, 
+      lib/PDF/Builder/Resource/CIDFont/CJKFont-TrueType.pm,
+      lib/PDF/Builder/Resoure/Font/BdFont-CoreFont-Postscript-SynFont.pm,
      Rearrange some of the documentation and update some "Options" lists to
       make looking up font options more straightforward and complete.
 

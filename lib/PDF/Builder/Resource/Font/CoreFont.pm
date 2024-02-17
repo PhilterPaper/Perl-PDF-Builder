@@ -128,17 +128,23 @@ Enables kerning if data is available.
 C<kerning> is an older name for this option, and is still available as
 an B<alternative> to C<dokern>.
 
-=item I<pdfname>
+=item pdfname
 
 Changes the reference-name of the font from its default.
 The reference-name is normally generated automatically and can be
 retrieved via $pdfname=$font->name().
 
+=item metrics
+
+If given, it is expected to be an anonymous hash of font file data. This is
+to be used instead of looking up the I<$fontname>.pm file for width and other
+data. You may need to use this option if your installed font happens to be
+out of synch with the PDF::Builder built-in core font metrics file (e.g.,
+I<helveticabold.pm>).
+
 =back
 
 =cut
-
-# TBD metrics option -- how used? 
 
 sub _look_for_font {
     my $fname = shift;
