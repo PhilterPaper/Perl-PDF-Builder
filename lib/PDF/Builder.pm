@@ -446,14 +446,18 @@ sub new {
 
 =over
 
-Set the default physical size for pages in the PDF.  If called without
-arguments, return the coordinates of the rectangle describing the default
-physical page size.
+Set the default physical size for pages in the PDF. If called without
+arguments (Get), return an array of the coordinates of the rectangle 
+describing the default physical page size.
 
 This is essentially an alternate method of defining the C<mediabox()> call,
 and added for compatibility with PDF::API2.
 
 See L<PDF::Builder::Page/Page Sizes> for possible values.
+
+Note that this method is I<only> at the PDF (document) level. It is not
+implemented at the page level. If you want to set or get the page-level
+override of the media size, use the C<mediabox()> method.
 
 =back
 
@@ -464,12 +468,13 @@ sub default_page_size {
 
     # Set
     if (@_) {
-        return $self->default_page_boundaries(media => @_);
+        return $self->mediabox(@_);
     }
 
     # Get
-    my $boundaries = $self->default_page_boundaries();
-    return @{$boundaries->{'media'}};
+    # up to 5 hash elements of 4 number arrays
+    my %boundaries = $self->default_page_boundaries();
+    return @{$boundaries{'media'}};  # s/b 4 element array
 }
 
 =head2 default_page_boundaries
@@ -505,7 +510,8 @@ sub _bounding_box {
             return $self->_bounding_box('MediaBox') if $type eq 'CropBox';
             return $self->_bounding_box('CropBox');
         }
-        return map { $_->val() } $self->{'pages'}->{$type}->elements();
+        my @xxx = $self->{'pages'}->{$type}->elements();  # 4 element array of hashes
+        return (map { $_->val() } @xxx);
     }
 
     # Set
@@ -514,7 +520,9 @@ sub _bounding_box {
 }
 
 sub default_page_boundaries {
-    return PDF::Builder::Page::boundaries(@_);
+    my %xxx = PDF::Builder::Page::boundaries(@_);
+    # 5 element 'media' etc. hash of anonymous arrays each 4 numbers
+    return %xxx;
 }
 
 # Deprecated; use default_page_size or default_page_boundaries

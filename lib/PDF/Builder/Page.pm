@@ -789,7 +789,8 @@ sub boundaries {
     if      (@_ == 0) {  # empty list -- do all boxes
         my %boundaries;
         foreach my $box (qw(Media Crop Bleed Trim Art)) {
-            $boundaries{lc($box)} = [$self->_bounding_box($box . 'Box')];
+            my @xxx = $self->_bounding_box($box . 'Box');
+            $boundaries{lc($box)} = \@xxx;
         }
         return %boundaries;
     } elsif (@_ == 1) {  # request one specific box
