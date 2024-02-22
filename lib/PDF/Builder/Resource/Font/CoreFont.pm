@@ -52,41 +52,57 @@ Returns a corefont object.
 
 =head2 Supported typefaces
 
-B<standard PDF types>
+=head3 Standard PDF types
+
+See examples/020_corefonts for a list of each font's glyphs.
 
 =over
 
 =item * helvetica, helveticaoblique, helveticabold, helvetiaboldoblique
 
-May have Arial substituted on some systems (e.g., Windows)
+Sans-serif, may have Arial substituted on some systems (e.g., Windows).
 
 =item * courier, courieroblique, courierbold, courierboldoblique
 
-Fixed pitch, may have Courier New substituted on some systems (e.g., Windows)
+Fixed pitch, may have Courier New substituted on some systems (e.g., Windows).
 
 =item * timesroman, timesitalic, timesbold, timesbolditalic
 
-May have Times New Roman substituted on some systems (e.g., Windows)
+Serif, may have Times New Roman substituted on some systems (e.g., Windows).
 
 =item * symbol, zapfdingbats
 
+Various symbols, including the Greek alphabet (in Symbol).
+
 =back
 
-B<Primarily Windows typefaces>
+=head3 Primarily Windows typefaces
+
+See examples/022_truefonts /Windows/Fonts/<name>.ttf 
+for a list of each font's glyphs.
 
 =over
 
 =item * georgia, georgiaitalic, georgiabold, georgiabolditalic
 
+Serif proportional.
+
 =item * verdana, verdanaitalic, verdanabold, verdanabolditalic
+
+Sans-serif proportional with simple strokes.
 
 =item * trebuchet, trebuchetitalic, trebuchetbold, trebuchetbolditalic
 
+Sans-serif proportional with simple strokes.
+
 =item * bankgothic, bankgothicitalic, bankgothicbold, bankgothicitalic
 
+Sans-serif proportional with simple strokes.
 Free versions of Bank Gothic are often only medium weight Roman (bankgothic).
 
 =item * webdings, wingdings
+
+Various symbols, in the vein of Zapf Dingbats.
 
 =back
 

@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2024-02-17  UNRELEASED
+3.027     2024-02-22  UNRELEASED
 * = work in progress
 
     lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Docs.pm, 
@@ -41,11 +41,25 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
     lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm
      Fix #210 (reported in API2 #75) default_page_size() was failing.
 
-    lib/PDF/Builder/Content/Text.pm
-     Due to an apparent bug in HTML::TreeBuilder (HTML::Tree #8), where <ins> 
-      and <del> tags cause unwanted paragraph breaks, these tags are 
-      temporarily changed to <u> and <s> instead. Needless to say, if you use
-      <ins> and <del>, you will not be able to modify them in CSS styling.
+    lib/PDF/Builder/docs/buildDoc.pl
+     Add run suggestions and examples for other structures of packages.
+
+    lib/PDF/Builder/Resource/Font/CoreFont.pm
+     Expand on descriptions of standard and Windows core fonts.
+
+    lib/PDF/Builder/Content/Text.pm, README.md
+     There is an apparent bug in HTML::TreeBuilder (HTML::Tree #8), where <ins> 
+      and <del> tags cause unwanted paragraph breaks. The best solution, until
+      the TreeBuilder prereq HTML::Tagset is fixed, is to edit HTML::Tagset
+      and make a one line fix. HTML::Tagset 3.21 and later may already be
+      updated.
+      
+      In \Strawberry\perl\vendor\lib\HTML\Tagset.pm (location of Tagset.pm
+      will vary on other Perls and OS's):
+        1. Find  %isPhraseMarkup = map {; $_ => 1 } qw(
+        2. Below that find     b i u s tt small big
+        3. Add a new line below that:   ins del
+      This adds <ins> and <del> to the list of inline tags.
 
     lib/PDF/Builder.pm, docs/buildDoc.pl, lib/PDF/Builder/Docs.pm, 
       lib/PDF/Builder/Resource/UniFont.pm, 

@@ -108,7 +108,12 @@ functionality.
 * Image::PNG::Libpng (0.57 or higher, recommended for enhanced PNG image function processing)
 * HarfBuzz::Shaper (0.024 or higher, needed for Latin script ligatures and kerning, as well as for any complex script such as Arabic, Indic scripts, or Khmer)
 * Text::Markdown (1.000031 or higher, needed if using 'md1' markup)
-* HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup)
+* HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup).
+Note that a prereq, HTML::Tagset, needs a fix for `<ins>` and `<del>` tags to
+be handled correctly, if version 3.21 has not yet been issued. See "Changes"
+for instructions in PDF::Builder's 3.027 release (or INFO/Changes\_2024 down
+the road). Once HTML::Tagset 3.21 has been released with the fix, this note
+will be removed as unnecessary.
 * Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc utility to create HTML documentation)
 
 If an optional package is needed, but not installed, sometimes PDF::Builder

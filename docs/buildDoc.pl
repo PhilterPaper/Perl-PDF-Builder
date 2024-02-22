@@ -1269,6 +1269,22 @@ in Builder/docs (also on the Desktop), run
 
     buildDoc.pl --leading='' --libtop=../../SVG-2.87/lib -rootname=SVG
 
+  Another example would be HTML::Tree and HTML::TreeBuilder. Note that they are
+in 'vendor', not 'site', and comprise a number of distinct modules that must
+be handled separately:
+
+    buildDoc.pl --leading=HTML --libtop=/Strawberry/perl/vendor/lib -rootname=Tree
+    buildDoc.pl --leading=HTML --libtop=/Strawberry/perl/vendor/lib -rootname=TreeBuilder
+    buildDoc.pl --leading=HTML --libtop=/Strawberry/perl/vendor/lib -rootname=Parse
+    buildDoc.pl --leading=HTML --libtop=/Strawberry/perl/vendor/lib -rootname=Element
+    buildDoc.pl --leading=HTML --libtop=/Strawberry/perl/vendor/lib -rootname=Tagset
+    buildDoc.pl --leading=HTML --libtop=/Strawberry/perl/vendor/lib -rootname=AsSubs
+
+If you do not have a standalone spelling checker, to find typos in the 
+documentation, such as "lintian", you can bring up each HTML page in a browser, 
+copy and paste into an email client, and ask for a spelling check. This will 
+occasionally find a bona-fide spelling error that can be corrected.
+
   The .pod or .pm file(s) are fed to Pod::Simple::XHTML utility to produce 
 .html files stored in the current directory or below (see configuration 
 section). .html files with any links in them (L<> tag) are fixed up to correct 
