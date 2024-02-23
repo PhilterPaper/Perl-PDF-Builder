@@ -9,8 +9,10 @@ use List::Util qw(min max);
 #use Data::Dumper;  # for debugging
 #  $Data::Dumper::Sortkeys = 1;  # hash keys in sorted order
  
-# when update column() tags and CSS, also update #195 list and Docs.pm.
-# any examples/ changes update Examples on website
+# >>>>>>>>>>>>>>>>>> CRITICAL !!!! <<<<<<<<<<<<<<<<<<<<<<
+# when update column() tags and CSS with new/changed support, also update 
+# Docs.pm (immediately) and #195 list (AT release).
+# any examples/ changes update Examples on website (AT release)
 
 # VERSION
 our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
@@ -3688,15 +3690,6 @@ sub _html_hash {
     if (!defined $rc) { $rc = 0; }  # not available
 
     if ($rc) {
-	# TEMPORARY WORKAROUND: HTML::TreeBuilder seems to have problem with
-	# <ins> and <del> tags causing paragraph breaks. For the time being,
-	# just convert to <u> and <s> tags. When fixed, remove this and up
-	# minimum level of HTML::TreeBuilder.
-	$text =~ s#<ins>#<u>#ig;
-	$text =~ s#</ins>#</u>#ig;
-	$text =~ s#<del>#<s>#ig;
-	$text =~ s#</del>#</s>#ig;
-	
 	# HTML converter appears to be installed, so use it
 	my $tree = HTML::TreeBuilder->new();
 	$tree->ignore_unknown(0);  # don't discard non-HTML recognized tags

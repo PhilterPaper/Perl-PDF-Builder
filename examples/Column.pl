@@ -24,6 +24,7 @@ $name =~ s/\.pl/.pdf/; # write in examples directory
 my $magenta = '#ff00ff';
 my $fs = 15;
 my ($rc, $next_y, $unused);
+print "CAUTION: page 4 requires that your HTML::Tagset installation be patched\n  so that <ins> and <del> are handled properly!\n";
 
 print "======================================================= pg 1\n";
 $page = $pdf->page();

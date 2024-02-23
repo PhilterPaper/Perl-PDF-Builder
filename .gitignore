@@ -23,7 +23,8 @@ pod2htmd.tmp
 # quick test files
 *-short
 # development stuff
-docs/PHP/
+docs/
+!docs/buildDoc.pl
 misc/
 pm.list
 examples/Envelope.pl

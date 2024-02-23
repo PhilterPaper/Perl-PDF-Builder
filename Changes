@@ -47,7 +47,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
     lib/PDF/Builder/Resource/Font/CoreFont.pm
      Expand on descriptions of standard and Windows core fonts.
 
-    lib/PDF/Builder/Content/Text.pm, README.md
+    lib/PDF/Builder/Content/Text.pm, README.md, examples/Column.pl
      There is an apparent bug in HTML::TreeBuilder (HTML::Tree #8), where <ins> 
       and <del> tags cause unwanted paragraph breaks. The best solution, until
       the TreeBuilder prereq HTML::Tagset is fixed, is to edit HTML::Tagset
