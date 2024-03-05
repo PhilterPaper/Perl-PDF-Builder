@@ -5,14 +5,18 @@
 #
 use File::Path qw(make_path);
  
-#my $ourLAST = 1;  # T: change my $LAST_UPDATE to our $LAST_UPDATE  # s/b no longer needed
-
 print "**** check https://en.wikipedia.org/wiki/Leap_second to see if any\n
      leap seconds have been added since 12/31/2016. Update Builder.pm.\n";
 to_continue();
+print "**** check README.md list of prereqs needing patching, and check \n
+     whether notice list needs updating (also in Changes).\n";
+to_continue();
+print "**** build all POD documentation (as HTML into docs/) and check that\n
+     it's clean\n";
+to_continue();
 print "**** check README.md for copyright year, minimum Perl version, current\n
      Builder version, current mandatory and optional prerequisites. Copy to \n
-     examples/Content.pl if anything has changed, and test the formatting.\n";
+     examples/Column.pl if anything has changed, and test the formatting.\n";
 to_continue();
 
 my ($VERSION, $PERL_V, $MAKE_MAKER, $TEST_EXCEPTION, $TEST_MEMORY_CYCLE,
@@ -39,7 +43,8 @@ print
 # if needed, create PERL_V_DOT in format 5.20.0
 # will auto-update Makefile.PL, .pm, .pl, Builder.pm, META.* files below
 
-print "     Check Perl version against https://www.cpan.org/src/ Perl latest release dates \n";
+print "**** Check Perl version against https://www.cpan.org/src/ Perl latest\n
+     release dates \n";
 print "      today-6 years last major release before that date.\n";
 to_continue();
 # future: 
@@ -79,26 +84,27 @@ if (checkForBackups($baseDirSrc)) {
 ##print "**** /Users/Phil/bin/gzipC.bat renamed to gzip.bat.\n";
 #to_continue();
 # grep -S  "2018" ..\*.* |grep -v "\~:" |grep -v "\.git" |grep -v "0x2018" |grep -v "\.cmap" |grep -v "\.data"
-print "**** What is the current copyright year in various files? At some\n";
-print "     point did you go around and update all file copyrights?\n";
+print "**** What is the current copyright year in various files? At some\n
+     point did you go around and update all file copyrights?\n";
 to_continue();
-print "**** Anything listed as DEPRECATED to expire before this month?\n";
-print "     Consider removing deprecated items.\n";
+print "**** Anything listed as DEPRECATED to expire before this month?\n
+     Consider removing deprecated items.\n";
 to_continue();
-print "**** have you installed any new prerequistes? if so, are the build\n";
-print "     prereqs list in Makefile.PL and the optional library module\n";
-print "     exclusion list in t/00-all-usable.t updated?\n";
+print "**** have you installed any new prerequistes? if so, are the build\n
+     prereqs list in Makefile.PL and the optional library module\n
+     exclusion list in t/00-all-usable.t updated?\n";
 to_continue();
-print "**** are all working (bugfix) directories removed, or moved to\n";
-print "     another place?\n";
+print "**** are all working (bugfix) directories removed, or moved to\n
+     another place?\n";
 to_continue();
 print "**** have you removed any old desktop\\temp directory?\n";
 to_continue();
-print "**** only Builder.pm and optional_update.pl should have \$VERSION defined (may be updated):\n";
+print "**** only Builder.pm and optional_update.pl should have \$VERSION \n
+     defined (may be updated):\n";
 system("findstr /s /c:\"our \$VERSION =\" *.p?");
 if_OK();
-print "**** Changes should have current date, and 'unreleased' notation\n";
-print "     removed.\n";
+print "**** Changes should have current date, and 'unreleased' notation\n
+     removed.\n";
 system("findstr /c:\"$VERSION\" Changes");
 if_OK();
 print "**** No file should be Read-Only.\n";
@@ -107,9 +113,9 @@ to_continue();
 
 print "**** Have you remembered to update LAST_UPDATE everywhere changed?\n";
 if_OK();
-print "**** Have you 1) compared PDF-Builder/ to /Strawberry, 2) run t-tests,\n";
-print "**** 3) run examples, 4) run contrib to thoroughly test? Have you 5) built\n";
-print "**** all docs (.html) to check PODs?\n";
+print "**** Have you 1) compared PDF-Builder/ to /Strawberry, 2) run 1_pc, \n
+     3) run 2_t-tests, 4) run 3_examples, 5) run 4_contrib to thoroughly \n
+     test? Have you 6) built all docs (.html) to check PODs?\n";
 to_continue();
 
 system("attrib -R Makefile.PL");
@@ -174,8 +180,8 @@ system("devtools\\PDFversion.pl . $VERSION");
 
 system('for /R %G in (*.pl) do dos2unix "%G"');
 system('for /R %G in (*.pm) do dos2unix "%G"');
-print "**** If .pl and .pm files now have good VERSION,\n";
-print "**** and they are in [unix] format, not DOS format.\n";
+print "**** If .pl and .pm files now have good VERSION,\n
+     and they are in [unix] format, not DOS format.\n";
 if_OK();
 
 ##system("dos2unix INFO\\old\\dist.ini.old");
@@ -233,7 +239,8 @@ print "**** copy .tar.gz to releases/ and git rm oldest\n";
 print "**** git update with latest changes\n";
 print "**** version update\n";
 print "**** Changes update next version\n";
-print "**** update documentation on catskilltech.com\n";
+print "**** Update Examples on catskilltech.com with any new examples/\n";
+print "**** Update Documentation on catskilltech.com with fresh copy\n";
 
 # not (yet) generating .html from POD
 #print "Proceeding. Ignore error messages \"Cannot find PDF::Builder...\" in podpath.\n";

@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2024-02-22  UNRELEASED
+3.027     2024-03-05  UNRELEASED
 * = work in progress
 
     lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Docs.pm, 
@@ -29,8 +29,12 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 *     CSS text-align property for left, center, and right added. Not fully imp.
 * _marker-* properties not fully tested yet
 * superfluous marker(s) when splitting a <li> across columns. did <marker>
-  get deleted once ink hit paper, as it should have?
+  get deleted once ink hit paper, as it should have? check if <marker> was
+  re-added, should not if format=pre (already done).
+* check paragraph within a list item works
 * remember to update Docs.pm, #195 (after release!) see UPDATE_195.txt
+* don't forget to update tools/3_examples.pl, MANIFEST, AND (at release) 
+  Examples/PDF/Builder.php with Column_lists and Column_layout 
 
     lib/PDF/Builder/Content/Text.pm, examples/Column.pl
      Fold all HTML tags to lower case (to support <P> etc.), detect 
@@ -48,11 +52,13 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
      Expand on descriptions of standard and Windows core fonts.
 
     lib/PDF/Builder/Content/Text.pm, README.md, examples/Column.pl
-     There is an apparent bug in HTML::TreeBuilder (HTML::Tree #8), where <ins> 
+     There is a bug in HTML::TreeBuilder prerequisite HTML::Tagset
+      (https://rt.cpan.org/Public/Bug/Display.html?id=151970) where <ins> 
       and <del> tags cause unwanted paragraph breaks. The best solution, until
-      the TreeBuilder prereq HTML::Tagset is fixed, is to edit HTML::Tagset
-      and make a one line fix. HTML::Tagset 3.21 and later may already be
-      updated.
+      the TreeBuilder prereq HTML::Tagset is fixed (and HTML::TreeBuilder
+      updated to require the new version), is to edit HTML::Tagset and make a 
+      one line fix. HTML::Tagset 3.21 and later may already be updated. These 
+      instructions are repeated and expanded upon in README.
       
       In \Strawberry\perl\vendor\lib\HTML\Tagset.pm (location of Tagset.pm
       will vary on other Perls and OS's):

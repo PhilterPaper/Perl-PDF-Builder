@@ -108,13 +108,33 @@ functionality.
 * Image::PNG::Libpng (0.57 or higher, recommended for enhanced PNG image function processing)
 * HarfBuzz::Shaper (0.024 or higher, needed for Latin script ligatures and kerning, as well as for any complex script such as Arabic, Indic scripts, or Khmer)
 * Text::Markdown (1.000031 or higher, needed if using 'md1' markup)
-* HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup).
-Note that a prereq, HTML::Tagset, needs a fix for `<ins>` and `<del>` tags to
-be handled correctly, if version 3.21 has not yet been issued. See "Changes"
-for instructions in PDF::Builder's 3.027 release (or INFO/Changes\_2024 down
-the road). Once HTML::Tagset 3.21 has been released with the fix, this note
-will be removed as unnecessary.
+* HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup)
 * Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc utility to create HTML documentation)
+
+#### Fixes needed to OPTIONAL packages
+
+Sometimes fixes or patches are needed for optional prerequisites. At the time of
+release of this PDF::Builder version, the following fixes or patches are known
+to be needed. As the libraries are updated, this list will be modified as
+necessary:
+
+* A prereq for HTML::TreeBuilder, HTML::Tagset (version 3.20 or earlier), needs 
+a fix for `<ins>` and `<del>` tags to be handled correctly. If not fixed, these
+tags cause undesired paragraph breaks, such as in the examples/Column.pl sample.
+Once installed, in \Strawberry\perl\vendor\lib\HTML\Tagset.pm (location of 
+Tagset.pm will vary on other Perls and OS's):
+
+    1. Find  %isPhraseMarkup = map {; $\_ => 1 } qw(
+    2. Below that find     b i u s tt small big
+    3. Add a new line below that:   ins del
+
+This adds `<ins>` and `<del>` to the list of inline ("phrase") tags. It is quite
+possible that other HTML tags may misbehave, and further updates are needed.
+If you experience such problems, try updating your copy of Tagset.pm with one
+from https://github.com/PhilterPaper/HTML-Tagset/blob/master/lib/HTML/Tagset.pm
+and see if that improves matters (and please report results via a ticket).
+
+#### ------------
 
 If an optional package is needed, but not installed, sometimes PDF::Builder
 will be able to fall back to built-in partial functionality (TIFF and PNG
@@ -152,7 +172,8 @@ runs the "t" tests to confirm the proper installation.
 
 This software is Copyright (c) 2017-2024 by Phil M. Perry.
 
-Previous copyrights are held by others (Steve Simms, Alfred Reibenschuh, et al.). See The HISTORY section of the documentation for more information.
+Previous copyrights are held by others (Steve Simms, Alfred Reibenschuh, 
+et al.). See The HISTORY section of the documentation for more information.
 
 We would like to acknowledge the efforts and contributions of a number of
 users of PDF::Builder (and its predecessor, PDF::API2), who have given their

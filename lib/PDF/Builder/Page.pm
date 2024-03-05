@@ -957,7 +957,8 @@ are to be compressed. If not given, the default is for the overall PDF
 compression setting to be used (I<on> by default).
 
 You may have more than one I<gfx> object. They and I<text> objects will be 
-output as objects and streams I<in the order defined>, with all actions pertaining
+output as objects and streams I<in the order B<that the objects are>
+defined>, with all actions pertaining
 to this I<gfx> object appearing in one stream. However, note that graphics 
 and text objects are not fully independent of each other: the exit state 
 (linewidth, strokecolor, etc.) of one object is the entry state of the next 
@@ -993,6 +994,17 @@ after creating $I<type>:
       $text2->save();
     $grfx2 = $page->gfx();
       $grfx1->restore();
+
+I<Generally,> you will want to define the graphics object first, and then the
+text object after that. This defines the order in which the streams will be
+rendered (graphics first), which is usually desirable if you're setting a
+background color, or have other graphics with which you want to overlay text
+over. Sometimes, though, you may wish to overlay text with graphics, in which
+case you might either define the objects text and then graphics, or define a
+second graphics stream to lay over the text. Most of the time it really doesn't
+matter which comes first (as text and graphics don't interact or overlay), but
+in any case, be aware of states carried over from the end of one stream
+into the next.
 
 B<Alternate name:> C<graphics>
 
@@ -1081,8 +1093,10 @@ compression setting to be used (I<on> by default).
 
 Please see the discussion above in C<gfx()> regarding multiple graphics and
 text objects on one page, how they are grouped into PDF objects and streams, 
-and the rendering consequences of running through one entire object at a time,
-before moving on to the next.
+and the rendering consequences of running through one entire object (stream)
+at a time, before moving on to the next. Even if you have only one graphics
+and one text stream, the order in which they are defined has consequences for
+how text overlays graphics or vice-versa.
 
 The I<text> object has many settings and attributes of its own, but shares many
 with graphics (I<gfx>), such as strokecolor, fillcolor, linewidth, linedash,
