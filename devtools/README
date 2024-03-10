@@ -24,7 +24,8 @@ code to use proper Linux commands and directory structures.
                 with find, for, and cp -p
   rename -> mv
   attrib -> chmod (+R make read-only, -R make read-write, else just list
-                   permissions/attributes R, A, S, H, etc.)
+                   permissions/attributes (R)ead-only, (A)rchive bit set, 
+                   (S)ystem file, (H)idden file, etc.)
   findstr -> grep
   erase -> rm
   mkdir -> mkdir
@@ -32,7 +33,8 @@ code to use proper Linux commands and directory structures.
   7z.exe is the tar/gzip/zip file packager "7-Zip" available on the web, and 
 installed into \Program Files\7-Zip. If you cannot obtain it, you will need to
 replace various calls to produce tar files, compress with gzip, or (possibly)
-produce .zip files.
+produce .zip files. Part of the packaging flow is to create a .tar file from
+the directory, then compress it as .tar.gz. 7z (and gzip) handle these tasks.
 
   dos2unix.exe is a utility found on the web (IIRC, as part of a local Git
 installation), and installed under \Program Files\Git. It reformats DOS style

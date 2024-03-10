@@ -268,6 +268,10 @@ h1, h2, h3 { text-align: center; }
 "<?php 
   \$file_mtime = \"/../Documentation/$base.php\";
   include_once(\"${parents_string}dir4/utils/appl_top.php\");
+  //
+  // UPDATING: update Perl POD. new keywords etc. in devtools/html2php.pl
+  //           buildDoc.pl creates new HTML, html2php.pl creates PHP, upload
+  //
 
 " . $string;
     }

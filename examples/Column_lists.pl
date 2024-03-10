@@ -197,10 +197,190 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
-	          'rect'=>[50,750, 500,450], 'outline'=>$magenta, 
+	          'rect'=>[50,750, 500,425], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ] );
 if ($rc) {
-    print STDERR "list example overflowed column!\n";
+    print STDERR "reversed list example overflowed column!\n";
+}
+
+print "---- default CSS for Markdown\n";
+$content = <<"END_OF_CONTENT";
+Ordered list with no margin-top/bottom (extra space between elements)
+
+1. Numbered item 1.
+2. Numbered item 2.
+3. Numbered item 3.
+
+## And a subheading to make green
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'md1', $content, 
+	          'rect'=>[50,275, 500,100], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ] );
+if ($rc) { 
+    print STDERR "Markdown CSS example overflowed column!\n";
+}
+
+print "---- set CSS for Markdown\n";
+$content = <<"END_OF_CONTENT";
+Ordered list with no margin-top/bottom (no space between elements) and new marker format
+
+1. Numbered item 1.
+2. Numbered item 2.
+3. Numbered item 3.
+
+## And a subheading to make green
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'md1', $content, 
+	          'rect'=>[50,165, 500,100], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ],
+	          'style'=>"
+        ol { _marker-before: '(' ; _marker-after: ')' ; }
+        li { margin-top: 0; margin-bottom: 0 } 
+        h2 { color: green; }
+       ", 
+        # marker-before/after could be in ol, too 
+	# note that comments not supported in CSS
+	         );
+if ($rc) { 
+    print STDERR "Markdown CSS example overflowed column!\n";
+}
+
+# Setting marker properties 
+print "======================================================= pg 4\n";
+print "---- Marker properties list examples\n";
+$page = $pdf->page();
+$text = $page->text();
+$grfx = $page->gfx();
+
+# 4 with default marker, 5 with explicit marker
+$content = <<"END_OF_CONTENT";
+<h2>Marker colors and specific text</h2>
+<ul style="_marker-color: blue;">
+  <li>Why <span style="color: blue;">blue?</span> Why not?</li>
+  <marker style="_marker-color: red;"><li>Oh, oh, <span style="color: red;">red</span> means trouble!</li>
+  <marker style="_marker-color: yellow;"><li>A color of <span style="color: yellow;">yellow</span> means caution.</li>
+  <marker style="_marker-color: green;"><li>A color of <span style="color: green;">green</span> means full speed ahead.</li>
+  <li>And back to <span style="color: blue;">blue</span> again.
+  <ul style="_marker-color: ''; _marker-text: '*'; _marker-font: 'ZapfDingbats';">
+    <li>Back to normal black markers,</li>
+    <marker style="_marker-text: '+';"><li>but wait, what's with the marker text?...</li>
+    <marker style="_marker-text: '=>'; _marker-font: 'Times';"><li>Not to mention multiple character strings!</li>
+  </ul></li>
+  <li>See? <span style="color: blue;">blue</span> markers again</li>
+</ul>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[50,750, 500,230], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ] );
+if ($rc) {
+    print STDERR "marker properties list 1 example overflowed column!\n";
+}
+
+$content = <<"END_OF_CONTENT";
+<h2>Marker size, weight, font, style</h2>
+<h3>Notice that the marker_width needs to be set wider than default</h3>
+<ol style="_marker-font: sans-serif; _marker-size: 60%; _marker-weight: bold; 
+           list-style-type: upper-roman; _marker-before: '('; 
+           _marker-after: ')'; _marker-style: italic;" start="1997">
+                   <li>Mildly concerned</li>
+  <li>Quite concerned</li>
+  <li>Panic time!</li>
+  <li>That wasn't as bad as feared</li>
+  <li>Start worrying about Y2K38</li>
+</ol>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[50,475, 500,180], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ], 'marker_width'=>50 );
+if ($rc) {
+    print STDERR "marker properties list 2 example overflowed column!\n";
+}
+
+# Checking behavior in lists split across columns
+print "======================================================= pg 5\n";
+print "---- List behavior when split across columns\n";
+$page = $pdf->page();
+$text = $page->text();
+$grfx = $page->gfx();
+
+# <ul> nested two deep, split there and other places
+# first column this depth, remainder to second column
+my $top_depth = 
+#   60;  # inside top level entry 1
+#   80;  # between top level entry 1 and 2
+   140;  # inside nested level entry 1
+#  175;  # after nested level entry 1
+#  300;
+
+$content = <<"END_OF_CONTENT";
+<h2>List split across columns</h2>
+<ul>
+  <li>&lt;ul&gt; top level, entry 1.
+  Sed ut perspiciatis, unde omnis iste natus error sit 
+voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, 
+quae ab illo inventore veritatis et quasi architecto beatae vitae dicta 
+sunt, explicabo.</li>
+<li>&lt;ul&gt; top level, entry 2.
+  Sed ut perspiciatis, unde omnis iste natus error sit 
+voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, 
+quae ab illo inventore veritatis et quasi architecto beatae vitae dicta 
+sunt, explicabo.</li>
+    <ul>
+      <li>&lt;ul&gt; nested level, entry 1.
+  Sed ut perspiciatis, unde omnis iste natus error sit 
+voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, 
+quae ab illo inventore veritatis et quasi architecto beatae vitae dicta 
+sunt, explicabo.</li>
+      <li>&lt;ul&gt; nested level, entry 2.
+  Sed ut perspiciatis, unde omnis iste natus error sit 
+voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, 
+quae ab illo inventore veritatis et quasi architecto beatae vitae dicta 
+sunt, explicabo.</li>
+    </ul>
+  <li>&lt;ul&gt; top level, entry 3.
+  Sed ut perspiciatis, unde omnis iste natus error sit 
+voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, 
+quae ab illo inventore veritatis et quasi architecto beatae vitae dicta 
+sunt, explicabo.</li>
+  <li>&lt;ul&gt; top level, entry 4.
+  Sed ut perspiciatis, unde omnis iste natus error sit 
+voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, 
+quae ab illo inventore veritatis et quasi architecto beatae vitae dicta 
+sunt, explicabo.</li>
+</ul>
+END_OF_CONTENT
+
+print "...first column\n";
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[50,750, 500,$top_depth], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ] );
+
+if ($top_depth < 300) {
+    print "...second column\n";
+    ($rc, $next_y, $unused) =
+        $text->column($page, $text, $grfx, 'pre', $unused, 
+ 	              'rect'=>[50,750-$top_depth-20, 500,325-$top_depth], 
+		      'outline'=>$magenta, 'para'=>[ 0, 0 ],
+	     );
+#	             'font_size'=>12 );
+
+   if ($rc) {
+       print STDERR "split list check example overflowed column!\n";
+   }
 }
 
 # ---------------------------------------------------------------------------

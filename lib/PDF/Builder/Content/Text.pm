@@ -1774,13 +1774,15 @@ sub column {
     my ($x, $y);
 
     my $font_size = 12; # basic default, override with font-size
-    if ($text->{' fontsize'} > 0) { $font_size = $text->{' fontsize'}; }
+   #if ($text->{' fontsize'} > 0) { $font_size = $text->{' fontsize'}; }
     if (defined $opts{'font_size'}) { $font_size = $opts{'font_size'}; }
     
     my $leading = 1.125; # basic default, override with text-height
     if (defined $opts{'leading'}) { $leading=$opts{'leading'}; }
-    my $marker_width = 2*$font_size;
+    my $marker_width = 2*$font_size;  # 2em space for list markers
+    my $marker_gutter = $font_size;   # 1em space between list marker and item
     if (defined $opts{'marker_width'}) { $marker_width=$opts{'marker_width'}; }
+    if (defined $opts{'marker_gutter'}) { $marker_gutter=$opts{'marker_gutter'}; }
 
     my $restore = 0; # restore text state and color at end
     if (defined $opts{'restore'}) { $restore = $opts{'restore'}; }
@@ -1836,9 +1838,9 @@ sub column {
     # process style attributes, tag attributes, style tags, column() options,
     # and fixed default attributes in that order to fill in each tag's
     # attribute list. on exit from tag, set attributes to restore settings
-    @mytext = _tag_attributes(@mytext);
+    @mytext = _tag_attributes($markup, @mytext);
 
-    ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $page, $text, $grfx, $restore, $para, $font_size, $marker_width, $leading, @mytext);
+    ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $page, $text, $grfx, $restore, $para, $font_size, $markup, $marker_width, $marker_gutter, $leading, @mytext);
 
     if ($rc > 1) {
 	# restore = 2 request restore to @entry_state for rc=0, 3 for 1
@@ -1953,6 +1955,14 @@ sub _default_css {
     $style{'body'}->{'width'} = '-1';  # TBD currently unused
     $style{'body'}->{'height'} = '-1';  # TBD currently unused ex. hr size
     $style{'body'}->{'_href'} = ''; 
+    $style{'body'}->{'_marker-before'} = ''; 
+    $style{'body'}->{'_marker-after'} = '.'; 
+    $style{'body'}->{'_marker-color'} = ''; 
+    $style{'body'}->{'_marker-font'} = ''; 
+    $style{'body'}->{'_marker-size'} = ''; 
+    $style{'body'}->{'_marker-style'} = ''; 
+    $style{'body'}->{'_marker-text'} = ''; 
+    $style{'body'}->{'_marker-weight'} = ''; 
 
     $style{'p'}->{'display'} = 'block';
     $style{'font'}->{'display'} = 'inline';
@@ -1970,6 +1980,10 @@ sub _default_css {
     $style{'ul'}->{'display'} = 'block'; 
     $style{'ul'}->{'margin-top'} = '50%';  # relative to text's font-size
     $style{'ul'}->{'margin-bottom'} = '50%'; 
+    $style{'ul'}->{'_marker-font'} = 'ZapfDingbats';
+    $style{'ul'}->{'_marker-style'} = 'normal';
+    $style{'ul'}->{'_marker-weight'} = 'bold';
+    $style{'ul'}->{'_marker-size'} = "50%";
     $style{'ol'}->{'list-style-type'} = '.o'; # decimal, lower-roman, upper-roman, lower-alpha, upper-alpha, none
     $style{'ol'}->{'list-style-position'} = 'outside'; # inside TBD
     $style{'ol'}->{'display'} = 'block'; 
@@ -1977,6 +1991,10 @@ sub _default_css {
     $style{'ol'}->{'margin-bottom'} = '50%'; 
     $style{'ol'}->{'_marker-before'} = ''; # content to add before marker
     $style{'ol'}->{'_marker-after'} = '.'; # content to add after marker
+    $style{'ol'}->{'_marker-font'} = '';  # unchanged
+    $style{'ol'}->{'_marker-style'} = 'normal';
+    $style{'ol'}->{'_marker-weight'} = 'bold';
+    $style{'ol'}->{'_marker-size'} = '';  # unchanged
    #$style{'sl'}->{'list-style-type'} = 'none'; TBD
     $style{'li'}->{'display'} = 'inline';  # should inherit from ul or ol
 
@@ -2078,7 +2096,7 @@ sub _default_css {
 #
 # also insert <marker> tag before evey <li> lacking an explicit one
 sub _tag_attributes {
-    my (@mytext) = @_;
+    my ($markup, @mytext) = @_;
     
     # start at [2], so defaults and styles skipped
     for (my $el=2; $el < @mytext; $el++) {
@@ -2114,20 +2132,36 @@ sub _tag_attributes {
 	    }
 	    # if user did not explicitly give a <marker> just before <li>,
 	    # insert one to "even up" with any in the source. 
-	    if ($mytext[$el-1]->{'tag'} ne '/marker') {
-		# we haven't added or expanded a <marker> here yet
-	        if ($mytext[$el-1]->{'tag'} ne 'marker') {
-		    splice(@mytext, $el, 0, {'tag'=>'marker', 'text'=>''});
-		    $el ++; # since we just inserted one element
+	    # $el element ($tag) s/b at 'li' at this point
+	    # MUST check if HTML::TreeBuilder added its own /marker tag!
+	    if ($markup ne 'pre') {
+		# if 'pre', any markers have already been added, so adding
+		# another (e.g., a list item split across column() calls)
+		# causes an extra marker
+	        if ($mytext[$el-1]->{'tag'} eq '/marker') {
+	            if ($mytext[$el-2]->{'tag'} eq '' &&
+	                $mytext[$el-3]->{'tag'} eq 'marker') {
+		        # full marker (empty) /marker at this point... unexpected
+		    } else {
+		        # auto-entered? /marker (presume marker too), need text tag
+	                splice(@mytext, $el-1, 0, {'tag'=>'', 'text'=>' '});
+		        $el++;
+		    }
+	        } elsif ($mytext[$el-1]->{'tag'} eq 'marker') {
+		    # author-added <marker>. add (empty) </marker>
+		    # note that HTML::TreeBuilder seems to want to add /marker
+	            splice(@mytext, $el++, 0, {'tag'=>'', 'text'=>' '});
+	            splice(@mytext, $el++, 0, {'tag'=>'/marker', 'text'=>''});
+	        } else {
+		    # we haven't added or expanded a <marker> here yet
+		    # add full <marker> (empty) </marker>
+		    splice(@mytext, $el++, 0, {'tag'=>'marker', 'text'=>''});
+	            splice(@mytext, $el++, 0, {'tag'=>'', 'text'=>' '});
+	            splice(@mytext, $el++, 0, {'tag'=>'/marker', 'text'=>''});
 	        }
-	        # then for any <marker> (which SHOULD be there, whether 
-		# original or just added), add blank text (to be updated 
-		# later), and </marker>
-	        splice(@mytext, $el, 0, {'tag'=>'', 'text'=>''},
-		                        {'tag'=>'/marker', 'text'=>''});
-	        $el += 2; # since we just inserted two more elements
 	    }
-	    # $el should still point to <li> element
+	    # $el should still point to <li> element, which should now have
+	    # three elements in front of it: <marker>(empty)</marker>
 	} elsif ($tag eq 'a') {
 	    if (defined $mytext[$el]->{'href'}) {
 	        $mytext[$el]->{'_href'} = delete($mytext[$el]->{'href'});
@@ -2190,16 +2224,19 @@ sub _tag_attributes {
 # the workhorse of the library: output text (modified by tags) in @mytext
 sub _output_text {
     my ($start_y, $min_y, $outl, $pdf, $page, $text, $grfx, $restore, $para, 
-	$font_size, $marker_width, $leading, @mytext) = @_;
+	$font_size, $markup, $marker_width, $marker_gutter, $leading, @mytext) = @_;
     my @outline = @$outl;
 
     # start_y is the lowest extent of the previous line, or the highest point
-    # of the column outline, and is where we start the next one. 
+    #   of the column outline, and is where we start the next one. 
     # min_y is the lowest y available within the column outline, outl.
     # pdf is the pdf top-level object. 
     # text is the text context. 
     # para is a flag that we are at the top of a column (no margin-top added).
     # font_size is the default font size to use.
+    # markup is 'html', 'pre' etc. in case you need to do something different
+    # marker_width is width (pt) of list markers (right justify within)
+    # marker_gutter is space (pt) between list marker and item text
     # leading is the default leading ratio to use.
     # mytext is the array of hashes containing tags, attributes, and text.
       
@@ -2237,6 +2274,7 @@ sub _output_text {
     my $x_adj = 0;  # ul, ol list marker move left from right-align position
     my $y_adj = 0;  # ul list marker elevation
 
+#print Dumper(@mytext);
     # mytext[0] should be default css values
     # mytext[1] should be any <style> tags (consolidated)
     # user input tags/text start at mytext[2]
@@ -2515,6 +2553,7 @@ sub _output_text {
 		        #     which is where dd left margin is
 		    }
 
+                    $fs = $properties[-1]->{'font-size'};
 		    # override any other property with corresponding _marker-*
 		    # properties-to-PDF-calls have NOT yet been done
 		    if (defined $properties[-1]->{'_marker-color'} &&
@@ -2542,7 +2581,6 @@ sub _output_text {
                         $properties[-1]->{'font-weight'} = 
 			    $properties[-1]->{'_marker-weight'};
 		    }
-                    $fs = $properties[-1]->{'font-size'};
 		
 		    # finally, update the text within the marker
 		    if ($list_marker ne '') {
@@ -2565,12 +2603,8 @@ sub _output_text {
 			    } elsif ($list_marker eq '.box') {
 			        $list_marker = chr(111); # non-standard
 			    }
-			    # ul defaults
-			    $properties[-1]->{'font-family'} = 'ZapfDingbats';
-			    $properties[-1]->{'font-style'} = 'normal';
-			    $properties[-1]->{'font-weight'} = 'bold';
-			    $properties[-1]->{'font-size'} = "50%";
 			     
+			    # ul defaults
 			    # x_adj (- to left) .3em+2pt for gap marker to text
 			    $x_adj = -(0.3 * $fs + 2);
 		            # figure y_adj for ul marker (raise, since smaller)
@@ -2579,10 +2613,6 @@ sub _output_text {
 		        } else {
 			    # it's a formatted count for <ol>
 			    # ol defaults
-			   #$properties[-1]->{'font-family'} = unchanged;
-			    $properties[-1]->{'font-style'} = 'normal';
-			    $properties[-1]->{'font-weight'} = 'bold';
-			   #$properties[-1]->{'font-size'} = unchanged;
 			    # x_adj (- to left) .3em for gap marker to text
 			    $x_adj = -(0.3 * $fs);
 			    $y_adj = 0; # marker is full size text
@@ -2782,7 +2812,13 @@ sub _output_text {
 	    $topm = $current_prop->{'margin-top'};
             my $vmargin = $botm;
 	    if ($botm < $topm) { $vmargin = $topm; }
-	    $start_y -= $vmargin; # could be too low for a new line!
+            if (!$para && $vmargin > 0) { 
+		# not at the top of the column, handle any requested vmargin
+		# TBD: consider checking that display=block before doing a
+		#      vertical margin?
+	        $start_y -= $vmargin; # could be too low for a new line!
+	    }
+	    $para = 0; # for rest of column honor vert margin requests
 	    # will set botm to new margin-bottom after this block is done
 
 	    # we're ready to roll, and output the actual text itself
@@ -3310,6 +3346,12 @@ sub _init_current_prop {
     $cur_prop->{'list-style-position'} = 'outside';
     $cur_prop->{'_marker-before'} = ''; 
     $cur_prop->{'_marker-after'} = '.'; 
+    $cur_prop->{'_marker-color'} = ''; 
+    $cur_prop->{'_marker-font'} = ''; 
+    $cur_prop->{'_marker-size'} = ''; 
+    $cur_prop->{'_marker-style'} = ''; 
+    $cur_prop->{'_marker-text'} = ''; 
+    $cur_prop->{'_marker-weight'} = ''; 
     $cur_prop->{'_href'} = '';
     
     return $cur_prop;

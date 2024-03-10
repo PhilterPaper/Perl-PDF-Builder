@@ -1,7 +1,19 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2024-03-05  UNRELEASED
+3.027     2024-03-09  UNRELEASED
 * = work in progress
+
+    lib/PDF/Builder/Content/Text.pm
+     Avoid top margins if at very beginning of column, and not just for
+      <p> paragraphs. Remove setting of font-size from current text object,
+      as this can produce unexpected results (now have default font size of
+      12 points, overridden by option 'font_size').
+
+    examples/020_corefonts 
+     Clean up code to permit any of three command lines: (nothing) -- default
+      list of all core fonts, (-s) -- 3 sample core fonts, (list of names) --
+      specified names (e.g., you need a quick list of what's in Zapf Dingbats
+      and wingdings).
 
     lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Docs.pm, 
       lib/PDF/Builder/Content.pm, MANIFEST, README.md, tools/3_examples.pl, 
@@ -11,13 +23,21 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       properties of individual <ol> and <ul> markers (e.g., bullet color) at 
       any or all <li>. This non-standard HTML tag can be used explicitly to 
       modify marker properties, and is automatically inserted into the code if 
-      not manually given. The new (non-standard) CSS properties are
+      not manually given. The new (non-standard) CSS properties and defaults 
+      and examples are
         _marker-text (define text to use as marker, rather than default)
+          '' (no change) for ol, ul; "=>" instead of a bullet
         _marker-color (change color from default) 
+          '' (no change) for ol, ul; "blue' instead of normal text black
         _marker-font (change marker font-family)
+          '' (no change) for ol, ZapfDingbats for ul; "sans-serif" for 
+          different ol marker font
         _marker-style (change marker font-style, e.g., italic)
+          '' (no change) for ol, ul; "italic" to italicize a marker
         _marker-size (change marker font-size)
+          '' (no change) for ol, 50% for ul;  "80%" for slightly reduced size
         _marker-weight (change marker font-weight)
+          'bold' for ol, ul;  "normal" if don't want bold markers
       The defaults are the normal font-family, color, etc. inherited from
       the <ol> or <ul> tag, updated by the usual suspects (style, CSS, etc.),
       and finally overridden by _marker-* properties (inherited and set in the
@@ -27,14 +47,6 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       <li> list item! Instead, set "_marker-color" to affect only markers.
       Split out list examples from Column.pl examples, into Column_lists.pl.
 *     CSS text-align property for left, center, and right added. Not fully imp.
-* _marker-* properties not fully tested yet
-* superfluous marker(s) when splitting a <li> across columns. did <marker>
-  get deleted once ink hit paper, as it should have? check if <marker> was
-  re-added, should not if format=pre (already done).
-* check paragraph within a list item works
-* remember to update Docs.pm, #195 (after release!) see UPDATE_195.txt
-* don't forget to update tools/3_examples.pl, MANIFEST, AND (at release) 
-  Examples/PDF/Builder.php with Column_lists and Column_layout 
 
     lib/PDF/Builder/Content/Text.pm, examples/Column.pl
      Fold all HTML tags to lower case (to support <P> etc.), detect 

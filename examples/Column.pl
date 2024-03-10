@@ -763,54 +763,6 @@ $text = $page->text();
 $grfx = $page->gfx();
 footer(++$page_num, $pdf, $text);
 
-print "---- default CSS for Markdown\n";
-$content = <<"END_OF_CONTENT";
-Ordered list with no margin-top/bottom (extra space between elements)
-
-1. Numbered item 1.
-2. Numbered item 2.
-3. Numbered item 3.
-
-## And a subheading to make green
-END_OF_CONTENT
-
-restore_props($text, $grfx);
-($rc, $next_y, $unused) =
-    $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[50,750, 500,100], 'outline'=>$magenta, 
-		  'para'=>[ 0, 0 ] );
-if ($rc) { 
-    print STDERR "Markdown CSS example overflowed column!\n";
-}
-
-print "---- set CSS for Markdown\n";
-$content = <<"END_OF_CONTENT";
-Ordered list with no margin-top/bottom (no space between elements) and new marker format
-
-1. Numbered item 1.
-2. Numbered item 2.
-3. Numbered item 3.
-
-## And a subheading to make green
-END_OF_CONTENT
-
-restore_props($text, $grfx);
-($rc, $next_y, $unused) =
-    $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[50,640, 500,100], 'outline'=>$magenta, 
-		  'para'=>[ 0, 0 ],
-	          'style'=>"
-        ol { _marker-before: '(' ; _marker-after: ')' ; }
-        li { margin-top: 0; margin-bottom: 0 } 
-        h2 { color: green; }
-       ", 
-        # marker-before/after could be in ol, too 
-	# note that comments not supported in CSS
-	         );
-if ($rc) { 
-    print STDERR "Markdown CSS example overflowed column!\n";
-}
-
 print "---- horizontal rules Markdown\n";
 $content = <<"END_OF_CONTENT";
 Markdown horizontal rules: 3 or more ---, ***, or ___. full width
@@ -831,7 +783,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[50,520, 500,125], 'outline'=>$magenta, 
+	          'rect'=>[50,750, 500,125], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
 if ($rc) { 
@@ -854,7 +806,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
-	          'rect'=>[50,385, 500,185], 'outline'=>$magenta, 
+	          'rect'=>[50,585, 500,185], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
 if ($rc) { 
@@ -873,7 +825,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[50,180, 500,100], 'outline'=>$magenta, 
+	          'rect'=>[50,365, 500,100], 'outline'=>$magenta, 
 		  'para'=>[ 0, 10 ],
 	         );
 if ($rc) { 
