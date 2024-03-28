@@ -263,14 +263,14 @@ $content = <<"END_OF_CONTENT";
 <h2>Marker colors and specific text</h2>
 <ul style="_marker-color: blue;">
   <li>Why <span style="color: blue;">blue?</span> Why not?</li>
-  <marker style="_marker-color: red;"><li>Oh, oh, <span style="color: red;">red</span> means trouble!</li>
-  <marker style="_marker-color: yellow;"><li>A color of <span style="color: yellow;">yellow</span> means caution.</li>
-  <marker style="_marker-color: green;"><li>A color of <span style="color: green;">green</span> means full speed ahead.</li>
+  <_marker style="_marker-color: red;"><li>Oh, oh, <span style="color: red;">red</span> means trouble!</li>
+  <_marker style="_marker-color: yellow;"><li>A color of <span style="color: yellow;">yellow</span> means caution.</li>
+  <_marker style="_marker-color: green;"><li>A color of <span style="color: green;">green</span> means full speed ahead.</li>
   <li>And back to <span style="color: blue;">blue</span> again.
   <ul style="_marker-color: ''; _marker-text: '*'; _marker-font: 'ZapfDingbats';">
     <li>Back to normal black markers,</li>
-    <marker style="_marker-text: '+';"><li>but wait, what's with the marker text?...</li>
-    <marker style="_marker-text: '=>'; _marker-font: 'Times';"><li>Not to mention multiple character strings!</li>
+    <_marker style="_marker-text: '+';"><li>but wait, what's with the marker text?...</li>
+    <_marker style="_marker-text: '=>'; _marker-font: 'Times';"><li>Not to mention multiple character strings!</li>
   </ul></li>
   <li>See? <span style="color: blue;">blue</span> markers again</li>
 </ul>
@@ -315,14 +315,19 @@ $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
 
-# <ul> nested two deep, split there and other places
+# <ul> nested two deep, split there and other places. making sure that
+#  superfluous bullets or other problems don't show up
 # first column this depth, remainder to second column
+my $entire_depth = 350;
 my $top_depth = 
 #   60;  # inside top level entry 1
 #   80;  # between top level entry 1 and 2
    140;  # inside nested level entry 1
-#  175;  # after nested level entry 1
-#  300;
+#  165;  # between nested level entry 1 and its paragraph
+#  180;  # inside paragraph
+#  205;  # after nested level entry 1
+#  230;  # inside nested level entry 2
+#  $entire_depth;  # entire thing
 
 $content = <<"END_OF_CONTENT";
 <h2>List split across columns</h2>
@@ -342,7 +347,12 @@ sunt, explicabo.</li>
   Sed ut perspiciatis, unde omnis iste natus error sit 
 voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, 
 quae ab illo inventore veritatis et quasi architecto beatae vitae dicta 
-sunt, explicabo.</li>
+sunt, explicabo.
+      <p>This should start a new paragraph. 
+  Sed ut perspiciatis, unde omnis iste natus error sit 
+voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, 
+quae ab illo inventore veritatis et quasi architecto beatae vitae dicta 
+sunt, explicabo.</p></li>
       <li>&lt;ul&gt; nested level, entry 2.
   Sed ut perspiciatis, unde omnis iste natus error sit 
 voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, 
@@ -362,21 +372,21 @@ sunt, explicabo.</li>
 </ul>
 END_OF_CONTENT
 
+# notice the non-zero paragraph top margin
 print "...first column\n";
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,750, 500,$top_depth], 'outline'=>$magenta, 
-		  'para'=>[ 0, 0 ] );
+		  'para'=>[ 0, 2 ] );
 
-if ($top_depth < 300) {
+if ($top_depth < $entire_depth) {
     print "...second column\n";
     ($rc, $next_y, $unused) =
         $text->column($page, $text, $grfx, 'pre', $unused, 
- 	              'rect'=>[50,750-$top_depth-20, 500,325-$top_depth], 
-		      'outline'=>$magenta, 'para'=>[ 0, 0 ],
+ 	              'rect'=>[50,750-$top_depth-20, 500,$entire_depth-$top_depth], 
+		      'outline'=>$magenta, 'para'=>[ 0, 2 ],
 	     );
-#	             'font_size'=>12 );
 
    if ($rc) {
        print STDERR "split list check example overflowed column!\n";

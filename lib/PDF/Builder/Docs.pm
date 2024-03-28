@@ -2177,6 +2177,12 @@ B<<ulE<gt>> tag (Markdown B<->) unordered (bulleted) list. type to override mark
 
 B<<olE<gt>> tag (Markdown B<1.>) ordered (numbered) list. start and type supported.
 
+=item *
+
+B<<markerE<gt>>> tag (not standard HTML) provide a place to specify, on a
+I<per list item basis>, overrides to default marker settings (see C<_marker-*>
+CSS extensions below). If omitted, the same HTML list markers and CSS properties are used for each list item (per usual practice)
+
 =item * 
 
 B<<liE<gt>> tag list item. value to override ordered list counter, and type to override marker type supported
@@ -2204,6 +2210,11 @@ B<<uE<gt>>, B<<insE<gt>> tags text underline
 =item * 
 
 B<<blockquoteE<gt>> tag (Markdown B<E<gt>>) indented both sides block of smaller text
+
+=item * 
+
+B<<_markerE<gt>> tag (non-standard) to explicitly set list marker properties 
+(_marker-*) for one specific (immediately following) list item
 
 =back
 
@@ -2253,19 +2264,55 @@ I<outside> or I<inside>, currently only I<outside> supported
 
 =item list-style-typemarker 
 
-description, per standard CSS, plus "box" for unordered list to give a box outline marker (not a filled "square")
+description, per standard CSS, plus "box" (I<extension>) for unordered list to give a box outline marker (not a filled "square")
 
 =item margin-top/right/bottom/left
 
 per standard CSS. combined B<margin> in the future
 
+=item _marker-*
+
+I<extensions>: these are CSS property overides to the appearance of list item markers (the formatted counter or bullet in front of the item). These may be applied to an entire list by placing them in CSS <styleE<gt> or a style= attribute within <olE<gt> or <ulE<gt>, or to override a single list item's entry by placing it in an optional <markerE<gt> tag. 
+
+The corresponding CSS attributes (color, font-family, font-style, font-size, font-weight) are cascaded as usual, and the _marker-* attributes are cascaded as usual. When outputting a list's marker, if the final C<_marker-*> property is not empty (''), it overrides the corresponding CSS property. C<_marker-text>, if not '', overrides whatever text the list would have otherwise used (formatted counter or bullet).
+
+If you are I<nesting> lists, C<_marker-*> properties will be inherited, as is the usual practice. If you want a nested list to use standard properties, you will need to cancel the current state of inherited C<_marker-*> propertie(s) by setting it/them to '' in the <olE<gt> or <ulE<gt> tag
+
+=over
+
 =item _marker-before
 
-I<extension>: text to insert before ordered list marker
+text to insert I<before> ordered list marker
 
 =item _marker-after
 
-I<extension>: text to insert after ordered list marker
+text to insert I<after> ordered list marker
+
+=item _marker-text
+
+define a text string to use as the list item marker that is different from the defaut. It may include multi-character text (e.g., '=>' or an entity), but don't use multi-byte (e.g., UTF-8) characters unless your selected font (see C<_marker-font>) supports it
+
+=item _marker-color
+
+override the default text color for this (or all) markers, e.g., 'blue' to set bullets or counters blue (as opposed to the normal black text). An example of using this color override would be a bulleted list with red bullets indicating a problem, yellow bullets indicating an area of concern, and green bullets indicating that all is well
+
+=item _marker-font
+
+override the standard font family used for a list item I<marker>. The standard is to use whatever font-family was in effect at the list tag, for ordered lists (formatted counters), or ZapfDingbats for unordered (bulleted) lists
+
+=item _marker-style
+
+override the styling ('normal' or 'italic') for a list item marker. The standard is to use whatever styling was in effect at the list tag
+
+=item _marker-size
+
+override the font size ('font-size' property) for a list item marker. The standard is to use whatever font-size was in effect at the list tag for ordered lists, and 50% of that for bulleted lists. You can choose to modify the marker's font size to make it more or less conspicuous, as desired
+
+=item _marker-weight
+
+override the font weight (boldness, 'normal' or 'bold') for a list item marker. The standard is to use 'bold' for both ordered and unordered lists
+
+=back
 
 =item text-decoration
 
@@ -2278,6 +2325,10 @@ change leading, ratio of baseline-to-baseline to font size. future: set as a len
 =item text-indent
 
 paragraph etc. indentation, I<n> points, I<npt>, I<n%> of font size
+
+=item text-align
+
+align a string of text to I<start> at the current position (left-aligned, 'left'), be I<centered> at the current position ('center'), or I<end> at the current position ('right' align). You will normally need to first set the current position to write at, before outputting aligned text, using the C<<_moveE<gt>> tag.
 
 =item width
 

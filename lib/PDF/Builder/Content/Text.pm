@@ -1263,11 +1263,11 @@ and CSS. Currently, HTML tags
     'sup', 'sub' (TBD superscript and subscript)
     's', 'strike', 'del' (line-through)
     'u', 'ins' (underline)
-    'ovl' (TBD -- non-standard HTML, overline)
-    'k' (TBD -- non-standard HTML, kerning left/right shift)
-    'marker' (non-standard HTML, gives ability to modify list markers.
-           if given, must be immediately before a <li>)
     'blockquote' (block quote)
+    '_ovl' (TBD -- non-standard HTML, overline)
+    '_k' (TBD -- non-standard HTML, kerning left/right shift)
+    '_marker' (non-standard HTML, gives ability to modify list markers.
+           if given, must be immediately before a <li>)
 
 are supported (fully or in part I<unless> "TBD"), along with limited CSS for 
 color, font-size, font-family, etc. 
@@ -2083,8 +2083,8 @@ sub _default_css {
    #$style{'sc'}->{'_expand'} = '110%'; # wider type   TBD _expand
    #likewise for pc (petite caps) TBD
 
-    $style{'marker'}->{'display'} = 'block'; 
-    $style{'marker'}->{'text-align'} = 'right'; 
+    $style{'_marker'}->{'display'} = 'block'; 
+    $style{'_marker'}->{'text-align'} = 'right'; 
    #  can set properties in <ol> or <ul> to apply to entire list (inherited)
     
     return \%style;
@@ -2094,7 +2094,7 @@ sub _default_css {
 # consolidate attributes and style attribute (if any)
 # mark empty tags (no explicit end tag will be found)
 #
-# also insert <marker> tag before evey <li> lacking an explicit one
+# also insert <_marker> tag before evey <li> lacking an explicit one
 sub _tag_attributes {
     my ($markup, @mytext) = @_;
     
@@ -2130,38 +2130,38 @@ sub _tag_attributes {
 	    if (defined $mytext[$el]->{'type'}) {
 	        $mytext[$el]->{'list-style-type'} = delete($mytext[$el]->{'type'});
 	    }
-	    # if user did not explicitly give a <marker> just before <li>,
+	    # if user did not explicitly give a <_marker> just before <li>,
 	    # insert one to "even up" with any in the source. 
 	    # $el element ($tag) s/b at 'li' at this point
-	    # MUST check if HTML::TreeBuilder added its own /marker tag!
+	    # MUST check if HTML::TreeBuilder added its own /_marker tag!
 	    if ($markup ne 'pre') {
-		# if 'pre', any markers have already been added, so adding
+		# if 'pre', any _markers have already been added, so adding
 		# another (e.g., a list item split across column() calls)
-		# causes an extra marker
-	        if ($mytext[$el-1]->{'tag'} eq '/marker') {
+		# causes an extra _marker
+	        if ($mytext[$el-1]->{'tag'} eq '/_marker') {
 	            if ($mytext[$el-2]->{'tag'} eq '' &&
-	                $mytext[$el-3]->{'tag'} eq 'marker') {
-		        # full marker (empty) /marker at this point... unexpected
+	                $mytext[$el-3]->{'tag'} eq '_marker') {
+		        # full _marker (empty) /_marker at this point... unexpected
 		    } else {
-		        # auto-entered? /marker (presume marker too), need text tag
+		        # auto-entered? /_marker (presume _marker too), need text tag
 	                splice(@mytext, $el-1, 0, {'tag'=>'', 'text'=>' '});
 		        $el++;
 		    }
-	        } elsif ($mytext[$el-1]->{'tag'} eq 'marker') {
-		    # author-added <marker>. add (empty) </marker>
-		    # note that HTML::TreeBuilder seems to want to add /marker
+	        } elsif ($mytext[$el-1]->{'tag'} eq '_marker') {
+		    # author-added <_marker>. add (empty) </_marker>
+		    # note that HTML::TreeBuilder seems to want to add /_marker
 	            splice(@mytext, $el++, 0, {'tag'=>'', 'text'=>' '});
-	            splice(@mytext, $el++, 0, {'tag'=>'/marker', 'text'=>''});
+	            splice(@mytext, $el++, 0, {'tag'=>'/_marker', 'text'=>''});
 	        } else {
-		    # we haven't added or expanded a <marker> here yet
-		    # add full <marker> (empty) </marker>
-		    splice(@mytext, $el++, 0, {'tag'=>'marker', 'text'=>''});
+		    # we haven't added or expanded a <_marker> here yet
+		    # add full <_marker> (empty) </_marker>
+		    splice(@mytext, $el++, 0, {'tag'=>'_marker', 'text'=>''});
 	            splice(@mytext, $el++, 0, {'tag'=>'', 'text'=>' '});
-	            splice(@mytext, $el++, 0, {'tag'=>'/marker', 'text'=>''});
+	            splice(@mytext, $el++, 0, {'tag'=>'/_marker', 'text'=>''});
 	        }
 	    }
 	    # $el should still point to <li> element, which should now have
-	    # three elements in front of it: <marker>(empty)</marker>
+	    # three elements in front of it: <_marker>(empty)</_marker>
 	} elsif ($tag eq 'a') {
 	    if (defined $mytext[$el]->{'href'}) {
 	        $mytext[$el]->{'_href'} = delete($mytext[$el]->{'href'});
@@ -2513,7 +2513,7 @@ sub _output_text {
                 } elsif ($tag eq 'style') {
 		    # sometimes some stray empty style tags seem to come 
 		    # through...  can be ignored
-	        } elsif ($tag eq 'marker') {
+	        } elsif ($tag eq '_marker') {
 		    # at this point, all properties are set in usual way. only
 		    # tasks remaining are to 1) determine the text,
 		    # 2) set CSS properties to default marker conventions.
@@ -2582,7 +2582,7 @@ sub _output_text {
 			    $properties[-1]->{'_marker-weight'};
 		    }
 		
-		    # finally, update the text within the marker
+		    # finally, update the text within the _marker
 		    if ($list_marker ne '') {
 		        # list marker should be nonblank for <ol> and <ul>,
 		        # blank for <sl> (just leave marker text alone)

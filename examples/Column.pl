@@ -28,8 +28,8 @@ print "CAUTION: page 4 requires that your HTML::Tagset installation be patched\n
 
 print "======================================================= pg 1\n";
 $page = $pdf->page();
-$text = $page->text();
 $grfx = $page->gfx();
+$text = $page->text();
 footer(++$page_num, $pdf, $text);
 
 print "---- single string entries\n";
@@ -91,8 +91,8 @@ $text->column($page, $text, $grfx, 'pre', [
 # larger font size and narrower columns to force line wraps
 print "======================================================= pg 2\n";
 $page = $pdf->page();
-$text = $page->text();
 $grfx = $page->gfx();
+$text = $page->text();
 footer(++$page_num, $pdf, $text);
 
 print "---- single string entries\n";
@@ -163,8 +163,8 @@ print "======================================================= pg 3\n";
 #
 # Lorem Ipsum text ('none') in mix of single string and array
 $page = $pdf->page();
-$text = $page->text();
 $grfx = $page->gfx();
+$text = $page->text();
 footer(++$page_num, $pdf, $text);
 
 # as an array of strings
@@ -232,8 +232,8 @@ if ($rc) {
 print "======================================================= pg 4\n";
 print "---- Customer sample Markdown and Table\n";
 $page = $pdf->page();
-$text = $page->text();
 $grfx = $page->gfx();
+$text = $page->text();
 footer(++$page_num, $pdf, $text);
 
 $content = <<"END_OF_CONTENT";
@@ -446,8 +446,8 @@ if ($use_Table) {
 print "======================================================= pg 5-8\n";
 print "---- A README.md file for PDF::Builder\n";
 $page = $pdf->page();
-$text = $page->text();
 $grfx = $page->gfx();
+$text = $page->text();
 footer(++$page_num, $pdf, $text);
 #  might need two or even three pages
 #  three <img> calls (GitHub buttons), several `code` 
@@ -676,8 +676,8 @@ restore_props($text,$grfx);
 while ($rc) { 
     # new page. uses fixed column template, no headers/footers/page numbers
     $page = $pdf->page();
-    $text = $page->text();
     $grfx = $page->gfx();
+    $text = $page->text();
     footer(++$page_num, $pdf, $text);
 
 #print Dumper($unused) if $page_num == 7;
@@ -693,8 +693,8 @@ while ($rc) {
 print "======================================================= pg 9\n";
 print "---- Block quotes\n";
 $page = $pdf->page();
-$text = $page->text();
 $grfx = $page->gfx();
+$text = $page->text();
 footer(++$page_num, $pdf, $text);
 
 $content = <<"END_OF_CONTENT";
@@ -759,8 +759,8 @@ if ($rc) {
 # setting your own CSS for Markdown or none
 print "======================================================= pg 10\n";
 $page = $pdf->page();
-$text = $page->text();
 $grfx = $page->gfx();
+$text = $page->text();
 footer(++$page_num, $pdf, $text);
 
 print "---- horizontal rules Markdown\n";
@@ -790,16 +790,17 @@ if ($rc) {
     print STDERR "Markdown horizontal rule example overflowed column!\n";
 }
 
+# note some tags capitalized, and some attributes capitalized
 print "---- horizontal rules HTML\n";
 $content = <<"END_OF_CONTENT";
 <p>HTML horizontal rules, with CSS</p>
-<hr>
+<hR>
 <p>Between two rules, above is default settings</p>
 <hr style="height: 5; color: blue">
 <p>Between two rules, above is very thick and blue</p>
 <hr style="width: 200" />
-<p>Above rule is only 200pt long</p>
-<hr size="17" color="orange" width="300">
+<P>Above rule is only 200pt long</p>
+<HR size="17" Color="orange" WIDTH="300">
 <p>Above rule is <em>very</em> thick orange and 300pt long</p>
 END_OF_CONTENT
 
@@ -832,6 +833,89 @@ if ($rc) {
     print STDERR "PDF links example overflowed column!\n";
 }
 
+# --------------
+# some bogus tags and CSS properties
+# expect one message about invalid 'glotz' tag. notice that HTML::TreeBuilder
+#   does NOT insert an extra </glotz> tag into the stream, as one already found
+# expect 'snork' CSS to be ignored
+#
+print "---- Bogus HTML tags and CSS property names\n";
+$content = <<"END_OF_CONTENT";
+<p>
+<glotz>This is within a 'glotz' tag</glotz>. 
+This is <glotz>within another.</glotz>
+</p>
+
+<p style="snork: 1em;">This paragraph has CSS 'snork' property.</p>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'md1', $content, 
+	          'rect'=>[50,250, 500,75], 'outline'=>$magenta, 
+		  'para'=>[ 0, 10 ],
+	         );
+if ($rc) { 
+    print STDERR "Invalid tags and CSS example overflowed column!\n";
+}
+ 
+# ------ some <_move> and text-align usage
+#
+print "---- <_move> and text-align usage\n";
+print "1 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+$content = <<"END_OF_CONTENT";
+<p>
+1.Normal text left justified.
+<_move dx="72">2._move right by 72pt.
+</p>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'md1', $content, 
+	          'rect'=>[100,165, 400,15], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ],
+	         );
+if ($rc) { 
+    print STDERR "1. <_move> and text-align example overflowed column!\n";
+}
+ 
+print "2 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+$content = <<"END_OF_CONTENT";
+<p>
+<_move x="50%"><span style="text-align: center;">1.centered text</span>
+<_move x="0%"><span style="text-align: left;">2.explicit LJ at 0%</span>
+<_move x="100%"><span style="text-align: right;">3.RJ text at 100%</span>
+</p>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'md1', $content, 
+	          'rect'=>[100,150, 400,15], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ],
+	         );
+if ($rc) { 
+    print STDERR "2. <_move> and text-align example overflowed column!\n";
+}
+ 
+print "3 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+$content = <<"END_OF_CONTENT";
+<p>
+<_move x="50%" dx="72">1.Center+72pt LJ text.
+</p>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'md1', $content, 
+	          'rect'=>[100,135, 400,15], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ],
+	         );
+if ($rc) { 
+    print STDERR "3. <_move> and text-align example overflowed column!\n";
+}
+ 
 # Column_layouts.pl TBD
 # TBD figure out a good way to fall back for unavailable fonts
 # demonstrate balanced columns two long columns and one short, first pass

@@ -134,6 +134,10 @@ If you experience such problems, try updating your copy of Tagset.pm with one
 from https://github.com/PhilterPaper/HTML-Tagset/blob/master/lib/HTML/Tagset.pm
 and see if that improves matters (and please report results via a ticket).
 
+**HTML::Tagset 3.22 has this fix in it. The easiest course of action is simply
+to check if your copy of HTML::Tagset is at least 3.22. If you can't update it,
+you will need to follow the above instructions.**
+
 #### ------------
 
 If an optional package is needed, but not installed, sometimes PDF::Builder

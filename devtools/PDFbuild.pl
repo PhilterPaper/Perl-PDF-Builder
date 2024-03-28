@@ -5,17 +5,24 @@
 #
 use File::Path qw(make_path);
  
-print "**** check https://en.wikipedia.org/wiki/Leap_second to see if any\n
-     leap seconds have been added since 12/31/2016. Update Builder.pm.\n";
+my $builder = 'Makefile.PL';
+my $script  = 'Makefile';
+my $hiDir   = 'PDF';
+my $product = 'Builder';
+my $master  = 'Builder.pm';
+my $GHname  = 'PDF-Builder';
+
+print "**** check https://en.wikipedia.org/wiki/Leap_second to see if any
+     leap seconds have been added since 12/31/2016. Update $master.\n";
 to_continue();
-print "**** check README.md list of prereqs needing patching, and check \n
+print "**** check README.md list of prereqs needing patching, and check
      whether notice list needs updating (also in Changes).\n";
 to_continue();
-print "**** build all POD documentation (as HTML into docs/) and check that\n
+print "**** build all POD documentation (as HTML into docs/) and check that
      it's clean\n";
 to_continue();
-print "**** check README.md for copyright year, minimum Perl version, current\n
-     Builder version, current mandatory and optional prerequisites. Copy to \n
+print "**** check README.md for copyright year, minimum Perl version, current
+     Builder version, current mandatory and optional prerequisites. Copy to
      examples/Column.pl if anything has changed, and test the formatting.\n";
 to_continue();
 
@@ -43,7 +50,7 @@ print
 # if needed, create PERL_V_DOT in format 5.20.0
 # will auto-update Makefile.PL, .pm, .pl, Builder.pm, META.* files below
 
-print "**** Check Perl version against https://www.cpan.org/src/ Perl latest\n
+print "**** Check Perl version against https://www.cpan.org/src/ Perl latest
      release dates \n";
 print "      today-6 years last major release before that date.\n";
 to_continue();
@@ -54,7 +61,7 @@ to_continue();
 #   * reformat PERL_V to something usable in Makefile.PL, (e.g.,
 #     '5.16.0' -> '5.016000' and update that file with it, just like VERSION
 
-print "**** have you rebuilt documentation and placed in INFO/?\n";
+print "**** have you rebuilt documentation and placed in an appropriate place?\n";
 to_continue();
 
 # -------------------------------------- configuration
@@ -69,7 +76,7 @@ $cmd7Zip  = $sevenZip . " a -r ";
 # location of pod2html
 $pod2html = "pod2html";   # should be in PATH
 
-$baseDirSrc = $desktop . "PDF-Builder\\";
+$baseDirSrc = $desktop . "$GHname\\";
 #$outputBasename = "PDF-API2-" . substr($dirName, 1);
 
 # --------------------------------------
@@ -80,31 +87,28 @@ if (checkForBackups($baseDirSrc)) {
 }
 # top level .pdf, .tmp, .html junk needs to go away
 
-##system("rename \\Users\\Phil\\bin\\gzipC.bat gzip.bat");
-##print "**** /Users/Phil/bin/gzipC.bat renamed to gzip.bat.\n";
-#to_continue();
 # grep -S  "2018" ..\*.* |grep -v "\~:" |grep -v "\.git" |grep -v "0x2018" |grep -v "\.cmap" |grep -v "\.data"
-print "**** What is the current copyright year in various files? At some\n
+print "**** What is the current copyright year in various files? At some
      point did you go around and update all file copyrights?\n";
 to_continue();
-print "**** Anything listed as DEPRECATED to expire before this month?\n
+print "**** Anything listed as INFO/DEPRECATED to expire before this month?
      Consider removing deprecated items.\n";
 to_continue();
-print "**** have you installed any new prerequistes? if so, are the build\n
-     prereqs list in Makefile.PL and the optional library module\n
+print "**** have you installed any new prerequistes? if so, are the build
+     prereqs list in $builder and the optional library module
      exclusion list in t/00-all-usable.t updated?\n";
 to_continue();
-print "**** are all working (bugfix) directories removed, or moved to\n
+print "**** are all working (bugfix) directories removed, or moved to
      another place?\n";
 to_continue();
 print "**** have you removed any old desktop\\temp directory?\n";
 to_continue();
-print "**** only Builder.pm and optional_update.pl should have \$VERSION \n
+print "**** only $master and optional_update.pl should have \$VERSION
      defined (may be updated):\n";
 system("findstr /s /c:\"our \$VERSION =\" *.p?");
 if_OK();
-print "**** Changes should have current date, and 'unreleased' notation\n
-     removed.\n";
+print "**** Changes should have current date,
+      and 'unreleased' notation removed.\n";
 system("findstr /c:\"$VERSION\" Changes");
 if_OK();
 print "**** No file should be Read-Only.\n";
@@ -113,14 +117,14 @@ to_continue();
 
 print "**** Have you remembered to update LAST_UPDATE everywhere changed?\n";
 if_OK();
-print "**** Have you 1) compared PDF-Builder/ to /Strawberry, 2) run 1_pc, \n
-     3) run 2_t-tests, 4) run 3_examples, 5) run 4_contrib to thoroughly \n
+print "**** Have you 1) compared $GHname/ to /Strawberry, 2) run 1_pc,
+     3) run 2_t-tests, 4) run 3_examples, 5) run 4_contrib to thoroughly
      test? Have you 6) built all docs (.html) to check PODs?\n";
 to_continue();
 
-system("attrib -R Makefile.PL");
+system("attrib -R $builder");
 update_with_version();
-print "**** updated version in Makefile.PL (check). Builder.pm updated\n";
+print "**** updated version in $builder (check). $master updated\n";
 print "**** \$VERSION -- commit in GitHub.\n";
 
 #print "**** git status, pull/merge, add, commit, push as necessary.\n";
@@ -130,14 +134,14 @@ to_continue();
 # Builder.pm: update fields GRAPHICS_TIFF, HARFBUZZ_SHAPER, IMAGE_PNG_LIBPNG,
 #                           TEXT_MARKDOWN, HTML_TREEBUILDER, POD_SIMPLE_XHTML
 update_Builder();
-print "**** Builder.pm should have had optionals updated.\n";
+print "**** $master should have had optionals updated.\n";
 if_OK();
 # Makefile.PL: update fields VERSION, PERL_V, MAKE_MAKER, TEST_MEMORY_CYCLE, 
 #              COMPRESS_ZLIB, FONT_TTF, GRAPHICS_TIFF, HARFBUZZ_SHAPER, 
 #              IMAGE_PNG_LIBPNG, TEXT_MARKDOWN, HTML_TREEBUILDER, 
 #              POD_SIMPLE_XHTML
 update_Makefile();
-print "**** Makefile.PL should have had updates.\n";
+print "**** $builder should have had updates.\n";
 if_OK();
 # META.*: update fields VERSION, PERL_V, MAKE_MAKER, TEST_EXCEPTION, 
 #         TEST_MEMORY_CYCLE, COMPRESS_ZLIB, FONT_TTF, GRAPHICS_TIFF, 
@@ -172,7 +176,7 @@ system("xcopy .\\INFO\\RoadMap $temp\\INFO\\");
 system("xcopy .\\INFO\\old\\*.* $temp\\INFO\\old\\");
 system("xcopy .\\t\\*.* $temp\\t\\");
 system("xcopy /s .\\examples\\*.* $temp\\examples\\");
-#unlink("$desktop\\temp\\Makefile.PL");
+#unlink("$desktop\\temp\\$builder");
 
 # all other .pm and .pl files should just have an empty '# VERSION' line
 print "calling PDFversion.pl\n";
@@ -200,14 +204,14 @@ system("dos2unix t\\*.*");
 print "**** all other text files should now be [unix] format, not DOS format.\n";
 if_OK();
 
-print "**** build Makefile\n";
-#system("attrib +R Makefile.PL");  # didn't seem to help
-system("Makefile.PL");
-##print "**** edit Makefile to insert VERSION update (and erase Makefile~)\n";
+print "**** build $script\n";
+#system("attrib +R $builder");  # didn't seem to help
+system("$builder");
+##print "**** edit $script to insert VERSION update (and erase $script~)\n";
 ##print "(tab)devtools\\PDFversion.pl \$(DISTVNAME) \$(VERSION)\n";
 # gzip -> devtools/gzip
 update2_Makefile();
-print "**** Check Makefile.\n";
+print "**** Check $script.\n";
 if_OK();
 
 print "**** $make all\n";
@@ -226,24 +230,22 @@ print "**** Is .tar.gz looking all right?\n";
 if_OK();
 
 system("xcopy /s $desktop\\temp\\*.* .");
-#system("git checkout Makefile.PL");
+#system("git checkout $builder");
 #print "**** run unVERSION.bat to reverse all the VERSION settings.\n";
-##system("rename \\Users\\Phil\\bin\\gzip.bat gzipC.bat");
 print "**** erase Desktop/temp/ if everything is clean in build\n";
-print "**** erase Makefile, etc. new stuff (EXCEPT .tar.gz)\n";
+print "**** erase $script, etc. new stuff (EXCEPT .tar.gz)\n";
 print "**** log on to PAUSE and upload .tar.gz file\n";
 print "**** consider removing an old release from CPAN\n";
-print "**** update Latest Release entry on forum, and motd on website\n";
-##print "**** check renamed /Users/Phil/bin/gzip.bat to gzipC.bat\n";
+print "**** update motd.php on website\n";
 print "**** copy .tar.gz to releases/ and git rm oldest\n";
-print "**** git update with latest changes\n";
 print "**** version update\n";
-print "**** Changes update next version\n";
-print "**** Update Examples on catskilltech.com with any new examples/\n";
+print "**** Changes update next version, add UNRELEASED\n";
+print "**** git update with latest changes\n";
+print "**** Update Examples on catskilltech.com with any new examples\n";
 print "**** Update Documentation on catskilltech.com with fresh copy\n";
 
 # not (yet) generating .html from POD
-#print "Proceeding. Ignore error messages \"Cannot find PDF::Builder...\" in podpath.\n";
+#print "Proceeding. Ignore error messages \"Cannot find $hiDir::$product...\" in podpath.\n";
 
 # clean out existing output structure, create empty dirs in destination
 #prepOutputDirs("$baseDirDst$dirName\\");
@@ -493,7 +495,7 @@ sub makeDownloads {
   my ($dst) = shift;
   
   # dst/code is the source directory, and dst/downloads is the target directory
-  # $outputBasename is like "PDF-API2-3.001"
+  # $outputBasename is like "$GHname-3.001"
 
   # also build dst/downloads/.downloads control file
   unless (open(OUT, ">$dst\\downloads\\.downloads")) {
@@ -528,23 +530,23 @@ sub update_with_version {
     my ($f, $line);
 
     my $outtemp = 'xxxxx.temp';
-#   my @name = ('Makefile.PL', 'dist.ini', 'META.json', 'META.yml');
+#   my @name = ($builder, 'dist.ini', 'META.json', 'META.yml');
 #   my @pattern = ('^(  "VERSION" => ")\d\.\d{3}(",\s)$',
 #           '^(version = )\d\.\d{3}(\s)$', 
 #           '^(   "version" : ")\d\.\d{3}(",\s)$',
 #           '^(version: \')\d\.\d{3}(\'\s)$'
 #          );
-##  my @name = ('Makefile.PL', "lib\\PDF\\Builder.pm", 'INFO\\old\\dist.ini.old');
+##  my @name = ($builder, "lib\\$hiDir\\$master", 'INFO\\old\\dist.ini.old');
 ##  my @pattern = ('^(\s*my \$version\s*=\s*\')\d\.\d{3}(\';.*)$',
 ##  		   '^(our \$VERSION = \')\d\.\d{3}(\'; # VERSION)',
 ##	           '^(version = )\d\.\d{3}(\s)$');
-    my @name = ('Makefile.PL',
-                "lib\\PDF\\Builder.pm",
+    my @name = ($builder,
+                "lib\\$hiDir\\$master",
                 "README.md",
                );
     my @pattern = ('^(\s*my \$version\s*=\s*\')\d\.\d{3}(\';.*)$',
     		   '^(our \$VERSION = \')\d\.\d{3}(\'; # VERSION)',
-                   '^(# PDF::Builder release )\d\.\d{3}(.*)$',
+                   '^(# $hiDir::$product release )\d\.\d{3}(.*)$',
                   );
 
     foreach $f (0 .. $#name) {
@@ -630,9 +632,6 @@ sub update_VERSION {
    
         while ($line = <IN>) {
             $line =~ s/$pattern/$newVer/;
-	   #if ($ourLAST) {
-	   #    $line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
-	   #}
 	    print OUT $line;
         }
    
@@ -734,7 +733,7 @@ sub update_Builder {
 		   "$POD_SIMPLE_XHTML",
 		  );
 
-    my $infile = "lib\\PDF\\Builder.pm";
+    my $infile = "lib\\$hiDir\\$master";
     my $outtemp = "xxxx.tmp";
     unless (open(IN, "<$infile")) {
 	die "Unable to read $infile for update\n";
@@ -808,7 +807,7 @@ sub update_Makefile {
 		   "$POD_SIMPLE_XHTML",
 		  );
 
-    my $infile = "Makefile.PL";
+    my $infile = $builder;
     my $outtemp = "xxxx.tmp";
     unless (open(IN, "<$infile")) {
 	die "Unable to read $infile for update\n";
@@ -849,7 +848,7 @@ sub update2_Makefile {
 		   "devtools\\gzip --best",
 	          );
 
-    my $infile = "Makefile";
+    my $infile = $script;
     my $outtemp = "xxxx.tmp";
     unless (open(IN, "<$infile")) {
 	die "Unable to read $infile for update\n";

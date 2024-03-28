@@ -1,13 +1,11 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2024-03-09  UNRELEASED
+3.027     2024-03-19  UNRELEASED
 * = work in progress
 
     lib/PDF/Builder/Content/Text.pm
      Avoid top margins if at very beginning of column, and not just for
-      <p> paragraphs. Remove setting of font-size from current text object,
-      as this can produce unexpected results (now have default font size of
-      12 points, overridden by option 'font_size').
+      <p> paragraphs.
 
     examples/020_corefonts 
      Clean up code to permit any of three command lines: (nothing) -- default
@@ -19,7 +17,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       lib/PDF/Builder/Content.pm, MANIFEST, README.md, tools/3_examples.pl, 
       examples/Column.pl, examples/Column_lists.pl (new), devtools/PDFbuild.pl
      Rearchitect list (ul and ol) generation to improve appearance and permit
-      upgrades to capabilities. Add <marker> tag to permit overrides of 
+      upgrades to capabilities. Add <_marker> tag to permit overrides of 
       properties of individual <ol> and <ul> markers (e.g., bullet color) at 
       any or all <li>. This non-standard HTML tag can be used explicitly to 
       modify marker properties, and is automatically inserted into the code if 
@@ -46,13 +44,25 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       "color" property in the <ol> or <ul> tag, it will *also* apply to each
       <li> list item! Instead, set "_marker-color" to affect only markers.
       Split out list examples from Column.pl examples, into Column_lists.pl.
-*     CSS text-align property for left, center, and right added. Not fully imp.
+
+    lib/PDF/Builder/Content/Text.pm
+*    CSS text-align property for left, center, and right added. Not fully imp.
+      Implement <_move> tag: "x" attribute absolute positioning within column
+      and/or "dx" attribute relative positioning. perhaps ignore "dx" if $x is
+      undefined?
+
+    lib/PDF/Builder/Content/Text.pm
+      Minor change to font size upon entry: first it is defaulted to 12pt. The
+      next step of overriding that setting with the text object's fontsize has
+      been removed, as this often produced unexpected results. Finally, the 
+      third step is to use the 'font_size' optional value, if given.
 
     lib/PDF/Builder/Content/Text.pm, examples/Column.pl
      Fold all HTML tags to lower case (to support <P> etc.), detect 
       unsupported or invalid tags and give error message (just once for each, 
       per column() call). Treat unknown tags as <span> tag. In Column.pl,
-*     change a few tags to upper case, add some bogus tags (expect error msg)?
+      A few tags are now upper case (are accepted), and some bogus tags (expect 
+      an error message) and bogus CSS entries (ignored) in one sample.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm
      Fix #210 (reported in API2 #75) default_page_size() was failing.
@@ -69,8 +79,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       and <del> tags cause unwanted paragraph breaks. The best solution, until
       the TreeBuilder prereq HTML::Tagset is fixed (and HTML::TreeBuilder
       updated to require the new version), is to edit HTML::Tagset and make a 
-      one line fix. HTML::Tagset 3.21 and later may already be updated. These 
-      instructions are repeated and expanded upon in README.
+      one line fix. These instructions are repeated and expanded upon in README.
       
       In \Strawberry\perl\vendor\lib\HTML\Tagset.pm (location of Tagset.pm
       will vary on other Perls and OS's):
@@ -78,6 +87,14 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
         2. Below that find     b i u s tt small big
         3. Add a new line below that:   ins del
       This adds <ins> and <del> to the list of inline tags.
+
+      ===NOTE=== the recent 3.22 release of HTML::Tagset has this fixed. The
+      easiest course of action is to check the version of HTML::Tagset, and if
+      it is earlier than 3.22, update it. If you cannot update the package with
+      a package manager such as 'cpan' or 'cpanm', you will need to manually
+      make the above fix. At some point in the future, presumably 
+      HTML::TreeBuilder will receive an upgrade to prereq HTML::Tagset 3.22 
+      (minimum) and the update will be taken care of automatically.
 
     lib/PDF/Builder.pm, docs/buildDoc.pl, lib/PDF/Builder/Docs.pm, 
       lib/PDF/Builder/Resource/UniFont.pm, 
