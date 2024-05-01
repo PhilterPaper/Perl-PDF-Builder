@@ -1,13 +1,14 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2024-04-30  UNRELEASED
+3.027     2024-05-01  UNRELEASED
 * = work in progress
 
-    lib/PDF/Builder/Content.pm, lib/PDF/Builder/Resource/BaseFont.pm
+    lib/PDF/Builder/Content.pm, lib/PDF/Builder/Resource/BaseFont.pm,
+      lib/PDF/Builder/Content/Text.pm
      Per ticket #215 (Johan Vromans), corrected underlining (and also strike-
       through and [future] overline) thickness and positioning to use the 
       correct Units Per Em (usually 1000, but many recent TTF and OTF fonts 
-      use 2048).
+      use 2048 or even higher values).
 
     lib/PDF/Builder/Content/Text.pm
      Avoid top margins if at very beginning of column, and not just for

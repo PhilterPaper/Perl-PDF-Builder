@@ -1264,10 +1264,14 @@ and CSS. Currently, HTML tags
     's', 'strike', 'del' (line-through)
     'u', 'ins' (underline)
     'blockquote' (block quote)
-    '_ovl' (TBD -- non-standard HTML, overline)
-    '_k' (TBD -- non-standard HTML, kerning left/right shift)
-    '_marker' (non-standard HTML, gives ability to modify list markers.
-           if given, must be immediately before a <li>)
+
+Non-standard HTML "tags"
+
+    '_ovl' (TBD -- overline similar to underline/strike-through)
+    '_k' (TBD -- kerning left/right shift)
+    '_marker' (gives ability to modify list markers. if given, must be 
+           immediately before a <li> tag. attributes: style)
+
 
 are supported (fully or in part I<unless> "TBD"), along with limited CSS for 
 color, font-size, font-family, etc. 
@@ -1352,8 +1356,8 @@ before processing, permitting paragraphs to span array elements if desired.
 
 =back
 
-I<There are other markup languages out there, such as HTML-like Pango, and
-man page (troff), that 
+I<There are other markup languages out there, such as HTML-like Pango, 
+nroff-like man page, and Perl's POD, that 
 might be supported in the future. It is very unlikely that TeX or LaTeX will 
 ever be supported, as they both already have excellent PDF output.>
 
@@ -1729,24 +1733,24 @@ It contains nothing to be used.
 #   <article>, <aside>, <section>  as predefined page areas?
 #
 #  extensions to HTML and CSS...
-#   <sl>* simple list (markers are ' ')
-#   <sc>* preprocess: around runs of lowercase put <span style="font-size: 80%;
+#   <_sl>* simple list (markers are ' ')
+#   <_sc>* preprocess: around runs of lowercase put <span style="font-size: 80%;
 #        expand: 110%"> and fold to UPPER CASE. this is post-mytext creation!
-#   <pc>* (Petite case) like <sc> but 1ex font-size, expand 120%
-#   <dc>* drop caps
-#   <ovl>* overline (similar to underline) using CSS text-decoration: overline
-#   <k>* kern text (shift left or right) with CSS _kern, or general positioning:
-#     ability to form (La)TeX logo through character positioning
+#   <_pc>* (Petite case) like <sc> but 1ex font-size, expand 120%
+#   <_dc>* drop caps
+#   <_ovl>* overline (similar to underline) using CSS text-decoration: overline
+#   <_k>* kern text (shift left or right) with CSS _kern, or general 
+#     positioning: ability to form (La)TeX logo through character positioning
 #        what to do at HTML level? x+/- %fs, y+/- %fs
 #     also useful for <sup>4</sup><sub>2</sub>He notation
-#   <vfrac>* vulgar fraction, using sup, sup, kern
+#   <_vfrac>* vulgar fraction, using sup, sup, kern
 #   HTML attributes to tune (force end) of something, such as early </sc> 
 #        after X words and/or end of line. flag to ignore next </sc> coming up,
 #        or just make self-closing with children?
-#   <endc>* force end of column here (at this y, while still filling line)
+#   <_endc>* force end of column here (at this y, while still filling line)
 #        e.g., to prevent an orphan. optional conditional (e.g., less than 1"
 #        of vertical space left in column)
-#   <keep>* material to keep together, such as headings and paragraph text
+#   <_keep>* material to keep together, such as headings and paragraph text
 #   leading (line-height) as a dimension instead of a ratio, convert to ratio
 #
 # 3.028 or later?
@@ -2057,13 +2061,13 @@ sub _default_css {
     $style{'del'}->{'text-decoration'} = 'line-through';
 
     # non-standard tag for overline TBD
-   #$style{'ovl'}->{'display'} = 'inline';
-   #$style{'ovl'}->{'text-decoration'} = 'overline';
+   #$style{'_ovl'}->{'display'} = 'inline';
+   #$style{'_ovl'}->{'text-decoration'} = 'overline';
     
     # non-standard tag for kerning (+ font-size fraction to move left, - right)
     # e.g., for vulgar fraction adjust / and denominator <sub> TBD
-   #$style{'k'}->{'display'} = 'inline';
-   #$style{'k'}->{'_kern'} = '0.2';
+   #$style{'_k'}->{'display'} = 'inline';
+   #$style{'_k'}->{'_kern'} = '0.2';
 
     $style{'hr'}->{'display'} = 'block';
     $style{'hr'}->{'height'} = '0.5'; # 1/2 pt default thickness
@@ -2263,6 +2267,7 @@ sub _output_text {
 
     my $phrase='';
     my $remainder='';
+    my $desired_x;  # leave undef, is correction for need_line reset of x
     my $topm = 0; # adjoining top margin
     my $botm = 0; # adjoining bottom margin
     my $current_prop = _init_current_prop(); # determine if a property has 
@@ -2628,8 +2633,8 @@ sub _output_text {
 		    $mytext[$el+1]->{'text'} = $list_marker;
 		    $list_marker = '';
 
-	       #} elsif ($tag eq 'ovl') { # TBD
-	       #} elsif ($tag eq 'k') { # TBD
+	       #} elsif ($tag eq '_ovl') { # TBD
+	       #} elsif ($tag eq '_k') { # TBD
 
 		} else {
 		    # unsupported or invalid tag found
@@ -2949,8 +2954,9 @@ sub _output_text {
 			# may be a combination separated by spaces
 			# inherit current color (strokecolor) setting
 			my $font = $pdf->get_font('face'=>'current');
+			my $upem = $font->upem();
 			my $strokethickness = $font->underlinethickness() || 1;
-			$strokethickness *= $fs/1000;
+			$strokethickness *= $fs/$upem;
 			my $stroke_ydist = $font->underlineposition() || 1;
 
 			# don't stroke through any trailing whitespace
@@ -2959,7 +2965,7 @@ sub _output_text {
 			    $trail = $text->advancewidth($1);
 			}
 
-			$stroke_ydist *= $fs/1000;
+			$stroke_ydist *= $fs/$upem;
 			# TBD consider whether to draw lines in graphics
 			#  context instead (could end up with text under line)
 			$text->add('ET'); # go into graphics mode
@@ -3118,7 +3124,7 @@ sub _output_text {
 		    next; # done with phrase loop if phrase empty
 
 	        } else {
-		    # existing line plus phrase is too long
+		    # existing line plus phrase is too long (overflows line)
 	            # entire phrase does NOT fit (case 2 or 3). start splitting 
 		    # up phrase, beginning with stripping space(s) off end
 
