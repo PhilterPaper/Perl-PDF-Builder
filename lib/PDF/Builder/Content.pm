@@ -4269,8 +4269,9 @@ sub _text_underline {
     }
     push @underline,1 if @underline%2;
 
-    my $underlineposition = (-$self->{' font'}->underlineposition()*$self->{' fontsize'}/1000||1);
-    my $underlinethickness = ($self->{' font'}->underlinethickness()*$self->{' fontsize'}/1000||1);
+    my $upem = $self->{' font'}->upem();
+    my $underlineposition = (-$self->{' font'}->underlineposition()*$self->{' fontsize'}/$upem ||1);
+    my $underlinethickness = ($self->{' font'}->underlinethickness()*$self->{' fontsize'}/$upem ||1);
     my $pos = 1;
 
     while (@underline) {
@@ -4328,12 +4329,13 @@ sub _text_strikethru {
     }
     push @strikethru,1 if @strikethru%2;
 
+    my $upem = $self->{' font'}->upem();
    # fonts define an underline position and thickness, but not strikethrough
    # ideally would be just under 1ex
-   #my $strikethruposition = (-$self->{' font'}->strikethruposition()*$self->{' fontsize'}/1000||1);
+   #my $strikethruposition = (-$self->{' font'}->strikethruposition()*$self->{' fontsize'}/$upem ||1);
     my $strikethruposition = 5*(($self->{' fontsize'}||20)/20);  # >0 is up
    # let's borrow the underline thickness for strikethrough purposes
-    my $strikethruthickness = ($self->{' font'}->underlinethickness()*$self->{' fontsize'}/1000||1);
+    my $strikethruthickness = ($self->{' font'}->underlinethickness()*$self->{' fontsize'}/$upem ||1);
     my $pos = 1;
 
     while (@strikethru) {

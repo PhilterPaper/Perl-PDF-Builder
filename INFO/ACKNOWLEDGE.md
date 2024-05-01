@@ -11,7 +11,9 @@ inclined).
 
 - Starting with the origins of the package, **Alfred Reibenschuh** built the 
 original _PDF::API2_ library, drawing on work by **Martin Hosken** 
-(_Text::PDF_, via the _Text::PDF::API_ wrapper).
+(_Text::PDF_, via the _Text::PDF::API_ wrapper). Reibenschuh has also been
+actively participating in discussions about where _PDF::Builder_ can
+go in future developments.
 - **Steve Simms** took over _PDF::API2_ and has continued to maintain it and
 extend its functionality. Much of his work is incorporated into _PDF::Builder_
 after the latter was forked from the former.
@@ -24,7 +26,8 @@ directly contributing code to) _PDF::Builder_, did inspire the Font Manager
 and some aspects of markup language support. His _HarfBuzz::Shaper_ can be
 used by _PDF::Builder_ applications to support many text shaping features. He 
 also has discussed with us many aspects of text processing that may prove 
-useful in future code and may show up later.
+useful in future code and may show up later. He has also developed an
+SVG-to-PDF package (_SVGPDF_) for SVG image support.
 - **Vadim Repin** contributed a number of fixes and minor enhancements.
 - **Davide Cervone** contributed support for allowing _PDF::Builder_ to 
 interface with _MathJax_ (NodeJS) for equation support `(upcoming feature)`.

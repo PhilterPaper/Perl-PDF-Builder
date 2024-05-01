@@ -264,6 +264,25 @@ sub iscff {
 
 =head1 TYPOGRAPHY-RELATED METHODS
 
+=head2 upem
+
+    $upem = $font->upem()
+
+=over
+
+Return the font's scaling factor (Units Per em). It is typically 1000 in most
+fonts, but more recent TTF and OTF fonts often use 2048 units.
+
+=back
+
+=cut
+
+sub upem { 
+    my $upem = $_[0]->data()->{'upem'}; 
+    if (!defined $upem) { $upem = 1000; }
+    return $upem;
+}
+
 =head2 fontbbox
 
     ($llx,$lly, $urx,$ury) = $font->fontbbox()
