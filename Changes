@@ -1,7 +1,23 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2024-05-01  UNRELEASED
+3.027     2024-05-07  UNRELEASED
 * = work in progress
+
+    lib/PDF/Builder/Basic/PDF/File.pm, devtools/html2php-PDFbuild-PDFversion.pl
+     Minor cleanup to get clean perlcritic run.
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Basic/PDF/File.pm, 
+       lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Content.pm, version, 
+       Makefile.PL, tools/optional_update.pl, docs/buildDoc.pl, 
+       t/00-all-usable.t, t/tiff.t, t/version.t, tools/2_t-tests.pl
+     Fix "require" of external libraries so oddly formatted VERSION numbers 
+       don't derail PDF::Builder loading. Builder was blowing up when 
+       Image::PNG::Libpng went to version 0.57_01 (development version)
+       for a while. Use version->parse("string")->numify() to create a uniform 
+       numeric version value for comparison (against a mininum). Also add 
+       SVGPDF version. Because of the conflict between the package 'version' 
+       and the function 'version()', change the function name to pdf_version().
+       Finally, start adding preliminary SVGPDF support code.
 
     lib/PDF/Builder/Content.pm, lib/PDF/Builder/Resource/BaseFont.pm,
       lib/PDF/Builder/Content/Text.pm

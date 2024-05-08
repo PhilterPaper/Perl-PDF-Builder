@@ -6,6 +6,7 @@ use strict;
 use warnings;
 use Carp;
 use List::Util qw(min max);
+use version;
 #use Data::Dumper;  # for debugging
 #  $Data::Dumper::Sortkeys = 1;  # hash keys in sorted order
  
@@ -16,6 +17,9 @@ use List::Util qw(min max);
 
 # VERSION
 our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
+
+my $TextMarkdown = '1.000031'; # minimum version of Text::Markdown;
+my $HTMLTreeBldr = '5.07';     # minimum version of HTML::TreeBuilder
 
 =head1 NAME
 
@@ -3675,10 +3679,15 @@ sub _md1_hash {
     my @array;
     my ($html, $rc);
     $rc = eval {
-        require Text::Markdown; # want to use 'markdown'
+        require Text::Markdown;
 	1;
     };
-    if (!defined $rc) { $rc = 0; }  # not available
+    if (!defined $rc) { $rc = 0; }  # else is 1
+    if ($rc) {
+	# installed, but not up to date?
+	if (version->parse("v$Text::Markdown::VERSION")->numify() <
+	    version->parse("v$TextMarkdown")->numify()) { $rc = 0; }
+    }
 
     if ($rc) {
 	# MD converter appears to be installed, so use it
@@ -3735,7 +3744,12 @@ sub _html_hash {
 	require HTML::TreeBuilder;
 	1;
     };
-    if (!defined $rc) { $rc = 0; }  # not available
+    if (!defined $rc) { $rc = 0; }  # else is 1
+    if ($rc) {
+	# installed, but not up to date?
+	if (version->parse("v$HTML::TreeBuilder::VERSION")->numify() <
+	    version->parse("v$HTMLTreeBldr")->numify()) { $rc = 0; }
+    }
 
     if ($rc) {
 	# HTML converter appears to be installed, so use it

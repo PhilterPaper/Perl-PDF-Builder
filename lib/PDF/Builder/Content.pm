@@ -4645,12 +4645,6 @@ have been specified.
 =back
 
 =cut
-#B<NOTE:> as HarfBuzz::Shaper is still in its early days, it is possible that
-#there will be major changes in its API. We hope that all changes will be 
-#upwardly compatible, but do not control this package and cannot guarantee that
-#there will not be any incompatible changes that in turn require changes to
-#PDF::Builder (C<textHS()>).
-#
 
 sub textHS {
     my ($self, $HSarray, $settings, %opts) = @_;

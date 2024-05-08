@@ -70,6 +70,7 @@ my %WriteMakefileArgs =
     #"Unicode::UCD" => 0,
     #"utf8" => 0,
     #"vars" => 0,
+    #"version" => 0,
     #"warnings" => 0,
      
     # === NOT core, but not currently used

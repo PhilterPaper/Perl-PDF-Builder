@@ -57,13 +57,14 @@ my @test_list = qw(
  rt120450
  rt126274
  string
+ svg
  text
  tiff
  version
  viewer-preferences
                   );
 # override full list above, and run just one or two tests
-#@test_list = qw( barcode );
+#@test_list = qw( tiff );
 
 # moved to xt/
 #   author-critic
@@ -90,7 +91,7 @@ if      (scalar @ARGV == 0) {
 
 foreach my $file (@test_list) {
     if ($file eq 'tiff') {
-	print "\nNote: t/tiff.t takes quite a bit longer than the others to run. Don't Panic!";
+	print "\nNote: t/tiff.t takes quite a bit longer than the others to run. Don't Panic!\n";
     }
 
     my @results = `perl t/$file.t`;

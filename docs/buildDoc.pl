@@ -15,7 +15,7 @@
 use strict;
 use warnings;
 use Getopt::Long;
-use Pod::Simple::XHTML;
+use Pod::Simple::XHTML 3.45;
 
 # VERSION
 our $LAST_UPDATE = '3.027'; # manually update whenever code is changed

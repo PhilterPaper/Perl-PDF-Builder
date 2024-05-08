@@ -277,8 +277,10 @@ sub open {
         if ($update) {
             die "PDF file '$filename' to update is not writable!" unless -w $filename;
         }
-        $fh = IO::File->new(($update ? '+' : '') . "<$filename") || return;
+        $fh = IO::File->new(($update ? '+' : '') . "<$filename");
+	if (!$fh) {
 	    die "File '$filename' unable to open! $!";
+	}
         $self->{' INFILE'} = $fh;
         if ($update) {
             $self->{' update'} = 1;
@@ -329,9 +331,9 @@ sub open {
 
 =head2 version
 
-    $new_version = $p->version($version, %opts) # Set 
+    $new_version = $p->pdf_version($version, %opts) # Set 
 
-    $ver = $p->version() # Get
+    $ver = $p->pdf_version() # Get
 
 =over
 
@@ -349,7 +351,7 @@ This message is suppressed if the 'silent' option is given with any value.
 
 =cut
 
-sub version {
+sub pdf_version {
     my $self = shift();
 
     # current version is the higher of trailer and header versions
@@ -522,8 +524,8 @@ Silently sets the version to the higher level.
 
 sub require_version {
     my ($self, $min_version) = @_;
-    my $current_version = $self->version();
-    $self->version($min_version) if $current_version < $min_version;
+    my $current_version = $self->pdf_version();
+    $self->pdf_version($min_version) if $current_version < $min_version;
     return $current_version;
 }
 

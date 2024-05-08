@@ -1,8 +1,11 @@
+#!/usr/bin/perl
 # build PDF-Builder distribution image
 #
 # consider copying MYMETA.* over META.* (before committing to GitHub)
 # see if attrib +R Makefile.PL (after editing) eliminates Kwalitee warning. NO
 #
+use strict;
+use warnings;
 use File::Path qw(make_path);
  
 my $builder = 'Makefile.PL';
@@ -287,13 +290,14 @@ sub checkForBackups {
 
   my $entry;
   my $result = 0; # nothing found yet
+  my $DIR;
 
   # open this directory
-  opendir(DIR, $dir) || die "unable to open dir '$dir': $!";
+  opendir($DIR, $dir) || die "unable to open dir '$dir': $!";
 
   my @dirList = ();
   my @fileList = ();
-  while ($entry = readdir(DIR)) {
+  while ($entry = readdir($DIR)) {
     if ($entry eq '.' || $entry eq '..') { next; }
     
     if (-d "$dir$entry") {
@@ -304,7 +308,7 @@ sub checkForBackups {
   }
 
   # done reading, so close directory
-  closedir(DIR);
+  closedir($DIR);
 
   while ($entry = shift(@fileList)) {
     # is a file... examine name
@@ -348,22 +352,25 @@ sub prepOutputDirs {
   mkdir($dir."code");
   mkdir($dir."docs");
   mkdir($dir."downloads");
+
+  return;
 } # end prepOutputDirs()
 
 sub eraseDir {
   my $dir = shift;
 
   my $entry;
+  my $DIR;
 
   # if $dir does exist, remove it recursively (must be empty for rmdir)
   if (-d $dir) {
 
     # open this directory
-    opendir(DIR, $dir) || die "unable to open dir '$dir': $!";
+    opendir($DIR, $dir) || die "unable to open dir '$dir': $!";
 
     my @dirList = ();
     my @fileList = ();
-    while ($entry = readdir(DIR)) {
+    while ($entry = readdir($DIR)) {
       if ($entry eq '.' || $entry eq '..') { next; }
     
       if (-d "$dir$entry") {
@@ -374,7 +381,7 @@ sub eraseDir {
     }
 
     # done reading, so close directory
-    closedir(DIR);
+    closedir($DIR);
 
     # erase all files in this dir
     while ($entry = shift(@fileList)) {
@@ -388,6 +395,8 @@ sub eraseDir {
     # finally, remove THIS directory
     rmdir($dir);
   }
+
+  return;
 } # end eraseDir()
 
 # -----------------------------------------
@@ -404,6 +413,7 @@ sub copyToCode {
   # put dir names in " " because they often have spaces in them
   system("xcopy \"$src\" \"$dst\" /E");
 
+  return;
 } # end copyToCode()
 
 # -----------------------------------------
@@ -418,15 +428,16 @@ sub makeHTML {
 
   my ($entry, $input, $output, $isPOD, $outfile);
   # $podBase set up at top
+  my $SRC;
 
   # open this directory for reading
-  opendir(SRC, "$src$extra") || die "unable to open dir '$src$extra': $!";
+  opendir($SRC, "$src$extra") || die "unable to open dir '$src$extra': $!";
 
   my @dirList = ();
   my @fileList = ();
   my @outputList = ();
 
-  while ($entry = readdir(SRC)) {
+  while ($entry = readdir($SRC)) {
     if ($entry eq '.' || $entry eq '..') { next; }
     
     if (-d "$src$extra$entry") {
@@ -446,7 +457,7 @@ sub makeHTML {
   }
 
   # done reading, so close directory
-  closedir(SRC);
+  closedir($SRC);
 
   while ($input = shift(@fileList)) {
     $output = shift(@outputList);
@@ -475,9 +486,10 @@ sub makeHTML {
       $outfile =~ s/<a>/<a $href>/;
     }
     # write modified outfile to $output file
-    unless (open(OUT, ">$output")) { die "Unable to open POD output file '$output': $!\n"; }
-    print OUT $outfile;
-    close(OUT); 
+    my $OUT;
+    unless (open($OUT, ">", $output)) { die "Unable to open POD output file '$output': $!\n"; }
+    print $OUT $outfile;
+    close($OUT); 
 
   } # process a .pm file found in a directory
 
@@ -486,6 +498,7 @@ sub makeHTML {
     makeHTML($src, $dst, "$extra$entry\\");
   }
 
+  return;
 } # end makeHTML()
 
 # -----------------------------------------
@@ -497,8 +510,9 @@ sub makeDownloads {
   # dst/code is the source directory, and dst/downloads is the target directory
   # $outputBasename is like "$GHname-3.001"
 
+  my $OUT;
   # also build dst/downloads/.downloads control file
-  unless (open(OUT, ">$dst\\downloads\\.downloads")) {
+  unless (open($OUT, ">", "$dst\\downloads\\.downloads")) {
     die "Unable to open output .downloads control file to write! $!\n";
   }
 
@@ -510,16 +524,17 @@ sub makeDownloads {
    
   # erase outputBasename.tar
   unlink("$dst\\downloads\\$outputBasename.tar");
-  print OUT "$outputBasename.tar.gz\n";
-  print OUT "The complete package in GNU-zipped tarball.\n";
+  print $OUT "$outputBasename.tar.gz\n";
+  print $OUT "The complete package in GNU-zipped tarball.\n";
    
   # product dst/downloads/outputBasename.zip from dst/code
   system("$cmd7Zip $dst\\downloads\\$outputBasename.zip $dst\\code\\*");
-  print OUT "$outputBasename.zip\n";
-  print OUT "The complete package in Windows ZIP format.\n";
+  print $OUT "$outputBasename.zip\n";
+  print $OUT "The complete package in Windows ZIP format.\n";
     
-  close(OUT);
+  close($OUT);
 
+  return;
 } # end makeDownloads()
 
 # -----------------------------------------
@@ -549,25 +564,26 @@ sub update_with_version {
                    '^(# $hiDir::$product release )\d\.\d{3}(.*)$',
                   );
 
-    foreach $f (0 .. $#name) {
+    my ($IN, $OUT);
+    foreach my $f (0 .. $#name) {
        #if ($f == 0) { system("attrib -R $name[0]"); }
-        unless (open(IN, "<$name[$f]")) { 
+        unless (open($IN, "<", $name[$f])) { 
             die "Unable to update $name[$f] with version\n";
         }
-        unless (open(OUT, ">$outtemp")) { 
+        unless (open($OUT, ">", $outtemp)) { 
             die "Unable to open temporary output file $outtemp\n";
         }
    
-        while ($line = <IN>) {
+        while ($line = <$IN>) {
             $line =~ s/$pattern[$f]/$1$VERSION$2/;
 	   #if ($ourLAST) {
 	   #    $line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
 	   #}
-	    print OUT $line;
+	    print $OUT $line;
         }
    
-        close(IN);
-        close(OUT);
+        close($IN);
+        close($OUT);
 	system("copy $outtemp $name[$f]");
 
 	system("dos2unix $name[$f]");
@@ -575,6 +591,7 @@ sub update_with_version {
        #if ($f == 0) { system("attrib +R $name[0]"); }
     }
     system("erase $outtemp");
+    return;
 }
 
 # -----------------------------------------
@@ -589,14 +606,15 @@ sub update_VERSION {
     my $newVer  = "our \$VERSION = '$VERSION'; # VERSION";
 
     my $outtemp = 'xxxxx.temp';
+    my $SRC;
 
     # open this directory for reading
-    opendir(SRC, "$src") || die "unable to open dir '$src': $!";
+    opendir($SRC, "$src") || die "unable to open dir '$src': $!";
 
     my @dirList = ();
     my @fileList = ();
 
-    while ($entry = readdir(SRC)) {
+    while ($entry = readdir($SRC)) {
         if ($entry eq '.' || $entry eq '..') { next; }
     
         if (-d "$src$entry") {
@@ -612,7 +630,7 @@ sub update_VERSION {
 
     # done reading, so close directory
     # have list of files and subdirectories within this one
-    closedir(SRC);
+    closedir($SRC);
 
     while ($name = shift(@fileList)) {
 
@@ -623,20 +641,21 @@ sub update_VERSION {
 	# make Read-Write
 	if ($ro_flag) { system("attrib -R $name"); }
 
-        unless (open(IN, "<$name")) { 
+	my ($IN, $OUT);
+        unless (open($IN, "<", $name)) { 
             die "Unable to update $name with version\n";
         }
-        unless (open(OUT, ">$outtemp")) { 
+        unless (open($OUT, ">", $outtemp)) { 
             die "Unable to open temporary output file $outtemp\n";
         }
    
-        while ($line = <IN>) {
+        while ($line = <$IN>) {
             $line =~ s/$pattern/$newVer/;
-	    print OUT $line;
+	    print $OUT $line;
         }
    
-        close(IN);
-        close(OUT);
+        close($IN);
+        close($OUT);
         $outtemp =~ s#/#\\#g;
         $name =~ s#/#\\#g;
 	system("copy $outtemp $name");
@@ -651,6 +670,7 @@ sub update_VERSION {
         update_VERSION($entry, $ro_flag);
     }
 
+    return;
 }
 
 #--------------
@@ -662,7 +682,7 @@ sub read_version {
     my @var_list = qw(version perl_v make_maker test_exception test_memory_cycle compress_zlib font_ttf graphics_tiff harfbuzz_shaper image_png_libpng text_markdown html_treebuilder pod_simple_xhtml);
 
     my $VER;  # file handle for version input
-    unless (open($VER, "<version")) {
+    unless (open($VER, "<", "version")) {
       die "Unable to open input 'version' control file $filename to read! $!\n";
     }
    
@@ -718,12 +738,13 @@ sub read_version {
 # also my $LAST_UPDATE to our $LAST_UPDATE if necessary
 sub update_Builder {
     # file should be ./lib/PDF/Builder.pm
-    my @pattern = ("(\\\$GrTFversion\\s*=\\s*)[\\d]+", 
-                   "(\\\$HBShaperVer\\s*=\\s*)[\\d.]+",
-	           "(\\\$LpngVersion\\s*=\\s*)[\\d.]+",
-                   "(\\\$TextMarkdown\\s*=\\s*)[\\d.]+",
-                   "(\\\$HTMLTreeBldr\\s*=\\s*)[\\d.]+",
-                   "(\\\$PodSimpleXHTML\\s*=\\s*)[\\d.]+",
+    my @pattern = ("(\\\$GrTFversion\\s*=\\s*)[\\d._]+", 
+                   "(\\\$HBShaperVer\\s*=\\s*)[\\d._]+",
+	           "(\\\$LpngVersion\\s*=\\s*)[\\d._]+",
+                   "(\\\$TextMarkdown\\s*=\\s*)[\\d._]+",
+                   "(\\\$HTMLTreeBldr\\s*=\\s*)[\\d._]+",
+                   "(\\\$PodSimpleXHTML\\s*=\\s*)[\\d._]+",
+                   "(\\\$SVGPDFver\\s*=\\s*)[\\d._]+",
 	          );
     my @newpat  = ("$GRAPHICS_TIFF",
 		   "$HARFBUZZ_SHAPER",
@@ -731,19 +752,21 @@ sub update_Builder {
 		   "$TEXT_MARKDOWN",
 		   "$HTML_TREEBUILDER",
 		   "$POD_SIMPLE_XHTML",
+		   "$SVGPDF",
 		  );
 
+    my ($IN, $OUT);
     my $infile = "lib\\$hiDir\\$master";
     my $outtemp = "xxxx.tmp";
-    unless (open(IN, "<$infile")) {
+    unless (open($IN, "<", $infile)) {
 	die "Unable to read $infile for update\n";
     }
-    unless (open(OUT, ">$outtemp")) {
+    unless (open($OUT, ">", $outtemp)) {
 	die "Unable to write temporary output file for $infile update\n";
     }
 
     my ($line, $i, @frags);
-    while ($line = <IN>) {
+    while ($line = <$IN>) {
 	# $line still has line-end \n
 	for ($i=0; $i<scalar(@pattern); $i++) {
             if ($line =~ m/$pattern[$i]/) {
@@ -755,13 +778,15 @@ sub update_Builder {
        #if ($ourLAST) {
        #    $line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
        #}
-	print OUT $line;
+	print $OUT $line;
     }
 
-    close(IN);
-    close(OUT);
+    close($IN);
+    close($OUT);
     system("copy $outtemp $infile");
     unlink($outtemp);
+
+    return;
 } # end update_Builder()
 
 # ---------------------
@@ -774,20 +799,21 @@ sub update_Makefile {
     # file should be ./Makefile.PL
     my @pattern = (
 		   "^use \\d\\.\\d{6};",
-		   "^use ExtUtils::MakeMaker\\s+[\\d.]+",
+		   "^use ExtUtils::MakeMaker\\s+[\\d._]+",
 		   "\\\$PERL_version\\s*=\\s*'\\d\\.\\d{6}'",
-		   "\\\$MakeMaker_version\\s*=\\s*'[\\d.]+'",
+		   "\\\$MakeMaker_version\\s*=\\s*'[\\d._]+'",
 		   # version should already be handled
-                   "\"Test::Exception\"\\s*=>\\s*[\\d.]+",
-                   "\"Test::Memory::Cycle\"\\s*=>\\s*[\\d.]+",
-                   "\"Compress::Zlib\"\\s*=>\\s*[\\d.]+",
-                   "\"Font::TTF\"\\s*=>\\s*[\\d.]+",
-	           "\"Graphics::TIFF\"\\s*=>\\s*[\\d.]+,", 
-	           "\"Image::PNG::Libpng\"\\s*=>\\s*[\\d.]+,",
-                   "\"HarfBuzz::Shaper\"\\s*=>\\s*[\\d.]+,",
-                   "\"Text::Markdown\"\\s*=>\\s*[\\d.]+,",
-                   "\"HTML::TreeBuilder\"\\s*=>\\s*[\\d.]+,",
-                   "\"Pod::Simple::XHTML\"\\s*=>\\s*[\\d.]+,",
+                   "\"Test::Exception\"\\s*=>\\s*[\\d._]+",
+                   "\"Test::Memory::Cycle\"\\s*=>\\s*[\\d._]+",
+                   "\"Compress::Zlib\"\\s*=>\\s*[\\d._]+",
+                   "\"Font::TTF\"\\s*=>\\s*[\\d._]+",
+	           "\"Graphics::TIFF\"\\s*=>\\s*[\\d._]+,", 
+	           "\"Image::PNG::Libpng\"\\s*=>\\s*[\\d._]+,",
+                   "\"HarfBuzz::Shaper\"\\s*=>\\s*[\\d._]+,",
+                   "\"Text::Markdown\"\\s*=>\\s*[\\d._]+,",
+                   "\"HTML::TreeBuilder\"\\s*=>\\s*[\\d._]+,",
+                   "\"Pod::Simple::XHTML\"\\s*=>\\s*[\\d._]+,",
+                   "\"SVGPDF\"\\s*=>\\s*[\\d._]+,",
 	          );
     my @newpat  = (
 		   "$PERL_V",
@@ -805,19 +831,21 @@ sub update_Makefile {
 		   "$TEXT_MARKDOWN",
 		   "$HTML_TREEBUILDER",
 		   "$POD_SIMPLE_XHTML",
+		   "$SVGPDF",
 		  );
 
+    my ($IN, $OUT);
     my $infile = $builder;
     my $outtemp = "xxxx.tmp";
-    unless (open(IN, "<$infile")) {
+    unless (open($IN, "<", $infile)) {
 	die "Unable to read $infile for update\n";
     }
-    unless (open(OUT, ">$outtemp")) {
+    unless (open($OUT, ">", $outtemp)) {
 	die "Unable to write temporary output file for $infile update\n";
     }
 
     my ($line, $i, @frags);
-    while ($line = <IN>) {
+    while ($line = <$IN>) {
 	# $line still has line-end \n
 	for ($i=0; $i<scalar(@pattern); $i++) {
 	    if ($line =~ m/$pattern[$i]/) {
@@ -829,13 +857,15 @@ sub update_Makefile {
        #if ($ourLAST) {
        #    $line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
        #}
-	print OUT $line;
+	print $OUT $line;
     }
 
-    close(IN);
-    close(OUT);
+    close($IN);
+    close($OUT);
     system("copy $outtemp $infile");
     unlink($outtemp);
+
+    return;
 } # end update_Makefile()
 
 sub update2_Makefile {
@@ -848,17 +878,18 @@ sub update2_Makefile {
 		   "devtools\\gzip --best",
 	          );
 
+    my ($IN, $OUT);
     my $infile = $script;
     my $outtemp = "xxxx.tmp";
-    unless (open(IN, "<$infile")) {
+    unless (open($IN, "<", $infile)) {
 	die "Unable to read $infile for update\n";
     }
-    unless (open(OUT, ">$outtemp")) {
+    unless (open($OUT, ">", $outtemp)) {
 	die "Unable to write temporary output file for $infile update\n";
     }
 
     my ($line, $i, @frags);
-    while ($line = <IN>) {
+    while ($line = <$IN>) {
 	# $line still has line-end \n
 	for ($i=0; $i<scalar(@pattern); $i++) {
 	    if ($line =~ m/$pattern[$i]/) {
@@ -866,13 +897,15 @@ sub update2_Makefile {
 		last;
 	    }
 	}
-	print OUT $line;
+	print $OUT $line;
     }
 
-    close(IN);
-    close(OUT);
+    close($IN);
+    close($OUT);
     system("copy $outtemp $infile");
     unlink($outtemp);
+
+    return;
 } # end update2_Makefile()
 
 # ---------------------
@@ -885,18 +918,19 @@ sub update_META {
     # META.json
     my @Jpattern = (
 		    # MM will be tripped twice, first time 0 is OK
-		    "\"ExtUtils::MakeMaker\"\\s*:\\s*\"[\\d.]+\"",
-                    "\"Compress::Zlib\"\\s*:\\s*\"[\\d.]+\"",
-                    "\"Font::TTF\"\\s*:\\s*\"[\\d.]+\"",
+		    "\"ExtUtils::MakeMaker\"\\s*:\\s*\"[\\d._]+\"",
+                    "\"Compress::Zlib\"\\s*:\\s*\"[\\d._]+\"",
+                    "\"Font::TTF\"\\s*:\\s*\"[\\d._]+\"",
 	            "\"perl\"\\s*:\\s*\"\\d\\.\\d{6}\"",
-                    "\"Test::Exception\"\\s*:\\s*\"[\\d.]+\"",
-                    "\"Test::Memory::Cycle\"\\s*:\\s*\"[\\d.]+\"",
-	            "\"Graphics::TIFF\"\\s*:\\s*\"[\\d.]+\"", 
-                    "\"HarfBuzz::Shaper\"\\s*:\\s*\"[\\d.]+\"",
-	            "\"Image::PNG::Libpng\"\\s:\\s*\"[\\d.]+\"",
-	            "\"Text::Markdown\"\\s:\\s*\"[\\d.]+\"",
-	            "\"HTML::TreeBuilder\"\\s:\\s*\"[\\d.]+\"",
-	            "\"Pod::Simple::XHTML\"\\s:\\s*\"[\\d.]+\"",
+                    "\"Test::Exception\"\\s*:\\s*\"[\\d._]+\"",
+                    "\"Test::Memory::Cycle\"\\s*:\\s*\"[\\d._]+\"",
+	            "\"Graphics::TIFF\"\\s*:\\s*\"[\\d._]+\"", 
+                    "\"HarfBuzz::Shaper\"\\s*:\\s*\"[\\d._]+\"",
+	            "\"Image::PNG::Libpng\"\\s:\\s*\"[\\d._]+\"",
+	            "\"Text::Markdown\"\\s:\\s*\"[\\d._]+\"",
+	            "\"HTML::TreeBuilder\"\\s:\\s*\"[\\d._]+\"",
+	            "\"Pod::Simple::XHTML\"\\s:\\s*\"[\\d._]+\"",
+	            "\"SVGPDF\"\\s:\\s*\"[\\d._]+\"",
 		    # meta-spec version has no "" around value, no update
 	            "\"version\"\\s*:\\s*\"\\d\\.\\d{3}\"",
 	           );
@@ -913,22 +947,24 @@ sub update_META {
 		    "$TEXT_MARKDOWN",
 		    "$HTML_TREEBUILDER",
 		    "$POD_SIMPLE_XHTML",
+		    "$SVGPDF",
 	            "$VERSION",
 	 	   );
     # META.yml
     my @Ypattern = (
 		    # MM will be tripped twice, first time 0 is OK
-		    "ExtUtils::MakeMaker:\\s*'[\\d.]+'",
-                    "Test::Exception:\\s*'[\\d.]+'",
-                    "Test::Memory::Cycle:\\s*'[\\d.]+'",
-	            "Graphics::TIFF:\\s*'[\\d.]+'", 
-                    "HarfBuzz::Shaper:\\s*'[\\d.]+'",
-	            "Image::PNG::Libpng:\\s*'[\\d.]+'",
-	            "Text::Markdown:\\s*'[\\d.]+'",
-	            "HTML::TreeBuilder:\\s*'[\\d.]+'",
-	            "Pod::Simple::XHTML:\\s*'[\\d.]+'",
-                    "Compress::Zlib:\\s*'[\\d.]+'",
-                    "Font::TTF:\\s*'[\\d.]+'",
+		    "ExtUtils::MakeMaker:\\s*'[\\d._]+'",
+                    "Test::Exception:\\s*'[\\d._]+'",
+                    "Test::Memory::Cycle:\\s*'[\\d._]+'",
+	            "Graphics::TIFF:\\s*'[\\d._]+'", 
+                    "HarfBuzz::Shaper:\\s*'[\\d._]+'",
+	            "Image::PNG::Libpng:\\s*'[\\d._]+'",
+	            "Text::Markdown:\\s*'[\\d._]+'",
+	            "HTML::TreeBuilder:\\s*'[\\d._]+'",
+	            "Pod::Simple::XHTML:\\s*'[\\d._]+'",
+	            "SVGPDF\\s*'[\\d._]+'",
+                    "Compress::Zlib:\\s*'[\\d._]+'",
+                    "Font::TTF:\\s*'[\\d._]+'",
 	            "perl:\\s*'\\d\\.\\d{6}'",
 	            # there is meta-spec version: which is indented, no update
 	            "^version:\\s*'\\d\\.\\d{3}'",
@@ -943,25 +979,27 @@ sub update_META {
 	            "$TEXT_MARKDOWN",
 	            "$HTML_TREEBUILDER",
 	            "$POD_SIMPLE_XHTML",
+	            "$SVGPDF",
 		    "$COMPRESS_ZLIB",
 		    "$FONT_TTF",
 	            "$PERL_V",
 	            "$VERSION",
                    );
     my @infiles = ('META.json', 'META.yml');
+    my ($IN, $OUT);
     my ($i, $infile);
     my $outtemp = "xxxx.tmp";
     for ($i=0; $i<scalar(@infiles); $i++) {
 	$infile = $infiles[$i];
-        unless (open(IN, "<$infile")) {
+        unless (open($IN, "<", $infile)) {
 	    die "Unable to read $infile for update\n";
         }
-        unless (open(OUT, ">$outtemp")) {
+        unless (open($OUT, ">", $outtemp)) {
 	    die "Unable to write temporary output file for $infile update\n";
         }
 
         my ($line, $j, @frags);
-        while ($line = <IN>) {
+        while ($line = <$IN>) {
 	    # $line still has line-end \n
 	    if ($i == 0) {
 	        for ($j=0; $j<scalar(@Jpattern); $j++) {
@@ -983,14 +1021,16 @@ sub update_META {
            #if ($ourLAST) {
            #    $line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
            #}
-	    print OUT $line;
+	    print $OUT $line;
         }
 
-        close(IN);
-        close(OUT);
+        close($IN);
+        close($OUT);
         system("copy $outtemp $infile");
         unlink($outtemp);
     } # loop through META files
+
+    return;
 } # end update_META()
 
 # ---------------------
@@ -1000,13 +1040,14 @@ sub update_META {
 # both library copy and temp copy
 sub update_all_usable {
     # file should be ./t/00-all-usable.t 
-    my @pattern = ("\\\$GrTFversion\\s*=\\s*[\\d.]+", 
-	           "\\\$LpngVersion\\s*=\\s*[\\d.]+",
+    my @pattern = ("\\\$GrTFversion\\s*=\\s*[\\d._]+", 
+	           "\\\$LpngVersion\\s*=\\s*[\\d._]+",
                    # (dummy update for future use)
-                   "\\\$HBShaperVer\\s*=\\s*[\\d.]+",
-                   "\\\$TextMarkdown\\s*=\\s*[\\d.]+",
-                   "\\\$HTMLTreeBldr\\s*=\\s*[\\d.]+",
-                   "\\\$PodSimpleXHTML\\s*=\\s*[\\d.]+",
+                   "\\\$HBShaperVer\\s*=\\s*[\\d._]+",
+                   "\\\$TextMarkdown\\s*=\\s*[\\d._]+",
+                   "\\\$HTMLTreeBldr\\s*=\\s*[\\d._]+",
+                   "\\\$PodSimpleXHTML\\s*=\\s*[\\d._]+",
+                   "\\\$SVGPDF\\s*=\\s*[\\d._]+",
 	          );
     my @newpat  = ("$GRAPHICS_TIFF",
 	           "$IMAGE_PNG_LIBPNG",
@@ -1015,19 +1056,21 @@ sub update_all_usable {
 		   "$TEXT_MARKDOWN",
 		   "$HTML_TREEBUILDER",
 		   "$POD_SIMPLE_XHTML",
+		   "$SVGPDF",
 		  );
 
+    my ($IN, $OUT);
     my $infile = "t\\00-all-usable.t";
     my $outtemp = "xxxx.tmp";
-    unless (open(IN, "<$infile")) {
+    unless (open($IN, "<", $infile)) {
 	die "Unable to read $infile for update\n";
     }
-    unless (open(OUT, ">$outtemp")) {
+    unless (open($OUT, ">", $outtemp)) {
 	die "Unable to write temporary output file for $infile update\n";
     }
 
     my ($line, $i, @frags);
-    while ($line = <IN>) {
+    while ($line = <$IN>) {
 	# $line still has line-end \n
 	for ($i=0; $i<scalar(@pattern); $i++) {
 	    if ($line =~ m/$pattern[$i]/) {
@@ -1039,25 +1082,28 @@ sub update_all_usable {
        #if ($ourLAST) {
        #    $line =~ s/^my \$LAST_UPDATE/our \$LAST_UPDATE/;
        #}
-	print OUT $line;
+	print $OUT $line;
     }
 
-    close(IN);
-    close(OUT);
+    close($IN);
+    close($OUT);
     system("copy $outtemp $infile");
     unlink($outtemp);
+
+    return;
 } # end update_all_usable()
 
 # ---------------------
 # optional_update.pl
 sub update_optional {
     # file should be optional_update.pl
-    my @pattern = ("\"Graphics::TIFF\",\\s*\"[\\d.]+\"", 
-	           "\"Image::PNG::Libpng\",\\s*\"[\\d.]+\"",
-                   "\"HarfBuzz::Shaper\",\\s*\"[\\d.]+\"",
-                   "\"Text::Markdown\",\\s*\"[\\d.]+\"",
-                   "\"HTML::TreeBuilder\",\\s*\"[\\d.]+\"",
-                   "\"Pod::Simple::XHTML\",\\s*\"[\\d.]+\"",
+    my @pattern = ("\"Graphics::TIFF\",\\s*\"[\\d._]+\"", 
+	           "\"Image::PNG::Libpng\",\\s*\"[\\d._]+\"",
+                   "\"HarfBuzz::Shaper\",\\s*\"[\\d._]+\"",
+                   "\"Text::Markdown\",\\s*\"[\\d._]+\"",
+                   "\"HTML::TreeBuilder\",\\s*\"[\\d._]+\"",
+                   "\"Pod::Simple::XHTML\",\\s*\"[\\d._]+\"",
+                   "\"SVGPDF\",\\s*\"[\\d._]+\"",
 	          );
     my @newpat  = ("$GRAPHICS_TIFF",
 	           "$IMAGE_PNG_LIBPNG",
@@ -1065,19 +1111,21 @@ sub update_optional {
 		   "$TEXT_MARKDOWN",
 		   "$HTML_TREEBUILDER",
 		   "$POD_SIMPLE_XHTML",
+		   "$SVGPDF",
 		  );
 
+    my ($IN, $OUT);
     my $infile = "tools/optional_update.pl";
     my $outtemp = "xxxx.tmp";
-    unless (open(IN, "<$infile")) {
+    unless (open($IN, "<", $infile)) {
 	die "Unable to read $infile for update\n";
     }
-    unless (open(OUT, ">$outtemp")) {
+    unless (open($OUT, ">", $outtemp)) {
 	die "Unable to write temporary output file for $infile update\n";
     }
 
     my ($line, $i, @frags);
-    while ($line = <IN>) {
+    while ($line = <$IN>) {
 	# $line still has line-end \n
 	for ($i=0; $i<scalar(@pattern); $i++) {
 	    if ($line =~ m/$pattern[$i]/) {
@@ -1094,12 +1142,14 @@ sub update_optional {
 	if ($line =~ m/# VERSION/) {
 	    $line = "our \$VERSION = '$VERSION'; # VERSION\n";
 	}
-	print OUT $line;
+	print $OUT $line;
     }
 
-    close(IN);
-    close(OUT);
+    close($IN);
+    close($OUT);
     $infile =~ s#/#\\#g;
     system("copy $outtemp $infile");
     unlink($outtemp);
+
+    return;
 } # end update_optional()

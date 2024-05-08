@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 use strict;
 use warnings;
 
@@ -286,6 +287,7 @@ h1, h2, h3 { text-align: center; }
 
     # write back out to PHP output file
     spew($string, $output);
+    return;
 }
 
 # ==================================

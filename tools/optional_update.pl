@@ -30,6 +30,7 @@ my %options = (
 	'4' => ["Text::Markdown",     "1.000031" ],
 	'5' => ["HTML::TreeBuilder",  "5.07"     ],
 	'6' => ["Pod::Simple::XHTML", "3.45"     ],
+	'7' => ["SVGPDF",             "0.86.2"   ],
               );
 
 print "\nHere are the available optional libraries. Select 0 or more of\n";
@@ -82,12 +83,13 @@ update_META_yml();
 sub update_Makefile {
     # file should be ./Makefile.PL
     my @pattern = (
-	           "(\"Graphics::TIFF\"\\s*=>\\s*)[\\d.]+,", 
-	           "(\"Image::PNG::Libpng\"\\s*=>\\s*)[\\d.]+,",
-                   "(\"HarfBuzz::Shaper\"\\s*=>\\s*)[\\d.]+,",
-                   "(\"Text::Markdown\"\\s*=>\\s*)[\\d.]+,",
-                   "(\"HTML::TreeBuilder\"\\s*=>\\s*)[\\d.]+,",
-                   "(\"Pod::Simple::XHTML\"\\s*=>\\s*)[\\d.]+,",
+	           "(\"Graphics::TIFF\"\\s*=>\\s*)[\\d._]+,",
+	           "(\"Image::PNG::Libpng\"\\s*=>\\s*)[\\d._]+,",
+                   "(\"HarfBuzz::Shaper\"\\s*=>\\s*)[\\d._]+,",
+                   "(\"Text::Markdown\"\\s*=>\\s*)[\\d._]+,",
+                   "(\"HTML::TreeBuilder\"\\s*=>\\s*)[\\d._]+,",
+                   "(\"Pod::Simple::XHTML\"\\s*=>\\s*)[\\d._]+,",
+                   "(\"SVGPDF\"\\s*=>\\s*)[\\d._]+,",
 	          );
 
     my $infile = "Makefile.PL";
@@ -160,12 +162,13 @@ sub update_Makefile {
 sub update_META_json {
     # file should be ./META.json
     my @pattern = (
-	           "(\"Graphics::TIFF\"\\s*:\\s*)\"[\\d.]+\"", 
-	           "(\"Image::PNG::Libpng\"\\s*:\\s*)\"[\\d.]+\"",
-                   "(\"HarfBuzz::Shaper\"\\s*:\\s*)\"[\\d.]+\"",
-                   "(\"Text::Markdown\"\\s*:\\s*)\"[\\d.]+\"",
-                   "(\"HTML::TreeBuilder\"\\s*:\\s*)\"[\\d.]+\"",
-                   "(\"Pod::Simple::XHTML\"\\s*:\\s*)\"[\\d.]+\"",
+	           "(\"Graphics::TIFF\"\\s*:\\s*)\"[\\d._]+\"",
+	           "(\"Image::PNG::Libpng\"\\s*:\\s*)\"[\\d._]+\"",
+                   "(\"HarfBuzz::Shaper\"\\s*:\\s*)\"[\\d._]+\"",
+                   "(\"Text::Markdown\"\\s*:\\s*)\"[\\d._]+\"",
+                   "(\"HTML::TreeBuilder\"\\s*:\\s*)\"[\\d._]+\"",
+                   "(\"Pod::Simple::XHTML\"\\s*:\\s*)\"[\\d._]+\"",
+                   "(\"SVGPDF\"\\s*:\\s*)\"[\\d._]+\"",
 	          );
 
     my $infile = "META.json";
@@ -225,12 +228,13 @@ sub update_META_json {
 sub update_META_yml {
     # file should be ./Makefile.PL
     my @pattern = (
-	           "(Graphics::TIFF:\\s*)'[\\d.]+'", 
-	           "(Image::PNG::Libpng:\\s*)'[\\d.]+'",
-                   "(HarfBuzz::Shaper:\\s*)'[\\d.]+'",
-                   "(Text::Markdown\\s*)'[\\d.]+'",
-                   "(HTML::TreeBuilder\\s*)'[\\d.]+'",
-                   "(Pod::Simple::XHTML\\s*)'[\\d.]+'",
+	           "(Graphics::TIFF:\\s*)'[\\d._]+'",
+	           "(Image::PNG::Libpng:\\s*)'[\\d._]+'",
+                   "(HarfBuzz::Shaper:\\s*)'[\\d._]+'",
+                   "(Text::Markdown\\s*)'[\\d._]+'",
+                   "(HTML::TreeBuilder\\s*)'[\\d._]+'",
+                   "(Pod::Simple::XHTML\\s*)'[\\d._]+'",
+                   "(SVGPDF\\s*)'[\\d._]+'",
 	          );
 
     my $infile = "META.yml";

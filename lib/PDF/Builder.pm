@@ -15,11 +15,13 @@ my $LpngVersion  = 0.57;     # minimum version of Image::PNG::Libpng
 my $TextMarkdown = 1.000031; # minimum version of Text::Markdown
 my $HTMLTreeBldr = 5.07;     # minimum version of HTML::TreeBuilder
 my $PodSimpleXHTML = 3.45;   # minimum version of Pod::Simple::XHTML
+my $SVGPDFver    = '0.86.2'; # minimum version of SVGPDF
 
 use Carp;
 use Encode qw(:all);
 use English;
 use FileHandle;
+use version;
 
 use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Util;
@@ -520,7 +522,7 @@ sub _bounding_box {
 }
 
 sub default_page_boundaries {
-    my %xxx = PDF::Builder::Page::boundaries(@_);
+    my %xxx = %{ PDF::Builder::Page::boundaries(@_) };
     # 5 element 'media' etc. hash of anonymous arrays each 4 numbers
     return %xxx;
 }
@@ -711,7 +713,7 @@ sub from_string {
 		    $newVer = substr($newVer, 0, length($currentVer));
 		} 
 	        substr($content, $pos+5, length($newVer)) = $newVer;
-		$self->version($newVer);
+		$self->pdf_version($newVer);
             }
 	}
     }
@@ -1795,9 +1797,9 @@ sub default {
 
 =head3 version
 
-    $version = $pdf->version() # Get
+    $version = $pdf->pdf_version() # Get
 
-    $version = $pdf->version($version) # Set (also returns newly set version)
+    $version = $pdf->pdf_version($version) # Set (also returns newly set version)
 
 =over
 
@@ -1815,10 +1817,14 @@ C<version> method.
 
 =cut
 
-sub version {
+sub pdf_version {
     my $self = shift();  # includes any %opts
 
-    return $self->{'pdf'}->version(@_); # just pass it over to the "real" one
+    if (!defined $self->{'pdf'}) {
+	carp "'pdf' element not defined in pdf_version() call";
+	return '1.4';
+    }
+    return $self->{'pdf'}->pdf_version(@_); # just pass it over to the "real" one
 }
 
 # when outputting a PDF feature, verCheckOutput(n, 'feature name') returns TRUE 
@@ -1838,13 +1844,13 @@ sub verCheckOutput {
     my ($self, $PDFver, $featureName) = @_;
 
     # check if feature required PDF version is higher than planned output
-    my $version = $self->version(); # current version
+    my $version = $self->pdf_version(); # current version
     if ($PDFver > $version) {
         if ($msgVer) {
 	    print "PDF version of requested feature '$featureName' is higher\n".                  "  than current output version $version ".
                   "(version reset to $PDFver)\n";
 	}
-        $self->version($PDFver);
+        $self->pdf_version($PDFver);
         return 1;
     } else {
         return 0;
@@ -1869,13 +1875,13 @@ sub verCheckOutput {
 sub verCheckInput {
     my ($self, $PDFver) = @_;
 
-    my $version = $self->version();
+    my $version = $self->pdf_version();
     # warning message and bump up version if read-in PDF level higher
     if ($PDFver > $version) {
         if ($msgVer) {
 	    print "PDF version just read in is higher than version of $version (version reset to $PDFver)\n";
 	}
-        $self->version($PDFver);
+        $self->pdf_version($PDFver);
         return 1;
     } else {
         return 0;
@@ -4186,6 +4192,7 @@ sub image {
                      $file =~ /\.png$/i      ? 'png'  :
                      $file =~ /\.gif$/i      ? 'gif'  :
                      $file =~ /\.tiff?$/i    ? 'tiff' :
+                     $file =~ /\.svg?$/i     ? 'svg'  :
                      $file =~ /\.p[bgpn]m$/i ? 'pnm'  : '');
 	# GD images are created on-the-fly and don't have files
     }
@@ -4198,6 +4205,8 @@ sub image {
         return $self->image_gif($file, %opts);
     } elsif ($format eq 'tiff') {
         return $self->image_tiff($file, %opts);
+    } elsif ($format eq 'svg') {
+        return $self->image_svg($file, %opts);
     } elsif ($format eq 'pnm') {
         return $self->image_pnm($file, %opts);
     } elsif ($format) {
@@ -4236,6 +4245,13 @@ sub _detect_image_format {
     # II4200 | MM0042 for TIFF
     return 'tiff' if $test =~ /^II\x2A\x00/;
     return 'tiff' if $test =~ /^MM\x00\x2A/;
+
+    # read up to 512 bytes for possible SVG file, expect to find '<svg\s'
+    $fh->seek(0, 0);
+    $bytes_read = $fh->read($test, 512);
+    $fh->seek(0, 0);
+    return 'svg'  if $test =~ /<svg\s/is;
+
     # GD images do not have files.
     return;
 }
@@ -4367,7 +4383,8 @@ sub LA_GT {
     if (!defined $rc) { $rc = 0; }  # else is 1
     if ($rc) {
 	# installed, but not up to date?
-	if ($Graphics::TIFF::VERSION < $GrTFversion) { $rc = 0; }
+	if (version->parse("v$Graphics::TIFF::VERSION")->numify() < 
+	    version->parse("v$GrTFversion")->numify()) { $rc = 0; }
     }
 
     return $rc;
@@ -4503,7 +4520,8 @@ sub LA_IPL {
     if (!defined $rc) { $rc = 0; }  # else is 1
     if ($rc) {
 	# installed, but not up to date?
-	if ($Image::PNG::Libpng::VERSION < $LpngVersion) { $rc = 0; }
+        if (version->parse("v$Image::PNG::Libpng::VERSION")->numify() < 
+            version->parse("v$LpngVersion")->numify()) { $rc = 0; }
     }
 
     return $rc;
@@ -4534,6 +4552,88 @@ sub image_gif {
     $self->{'pdf'}->out_obj($self->{'pages'});
 
     return $obj;
+}
+
+=head2 image_svg
+
+    $pnm = $pdf->image_svg($file, %opts)
+
+=over
+
+Imports and returns a new SVG image object. C<$file> may be a filename, a 
+string, or a filehandle.
+
+See L<PDF::Builder::Resource::XObject::Image::SVG> for additional information
+and C<examples/Content.pl> for some examples of placing an image on a page
+(JPEG, but the principle is the same). Note that C<object()> is preferably
+used rather than C<image()>. If C<image> determines that the image object is
+a processed SVG array, it simply passes it on to C<object>.
+
+=back
+
+=cut
+
+sub image_svg {
+    my ($self, $file, %opts) = @_;
+
+    my $rc;
+    $rc = eval {
+        require SVGPDF;
+	1;
+    };
+    if (!defined $rc) { $rc = 0; }  # else is 1
+    if ($rc) { 
+        # installed, but not up to date?
+	if (version->parse("v$SVGPDF::VERSION")->numify() <
+	    version->parse("v$SVGPDFver")->numify()) { $rc = 0; }
+    }
+   
+    require PDF::Builder::Resource::XObject::Image::SVG;
+    my $obj = PDF::Builder::Resource::XObject::Image::SVG->new($self->{'pdf'}, $file, %opts);
+
+    $self->{'pdf'}->out_obj($self->{'pages'});
+
+    return $obj;
+}
+
+=head3 LA_SVG
+
+    $rc = $pdf->LA_SVG()
+
+=over
+
+Returns 1 if the library name (package) SVGPDF is installed, and 
+0 otherwise. For this optional library, this call can be used to know if it 
+is safe to use certain functions. For example:
+
+=back
+
+    if ($pdf->LA_SVG() {
+        # is installed and usable
+    } else {
+        # not available. can't use image_svg or any other SVG function
+    }
+
+=cut
+
+# there doesn't seem to be a way to pass in a string (or bare) package name,
+# to make a generic check routine
+sub LA_SVG {
+    my ($self) = @_;
+
+    my ($rc);
+    $rc = eval {
+        require SVGPDF;
+        1;
+    };
+    if (!defined $rc) { $rc = 0; }  # else is 1
+    if ($rc) {
+	# installed, but not up to date?
+        if (version->parse("v$SVGPDF::VERSION")->numify() < 
+            version->parse("v$SVGPDFver")->numify()) { $rc = 0; }
+    }
+
+    return $rc;
 }
 
 =head2 image_gd
