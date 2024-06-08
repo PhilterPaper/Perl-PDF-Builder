@@ -48,7 +48,8 @@ print
 "IMAGE_PNG_LIBPNG = $IMAGE_PNG_LIBPNG\n" .
 "TEXT_MARKDOWN = $TEXT_MARKDOWN\n" .
 "HTML_TREEBUILDER = $HTML_TREEBUILDER\n" .
-"POD_SIMPLE_XHTML = $POD_SIMPLE_XHTML\n"; 
+"POD_SIMPLE_XHTML = $POD_SIMPLE_XHTML\n" .
+"SVGPDF = $SVGPDF\n";
 # PERL_V in format 5.020000
 # if needed, create PERL_V_DOT in format 5.20.0
 # will auto-update Makefile.PL, .pm, .pl, Builder.pm, META.* files below

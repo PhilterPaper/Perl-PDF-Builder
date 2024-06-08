@@ -1,10 +1,27 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2024-05-07  UNRELEASED
+3.027     2024-06-08  UNRELEASED
 * = work in progress
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/SVG.pm (new),
+      lib/PDF/Builder/Content.pm, Makefile.PL, README.md, INFO/ACKNOWLEDGE.md, 
+      tools/optional_update.pl, t/svg.t (new), t/00-all-usable.t, META.yml, 
+      tools/2_t-tests.pl, devtools/PDFbuild.pl, MANIFEST, version, 
+      examples/SVG.pl (new), examples/resources/SVG/ATS_flow-GIFfilein-
+      GPscatter5-MJdisplayNoTag-QRcode.svg (new), examples/README, 
+      examples/examples.output, tools/3_examples.pl
+     Add code to support via SVGPDF (package by Johan Vromans) SVG images with 
+      image_svg() method. In the near future, plans are to add MathJax markup,
+      GNUplot interfaces, and enhanced barcode support; all of which make use
+      of SVG.
 
     lib/PDF/Builder/Basic/PDF/File.pm, devtools/html2php-PDFbuild-PDFversion.pl
      Minor cleanup to get clean perlcritic run.
+
+    lib/PDF/Builder/Basic/PDF/File.pm
+     Per PDF::API2 commit 308e70f, die (crash) with message instead of
+      freezing up if a malformed PDF trailer's Prev keys result in a loop
+      or if multiple trailers use the same object ID and generation number.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Basic/PDF/File.pm, 
        lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Content.pm, version, 
@@ -17,7 +34,9 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
        numeric version value for comparison (against a mininum). Also add 
        SVGPDF version. Because of the conflict between the package 'version' 
        and the function 'version()', change the function name to pdf_version().
-       Finally, start adding preliminary SVGPDF support code.
+       Note that minimum levels must be proper integer or real numbers, and
+       cannot have any underscores, dashes, or multiple decimal points! To do
+       so would require quotes around the value so it is treated as a string.
 
     lib/PDF/Builder/Content.pm, lib/PDF/Builder/Resource/BaseFont.pm,
       lib/PDF/Builder/Content/Text.pm
@@ -34,7 +53,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
      Clean up code to permit any of three command lines: (nothing) -- default
       list of all core fonts, (-s) -- 3 sample core fonts, (list of names) --
       specified names (e.g., you need a quick list of what's in Zapf Dingbats
-      and wingdings).
+      and Wingdings).
 
     lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Docs.pm, 
       lib/PDF/Builder/Content.pm, MANIFEST, README.md, tools/3_examples.pl, 
@@ -68,11 +87,10 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       <li> list item! Instead, set "_marker-color" to affect only markers.
       Split out list examples from Column.pl examples, into Column_lists.pl.
 
-    lib/PDF/Builder/Content/Text.pm
-*    CSS text-align property for left, center, and right added. Not fully imp.
-      Implement <_move> tag: "x" attribute absolute positioning within column
-      and/or "dx" attribute relative positioning. perhaps ignore "dx" if $x is
-      undefined?
+    lib/PDF/Builder/Content/Text.pm, examples/Column.pl
+*    CSS text-align property for left, center, and right added. Also implement
+      <_move> tag: "x" attribute absolute positioning within column and/or 
+      "dx" attribute relative positioning. If $x is undefined, assume is at 0.
 
     lib/PDF/Builder/Content/Text.pm
       Minor change to font size upon entry: first it is defaulted to 12pt. The
@@ -141,7 +159,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
        insert_before() and insert_after() to place a bookmark within an
        existing list. If you *are* successfully using '$prev', please describe
        how you are using it so I can document it and restore it to the code!
-*  note that original Outline problem remains to be fixed
+       Note that original Outline problem (#207) remains to be fixed!
 
     README.md, contrib/*, examples/*, tools/*, devtools/PDFbuild.pl, 
       devtools/PDFversion.pl, docs/buildDoc.pl

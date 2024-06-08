@@ -110,6 +110,7 @@ functionality.
 * Text::Markdown (1.000031 or higher, needed if using 'md1' markup)
 * HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup)
 * Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc utility to create HTML documentation)
+* SVGPDF (0.086.2 or higher, needed if using SVG image functions)
 
 #### Fixes needed to OPTIONAL packages
 

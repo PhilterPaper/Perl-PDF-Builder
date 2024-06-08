@@ -176,6 +176,8 @@ tested with each release thereafter
  ShowFont.pl     list glyphs in a font. output varies by font, encoding(s),
                  and font type.
 
+ SVG.pl          5 examples of SVG graphics output as PDF
+
 =========== not currently "live" (removed or TBD):
 
  Column_layouts.pl   demonstrate column() with various column shapes

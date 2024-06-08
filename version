@@ -33,5 +33,5 @@ IMAGE_PNG_LIBPNG 0.57
 TEXT_MARKDOWN    1.000031
 HTML_TREEBUILDER 5.07
 POD_SIMPLE_XHTML 3.45
-SVGPDF           0.86.2
+SVGPDF           0.086  # actually, 0.086.2 preferred, but is not a number
 

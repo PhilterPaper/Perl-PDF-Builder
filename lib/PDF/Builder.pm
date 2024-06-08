@@ -15,7 +15,7 @@ my $LpngVersion  = 0.57;     # minimum version of Image::PNG::Libpng
 my $TextMarkdown = 1.000031; # minimum version of Text::Markdown
 my $HTMLTreeBldr = 5.07;     # minimum version of HTML::TreeBuilder
 my $PodSimpleXHTML = 3.45;   # minimum version of Pod::Simple::XHTML
-my $SVGPDFver    = '0.86.2'; # minimum version of SVGPDF
+my $SVGPDFver    = 0.086;    # minimum version of SVGPDF
 
 use Carp;
 use Encode qw(:all);
@@ -4569,6 +4569,15 @@ and C<examples/Content.pl> for some examples of placing an image on a page
 used rather than C<image()>. If C<image> determines that the image object is
 a processed SVG array, it simply passes it on to C<object>.
 
+B<CAUTIONS:> 
+1. If using C<image()>, the final two (optional) parameters are I<not> width 
+and height, but instead the horizontal scale and vertical scale.
+2. Results are unpredictable if allowing C<x> and C<y> positions to default
+to I<Lower Left> corner at C<(0,0)>, due to different scaling. It is best to
+explicitly give the C<x> and C<y> positions.
+3. Be aware that due to different scaling, some resulting images may be much
+larger than expected. Account for this when setting any C<scale> factor.
+
 =back
 
 =cut
@@ -4587,9 +4596,20 @@ sub image_svg {
 	if (version->parse("v$SVGPDF::VERSION")->numify() <
 	    version->parse("v$SVGPDFver")->numify()) { $rc = 0; }
     }
+    if (!$rc) {
+	carp "SVGPDF not available, so SVG image can not be processed";
+	return [];
+    }
    
     require PDF::Builder::Resource::XObject::Image::SVG;
-    my $obj = PDF::Builder::Resource::XObject::Image::SVG->new($self->{'pdf'}, $file, %opts);
+    my $obj = PDF::Builder::Resource::XObject::Image::SVG->new($self, $file, %opts);
+
+    if (defined $opts{'compress'} && $opts{'compress'} == 0) {
+        # suppress compression of stream
+        my $o = $obj->[0]->{'xo'};
+        delete $o->{'Filter'};
+        delete $o->{'-docompress'};
+    }
 
     $self->{'pdf'}->out_obj($self->{'pages'});
 

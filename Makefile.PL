@@ -113,6 +113,8 @@ my %WriteMakefileArgs =
     #  HTML::TreeBuilder => 5.07,
     #  # use of buildDoc.pl to build HTML documentation from POD
     #  Pod::Simple::XHTML => 3.45,
+    #  # process SVG images
+    #  SVGPDF => 0.086.2,
     #},     
 
   }

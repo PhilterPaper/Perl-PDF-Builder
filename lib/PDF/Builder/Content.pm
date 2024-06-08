@@ -2938,6 +2938,9 @@ I<stroked>.
     # -> CMYK color model
     # This maps to 0-1.0 values for cyan, magenta, yellow, and black
     $content->fillcolor('%FF000000');   # cyan
+    # Note: you might wish to make use of packages such as 
+    #  HashData::Color::PantoneToCMYK to map "Pantone" color names/codes to a 
+    #  set of CMYK values
 
     # Use an HSV color (! followed by 3, 6, 9, or 12 hex digits)
     # -> RGB color model
@@ -3192,6 +3195,11 @@ For example, if you have a 600x600 image that you would like to be
 shown at 600dpi (i.e., one inch square), set the width and height to 72.
 (72 Big Points is one inch)
 
+If passed the output of C<image_svg()>, C<image()> will simply pass it on to
+the C<object()> method, with adjusted parameters. Note that this usage 
+requires that the C<width> and C<height> are replaced by C<scale_x> and
+C<scale_y> values (optionally).
+
 =back
 
 =cut
@@ -3202,6 +3210,14 @@ sub image {
 
     if (!defined $y) { $y = 0; }
     if (!defined $x) { $x = 0; }
+
+    # is this a processed SVG (array of hashes)? throw over the wall to object
+    if (ref($img) eq 'ARRAY') {
+	# note that w and h are NOT the sizes, but are the SCALING factors
+	# (default: 1). discussed in image_svg() call.
+	$self->object($img, $x,$y, $w,$h);
+	return $self;
+    }
 
     if (defined $img->{'Metadata'}) {
         $self->_metaStart('PPAM:PlacedImage', $img->{'Metadata'});
@@ -3288,12 +3304,20 @@ sub formimage {
 
 =head3 object
 
-    $content = $content->object($object, $x,$y, $scale_x,$scale_y)
+    $content->object($object, $x,$y, $scale_x,$scale_y)
+
+    $content->object($object, $x,$y, $scale)
+
+    $content->object($object, $x,$y)
+
+    $content->object($object)
 
 =over
 
 Places an image or other external object (a.k.a. XObject) on the page in the
-specified location.
+specified location (giving the upper left corner of the object). Note that this
+positioning is I<different> from C<image()> and C<formimage()>, which give the
+I<lower left> corner!
 
 Up to four optional arguments may be given, with their defaults as described
 below.
@@ -3312,8 +3336,8 @@ image on the page, in points. If C<$scale_x> is omitted, it will default to 72
 pixels per inch. If C<$scale_y> is omitted, the image will be scaled
 proportionally, based on the image dimensions.
 
-For other external objects, the scale is a multiplier, where 1 (the default)
-represents 100% (i.e. no change).
+For other external objects, including B<SVG images>, the scale is a 
+multiplier, where 1 (the default) represents 100% (i.e., no change).
 
 If coordinate transformations have been made (see Coordinate Transformations
 above), the position and scale will be relative to the updated coordinates.
@@ -3321,12 +3345,15 @@ above), the position and scale will be relative to the updated coordinates.
 If no coordinate transformations are needed, this method can be called directly
 from the L<PDF::Builder::Page> object instead.
 
+If an SVG XObject array (output from C<image_svg()>) is passed in, only the
+first [0th] element will be displayed. Any others will be ignored.
+
 =back
 
 =cut
 
-# Behavior based on argument count. xo, x,y, scale_x/w,scale_y/h
-# 1: Place at 0, 0, 100%
+# Behavior based on argument count. xo, UL x,y, scale_x/w,scale_y/h
+# 1: Place at 0, 0, 100% (lower left)
 # 2: Place at x, 0, 100%
 # 3: Place at X, Y, 100%
 # 4: Place at X, Y, scaled
@@ -3339,21 +3366,103 @@ sub object {
     my ($self, $object, $x, $y, $scale_x, $scale_y) = @_;
     $x //= 0;
     $y //= 0;
-    if ($object->isa('PDF::Builder::Resource::XObject::Image')) {
-        $scale_x //= $object->width();
-        $scale_y //= $object->height() * $scale_x / $object->width();
-    }
-    else {
-        $scale_x //= 1;
-        $scale_y //= $scale_x;
+    $scale_x //= 1;
+    $scale_y //= $scale_x;
+
+    my $name;
+    if (UNIVERSAL::isa($object,'PDF::Builder::Resource::XObject::Image')) {
+        $scale_x = $object->width();
+        $scale_y = $object->height() * $scale_x / $object->width();
+	$name    = $object->name();
+
+    } elsif (ref($object) eq 'ARRAY') {
+	# output from image_svg()
+	if (defined $object->[0]) {
+
+	    # simply ignore anything after the first element (first <svg>)
+	    my $xo      = $object->[0]->{'xo'};      # hash of content
+            my $width   = $object->[0]->{'width'};   # viewBox width
+            my $height  = $object->[0]->{'height'};  # viewBox height
+	    my $vwidth  = $object->[0]->{'vwidth'};  # desired (design) width
+	    my $vheight = $object->[0]->{'vheight'}; # desired (design) height
+	    my @vb = @{$object->[0]->{'vbox'}};      # viewBox
+	    my @bb = $xo->bbox();                       # bounding box
+
+	    # scale factors to get viewBox dimensions to design dimensions
+	    my $flag = 1; # h and v scale will be defined
+	    if (!defined $width || !defined $vwidth ||
+	        !defined $height || !defined $vheight)  {
+	        $flag = 0;
+	    }
+
+  	    # bbox: y=0 is baseline, [1] is max descender, [3] is max ascender
+	    #       [0] min x (usually 0), [2] max x (usually width).
+	    #       if no "baseline", [3] is usually 0 (and [1] is -height)
+            my $h = $bb[3] - $bb[1];
+	    my ($hscale, $vscale);
+	    if ($flag) {
+	        $hscale = $vwidth / $width;
+                $vscale = $vheight / $height;
+	    } else {
+	        $hscale = $vscale = 1;
+	    }
+	    $scale_x *= $hscale;
+	    $scale_y *= $vscale;
+
+	    # if x,y = 0,0, assume want that to be the LOWER left corner,
+	    #   and rejigger y to be UPPER left
+	    if ($x == 0 && $y == 0) {
+                $y = $h;
+	    }
+
+            # store away in $object where the image bounds are UL to LR, 
+	    #    baseline y. only for SVG images, used by higher level apps.
+	    if ($bb[3] > 0) {
+	        # baseline for equation is above bottom of viewbox
+                $object->[0]->{'imageVB'} = [ 
+	             $x, $y, 
+	             $x+($bb[2]-$bb[0])*$scale_x, $y-$h*$scale_y,
+	             $y-($h+$bb[1])*$scale_y
+                ];
+	    } else {
+		# no separate baseline (give as LRy)
+                $object->[0]->{'imageVB'} = [ 
+	             $x, $y, 
+	             $x+($bb[2]-$bb[0])*$scale_x, $y-$h*$scale_y,
+	             $y-$h*$scale_y
+                ];
+	    }
+
+	    # make up a name
+	    $name = 'Sv' . pdfkey();
+
+            $self->save();
+	    # baseline for equation is above bottom of viewbox
+	    # also adjust y position, otherwise MathJax eqn
+	    #   itself is too high on page
+            $self->matrix($scale_x, 0, 0, $scale_y, $x, $y-$bb[3]*$scale_y);
+            $self->add('/' . $name, 'Do');
+            $self->restore();
+
+            $self->resource('XObject', $name, $xo);
+	    return $self;
+
+	} else {
+	    # don't have at least one <svg>
+	    carp "attempt to display SVG object with no content.";
+	    return $self;
+	}
+    } else {
+        # scale_x/y already set
+        $name    = $object->name();
     }
 
     $self->save();
     $self->matrix($scale_x, 0, 0, $scale_y, $x, $y);
-    $self->add('/' . $object->name(), 'Do');
+    $self->add('/' . $name, 'Do');
     $self->restore();
 
-    $self->resource('XObject', $object->name(), $object);
+    $self->resource('XObject', $name, $object);
 
     return $self;
 }

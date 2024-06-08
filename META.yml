@@ -26,6 +26,7 @@ no_index:
 #  Text::Markdown: '1.000031'
 #  HTML::TreeBuilder: '5.07'
 #  Pod::Simple::XHTML: '3.45'
+#  SVGPDF: '0.086.2'
 requires:
   Compress::Zlib: '1.0'
   Font::TTF: '1.04'
@@ -34,5 +35,5 @@ resources:
   bugtracker: https://github.com/PhilterPaper/Perl-PDF-Builder/issues
   homepage: https://metacpan.org/pod/PDF::Builder
   repository: git://github.com/PhilterPaper/Perl-PDF-Builder.git
-version: '3.026'
+version: '3.027'
 x_serialization_backend: 'CPAN::Meta::YAML version 0.018'

@@ -13,7 +13,7 @@ my $LpngVersion  = 0.57;     # minimum version of Image::PNG::Libpng
 my $TextMarkdown = 1.000031; # minimum version of Text::Markdown
 my $HTMLTreeBldr = 5.07;     # minimum version of HTML::TreeBuilder
 my $PodSimpleXHTML = 3.45;   # minimum version of Pod::Simple::XHTML
-my $SVGPDFver    = 0.86;     # minimum version of SVGPDF
+my $SVGPDFver    = 0.086;    # minimum version of SVGPDF
 
 # Test all of the modules to make sure that a simple "use Module"
 # won't result in a crash.

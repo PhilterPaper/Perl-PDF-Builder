@@ -361,3 +361,7 @@ ShowFont.pl
    15 pages each of Helvetica in 10 different Latin encodings
    run without command line arguments to get help
 
+SVG.pl
+  SVG.pdf
+   5 pages of 5 different SVG inputs
+

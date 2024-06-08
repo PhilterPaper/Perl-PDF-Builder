@@ -667,8 +667,8 @@ sub exclude_version {
 }
 
 sub show_diag { 
-    $failed = 0;
-   #$failed = 1;
+   #$failed = 0;
+    $failed = 1;
     return;
 }
 

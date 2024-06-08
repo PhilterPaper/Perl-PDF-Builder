@@ -30,7 +30,7 @@ my %options = (
 	'4' => ["Text::Markdown",     "1.000031" ],
 	'5' => ["HTML::TreeBuilder",  "5.07"     ],
 	'6' => ["Pod::Simple::XHTML", "3.45"     ],
-	'7' => ["SVGPDF",             "0.86.2"   ],
+	'7' => ["SVGPDF",             "0.086"    ], # 0.086.2 preferred
               );
 
 print "\nHere are the available optional libraries. Select 0 or more of\n";
