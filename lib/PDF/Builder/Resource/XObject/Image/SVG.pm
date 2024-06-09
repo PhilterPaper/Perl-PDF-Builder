@@ -64,6 +64,14 @@ can create PDFs that make use of Windows "core" fonts (extension). This does
 not guarantee that such fonts I<will> be available on the machine used to read
 the resulting PDF!
 
+=item compress => flag
+
+If set to true (a non-zero value; default is 1), the resulting XObject stream 
+will be compressed. This is what you would normally do. On the other hand,
+setting it to false (0) leaves the stream uncompressed. You may wish to do this
+if you want to examine the stream in the finished PDF, such as is done for the
+t-test.
+
 =back
 
 SVGPDF Options:

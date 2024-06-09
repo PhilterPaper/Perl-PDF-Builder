@@ -1,4 +1,4 @@
-# PDF::Builder release 3.026
+# PDF::Builder release 3.027
 
 A Perl library to facilitate the creation and modification of PDF files
 
