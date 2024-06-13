@@ -3921,8 +3921,9 @@ sub set_font_path {
 sub _findFont {
     my $font = shift();
 
-    # Check the current directory
+    # Check the current directory or the path is absolute
     return $font if -f $font;
+    return if substr($font, 0, 1) eq '/';
 
     # Check the font search path
     foreach my $directory (@font_path) {

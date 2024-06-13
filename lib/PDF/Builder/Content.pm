@@ -4507,6 +4507,8 @@ sub text {
 	    $align = 'c';
 	} elsif ($align eq 'r' || $align eq 'right') {
 	    $align = 'r';
+	} elsif ($align eq 'j' || $align eq 'justified') {
+	    $align = 'j';
 	} else {
 	    $align = 'l'; # silent error on bad alignment
 	}
@@ -4531,7 +4533,7 @@ sub text {
 
     # now have alignment, indentation amount, text width
     # adjust indentation by text width and alignment. negative to move text left
-    if      ($align eq 'l') {
+    if      ($align eq 'l' || $align eq 'j') {
 	# no change
     } elsif ($align eq 'c') {
 	$indent -= $wd/2;

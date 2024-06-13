@@ -615,7 +615,9 @@ sub text_fill_left {
     # copy dashed option names to preferred undashed names
     if (defined $opts{'-spillover'} && !defined $opts{'spillover'}) { $opts{'spillover'} = delete($opts{'-spillover'}); }
 
-    my $over = (not(defined($opts{'spillover'}) and $opts{'spillover'} == 0));
+    # 0 = overflow past right margin NOT allowed; 1 = allowed
+    my $over = defined($opts{'spillover'}) && $opts{'spillover'} == 1;
+    $over = 0 if $over eq '';
     my ($line, $ret) = $self->_text_fill_line($text, $width, $over, %opts);
     # override any stray 'align' that got through to here
     $width = $self->text($line, %opts, 'align'=>'l');
@@ -647,7 +649,9 @@ sub text_fill_center {
     # copy dashed option names to preferred undashed names
     if (defined $opts{'-spillover'} && !defined $opts{'spillover'}) { $opts{'spillover'} = delete($opts{'-spillover'}); }
 
-    my $over = (not(defined($opts{'spillover'}) and $opts{'spillover'} == 0));
+    # 0 = overflow past right margin NOT allowed; 1 = allowed
+    my $over = defined($opts{'spillover'}) && $opts{'spillover'} == 1;
+    $over = 0 if $over eq '';
     my ($line, $ret) = $self->_text_fill_line($text, $width, $over, %opts);
     $width = $self->text_center($line, %opts);
     return ($width, $ret);
@@ -673,7 +677,9 @@ sub text_fill_right {
     # copy dashed option names to preferred undashed names
     if (defined $opts{'-spillover'} && !defined $opts{'spillover'}) { $opts{'spillover'} = delete($opts{'-spillover'}); }
 
-    my $over = (not(defined($opts{'spillover'}) and $opts{'spillover'} == 0));
+    # 0 = overflow past right margin NOT allowed; 1 = allowed
+    my $over = defined($opts{'spillover'}) && $opts{'spillover'} == 1;
+    $over = 0 if $over eq '';
     my ($line, $ret) = $self->_text_fill_line($text, $width, $over, %opts);
     $width = $self->text_right($line, %opts);
     return ($width, $ret);
@@ -725,7 +731,9 @@ sub text_fill_justified {
 	else { warn "Unknown last_align for justified fill, 'left' used\n"; }
     }
 
-    my $over = (not(defined($opts{'spillover'}) and $opts{'spillover'} == 0));
+    # 0 = overflow past right margin NOT allowed; 1 = allowed
+    my $over = defined($opts{'spillover'}) && $opts{'spillover'} == 1;
+    $over = 0 if $over eq '';
     my ($line, $ret) = $self->_text_fill_line($text, $width, $over, %opts);
     # if last line, use $align (don't justify)
     if ($ret eq '') {
