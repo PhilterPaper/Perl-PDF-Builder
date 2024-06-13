@@ -1,7 +1,12 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2024-06-08  UNRELEASED
+3.027     2024-06-12  UNRELEASED
 * = work in progress
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Content.pm, 
+      lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/CIDFont.pm
+     Fix failed paragraph justification due to word-spacing not being passed
+      to text output routine when TTF/OTF fonts are used, per #193.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/SVG.pm (new),
       lib/PDF/Builder/Content.pm, Makefile.PL, README.md, INFO/ACKNOWLEDGE.md, 
