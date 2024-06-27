@@ -1,12 +1,9 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2024-06-12  UNRELEASED
+3.027     2024-06-27  UNRELEASED
 * = work in progress
 
-    lib/PDF/Builder.pm, lib/PDF/Builder/Content.pm, 
-      lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/CIDFont.pm
-     Fix failed paragraph justification due to word-spacing not being passed
-      to text output routine when TTF/OTF fonts are used, per #193.
+  ==== New features
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/SVG.pm (new),
       lib/PDF/Builder/Content.pm, Makefile.PL, README.md, INFO/ACKNOWLEDGE.md, 
@@ -19,46 +16,6 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       image_svg() method. In the near future, plans are to add MathJax markup,
       GNUplot interfaces, and enhanced barcode support; all of which make use
       of SVG.
-
-    lib/PDF/Builder/Basic/PDF/File.pm, devtools/html2php-PDFbuild-PDFversion.pl
-     Minor cleanup to get clean perlcritic run.
-
-    lib/PDF/Builder/Basic/PDF/File.pm
-     Per PDF::API2 commit 308e70f, die (crash) with message instead of
-      freezing up if a malformed PDF trailer's Prev keys result in a loop
-      or if multiple trailers use the same object ID and generation number.
-
-    lib/PDF/Builder.pm, lib/PDF/Builder/Basic/PDF/File.pm, 
-       lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Content.pm, version, 
-       Makefile.PL, tools/optional_update.pl, docs/buildDoc.pl, 
-       t/00-all-usable.t, t/tiff.t, t/version.t, tools/2_t-tests.pl
-     Fix "require" of external libraries so oddly formatted VERSION numbers 
-       don't derail PDF::Builder loading. Builder was blowing up when 
-       Image::PNG::Libpng went to version 0.57_01 (development version)
-       for a while. Use version->parse("string")->numify() to create a uniform 
-       numeric version value for comparison (against a mininum). Also add 
-       SVGPDF version. Because of the conflict between the package 'version' 
-       and the function 'version()', change the function name to pdf_version().
-       Note that minimum levels must be proper integer or real numbers, and
-       cannot have any underscores, dashes, or multiple decimal points! To do
-       so would require quotes around the value so it is treated as a string.
-
-    lib/PDF/Builder/Content.pm, lib/PDF/Builder/Resource/BaseFont.pm,
-      lib/PDF/Builder/Content/Text.pm
-     Per ticket #215 (Johan Vromans), corrected underlining (and also strike-
-      through and [future] overline) thickness and positioning to use the 
-      correct Units Per Em (usually 1000, but many recent TTF and OTF fonts 
-      use 2048 or even higher values).
-
-    lib/PDF/Builder/Content/Text.pm
-     Avoid top margins if at very beginning of column, and not just for
-      <p> paragraphs.
-
-    examples/020_corefonts 
-     Clean up code to permit any of three command lines: (nothing) -- default
-      list of all core fonts, (-s) -- 3 sample core fonts, (list of names) --
-      specified names (e.g., you need a quick list of what's in Zapf Dingbats
-      and Wingdings).
 
     lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Docs.pm, 
       lib/PDF/Builder/Content.pm, MANIFEST, README.md, tools/3_examples.pl, 
@@ -97,6 +54,32 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       <_move> tag: "x" attribute absolute positioning within column and/or 
       "dx" attribute relative positioning. If $x is undefined, assume is at 0.
 
+    lib/PDF/Builder/Basic/PDF/File.pm
+     Per PDF::API2 commit 308e70f, die (crash) with message instead of
+      freezing up if a malformed PDF trailer's Prev keys result in a loop
+      or if multiple trailers use the same object ID and generation number.
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Basic/PDF/File.pm, 
+       lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Content.pm, version, 
+       Makefile.PL, tools/optional_update.pl, docs/buildDoc.pl, 
+       t/00-all-usable.t, t/tiff.t, t/version.t, tools/2_t-tests.pl
+     Fix "require" of external libraries so oddly formatted VERSION numbers 
+       don't derail PDF::Builder loading. Builder was blowing up when 
+       Image::PNG::Libpng went to version 0.57_01 (development version)
+       for a while. Use version->parse("string")->numify() to create a uniform 
+       numeric version value for comparison (against a mininum). Also add 
+       SVGPDF version. Because of the conflict between the package 'version' 
+       and the function 'version()', change the function name to pdf_version().
+       Note that minimum levels must be proper integer or real numbers, and
+       cannot have any underscores, dashes, or multiple decimal points! To do
+       so would require quotes around the value so it is treated as a string.
+
+    examples/020_corefonts 
+     Clean up code to permit any of three command lines: (nothing) -- default
+      list of all core fonts, (-s) -- 3 sample core fonts, (list of names) --
+      specified names (e.g., you need a quick list of what's in Zapf Dingbats
+      and Wingdings).
+
     lib/PDF/Builder/Content/Text.pm
       Minor change to font size upon entry: first it is defaulted to 12pt. The
       next step of overriding that setting with the text object's fontsize has
@@ -110,11 +93,95 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       A few tags are now upper case (are accepted), and some bogus tags (expect 
       an error message) and bogus CSS entries (ignored) in one sample.
 
-    lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm
-     Fix #210 (reported in API2 #75) default_page_size() was failing.
-
     lib/PDF/Builder/docs/buildDoc.pl
      Add run suggestions and examples for other structures of packages.
+
+    lib/PDF/Builder.pm, docs/buildDoc.pl, lib/PDF/Builder/Docs.pm, 
+      lib/PDF/Builder/Resource/UniFont.pm, 
+      lib/PDF/Builder/Resource/CIDFont/CJKFont-TrueType.pm,
+      lib/PDF/Builder/Resoure/Font/BdFont-CoreFont-Postscript-SynFont.pm,
+     Rearrange some of the documentation and update some "Options" lists to
+      make looking up font options more straightforward and complete.
+
+    lib/PDF/Builder/Content.pm
+      Move end/endpath description (POD) to a more appropriate section.
+
+    lib/PDF/Builder/Basic/PDF/File.pm
+      If open() for update, check that existing PDF is read/write. Also report
+       any error opening a PDF, and die, instead of just returning.
+
+    lib/PDF/Builder/Docs-Outlines-Outline.pm
+      Clarify and extend the documentation for creating and maintaining
+       outlines (bookmarks), including how to create multilevel (nested)
+       bookmarks. Remove '$prev' entry from Outline's constructor, as it
+       appears to have never functioned as intended. Instead, use the methods
+       insert_before() and insert_after() to place a bookmark within an
+       existing list. If you *are* successfully using '$prev', please describe
+       how you are using it so I can document it and restore it to the code!
+       Note that original Outline problem (#207) remains to be fixed!
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/PNG_IPL.pm,
+      lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm,
+      lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm
+     Update Image::PNG::Libpng handling so that SVGPDF library will be able
+      to handle inlined PNG images by passing an IO::String "filehandle" from
+      File::LoadLines, etc. Also, TIFF (with Graphics::TIFF usage) will now
+      accept filehandles (at least, "GLOB" type) as input, and write out a
+      temporary file to use. Certain operating systems seem to have trouble
+      erasing the temporary file, so temps may build up over time! This area of
+      filehandle inputs is still being actively investigated. It appears that
+      all image formats except GD (GIF, JPEG, TIFF, TIFF with Graphics::TIFF, 
+      PNM, PNG, and PNG with Image::PNG::Libpng) can now be given either a 
+      filepath and name, or a Perl filehandle.
+
+    lib/PDF/Builder/Content.pm
+     Correct placement of content of "object" and in POD elaborate on necessary
+      corrections that may be needed.
+
+    lib/PDF/Builder.pm
+     Recommend workaround for problems with Adobe Acrobat Reader when 
+      displaying decimal (only) page labels (need to specify "start").
+
+    (most .pm files) update POD for more consistent appearance, including links
+      for major entries and methods.
+    docs/buildDoc.pl put NAVIGATION links at the top of the Table of Contents,
+      since usually now many more entries are in the TOC. The links themselves
+      are still at the bottom of the page.
+    devtools/PDFbuild.pl updates found to be needed in 3.026 build.
+    devtools/html2php.pl updates found to be needed.
+    MANIFEST add INFO/Changes_2023.
+
+  ==== Bug fixes
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm
+     Update recommendations that not only should T1 (PS) font and CJK font
+      users strongly consider changing over to TTF/OTF fonts, but add that
+      "core" fonts (while they will always be supported), are rather limited in 
+      their capabilities (especially single-byte encoding only, no UTF-8, 
+      limited selection of glyphs, no font embedding) and users should consider 
+      changing over to TTF/OTF fonts to get more capabilities.
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Content.pm, 
+      lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/CIDFont.pm
+     Fix failed paragraph justification due to word-spacing not being passed
+      to text output routine when TTF/OTF fonts are used, per #193.
+
+    lib/PDF/Builder/Basic/PDF/File.pm, devtools/html2php-PDFbuild-PDFversion.pl
+     Minor cleanup to get clean perlcritic run.
+
+    lib/PDF/Builder/Content.pm, lib/PDF/Builder/Resource/BaseFont.pm,
+      lib/PDF/Builder/Content/Text.pm
+     Per ticket #215 (Johan Vromans), corrected underlining (and also strike-
+      through and [future] overline) thickness and positioning to use the 
+      correct Units Per Em (usually 1000, but many recent TTF and OTF fonts 
+      use 2048 or even higher values).
+
+    lib/PDF/Builder/Content/Text.pm
+     Avoid top margins if at very beginning of column, and not just for
+      <p> paragraphs.
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Page.pm
+     Fix #210 (reported in API2 #75) default_page_size() was failing.
 
     lib/PDF/Builder/Resource/Font/CoreFont.pm
      Expand on descriptions of standard and Windows core fonts.
@@ -142,69 +209,14 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       HTML::TreeBuilder will receive an upgrade to prereq HTML::Tagset 3.22 
       (minimum) and the update will be taken care of automatically.
 
-    lib/PDF/Builder.pm, docs/buildDoc.pl, lib/PDF/Builder/Docs.pm, 
-      lib/PDF/Builder/Resource/UniFont.pm, 
-      lib/PDF/Builder/Resource/CIDFont/CJKFont-TrueType.pm,
-      lib/PDF/Builder/Resoure/Font/BdFont-CoreFont-Postscript-SynFont.pm,
-     Rearrange some of the documentation and update some "Options" lists to
-      make looking up font options more straightforward and complete.
-
-    lib/PDF/Builder/Content.pm
-      Move end/endpath description (POD) to a more appropriate section.
-
-    lib/PDF/Builder/Basic/PDF/File.pm
-      If open() for update, check that existing PDF is read/write. Also report
-       any error opening a PDF, and die, instead of just returning.
-
-    lib/PDF/Builder/Docs-Outlines-Outline.pm
-      Clarify and extend the documentation for creating and maintaining
-       outlines (bookmarks), including how to create multilevel (nested)
-       bookmarks. Remove '$prev' entry from Outline's constructor, as it
-       appears to have never functioned as intended. Instead, use the methods
-       insert_before() and insert_after() to place a bookmark within an
-       existing list. If you *are* successfully using '$prev', please describe
-       how you are using it so I can document it and restore it to the code!
-       Note that original Outline problem (#207) remains to be fixed!
-
     README.md, contrib/*, examples/*, tools/*, devtools/PDFbuild.pl, 
       devtools/PDFversion.pl, docs/buildDoc.pl
      Bite the bullet and change "my $LAST_UPDATE" to "our $LAST_UPDATE", and
       remove the build-time edit of all these files. .pm file instances were
       already changed earlier during POD structure updates.
 
-    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/PNG_IPL.pm,
-      lib/PDF/Builder/Resource/XObject/Image/TIFF_GT.pm,
-      lib/PDF/Builder/Resource/XObject/Image/TIFF/File_GT.pm
-     Update Image::PNG::Libpng handling so that SVGPDF library will be able
-      to handle inlined PNG images by passing an IO::String "filehandle" from
-      File::LoadLines, etc. Also, TIFF (with Graphics::TIFF usage) will now
-      accept filehandles (at least, "GLOB" type) as input, and write out a
-      temporary file to use. Certain operating systems seem to have trouble
-      erasing the temporary file, so temps may build up over time! This area of
-      filehandle inputs is still being actively investigated. It appears that
-      all image formats except GD (GIF, JPEG, TIFF, TIFF with Graphics::TIFF, 
-      PNM, PNG, and PNG with Image::PNG::Libpng) can now be given either a 
-      filepath and name, or a Perl filehandle.
-
     examples/RMtutorial.pl
      Correct font 'Times' to 'Times-Roman' to avoid warning messages.
-
-    lib/PDF/Builder/Content.pm
-     Correct placement of content of "object" and in POD elaborate on necessary
-      corrections that may be needed.
-
-    lib/PDF/Builder.pm
-     Recommend workaround for problems with Adobe Acrobat Reader when 
-      displaying decimal (only) page labels (need to specify "start").
-
-    (most .pm files) update POD for more consistent appearance, including links
-      for major entries and methods.
-    docs/buildDoc.pl put NAVIGATION links at the top of the Table of Contents,
-      since usually now many more entries are in the TOC. The links themselves
-      are still at the bottom of the page.
-    devtools/PDFbuild.pl updates found to be needed in 3.026 build.
-    devtools/html2php.pl updates found to be needed.
-    MANIFEST add INFO/Changes_2023.
 
 (see INFO/Changes_2023 for earlier changes)
 

@@ -4145,8 +4145,8 @@ B<Caution:> Do not confuse this C<image> ($pdf-E<gt>) with the image method
 found in the graphics (gfx) class ($gfx-E<gt>), used to actually I<place> a
 read-in or decoded image on the page!
 
-See L<PDF::Builder::Content/image> for details about placing images on a page
-once they're imported.
+See L<PDF::Builder::Content/image> and L<PDF::Builder::Content/object> for 
+details about placing images on a page once they're imported.
 
 The image format is normally detected automatically based on the file's
 extension (.gif, .png, .tif/.tiff, .jpg/.jpeg, .pnm/.pbm/.pgm/.ppm). If passed 

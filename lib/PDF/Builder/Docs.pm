@@ -679,7 +679,7 @@ The C<level> parameter accepts the following values:
 
 =over
 
-=item Z<>0 
+=item Z<>0
 
 Do not output any diagnostic messages; just return any version override.
 
@@ -1549,7 +1549,12 @@ Note that core fonts use fixed lists of expected glyphs, along with metrics
 such as their widths. This may not exactly match up with whatever local font
 file is used by the PDF reader. It's usually pretty close, but many cases have
 been found where the list of glyphs is different between the core fonts and
-various local font files, so be aware of this.
+various local font files, so be aware of this. There is no guarantee that all
+glyphs (code points) found in one single-byte encoding will be found in
+another, nor that font metrics are available for all glyphs covered by a given
+singe-byte encoding. If you are writing in English, or even in most Western
+European languages, this is usually not a problem, but for other languages it
+might be.
 
 To allow UTF-8 text and extended glyph counts, you should 
 consider replacing your use of core fonts with TrueType (.ttf) and OpenType
@@ -1590,7 +1595,9 @@ metrics are known and match the glyphs, UTF-8 encoding can be used, and
 that the glyphs I<will> be available on the reader's machine. At least on
 Windows platforms, most of the fonts are TTF anyway, which are used behind the
 scenes for "core" fonts, while missing most of the capabilities of TTF (now
-or possibly later in PDF::Builder) such as embedding, ligatures, UTF-8, etc.
+or possibly later in PDF::Builder) such as embedding, kerning, ligatures (via 
+HarfBuzz::Shaper), UTF-8, etc. In addition, with font embedding you will be
+closer to the goal of PDF/A (not yet formally supported in PDF::Builder).
 The downside is, obviously, that the resulting PDF file will be larger because
 it includes the font(s). There I<might> also be copyright or licensing issues 
 with the redistribution of font files in this manner (you might want to check,
@@ -1642,7 +1649,9 @@ be checked to see how to parse the file.
 To allow UTF-8 text and extended glyph counts in one font, you should 
 consider replacing your use of Type1 fonts with TrueType (.ttf) and OpenType
 (.otf) fonts. There are tools, such as I<FontForge>, which can do a fairly good
-(though, not perfect) job of converting your font library to OTF.
+(though, not perfect) job of converting your font library to OTF. See
+L<PDF::Builder::Docs/Core Fonts> above for more discussion of the limitations
+of single-byte encodings.
 
 B<Examples:>
 
@@ -1753,6 +1762,11 @@ It may act a little differently than C<cjkfont> (due a a different Cmap), but
 you I<should> be able to embed the font file into the PDF.
 
 See also L<PDF::Builder::Resource::CIDFont::CJKFont>
+
+Due to the lack of ongoing support for CJK fonts, and the apparent "arrested 
+development" of PDF support for them at an early stage of life, we I<strongly> 
+recommend that you attempt to directly use TTF or OTF fonts for Far-Eastern 
+(CJK) text support (via C<ttfont()>) before resorting to C<cjkfont()> usage!
 
 =head3 Synthetic Fonts
 
