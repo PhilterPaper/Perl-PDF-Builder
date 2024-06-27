@@ -631,13 +631,11 @@ sub append_file {
     }
     $tdict->{'Size'} = $self->{'Size'};
 
-
     foreach my $key (grep { $_ !~ m/^\s/ } keys %$self) {
         $tdict->{$key} = $self->{$key} unless defined $tdict->{$key};
     }
 
     $fh->seek($self->{' epos'}, 0);
-
     $self->out_trailer($tdict, $self->{' update'});
     close $self->{' OUTFILE'};
 
@@ -732,8 +730,6 @@ sub close_file {
     # NO! Don't do that thing! In fact, let out_trailer do the opposite!
 
     $tdict->{'Size'} = $self->{'Size'} || PDFNum(1);
-
-
     $tdict->{'Prev'} = PDFNum($self->{' loc'}) if $self->{' loc'};
     if ($self->{' update'}) {
         foreach my $key (grep { $_ !~ m/^[\s\-]/ } keys %$self) {
@@ -743,8 +739,6 @@ sub close_file {
         my $fh = $self->{' INFILE'};
         $fh->seek($self->{' epos'}, 0);
     }
-
-
 
     $self->out_trailer($tdict, $self->{' update'});
     close($self->{' OUTFILE'});
@@ -1166,7 +1160,6 @@ sub new_obj {
     }
 
     $i = $self->{' maxobj'}++;
-
     if (defined $base) {
         $self->add_obj($base, $i, 0);
         $self->out_obj($base);
@@ -1604,7 +1597,6 @@ sub readxrtr {
         while ($buf =~ m/^$ws_char*([0-9]+)$ws_char+([0-9]+)$ws_char*$cr(.*?)$/s) {
             my $old_buf = $buf;
             $xmin = $1;   # starting object number of this subsection
-
             $xnum = $2;   # number of entries in this subsection 
             $buf  = $3;   # remainder of buffer
             $subsection_count++;
@@ -1677,7 +1669,6 @@ sub readxrtr {
                     }
                 }
                 $xmin++;
-
             } # traverse one subsection for objects xmin through xmin+xnum-1 
             # go back for next subsection (if any)
         } # loop through xref subsections
@@ -1804,7 +1795,6 @@ sub readxrtr {
             @index = map { $_->val() } @{$tdict->{'Index'}->val()};
         } else {
             @index = (0, $tdict->{'Size'}->val());
-
         }
 
         while (scalar @index) {
@@ -1851,7 +1841,6 @@ sub readxrtr {
     $tdict->{' loc'} = $xpos;
     $tdict->{' xref'} = $xlist;
     $self->{' maxobj'} = $xmin + 1 if $xmin + 1 > $self->{' maxobj'};
-
     $tdict->{' prev'} = $self->readxrtr($tdict->{'Prev'}->val(), %options)
         if (defined $tdict->{'Prev'} and $tdict->{'Prev'}->val() != 0);
     delete $tdict->{' prev'} unless defined $tdict->{' prev'};
@@ -1891,7 +1880,6 @@ sub out_trailer {
         $tdict->{'Size'} = PDFNum($self->{' maxobj'}    );
 
     }
-
 
     my $tloc = $fh->tell();
 ##  $fh->print("xref\n");
@@ -1966,7 +1954,6 @@ sub out_trailer {
             @a == 2 ? push @index, @a : push @stream, \@a;
         }
         my $i = $self->{' maxobj'}++;
-
         $self->add_obj($tdict, $i, 0);
         $self->out_obj($tdict);
 
@@ -1996,7 +1983,6 @@ sub out_trailer {
         }
 	# build a dictionary for the cross reference stream
         $tdict->{'Size'} = PDFNum($i + 1);
-
         $tdict->{'Index'} = PDFArray(map { PDFNum($_) } @index);
         $tdict->{'W'} = PDFArray(map { PDFNum($_) } 1, $len, 1);
         $tdict->{'Filter'} = PDFName('FlateDecode');
@@ -2045,7 +2031,6 @@ sub _new {
     $self->{' outlist'}       = [];
     $self->{' outlist_cache'} = {};     # A cache of what's in the 'outlist'
     $self->{' maxobj'}        = 1;
-
     $self->{' objcache'}      = {};
     $self->{' objects'}       = {};
 

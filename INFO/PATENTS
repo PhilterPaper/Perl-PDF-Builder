@@ -19,10 +19,16 @@ interprets PDF files that are compliant with the Specification:
   domain (i.e., expired). If you wish to do something with them that 
   might possibly be infringing, I would suggest consulting an IPL 
   attorney to confirm this! Note that Adobe still holds various 
-  PDF-related trademarks which are still protected under IP Law. 
+  PDF-related trademarks which are protected under IP Law. 
 
   PDF itself is now under open standard ISO 32000-2
   See https://pdfa.org/pdf-standards/
+  Closely related is the archival document standard (PDF/A subset of PDF)
+    found in ISO 19005. This concerns avoiding external references and
+    encryption, and device-independent color and other specifications.
+  There are other PDF variants of lesser concern to us at this time,
+    including PDF/X (high quality printing) and 
+    PDF/VT (graphics data exchange).
 ]
 
 U.S. Patent Numbers:
