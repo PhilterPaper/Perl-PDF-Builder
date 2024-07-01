@@ -22,12 +22,18 @@ PDF::Builder::Docs - Additional documentation for Builder module
 There are four levels of involvement with PDF::Builder. Depending on what you
 want to do, different kinds of installs are recommended.
 
-B<1.> Simply installing PDF::Builder as a prerequisite for running some other
+=over
+
+=item 1.
+
+Simply installing PDF::Builder as a prerequisite for running some other
 package. All you need to do is install the CPAN package for PDF::Builder, and
 it will load the .pm files into your Perl library. If the other package prereqs
 PDF::Builder, its installer may download and install PDF::Builder automatically.
 
-B<2.> You want to write a Perl program that uses PDF::Builder functions. In 
+=item 2.
+
+You want to write a Perl program that uses PDF::Builder functions. In 
 addition to installing PDF::Builder from CPAN, you will want documentation on
 it. Obtain a copy of the product from GitHub 
 (https://github.com/PhilterPaper/Perl-PDF-Builder) or as a gzipped tar file from CPAN. 
@@ -35,7 +41,9 @@ This includes a utility to
 build (from POD) a library of HTML documents, as well as examples (examples/ 
 directory) and contributed sample programs (contrib/ directory).
 
-B<3.> You want to modify PDF::Builder files. In addition to the CPAN and GitHub
+=item 3.
+
+You want to modify PDF::Builder files. In addition to the CPAN and GitHub
 distributions, you I<may> choose to keep a local Git repository for tracking
 your changes. Depending on whether or not your PDF::Builder copy is being used
 for production purposes, you may want to do your editing and testing in the Perl
@@ -44,11 +52,15 @@ directory) and examples provide good regression tests to ensure that you haven't
 broken anything. If you do your editing on the live code, don't forget when done
 to copy the changes back into the master version you keep!
 
-B<4.> You want to contribute to the development of PDF::Builder. You will need a
+=item 4.
+
+You want to contribute to the development of PDF::Builder. You will need a
 local Git repository (and a GitHub account), so that when you've got it all 
 done, you can issue a "Pull Request" to bring it to our attention. We can't 
 guarantee that your work will be incorporated into the project, but at least we
 will look at it. From time to time, a new CPAN version will be issued.
+
+=back
 
 If you want to make substantial changes for public use, and can't come to a 
 meeting of minds with us, you can even start your own GitHub project and 
@@ -1537,76 +1549,154 @@ Outlines/Bookmarks column is usually fairly narrow.
 
 =head3 Core Fonts
 
-Core fonts are limited to single byte encodings. You cannot use UTF-8 or other
-multibyte encodings with core fonts. The default encoding for the core fonts is
-WinAnsiEncoding (roughly the CP-1252 superset of ISO-8859-1). See the 
-C<encode> option below to change this encoding.
-See L<PDF::Builder::Resource::Font/font automap> method for information on
-accessing more than 256 glyphs in a font, using planes, I<although there is no
-guarantee that future changes to font files will permit consistent results>.
+These are the "built-in" fonts, in the sense that any PDF Reader is guaranteed
+to supply and support them. The I<metrics> for the supported fonts are 
+shipped with PDF::Builder, but not the fonts themeselves.
 
-Note that core fonts use fixed lists of expected glyphs, along with metrics
-such as their widths. This may not exactly match up with whatever local font
-file is used by the PDF reader. It's usually pretty close, but many cases have
-been found where the list of glyphs is different between the core fonts and
-various local font files, so be aware of this. There is no guarantee that all
-glyphs (code points) found in one single-byte encoding will be found in
-another, nor that font metrics are available for all glyphs covered by a given
-singe-byte encoding. If you are writing in English, or even in most Western
-European languages, this is usually not a problem, but for other languages it
-might be.
+Core fonts are limited to B<single byte encodings>. The default encoding for 
+the core fonts is WinAnsiEncoding (roughly the CP-1252/Windows-1252 superset of 
+ISO-8859-1/Latin-1). See the C<encode> option below to change this encoding.
 
-To allow UTF-8 text and extended glyph counts, you should 
-consider replacing your use of core fonts with TrueType (.ttf) and OpenType
-(.otf) fonts. There are tools, such as I<FontForge>, which can do a fairly good
-(though, not perfect) job of converting a Type1 font library to OTF.
+There are some 14 core fonts (regular, I<italic>, B<bold>, and B<I<bold-italic>>
+variants) for Times [serif], Helvetica [sans serif], Courier [fixed pitch]; 
+plus two symbol fonts, Symbol and Zapf Dingbats) that are supposed to be 
+available on any PDF Reader, B<although other fonts with very similar metrics 
+are often substituted.> 
 
-B<Examples:>
+Windows machines have an additional 14 "core" fonts (15 if you count Bank 
+Gothic): Georgia [serif], Verdana [sans serif], and Trebuchet [sans serif] in 
+4 variants each, along with Webdings and Wingdings). These are
+I<usually> available on a Windows platform (but not guaranteed!). They are 
+usually not installed by default on Linux, Mac, and other non-Windows 
+platforms, so use caution if specifying these fonts.
+
+=head4 Examples
 
     $font1 = $pdf->corefont('Times-Roman', encode => 'latin2');
     $font2 = $pdf->corefont('Times-Bold');
     $font3 = $pdf->corefont('Helvetica');
     $font4 = $pdf->corefont('ZapfDingbats');
 
-B<Notes:> 
+Core fonts can also be requested via the C<font()> method
 
-Even though these are called "core" fonts, the fonts themselves are I<not> 
-shipped with PDF::Builder; but rather are expected to be found on the machine 
-with the PDF Reader. Most core fonts are installed with a PDF reader, and thus 
-are not coordinated with PDF::Builder. PDF::Builder I<does> ship with core font 
-I<metrics> files (width, glyph names, etc.), but these cannot be guaranteed to 
-be in synch with what the PDF reader has installed!
+    $font5 = $pdf->font('Courier-Oblique');
 
-There are some 14 core fonts (regular, italic, bold, and bold-italic for
-Times [serif], Helvetica [sans serif], Courier [fixed pitch]; plus two symbol 
-fonts) that are supposed to be available on any PDF reader, B<although other 
-fonts with very similar metrics are often substituted.> You should I<not> count 
-on any of the 15 Windows core fonts (Bank Gothic, Georgia, Trebuchet, Verdana, 
-and two more symbol fonts) being present, especially on Linux, Mac, or other 
-non-Windows platforms. Be aware if you are producing PDFs to be read on a
-variety of different systems! In addition, various Reader authors and packagers
-may choose to substitute fonts with very similar metrics (e.g., I<Times New 
-Roman> for I<Times Roman>, or I<Arial> for I<Hevetica>).
+as well as being built into FontManager
 
-If you want to ensure the widest portability for a PDF document you produce,
-you should consider using TTF fonts (instead of core fonts) and embedding them 
-in the document. This ensures that there will be no substitutions, that all
-metrics are known and match the glyphs, UTF-8 encoding can be used, and 
-that the glyphs I<will> be available on the reader's machine. At least on
-Windows platforms, most of the fonts are TTF anyway, which are used behind the
-scenes for "core" fonts, while missing most of the capabilities of TTF (now
-or possibly later in PDF::Builder) such as embedding, kerning, ligatures (via 
-HarfBuzz::Shaper), UTF-8, etc. In addition, with font embedding you will be
-closer to the goal of PDF/A (not yet formally supported in PDF::Builder).
-The downside is, obviously, that the resulting PDF file will be larger because
-it includes the font(s). There I<might> also be copyright or licensing issues 
-with the redistribution of font files in this manner (you might want to check,
-before widely distributing a PDF document with embedded fonts, although many
-I<do> permit the part of the font used, to be embedded.).
+    $font6 = $pdf->get_font('face'=>'Times', 'italic'=>1, 'bold'=>0);
+
+=head4 Notes and Limitations
+
+=over
+
+=item *
+
+You B<cannot> use UTF-8 or other multibyte encodings with core fonts, I<only>
+single byte encodings (256 characters maximum). A PDF Reader simply does not
+know what to do with a multibyte character, and likely will render it as a
+sequence of single characters (producing garbage). Although most single-byte 
+encodings, at least for European languages, are supported, it is possible that 
+you might encounter an encoding that includes a character I<not> found in a 
+given font file, or vice-versa (the font includes characters that the encoding 
+does not give you access to).
+
+=item *
+
+Do not confuse Unicode character points (such as given with an HTML entity) 
+with single byte values or multibyte characters. The only way to access a
+character defined for a given encoding is with a I<single> byte value in the 
+range 0 to 255. For example, if you can't directly type a "Euro" symbol, it is 
+C<\x80> in many encodings -- you would use that instead of the Unicode 
+C<\x{20AC}> code point or C<x\{E282AC}> UTF-8 byte string. It's a matter of 
+giving a single byte value that the PDF Reader can look up in its font 
+definition to get the desired glyph. If the "Euro" symbol is not found in the 
+encoding you're using, well, you're out of luck.
+
+=item *
+
+Be aware of what a given platform (operating system) and editor is using for 
+its code page when it creates a file with your text to be turned into a PDF!
+If you typed a "Euro" but it's, say, a UTF-8 byte string in the file, you 
+probably won't get a "Euro" in your PDF.
+
+=item *
+
+Note that core fonts use fixed lists of expected glyphs, along with metrics
+such as their widths. This may not exactly match up with whatever local font
+file is used by the PDF Reader. It's usually pretty close, but many cases have
+been found where the list of glyphs is different between the core fonts and
+various local font files, so be aware of this. There is no guarantee that all
+glyphs (code points) found in one single-byte encoding will be found in
+another, nor that font metrics are available for all glyphs covered by a given
+singe-byte encoding. If you are writing in English, or even in most Western
+European languages, this is usually not a problem with core fonts, but for 
+other languages and alphabets, it might be.
+
+=item *
+
+Also be aware that a PDF Reader is free to substitute another font which is
+similar (but not necessarily identical) to the requested core font. For example,
+Windows machines often substitute I<Arial> for the requested I<Helvetica>. The
+metrics (widths) are the same, but the glyphs are a little different.
+
+=item *
+
+Core fonts are supposed to be available on all PDF Readers, so they are not
+embeddable in the PDF (as TTF fonts are). This is not believed to be a problem
+for archival (PDF/A) documents, but may become one at some point, so you should
+be aware.
+
+=back
+
+See L<PDF::Builder::Resource::Font/font automap> method for information on
+accessing more than 256 glyphs in a font, using B<planes>, I<although there is 
+no guarantee that future changes to font files will permit consistent results>.
+
+=head4 Should you use TTF instead?
+
+If you need to reliably access certain characters not found in common 
+encodings, please consider using TrueType (TTF) or OpenType (OTF) fonts via the 
+C<ttfont()> method. Note that you will be responsible for specifying the exact 
+path and full file name of the TTF file, and making sure the font file is
+available on the PDF Writer, and possibly on the Reader (if not embedded).
+
+This would enable you to use UTF-8 text, with extended glyph usability, as well
+as permitting the font itself to be embedded in the PDF, ensuring that you get
+I<exactly> the glyphs you want, without any substitutions. Kerning and
+ligature support (via HarfBuzz::Shaper) may be more available for TTF fonts.
+There are tools, such as I<FontForge>, which can do a fairly good
+(though, not perfect) job of converting a Type1 font library (if that's what
+your core fonts are, internally) to OTF.
 
 See also L<PDF::Builder::Resource::Font::CoreFont>.
 
 =head3 PS Fonts
+
+PostScript fonts are also known as "Type 1" fonts. These are not "built-in" 
+fonts, and both the PDF Writer and any PDF Reader would need to provide the 
+desired font files. PostScript fonts used to be very commonly used, but have
+fallen out of favor.
+
+PS (Type 1) fonts are I<not> shipped with PDF::Builder, but are 
+expected to be found on the machine with the PDF reader. Most PDF readers do 
+I<not> install PS fonts, and it is up to the user of the PDF reader to install
+the needed fonts. Unlike TrueType fonts, PS (T1) fonts are not embedded in the 
+PDF, and must be supplied on the Reader end.
+
+PS fonts are limited to B<single byte encodings>. The default encoding for 
+the PS fonts is WinAnsiEncoding (roughly the CP-1252/Windows-1252 superset of 
+ISO-8859-1/Latin-1). See the C<encode> option below to change this encoding.
+
+One characteristic of PS font usage is that I<two> files are used for each
+font: a glyph file (C<.pfa> for ASCII format, C<.pfb> for binary format, or
+C<.t1> for an extended format), and a metrics file (C<.afm> for an ASCII 
+format, or C<.pfm> for binary format). A binary glyph file may be used with
+an ASCII metrics file, and vice-versa, if desired or needed. The ASCII and 
+binary files have the same content, just in different formats.
+
+B<Caution:> the file name given for the glyph file (first argument to C<psfont>)
+I<must> have a file extension of .pfa, .pfb, or .t1; as the extension will
+be checked to see how to parse the file.
 
 =head4 WARNING: End of Adobe Support
 
@@ -1625,76 +1715,133 @@ longer be possible. At any rate, users may want to consider starting to move
 away from Type 1 font usage and switch to TTF/OTF or even core fonts, although 
 it is unknown how long Type 1 Reader support will continue.>
 
-PS (T1) fonts are limited to single byte encodings. You cannot use UTF-8 or 
-other multibyte encodings with T1 fonts.
-The default encoding for the T1 fonts is
-WinAnsiEncoding (roughly the CP-1252 superset of ISO-8859-1). See the 
-C<encode> option below to change this encoding.
-See L<PDF::Builder::Resource::Font/font automap> method for information on
-accessing more than 256 glyphs in a font, using planes, I<although there is no
-guarantee that future changes to font files will permit consistent results>.
-B<Note:> many Type1 fonts are limited to 256 glyphs, but some are available
-with more than 256 glyphs. Still, a maximum of 256 at a time are usable.
-
-C<psfont> accepts ASCII (.pfa), binary (.pfb), and .t1 Type1 glyph files.
-Font metrics can be supplied in either ASCII (.afm) or binary (.pfm) format,
-as can be seen in the examples given below. It is possible to use .pfa with .pfm
-and .pfb with .afm if that's what's available. The ASCII and binary files have
-the same content, just in different formats.
-
-B<Caution:> the file name given for the glyph file (first argument to C<psfont>)
-I<must> have a file extension of .pfa, .pfb, or .t1; as the extension will
-be checked to see how to parse the file.
-
-To allow UTF-8 text and extended glyph counts in one font, you should 
-consider replacing your use of Type1 fonts with TrueType (.ttf) and OpenType
-(.otf) fonts. There are tools, such as I<FontForge>, which can do a fairly good
-(though, not perfect) job of converting your font library to OTF. See
-L<PDF::Builder::Docs/Core Fonts> above for more discussion of the limitations
-of single-byte encodings.
-
-B<Examples:>
+=head4 Examples
 
     $font1 = $pdf->psfont('Times-Book.pfa', afmfile => 'Times-Book.afm');
     $font2 = $pdf->psfont('/fonts/Synest-FB.pfb', pfmfile => '/fonts/Synest-FB.pfm');
 
-B<Note:> these T1 (Type1) fonts are I<not> shipped with PDF::Builder, but are 
-expected to be found on the machine with the PDF reader. Most PDF readers do 
-not install T1 fonts, and it is up to the user of the PDF reader to install
-the needed fonts. Unlike TrueType fonts, PS (T1) fonts are not embedded in the 
-PDF, and must be supplied on the Reader end.
+PS fonts can also be requested via the C<font()> method
+
+    $font3 = $pdf->font('/fonts/Times-Book.t1', afmfile => '/fonts/Times-Book.afm');
+
+as well as being capable of being loaded into FontManager
+
+    $font4 = $pdf->get_font('face'=>'Times-Book', 'italic'=>0, 'bold'=>0);
+
+=head4 Notes and Limitations
+
+=over
+
+=item *
+
+You B<cannot> use UTF-8 or other multibyte encodings with PS fonts, I<only>
+single byte encodings (256 characters maximum). A PDF Reader (or Writer!) 
+simply does not know what to do with a multibyte character, and likely will 
+render it as a sequence of single characters (producing garbage). Although most 
+single-byte encodings, at least for European languages, are supported, it is 
+possible that you might encounter an encoding that includes a character I<not> 
+found in a given font file, or vice-versa (the font includes characters that 
+the encoding does not give you access to).
+
+=item *
+
+Do not confuse Unicode character points (such as given with an HTML entity) 
+with single byte values or multibyte characters. The only way to access a
+character defined for a given encoding is with a I<single> byte value in the 
+range 0 to 255. For example, if you can't directly type a "Euro" symbol, it is 
+C<\x80> in many encodings -- you would use that instead of the Unicode 
+C<\x{20AC}> code point or C<x\{E282AC}> UTF-8 byte string. It's a matter of 
+giving a single byte value that the PDF Reader can look up in its font 
+definition to get the desired glyph. If the "Euro" symbol is not found in the 
+encoding you're using, well, you're out of luck.
+
+=item *
+
+Be aware of what a given platform (operating system) and editor is using for 
+its code page when it creates a file with your text to be turned into a PDF!
+If you typed a "Euro" but it's, say, a UTF-8 byte string in the file, you 
+probably won't get a "Euro" in your PDF.
+
+=back
+
+See L<PDF::Builder::Resource::Font/font automap> method for information on
+accessing more than 256 glyphs in a font, using B<planes>, I<although there is 
+no guarantee that future changes to font files will permit consistent results>.
+
+=head4 Should you use TTF instead?
+
+If you need to reliably access certain characters not found in common 
+encodings, please consider using TrueType (TTF) or OpenType (OTF) fonts via the 
+C<ttfont()> method. Note that you will be responsible for specifying the exact 
+path and full file name of the TTF file, and making sure the font file is
+available on the PDF Writer, and possibly on the Reader (if not embedded).
+
+This would enable you to use UTF-8 text, with extended glyph usability, as well
+as permitting the font itself to be embedded in the PDF, ensuring that you get
+I<exactly> the glyphs you want, without any substitutions or failures due to 
+lack of the desired files on the Reader. Kerning and
+ligature support (via HarfBuzz::Shaper) may be more available for TTF fonts.
+There are tools, such as I<FontForge>, which can do a fairly good
+(though, not perfect) job of converting a Type1 font library to OTF.
 
 See also L<PDF::Builder::Resource::Font::Postscript>.
 
 =head3 TrueType Fonts
 
-B<Warning:> BaseEncoding is I<not> set by default for TrueType fonts, so B<text 
-in the PDF isn't searchable> (by the PDF reader) unless a ToUnicode CMap is 
-included. A ToUnicode CMap I<is> included by default (unicodemap set to 1) by
-PDF::Builder, but allows it to be disabled (for performance and file size 
-reasons) by setting unicodemap to 0. This will produce non-searchable text, 
-which, besides being annoying to users, may prevent screen 
-readers and other aids to disabled users from working correctly!
+TrueType (TTF) fonts and their close cousins, OpenType (OTF) fonts, are widely
+used. These are often included with many operating systems, although they are
+not "built-in" to PDF, and both the PDF Writer and any PDF Reader (if the font
+is B<not> embedded) would need to provide the desired font files.
 
-B<Examples:>
+TTF and OTF fonts are I<not> shipped with PDF::Builder, but are expected to be 
+found on the machine with the PDF Writer (and if needed, the Reader). Most PDF 
+readers do I<not> install TTF/OTF fonts, and it is up to the user of the PDF 
+reader to install the needed fonts (if they were not embedded). Note that the 
+default behavior I<is> to embed the font subset (glyphs actually used) into the 
+PDF file, so that there is no chance of not having the correct font available 
+on the reader.
+
+TTF and OTF fonts are B<not> limited to single byte encodings, but can use
+multibyte encodings such as UTF-8. The default encoding for these fonts is 
+WinAnsiEncoding (roughly the CP-1252/Windows-1252 superset of 
+ISO-8859-1/Latin-1). See the C<encode> option below to change this encoding.
+
+=head4 Examples
 
     $font1 = $pdf->ttfont('Times.ttf');
     $font2 = $pdf->ttfont('Georgia.otf');
 
+TTF/OTF fonts can also be requested via the C<font()> method
+
+    $font3 = $pdf->font('/fonts/Sanskrit.ttf');
+
+as well as being capable of being loaded into FontManager
+
+    $font4 = $pdf->get_font('face'=>'BrushScript', 'italic'=>0, 'bold'=>0);
+
+=head4 Notes and Limitations
+
+=over
+
+=item *
+
 B<CAUTION:> There is a "gotcha" with TrueType fonts that you need to be aware
 of when using them. PDF::Builder outputs to the text stream a list of I<glyph
 IDs> as four-digit hex codes, rather than the list of character byte codes 
-used by other
-font types. The B<Tw> operator, if used (C<$text->wordspace(n)>) to adjust
+used by other font types. The intent is to allow more than the standard Unicode
+points (alternate glyphs for ligatures and other uses). Don't count on it as 
+encryption to hide your content (the PDF Reader will just display it anyway!), 
+even though it I<does> make it hard to find specific text in a PDF using a text 
+editor.
+
+=item *
+
+The B<Tw> operator, if used (C<$text-E<gt>wordspace(n)>) to adjust
 inter-word spacing, B<will be ignored> by most, if not all, PDF Readers
 (including Adobe products). This is because this operator is looking for actual
 ASCII spaces (x20 bytes) in the stream, to apply the width change to. Note that 
 only ASCII spaces are affected (not other spaces), and not at all for TrueType 
-and OpenType fonts! We are considering adding ways to emulate word spacing for 
-TrueType font support, as well as possibly extending it to non-ASCII spaces for 
-all font types. Note that inter-character spacing (via C<$text->charspace(n)> 
-and the B<Tc> operator) still works for all font types.
-
+and OpenType fonts (because they have 4-digit glyph IDs, not x20 bytes)! 
 PDF::Builder has been updated to attempt to respect the B<Tw> operator when
 using TTF/OTF fonts. If the C<Tw> amount is non-zero, it will split up 
 sentences on ASCII spaces (x20) and individually place words on the page. This 
@@ -1704,7 +1851,39 @@ spacing via the C<wordspace()> method. Note that again, I<only> ASCII spaces
 types), and other spaces (xA0 required/non-breaking space, thin space, etc.)
 are not handled.
 
-B<Where is the font I just added?> Well, sometimes you get lucky and can
+=item *
+
+B<Warning:> BaseEncoding is I<not> set by default for TrueType fonts, so 
+B<text in the PDF isn't searchable> (by the PDF reader) unless a ToUnicode 
+CMap is included. A ToUnicode CMap I<is> included by default (unicodemap set 
+to 1) by PDF::Builder, but allows it to be disabled (for performance and file 
+size reasons) by setting unicodemap to 0. This will produce non-searchable 
+text, which, besides being annoying to users, may prevent screen readers and 
+other aids to disabled users from working correctly!
+
+=item *
+
+Do not confuse Unicode character points (such as given with an HTML entity) 
+with single byte values or multibyte characters. The only way to access a
+character defined for a given encoding is with a I<single> code value in the 
+allowable range. For example, if you can't directly type a "Euro" symbol, it is 
+C<\x80> in many encodings -- you would use that for a single-byte encoding, or
+for UTF-8, the Unicode C<\x{20AC}> code point. You would never give the UTF-8
+byte string C<x\{E282AC}>. It needs to be understandable in the context of the
+current encoding, so that the 4-digit glyph code can be output.
+
+=item *
+
+Be aware of what a given platform (operating system) and editor is using for 
+its code page when it creates a file with your text to be turned into a PDF!
+If you typed a "Euro" but it's, say, a UTF-8 byte string in the file, and you 
+are using a single-byte encoding, you probably won't get a "Euro" in your PDF.
+
+=back
+
+=head4 Where is the font I just added?
+
+Well, sometimes you get lucky and can
 specify the exact directory that the C<.ttf> or C<.otf> file will reside in,
 making it easy to specify the path to the font file (for uses such as 
 C<ttfont()>, C<font()>, or Font Manager calls). Other times, the operating
@@ -1747,14 +1926,14 @@ B<Examples:>
     $font = $pdf->cjkfont('korean');
     $font = $pdf->cjkfont('traditional');
 
-B<Warning:> Unlike C<ttfont>, the font file is I<not> embedded in the output 
+B<Warning:> Unlike C<ttfont()>, the font file is I<not> embedded in the output 
 PDF file. This is
 evidently behavior left over from the early days of CJK fonts, where the 
 C<Cmap> and C<Data> were always external files, rather than internal tables.
 If you need a CJK-using PDF file to embed the font, for portability, you can
 create a PDF using C<cjkfont>, and then use an external utility (e.g.,
 C<pdfcairo>) to embed the font in the PDF. It may also be possible to use 
-C<ttfont> instead, to produce the PDF, provided you can deduce the correct 
+C<ttfont()> instead, to produce the PDF, provided you can deduce the correct 
 font file name from examining the PDF file (e.g., on my Windows system, the 
 "Ming" font would be C<< $font = $pdf->ttfont("C:/Program Files/Adobe/Acrobat DC/Resource/CIDFont/AdobeMingStd-Light.otf") >>.
 Of course, the font file used would have to be C<.ttf> or C<.otf>.
@@ -1767,6 +1946,9 @@ Due to the lack of ongoing support for CJK fonts, and the apparent "arrested
 development" of PDF support for them at an early stage of life, we I<strongly> 
 recommend that you attempt to directly use TTF or OTF fonts for Far-Eastern 
 (CJK) text support (via C<ttfont()>) before resorting to C<cjkfont()> usage!
+Also, CJK fonts appear to be unusable as input for synthetic fonts, and 
+normally aren't embedded in the PDF file (requiring the font file to be 
+installed on the Reader).
 
 =head3 Synthetic Fonts
 

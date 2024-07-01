@@ -3545,7 +3545,8 @@ including supported C<%opts>,
 see L<PDF::Builder::Resource::Font::CoreFont>. 
 Note that this is an Adobe-standard corefont I<name>, and not a file name.
 
-See also L<PDF::Builder::Docs/Core Fonts> for additional information.
+See also L<PDF::Builder::Docs/Core Fonts> for additional information,
+including Notes and Limitations.
 
 =back
 
@@ -3585,7 +3586,8 @@ sub corefont {
 Returns a new Adobe Type1 ("PostScript", "T1") font object. For details, 
 including supported C<%opts>, see L<PDF::Builder::Resource::Font::Postscript>.
 
-See also L<PDF::Builder::Docs/PS Fonts> for additional information.
+See also L<PDF::Builder::Docs/PS Fonts> for additional information,
+including Notes and Limitations.
 
 =back
 
@@ -3628,7 +3630,8 @@ Returns a new TrueType (or OpenType) font object.
 For details, including supported C<%opts>, 
 see L<PDF::Builder::Resource::CIDFont::TrueType>.
 
-See also L<PDF::Builder::Docs/TrueType Fonts>.
+See also L<PDF::Builder::Docs/TrueType Fonts> for additional information,
+including Notes and Limitations.
 
 =back
 
@@ -3821,6 +3824,7 @@ sub font {
     my $format = $opts{'format'};
     $format //= ($name =~ /\.[ot]tf$/i ? 'truetype' :
                  $name =~ /\.pf[ab]$/i ? 'type1'    :
+                 $name =~ /\.t1$/i ?     'type1'    :
                  $name =~ /\.bdf$/i    ? 'bitmap'   : '');
 
     if      ($format eq 'truetype') {
