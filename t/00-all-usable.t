@@ -55,6 +55,7 @@ if ($rc) {
         version::parse($GrTFversion)) { $rc = 0; }
 }
 $has_GT = $rc;
+my $dummy = $has_GT;
 
 # check for Image::PNG::Libpng installed, and if so, run use test
 $rc = eval {
@@ -68,6 +69,7 @@ if ($rc) {
         version::parse($LpngVersion)) { $rc = 0; }
 }
 $has_IPL = $rc;
+$dummy = $has_IPL;
 
 foreach my $file (@files) {
     ($file) = $file =~ m|^lib/(.*)\.pm$|;

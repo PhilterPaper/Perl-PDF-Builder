@@ -450,7 +450,7 @@ sub new {
 
 Set the default physical size for pages in the PDF. If called without
 arguments (Get), return an array of the coordinates of the rectangle 
-describing the default physical page size.
+describing the default physical page size (the Media Box).
 
 This is essentially an alternate method of defining the C<mediabox()> call,
 and added for compatibility with PDF::API2.
@@ -481,15 +481,18 @@ sub default_page_size {
 
 =head2 default_page_boundaries
 
-    $pdf->default_page_boundaries(%boundaries); # Set
+    $pdf->default_page_boundaries('media' => [xmin, ymin, xmax, ymax]); 
+         # Set the media box
 
-    %boundaries = $pdf->default_page_boundaries(); # Get
+    %boundaries = $pdf->default_page_boundaries(); # Get (all five)
+    @media_rect = @{ $boundaries{'media'} }; # show 'media' box
 
 =over
 
-Set default prepress page boundaries for pages in the PDF.  If called without
-arguments, returns the coordinates of the rectangles describing each of the
-supported page boundaries.
+Set default prepress page boundaries ('boxes') for pages in the PDF. If called 
+without arguments, returns the coordinates of the rectangles describing each 
+of the supported page boundaries, as a hash of array refs. Each will be US 
+Letter size, unless it has been explicitly changed.
 
 See the equivalent C<page_boundaries> method in L<PDF::Builder::Page> for 
 details.

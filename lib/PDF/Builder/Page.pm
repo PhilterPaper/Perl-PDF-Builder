@@ -647,11 +647,14 @@ The media box defines the boundaries of the physical medium on which the page is
 to be printed.  It may include any extended area surrounding the finished page
 for bleed, printing marks, or other such purposes. The default value is as
 defined for PDF, a US letter page (8.5" x 11").
+B<CAUTION:> Most printers can I<not> print all the way to the edge of the
+physical medium (paper, etc.). Some space around the edges will be reserved
+for pinch rollers, etc. to move the paper without smearing around toner or ink.
 
 =item crop
 
 The crop box defines the region to which the contents of the page shall be
-clipped (cropped) when displayed or printed.  The default value is the page's
+clipped (cropped) when displayed or printed. The default value is the page's
 media box.
 This is a historical page boundary. You'll likely want to set the bleed and/or
 trim boxes instead.
@@ -747,6 +750,7 @@ of a rectangle can be specified.
 
 =cut
 
+# returns ARRAY of 4 elements
 sub _to_rectangle {
     my $value = shift();
 
@@ -755,7 +759,7 @@ sub _to_rectangle {
         if      (@$value == 2) {
             return (0, 0, @$value);
         } elsif (@$value == 4) {
-            return @$value;
+            return (@$value);
         }
         croak "Page boundary array must contain two or four numbers";
     }
@@ -804,8 +808,8 @@ sub boundaries {
     }
 
     # Set
-    my %boxes = @_;
-    foreach my $box (qw(media crop bleed trim art)) {
+    my %boxes = @_; # should be even count
+    foreach my $box (qw( media crop bleed trim art )) {
         next unless exists $boxes{$box};
 
         # Special case: A single number as the value for anything other than
@@ -830,8 +834,7 @@ sub boundaries {
             $rectangle[1] += $value;
             $rectangle[2] -= $value;
             $rectangle[3] -= $value;
-        }
-        else {
+        } else {
             @rectangle = _to_rectangle($value);
         }
 
@@ -840,7 +843,7 @@ sub boundaries {
         $boxes{$box} = [@rectangle];
     }
 
-    return $self;
+    return %boxes;
 }
 
 sub _bounding_box {
