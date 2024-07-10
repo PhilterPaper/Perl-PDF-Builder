@@ -522,7 +522,7 @@ sub _bounding_box {
 }
 
 sub default_page_boundaries {
-    my %xxx = %{ PDF::Builder::Page::boundaries(@_) };
+    my %xxx = PDF::Builder::Page::boundaries(@_);
     # 5 element 'media' etc. hash of anonymous arrays each 4 numbers
     return %xxx;
 }

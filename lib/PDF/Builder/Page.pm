@@ -788,7 +788,7 @@ sub boundaries {
     # Get
     if      (@_ == 0) {  # empty list -- do all boxes
         my %boundaries;
-        foreach my $box (qw(Media Crop Bleed Trim Art)) {
+        foreach my $box (qw( Media Crop Bleed Trim Art )) {
             my @xxx = $self->_bounding_box($box . 'Box');
             $boundaries{lc($box)} = \@xxx;
         }
