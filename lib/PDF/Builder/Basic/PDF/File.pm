@@ -1293,7 +1293,7 @@ sub ship_out {
         map { $fh->print("\%   $_ \n") } split(/$cr/, $objind->{' comments'}) if $objind->{' comments'};
         $self->{' locs'}{$objind->uid()} = $fh->tell();
         my ($objnum, $objgen) = @{$self->{' objects'}{$objind->uid()}}[0..1];
-        $fh->printf('%d %d obj ', $objnum, $objgen);
+        $fh->printf("%d %d obj\n", $objnum, $objgen);
         $objind->outobjdeep($fh, $self);
         $fh->print("\nendobj\n");
 
