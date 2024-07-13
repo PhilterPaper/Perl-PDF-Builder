@@ -3011,9 +3011,9 @@ Many PDF readers do not support page labels; they simply (at most)
 label the sliding thumb with the physical page number. B<Adobe Acrobat Reader> 
 (free version) appears to have a bug in some versions, where if the only
 page label is 'decimal' (the default), it labels the thumb as though no page 
-labels were defined ("Page I<m> of I<n>"). You should be able to get around 
-this problem by always using an explicit B<start> option value, e.g., 
-C<'start' =E<gt> 1>, and not counting on the default value.
+labels were defined ("Page I<m> of I<n>"). You can get around this problem by 
+using an explicit B<start> option value, e.g., C<'start' =E<gt> 1>. However, 
+for your convenience, the B<start> option now defaults to 1.
 
 =back
 
@@ -3236,6 +3236,10 @@ sub pageLabel {
 
         if (defined $opts->{'start'}) {
             $d->{'St'} = PDFNum($opts->{'start'});
+	} else {
+	    # some PDF Readers (e.g., Adobe Acrobat Reader) ignore a decimal
+	    # label if no Start given, so default to 1
+            $d->{'St'} = PDFNum(1);
         }
 
         $nums->add_elements($d);

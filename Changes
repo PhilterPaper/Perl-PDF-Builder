@@ -153,6 +153,11 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 
   ==== Bug fixes
 
+    lib/PDF/Builder.pm
+     Some PDF Readers ignore a request for decimal page numbers (and output
+      a page label of "Page m of n") if an explicit Start value isn't given.
+      Default Start value to 1.
+
     lib/PDF/Builder/Basic/PDF/File.pm
      Add newline after 'm n obj' to bring more in conformance with PDF/A
       requirements (ISO 19005-1:2005, Clause: 6.1.8) per #52 and PDF::API2 #82.
