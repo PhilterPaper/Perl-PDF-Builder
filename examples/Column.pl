@@ -9,6 +9,8 @@ use Data::Dumper; # for debugging
 # VERSION
 our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
+# README.md is used below on page 5. Be sure to insert a fresh copy at build 
+#  time, and check if goes more pages. \ -> \\, $PERL_version -> \$PERL_version
 my $use_Table = 1; # if 1, use PDF::Table for table example
 # TBD automatically check if PDF::Table available, and if so, use it
 
@@ -443,7 +445,7 @@ if ($use_Table) {
 }
 
 # more pages with more extensive MD
-print "======================================================= pg 5-8\n";
+print "======================================================= pg 5-9\n";
 print "---- A README.md file for PDF::Builder\n";
 $page = $pdf->page();
 $grfx = $page->gfx();
@@ -451,27 +453,32 @@ $text = $page->text();
 footer(++$page_num, $pdf, $text);
 #  might need two or even three pages
 #  three <img> calls (GitHub buttons), several `code` 
+#  escape $ and \ in several lines
 $content = <<"END_OF_CONTENT";
-# PDF::Builder release 3.026
+# PDF::Builder release 3.027
 
-A Perl library to facilitate the creation and modification of PDF files
+A Perl library to create and modify PDF files
 
 ## What is it?
 
-PDF::Builder is a **fork** of the popular PDF::API2 Perl library. It provides a
-library of modules and functions so that a PDF file (document) may be built and
-maintained from Perl programs (it can also read in, modify, and write back out
-existing PDF files). It is not a WYSIWYG editor; nor is it a canned
-utility or converter. It does _not_ have a GUI or command line interface -- it
-is driven by your Perl program. It is a set of **building blocks** (methods)
-with which you can perform a wide variety of operations, ranging from basic
-operations such as selecting a font face, to defining an entire page at a time
-in the document, using a large subset of either Markdown or HTML markup
-languages. You can call it from arbitrary Perl programs, which may even create
-content on-the-fly (or read it in from other sources). Quite a few code
+PDF::Builder is a **fork** of the popular PDF::API2\* Perl library. It
+provides a library of modules and functions so that a PDF file (document) may
+be built and maintained from Perl programs (it can also read in, modify, and
+write back out existing PDF files). It is not a WYSIWYG editor; nor is it a
+canned utility or converter. It does _not_ have a GUI or command line interface
+-- it is driven by _your_ Perl program. It is a set of **building blocks**
+(methods) with which you can perform a wide variety of operations, ranging
+from basic operations (such as selecting a font face), to defining an entire
+page at a time in the document (using a large subset of either Markdown or HTML
+markup languages). You can call it from arbitrary Perl programs, which may even
+create content on-the-fly (or read it in from other sources). Quite a few code
 examples are provided, to help you to get started with the process of creating
 a PDF document. Many enhancements are in the pipeline to make PDF::Builder even
 more powerful and versatile.
+
+\*Note that PDF::Builder is **not** built on PDF::API2, and does **not**
+require that it be installed. The two libraries are completely independent of
+each other and one will not interfere with the other if both are installed.
 
 [Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full), including Documentation and Examples.
 
@@ -552,9 +559,9 @@ These libraries should be automatically installed...
 
 These libraries are _recommended_ for improved functionality and performance.
 The default behavior is **not** to attempt to install them during PDF::Builder
-installation, in order to speed up the testing process and not clutter up 
-matters, especially if an optional package fails to install. You can always 
-manually install them later, if you desire to make use of their added 
+installation, in order to speed up the testing process and not clutter up
+matters, especially if an optional package fails to install. You can always
+manually install them later, if you desire to make use of their added
 functionality.
 
 * Perl::Critic (1.150 or higher, need if running tools/1\_pc.pl)
@@ -563,12 +570,48 @@ functionality.
 * HarfBuzz::Shaper (0.024 or higher, needed for Latin script ligatures and kerning, as well as for any complex script such as Arabic, Indic scripts, or Khmer)
 * Text::Markdown (1.000031 or higher, needed if using 'md1' markup)
 * HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup)
-* Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc utility to create HTML documentation)
+* Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc.pl utility to create HTML documentation)
+* SVGPDF (0.086.2 or higher, needed if using SVG image functions)
+
+**Note** that some of these packages, in turn, make use of various open source
+libraries (DLLs/shared libs) that you may need to hunt around for, and install
+on your system before you can install a given package. That is, they may not
+necessarily come with your Operating System or Perl installation. Other
+packages are "pure Perl" and should install without trouble.
+
+#### Fixes needed to OPTIONAL packages
+
+Sometimes fixes or patches are needed for optional prerequisites. At the time of
+release of this PDF::Builder version, the following fixes or patches are known
+to be needed. As the libraries are updated, this list will be modified as
+necessary:
+
+* A prereq for HTML::TreeBuilder, HTML::Tagset (version 3.20 or earlier), needs 
+a fix for `<ins>` and `<del>` tags to be handled correctly. If not fixed, these
+tags cause undesired paragraph breaks, such as in the examples/Column.pl sample.
+Once installed, in \\Strawberry\\perl\\vendor\\lib\\HTML\\Tagset.pm (location of
+Tagset.pm will vary on other Perls and OS's):
+
+    1. Find  %isPhraseMarkup = map {; $\_ => 1 } qw(
+    2. Below that find     b i u s tt small big
+    3. Add a new line below that:   ins del
+
+This adds `<ins>` and `<del>` to the list of inline ("phrase") tags. It is quite
+possible that other HTML tags may misbehave, and further updates are needed.
+If you experience such problems, try updating your copy of Tagset.pm with one
+from https://github.com/PhilterPaper/HTML-Tagset/blob/master/lib/HTML/Tagset.pm
+and see if that improves matters (and please report results via a ticket).
+
+**HTML::Tagset 3.22 has this fix in it. The easiest course of action is simply
+to check if your copy of HTML::Tagset is at least 3.22. If you can't update it,
+you will need to follow the above instructions.**
+
+#### ------------
 
 If an optional package is needed, but not installed, sometimes PDF::Builder
-will be able to fall back to built-in partial functionality (TIFF and PNG 
-images), but other times will fail. After installing the missing package, you 
-may wish to then run the t-test suite for that library to confirm that it is 
+will be able to fall back to built-in partial functionality (TIFF and PNG
+images), but other times will fail. After installing the missing package, you
+may wish to then run the t-test suite for that library to confirm that it is
 properly running, as well as running the examples.
 
 Other than an installer for standard CPAN packages (such as 'cpan' on
@@ -579,7 +622,7 @@ done during the install process, only copying of .pm Perl module files.
 
 ## Manually building
 
-As is the usual practice with building such a package (from the command line), 
+As is the usual practice with building such a package (from the command line),
 the steps are:
 
 1. perl Makefile.PL
@@ -587,21 +630,22 @@ the steps are:
 1. make test
 1. make install
 
-If you have your system configured to run Perl for a .pl/.PL file, you may be 
-able to omit "perl" from the first command, which creates a Makefile. "make" 
-is the generic command to run (it feeds on the Makefile produced by 
-Makefile.PL), but your system may have it under a different name, such as 
+If you have your system configured to run Perl for a .pl/.PL file, you may be
+able to omit "perl" from the first command, which creates a Makefile. "make"
+is the generic command to run (it feeds on the Makefile produced by
+Makefile.PL), but your system may have it under a different name, such as
 dmake, gmake (e.g., Strawberry Perl on Windows), or nmake.
 
-PDF::Builder does not currently compile and link anything, so gcc, g++, etc.
-will not be used. The build process merely copies .pm files around, and
+PDF::Builder does not currently compile and link anything, so `gcc`, `g++`,
+etc. will not be used. The build process merely copies .pm files around, and
 runs the "t" tests to confirm the proper installation.
 
 ## Copyright
 
-This software is Copyright (c) 2017-2024 by Phil M. Perry.
+This software is Copyright (c) 2017-2025 by Phil M. Perry.
 
-Previous copyrights are held by others (Steve Simms, Alfred Reibenschuh, et al.). See The HISTORY section of the documentation for more information.
+Previous copyrights are held by others (Steve Simms, Alfred Reibenschuh, 
+et al.). See The HISTORY section of the documentation for more information.
 
 We would like to acknowledge the efforts and contributions of a number of
 users of PDF::Builder (and its predecessor, PDF::API2), who have given their
@@ -639,7 +683,7 @@ a pointer to your work. The more cross-pollination, the better!
 * LICENSE file for more on the license term
 * INFO/RoadMap file for the PDF::Builder road map
 * INFO/ACKNOWLEDGE.md for "thank yous" to those who contributed to this product
-* INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues 
+* INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues
 * INFO/DEPRECATED file for information on deprecated features
 * INFO/KNOWN\_INCOMP file for known incompatibilities with PDF::API2
 * INFO/CONVERSION file for how to convert from PDF::API2 to PDF::Builder
@@ -655,7 +699,7 @@ and go to the `docs/` directory. Run `buildDoc.pl --all` to generate the full
 tree of documentation. There's a lot of additional information in the
 PDF::Builder::Docs module (it's all documentation).
 
-You may find it more convenient to point your browser to our 
+You may find it more convenient to point your browser to our
 [Home Page](https://www.catskilltech.com/FreeSW/product/PDF-Builder/title/PDF%3A%3ABuilder/freeSW_full)
 to see the full documentation build (as well as most of the example outputs).
 
@@ -690,7 +734,7 @@ while ($rc) {
 # for various lists, see Column_lists.pl
 
 # block quotes and font extent changes
-print "======================================================= pg 9\n";
+print "======================================================= pg 10\n";
 print "---- Block quotes\n";
 $page = $pdf->page();
 $grfx = $page->gfx();
@@ -757,7 +801,7 @@ if ($rc) {
 }
 
 # setting your own CSS for Markdown or none
-print "======================================================= pg 10\n";
+print "======================================================= pg 11\n";
 $page = $pdf->page();
 $grfx = $page->gfx();
 $text = $page->text();

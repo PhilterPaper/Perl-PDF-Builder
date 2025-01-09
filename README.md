@@ -1,23 +1,27 @@
 # PDF::Builder release 3.027
 
-A Perl library to facilitate the creation and modification of PDF files
+A Perl library to create and modify PDF files
 
 ## What is it?
 
-PDF::Builder is a **fork** of the popular PDF::API2 Perl library. It provides a
-library of modules and functions so that a PDF file (document) may be built and
-maintained from Perl programs (it can also read in, modify, and write back out
-existing PDF files). It is not a WYSIWYG editor; nor is it a canned
-utility or converter. It does _not_ have a GUI or command line interface -- it
-is driven by your Perl program. It is a set of **building blocks** (methods)
-with which you can perform a wide variety of operations, ranging from basic
-operations such as selecting a font face, to defining an entire page at a time
-in the document, using a large subset of either Markdown or HTML markup
-languages. You can call it from arbitrary Perl programs, which may even create
-content on-the-fly (or read it in from other sources). Quite a few code
+PDF::Builder is a **fork** of the popular PDF::API2\* Perl library. It
+provides a library of modules and functions so that a PDF file (document) may
+be built and maintained from Perl programs (it can also read in, modify, and
+write back out existing PDF files). It is not a WYSIWYG editor; nor is it a
+canned utility or converter. It does _not_ have a GUI or command line interface
+-- it is driven by _your_ Perl program. It is a set of **building blocks**
+(methods) with which you can perform a wide variety of operations, ranging
+from basic operations (such as selecting a font face), to defining an entire
+page at a time in the document (using a large subset of either Markdown or HTML
+markup languages). You can call it from arbitrary Perl programs, which may even
+create content on-the-fly (or read it in from other sources). Quite a few code
 examples are provided, to help you to get started with the process of creating
 a PDF document. Many enhancements are in the pipeline to make PDF::Builder even
 more powerful and versatile.
+
+\*Note that PDF::Builder is **not** built on PDF::API2, and does **not**
+require that it be installed. The two libraries are completely independent of
+each other and one will not interfere with the other if both are installed.
 
 [Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full), including Documentation and Examples.
 
@@ -109,8 +113,14 @@ functionality.
 * HarfBuzz::Shaper (0.024 or higher, needed for Latin script ligatures and kerning, as well as for any complex script such as Arabic, Indic scripts, or Khmer)
 * Text::Markdown (1.000031 or higher, needed if using 'md1' markup)
 * HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup)
-* Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc utility to create HTML documentation)
+* Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc.pl utility to create HTML documentation)
 * SVGPDF (0.086.2 or higher, needed if using SVG image functions)
+
+**Note** that some of these packages, in turn, make use of various open source
+libraries (DLLs/shared libs) that you may need to hunt around for, and install
+on your system before you can install a given package. That is, they may not
+necessarily come with your Operating System or Perl installation. Other
+packages are "pure Perl" and should install without trouble.
 
 #### Fixes needed to OPTIONAL packages
 
@@ -122,7 +132,7 @@ necessary:
 * A prereq for HTML::TreeBuilder, HTML::Tagset (version 3.20 or earlier), needs 
 a fix for `<ins>` and `<del>` tags to be handled correctly. If not fixed, these
 tags cause undesired paragraph breaks, such as in the examples/Column.pl sample.
-Once installed, in \Strawberry\perl\vendor\lib\HTML\Tagset.pm (location of 
+Once installed, in \Strawberry\perl\vendor\lib\HTML\Tagset.pm (location of
 Tagset.pm will vary on other Perls and OS's):
 
     1. Find  %isPhraseMarkup = map {; $\_ => 1 } qw(
@@ -175,7 +185,7 @@ runs the "t" tests to confirm the proper installation.
 
 ## Copyright
 
-This software is Copyright (c) 2017-2024 by Phil M. Perry.
+This software is Copyright (c) 2017-2025 by Phil M. Perry.
 
 Previous copyrights are held by others (Steve Simms, Alfred Reibenschuh, 
 et al.). See The HISTORY section of the documentation for more information.
