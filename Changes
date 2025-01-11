@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2024-07-13  UNRELEASED
+3.027     2025-01-10  UNRELEASED
 * = work in progress
 
   ==== New features
@@ -153,10 +153,20 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 
   ==== Bug fixes
 
+*   Truetype/Opentype fonts not properly embedding (#222)
+
+*   More consistent handling of core fonts, especially Windows extensions (#213)
+
+*   In Column, some list entries get extra EOL after marker (line a little
+    too long, not allowing for marker?)
+
+    lib/PDF/Builder.pm, /lib/PDF/Builder/Page.pm
+     Per #219, fixes to default_page_boundaries().
+
     lib/PDF/Builder.pm
-     Some PDF Readers ignore a request for decimal page numbers (and output
-      a page label of "Page m of n") if an explicit Start value isn't given.
-      Default Start value to 1.
+     Some PDF Readers (including some releases of Adobe Acrobat Reader) ignore 
+      a request for decimal page numbers (and output a page label of "Page m 
+      of n") if an explicit Start value isn't given. Default Start value to 1.
 
     lib/PDF/Builder/Basic/PDF/File.pm
      Add newline after 'm n obj' to bring more in conformance with PDF/A

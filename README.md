@@ -1,6 +1,6 @@
 # PDF::Builder release 3.027
 
-A Perl library to create and modify PDF files
+A Perl library to create and modify PDF (Portable Document Format) files
 
 ## What is it?
 
@@ -114,7 +114,7 @@ functionality.
 * Text::Markdown (1.000031 or higher, needed if using 'md1' markup)
 * HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup)
 * Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc.pl utility to create HTML documentation)
-* SVGPDF (0.086.2 or higher, needed if using SVG image functions)
+* SVGPDF (0.087 or higher, needed if using SVG image functions)
 
 **Note** that some of these packages, in turn, make use of various open source
 libraries (DLLs/shared libs) that you may need to hunt around for, and install
