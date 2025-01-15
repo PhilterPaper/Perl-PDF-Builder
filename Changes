@@ -160,6 +160,16 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 *   In Column, some list entries get extra EOL after marker (line a little
     too long, not allowing for marker?)
 
+    lib/PDF/Builder/Content.pm
+     The advancewidth() function was not properly counting the space added by
+      character space and word space settings, in some cases. This could become
+      very apparent in lines with multiple writes, where it wasn't counting
+      extra space added after the last character in a write. A note was also
+      added to the word space documentation explaining that all spaces between
+      words receive the extra word space (not just once per run of spaces), and
+      inter-word spaces also receive extra character space (Tc). Thanks to
+      @gtnuux for reporting this (#234) and suggesting the fix.
+
     lib/PDF/Builder.pm, /lib/PDF/Builder/Page.pm
      Per #219, fixes to default_page_boundaries().
 

@@ -3481,8 +3481,8 @@ counteract scaling.
 
 =over
 
-Sets additional spacing between B<characters> in a line. This is in I<points>,
-and is initially zero.
+Sets additional B<horizontal> spacing between B<characters> in a line. Vertical 
+writing systems are not supported. This is in I<points> and is initially zero.
 It may be positive to give an I<expanded> effect to words, or
 it may be negative to give a I<condensed> effect to words.
 If C<$spacing> is given, the current setting is replaced by that value and
@@ -3503,6 +3503,9 @@ towards a consistent width throughout a document (or at least, a paragraph).
 You may also choose to use character spacing for special effects, such as a
 high-level heading expanded with extra space. This is a decorative effect, and
 should be used with restraint.
+
+Note that interword spaces (x20) I<also> receive additional character space,
+in addition to any additional word space (C<wordspace>) defined!
 
 B<CAUTION:> be careful about using C<charspace> if you are using a connected
 ("script") font. This might include Arabic, Devanagari, Latin cursive 
@@ -3551,8 +3554,8 @@ sub charspace {
 
 =over
 
-Sets additional spacing between B<words> in a line. This is in I<points> and
-is initially zero 
+Sets additional B<horizontal> spacing between B<words> in a line. Vertical 
+writing systems are not supported. This is in I<points> and is initially zero 
 (i.e., just the width of the space, without anything extra). It may be negative
 to close up sentences a bit. 
 If C<$spacing> is given, the current setting is replaced by that value and
@@ -3566,7 +3569,10 @@ results (although resulting in a somewhat increased PDF file size).
 Note that it is a limitation of the PDF specification (as of version 1.7, 
 section 9.3.3) that only spacing with an ASCII space (x20) is adjusted. Neither
 required blanks (xA0) nor any multiple-byte spaces (including thin and wide
-spaces) are currently adjusted.
+spaces) are currently adjusted. B<However,> multiple I<spaces> between words
+I<each> are expanded. E.g., if you have a double x20 space between words, it
+will receive I<twice> the expansion of a single space! Furthermore, character
+spacing (Tc) is also added to each space, in I<addition> to word spacing (Tw).
 
 B<alternate names:> C<word_spacing> and C<word_space>
 
@@ -4243,11 +4249,21 @@ sub advancewidth {
     # other code should first fatal error in text() call, this is a fallback
     return 0 if !defined $opts{'font'};
 
+    # leading, trailing, extra spaces are counted (not squeezed out)
+    # width of text without adjusting char and word spacing
     $glyph_width = $opts{'font'}->width($text)*$opts{'fontsize'};
+    # how many ASCII spaces x20. TBD: account for other size spaces, maybe tabs
     $num_space   = $text =~ y/\x20/\x20/;
+    # how many characters in all, including spaces
     $num_char    = length($text);
+    # how many points to add to width due to spaces. note that doubled 
+    # interword spaces count as two (or more) word spaces, not just one
     $word_spaces = $opts{'wordspace'}*$num_space;
-    $char_spaces = $opts{'charspace'}*($num_char - 1);
+    # intercharacter additional spacing (note that interword spaces count
+    # as normal characters here. TBD: check PDF spec if that is correct).
+    # want extra space after EACH character, including the one on the end, not
+    # just between each character WITHIN the text string.
+    $char_spaces = $opts{'charspace'}*$num_char;
     $advance     = ($glyph_width+$word_spaces+$char_spaces)*$opts{'hscale'}/100;
 
     return $advance;
