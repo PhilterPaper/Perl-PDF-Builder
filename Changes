@@ -1,9 +1,21 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2025-01-10  UNRELEASED
+3.027     2025-01-23  UNRELEASED
 * = work in progress
 
   ==== New features
+
+*    (possibly) t/tiff.t updated for Macs (macos and darwin) to fix timing
+      issue with Macports.
+
+*    Font Manager adds default script face. For Windows, use ScriptMTBold
+      (TTF, comes with Windows), although FrenchScriptMT is a nice alternative.
+      Linux, etc. doesn't seem guaranteed to come with a script font, so use
+      Times Bold Italic as something reasonable, although Helvetica Bold 
+      Oblique is a nice alternative. If you have other script fonts installed,
+      you can easily override the script face with your choice. The use of
+      an already-present font (Times Bold Italic core font) leads to changes
+      to reuse the font, rather than loading in a new copy.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/SVG.pm (new),
       lib/PDF/Builder/Content.pm, Makefile.PL, README.md, INFO/ACKNOWLEDGE.md, 
@@ -50,7 +62,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       Split out list examples from Column.pl examples, into Column_lists.pl.
 
     lib/PDF/Builder/Content/Text.pm, examples/Column.pl
-*    CSS text-align property for left, center, and right added. Also implement
+     CSS text-align property for left, center, and right added. Also implement
       <_move> tag: "x" attribute absolute positioning within column and/or 
       "dx" attribute relative positioning. If $x is undefined, assume is at 0.
 
@@ -160,6 +172,11 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 *   In Column, some list entries get extra EOL after marker (line a little
     too long, not allowing for marker?)
 
+    README.md
+     Note on installing on older Macs: see #223 for dealing with strange errors
+      with the "convert" utility (ImageMagick). Apparently it was missing
+      the Arial font on some older releases.
+
     lib/PDF/Builder/Content.pm, t/text.t
      The advancewidth() function was not properly counting the space added by
       character space and word space settings, in some cases. This could become
@@ -168,7 +185,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       added to the word space documentation explaining that all spaces between
       words receive the extra word space (not just once per run of spaces), and
       inter-word spaces also receive extra character space (Tc). Thanks to
-      @gtnuux for reporting this (#234) and suggesting the fix.
+      @gtnuux for reporting this (#224) and suggesting the fix.
 
       As a practical matter, advancewidth() now properly returns any extra
       space added to the last character (charspace or wordspace), whereas
@@ -182,7 +199,8 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
     lib/PDF/Builder.pm
      Some PDF Readers (including some releases of Adobe Acrobat Reader) ignore 
       a request for decimal page numbers (and output a page label of "Page m 
-      of n") if an explicit Start value isn't given. Default Start value to 1.
+      of n") if an explicit Start value isn't given. Default Start value to 1
+      (always explicitly specify to PDF Reader).
 
     lib/PDF/Builder/Basic/PDF/File.pm
      Add newline after 'm n obj' to bring more in conformance with PDF/A

@@ -163,6 +163,15 @@ needed (worst case, you can unpack the `.tar.gz` file and copy files into
 place yourself!). Currently there are no compiles and links (Perl extensions)
 done during the install process, only copying of .pm Perl module files.
 
+### External utilities
+
+t/tiff.t (install testing for TIFF support) makes use of GhostScript and 
+ImageMagick (convert utility). You may need to install these in order to get
+full testing (tests that need them will be skipped if they are not installed).
+Note that it has been reported that some versions of Mac Perl systems have
+a 'convert' utility that is missing the default Arial font, and thus will fail
+(see ticket 223).
+
 ## Manually building
 
 As is the usual practice with building such a package (from the command line),
