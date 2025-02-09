@@ -451,13 +451,13 @@ $page = $pdf->page();
 $grfx = $page->gfx();
 $text = $page->text();
 footer(++$page_num, $pdf, $text);
-#  might need two or even three pages
+#  might need three or four pages
 #  three <img> calls (GitHub buttons), several `code` 
-#  escape $ and \ in several lines
+#  escape $ and \ in several lines, unescape \* 
 $content = <<"END_OF_CONTENT";
 # PDF::Builder release 3.027
 
-A Perl library to create and modify PDF files
+A Perl library to create and modify PDF (Portable Document Format) files
 
 ## What is it?
 
@@ -476,7 +476,7 @@ examples are provided, to help you to get started with the process of creating
 a PDF document. Many enhancements are in the pipeline to make PDF::Builder even
 more powerful and versatile.
 
-\*Note that PDF::Builder is **not** built on PDF::API2, and does **not**
+\\*Note that PDF::Builder is **not** built on PDF::API2, and does **not**
 require that it be installed. The two libraries are completely independent of
 each other and one will not interfere with the other if both are installed.
 
@@ -571,7 +571,7 @@ functionality.
 * Text::Markdown (1.000031 or higher, needed if using 'md1' markup)
 * HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup)
 * Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc.pl utility to create HTML documentation)
-* SVGPDF (0.086.2 or higher, needed if using SVG image functions)
+* SVGPDF (0.087 or higher, needed if using SVG image functions)
 
 **Note** that some of these packages, in turn, make use of various open source
 libraries (DLLs/shared libs) that you may need to hunt around for, and install
@@ -581,30 +581,8 @@ packages are "pure Perl" and should install without trouble.
 
 #### Fixes needed to OPTIONAL packages
 
-Sometimes fixes or patches are needed for optional prerequisites. At the time of
-release of this PDF::Builder version, the following fixes or patches are known
-to be needed. As the libraries are updated, this list will be modified as
-necessary:
-
-* A prereq for HTML::TreeBuilder, HTML::Tagset (version 3.20 or earlier), needs 
-a fix for `<ins>` and `<del>` tags to be handled correctly. If not fixed, these
-tags cause undesired paragraph breaks, such as in the examples/Column.pl sample.
-Once installed, in \\Strawberry\\perl\\vendor\\lib\\HTML\\Tagset.pm (location of
-Tagset.pm will vary on other Perls and OS's):
-
-    1. Find  %isPhraseMarkup = map {; $\_ => 1 } qw(
-    2. Below that find     b i u s tt small big
-    3. Add a new line below that:   ins del
-
-This adds `<ins>` and `<del>` to the list of inline ("phrase") tags. It is quite
-possible that other HTML tags may misbehave, and further updates are needed.
-If you experience such problems, try updating your copy of Tagset.pm with one
-from https://github.com/PhilterPaper/HTML-Tagset/blob/master/lib/HTML/Tagset.pm
-and see if that improves matters (and please report results via a ticket).
-
-**HTML::Tagset 3.22 has this fix in it. The easiest course of action is simply
-to check if your copy of HTML::Tagset is at least 3.22. If you can't update it,
-you will need to follow the above instructions.**
+Sometimes fixes or patches are needed for optional prerequisites. See the file
+INFO/Prereq\_fixes.md for a list of known issues.
 
 #### ------------
 
@@ -870,7 +848,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[50,365, 500,100], 'outline'=>$magenta, 
+	          'rect'=>[50,375, 500,100], 'outline'=>$magenta, 
 		  'para'=>[ 0, 10 ],
 	         );
 if ($rc) { 
@@ -896,7 +874,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[50,250, 500,75], 'outline'=>$magenta, 
+	          'rect'=>[50,260, 500,60], 'outline'=>$magenta, 
 		  'para'=>[ 0, 10 ],
 	         );
 if ($rc) { 
@@ -906,28 +884,59 @@ if ($rc) {
 # ------ some <_move> and text-align usage
 #
 print "---- <_move> and text-align usage\n";
-print "1 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
 $content = <<"END_OF_CONTENT";
 <p>
-1.Normal text left justified.
-<_move dx="72">2._move right by 72pt.
+<span style="text-align: left;">text-align: left</span>
 </p>
 END_OF_CONTENT
 
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
-    $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[100,165, 400,15], 'outline'=>$magenta, 
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[100,187, 400,13], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
 if ($rc) { 
     print STDERR "1. <_move> and text-align example overflowed column!\n";
 }
  
-print "2 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
 $content = <<"END_OF_CONTENT";
 <p>
-<_move x="50%"><span style="text-align: center;">1.centered text</span>
+<_move x="50%"><span style="text-align: center;">text-align: center</span>
+</p>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[100,174, 400,13], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ],
+	         );
+if ($rc) { 
+    print STDERR "2. <_move> and text-align example overflowed column!\n";
+}
+ 
+$content = <<"END_OF_CONTENT";
+<p>
+<_move x="100%"><span style="text-align: right;">text-align: right</span>
+</p>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[100,161, 400,13], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ],
+	         );
+if ($rc) { 
+    print STDERR "3. <_move> and text-align example overflowed column!\n";
+print "rc=$rc, leftover text =\n";
+print Dumper(@$unused);
+}
+ 
+$content = <<"END_OF_CONTENT";
+<p>
+<_move x="50%"><span style="text-align: center;">1.text at center</span>
 <_move x="0%"><span style="text-align: left;">2.explicit LJ at 0%</span>
 <_move x="100%"><span style="text-align: right;">3.RJ text at 100%</span>
 </p>
@@ -935,29 +944,29 @@ END_OF_CONTENT
 
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
-    $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[100,150, 400,15], 'outline'=>$magenta, 
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[100,144, 400,13], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
 if ($rc) { 
-    print STDERR "2. <_move> and text-align example overflowed column!\n";
+    print STDERR "4. <_move> and text-align example overflowed column!\n";
 }
  
-print "3 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
 $content = <<"END_OF_CONTENT";
 <p>
 <_move x="50%" dx="72">1.Center+72pt LJ text.
+<_move x="50%" dx="-72"><span style="text-align: center;">2.Center-72pt CJ text.</span>
 </p>
 END_OF_CONTENT
 
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
-    $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[100,135, 400,15], 'outline'=>$magenta, 
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[100,131, 400,13], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
 if ($rc) { 
-    print STDERR "3. <_move> and text-align example overflowed column!\n";
+    print STDERR "5. <_move> and text-align example overflowed column!\n";
 }
  
 # Column_layouts.pl TBD

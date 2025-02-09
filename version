@@ -14,24 +14,23 @@ PERL_V       5.026000
 
 # minimum ExeUtils::Makemaker needed for configuration
 # update Makefile.PL, META.*
-MAKE_MAKER   6.66        # 6.5503 may also work
+MAKE_MAKER   6.66        # ExtUtils::MakeMaker 6.5503 may also work 7.70 current
 
 # mandatory prerequisites
 # update Makefile.PL, META.*
-TEST_EXCEPTION     0
-TEST_MEMORY_CYCLE  1.0
-
-COMPRESS_ZLIB      1.0
-FONT_TTF           1.04
+TEST_EXCEPTION     0      # 0.43 is current release
+TEST_MEMORY_CYCLE  1.0    # 1.06 is current release
+COMPRESS_ZLIB      1.0    # 2.213 is current release
+FONT_TTF           1.04   # 1.06 is current release
 # READONLY         0     Future usage? per TIFF changes
 
 # optional prerequisites
 # update Makefile.PL, META.*, Builder.pm, t/00-all-usable.t
-GRAPHICS_TIFF    19     # 20 is current release
-HARFBUZZ_SHAPER  0.024  # 0.026 is current release
-IMAGE_PNG_LIBPNG 0.57
+GRAPHICS_TIFF    19       # 21 is current release
+HARFBUZZ_SHAPER  0.024    # 0.027 is current release
+IMAGE_PNG_LIBPNG 0.57     # 0.58 is current release
 TEXT_MARKDOWN    1.000031
 HTML_TREEBUILDER 5.07
 POD_SIMPLE_XHTML 3.45
-SVGPDF           0.087
+SVGPDF           0.087    # 0.90 is current release
 

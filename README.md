@@ -30,22 +30,40 @@ each other and one will not interfere with the other if both are installed.
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/PhilterPaper/Perl-PDF-Builder/graphs/commit-activity)
 
 This archive contains the distribution PDF::Builder.
-See **Changes** file for the version.
+See **Changes** file for the version and list of changes from the previous 
+release.
 
-## Obtaining the Package
+## Obtaining and Installing the Package
 
 The installable Perl package may be obtained from
 "https://metacpan.org/pod/PDF::Builder", or via a CPAN installer package. If
 you install this product, only the run-time modules will be installed. Download
-the full `.tar.gz` file and unpack it (hint: on Windows,
-**7-Zip File Manager** is an excellent tool) to get utilities, test buckets,
-example usage, etc.
+the full `.tar.gz` file and unpack it (uncompress, then extract directory --
+hint: on Windows, **7-Zip File Manager** is an excellent tool) to get 
+utilities, test buckets, example usage, etc.
 
 Alternatively, you can obtain the full source files from
 "https://github.com/PhilterPaper/Perl-PDF-Builder", where the ticket list
 (bugs, enhancement requests, etc.) is also kept. Unlike the installable CPAN
 version, this will have to be manually installed (copy files; there are no XS
 compiles at this time).
+
+Other than an installer for standard CPAN packages (such as 'cpan' on
+Strawberry Perl for Windows), no other tools or manually-installed prereqs are
+needed (worst case, you can unpack the `.tar.gz` file and copy files into
+place yourself!). Currently there are no compiles and links (Perl extensions)
+done during the install process, only copying of .pm Perl module files. 
+
+A package installer such as "cpan" (included with Strawberry Perl and some
+other systems) can retrieve the package, unpack and copy files, and run 
+installation tests without manual intervention. Not only PDF::Builder itself, 
+but any needed prerequisites, may be quickly installed in this manner. Some 
+Perl distributions (e.g., ActiveState) may repackage PDF::Builder and 
+prerequisites into their own install format, as may Linux distributions such
+as Red Hat or SUSE. Finally, it is possible to copy files directly from the 
+GitHub repository to your system, and manually run the "t" (installation) 
+tests, all without going through a `.tar.gz` CPAN package. There are many 
+possibilities.
 
 Note that there are several "optional" libraries (Perl modules) used to extend
 and improve PDF::Builder. Read about the list of optional libraries in
@@ -124,30 +142,8 @@ packages are "pure Perl" and should install without trouble.
 
 #### Fixes needed to OPTIONAL packages
 
-Sometimes fixes or patches are needed for optional prerequisites. At the time of
-release of this PDF::Builder version, the following fixes or patches are known
-to be needed. As the libraries are updated, this list will be modified as
-necessary:
-
-* A prereq for HTML::TreeBuilder, HTML::Tagset (version 3.20 or earlier), needs 
-a fix for `<ins>` and `<del>` tags to be handled correctly. If not fixed, these
-tags cause undesired paragraph breaks, such as in the examples/Column.pl sample.
-Once installed, in \Strawberry\perl\vendor\lib\HTML\Tagset.pm (location of
-Tagset.pm will vary on other Perls and OS's):
-
-    1. Find  %isPhraseMarkup = map {; $\_ => 1 } qw(
-    2. Below that find     b i u s tt small big
-    3. Add a new line below that:   ins del
-
-This adds `<ins>` and `<del>` to the list of inline ("phrase") tags. It is quite
-possible that other HTML tags may misbehave, and further updates are needed.
-If you experience such problems, try updating your copy of Tagset.pm with one
-from https://github.com/PhilterPaper/HTML-Tagset/blob/master/lib/HTML/Tagset.pm
-and see if that improves matters (and please report results via a ticket).
-
-**HTML::Tagset 3.22 has this fix in it. The easiest course of action is simply
-to check if your copy of HTML::Tagset is at least 3.22. If you can't update it,
-you will need to follow the above instructions.**
+Sometimes fixes or patches are needed for optional prerequisites. See the file
+INFO/Prereq\_fixes.md for a list of known issues.
 
 #### ------------
 
@@ -156,12 +152,6 @@ will be able to fall back to built-in partial functionality (TIFF and PNG
 images), but other times will fail. After installing the missing package, you
 may wish to then run the t-test suite for that library to confirm that it is
 properly running, as well as running the examples.
-
-Other than an installer for standard CPAN packages (such as 'cpan' on
-Strawberry Perl for Windows), no other tools or manually-installed prereqs are
-needed (worst case, you can unpack the `.tar.gz` file and copy files into
-place yourself!). Currently there are no compiles and links (Perl extensions)
-done during the install process, only copying of .pm Perl module files.
 
 ### External utilities
 

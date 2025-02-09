@@ -5,9 +5,6 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 
   ==== New features
 
-*    (possibly) t/tiff.t updated for Macs (macos and darwin) to fix timing
-      issue with Macports.
-
 *    Font Manager adds default script face. For Windows, use ScriptMTBold
       (TTF, comes with Windows), although FrenchScriptMT is a nice alternative.
       Linux, etc. doesn't seem guaranteed to come with a script font, so use
@@ -16,6 +13,10 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       you can easily override the script face with your choice. The use of
       an already-present font (Times Bold Italic core font) leads to changes
       to reuse the font, rather than loading in a new copy.
+
+    README.md, INFO/Prereq_fixes.md (new), MANIFEST, examples/Column.pl
+     Move patches needed for some prerequisites (required or optional) to a
+      new file INFO/Prereq_fixes.md, to reduce clutter in README.md.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Resource/XObject/Image/SVG.pm (new),
       lib/PDF/Builder/Content.pm, Makefile.PL, README.md, INFO/ACKNOWLEDGE.md, 
