@@ -7,10 +7,10 @@ VERSION 3.027
 #   of Perl" (NOT "Latest releases in each branch of Perl"!) and subtract 
 #   6 years to get date of oldest release, and then go one release before that. 
 #   Would be nice to read cpan First Release and figure out min Perl version.
-#PERL_V_DOT   5.26.0  # dist.ini, .travis.yml
+#PERL_V_DOT   5.28.0  # dist.ini, .travis.yml
 #    two decimals seems to upset Perl when treating as a number, not string
 # update Makefile.PL, META.*
-PERL_V       5.026000
+PERL_V       5.028000
 
 # minimum ExeUtils::Makemaker needed for configuration
 # update Makefile.PL, META.*
@@ -27,8 +27,8 @@ FONT_TTF           1.04   # 1.06 is current release
 # optional prerequisites
 # update Makefile.PL, META.*, Builder.pm, t/00-all-usable.t
 GRAPHICS_TIFF    19       # 21 is current release
-HARFBUZZ_SHAPER  0.024    # 0.027 is current release
-IMAGE_PNG_LIBPNG 0.57     # 0.58 is current release
+HARFBUZZ_SHAPER  0.024    # 0.031 is current release
+IMAGE_PNG_LIBPNG 0.57     # 0.59 is current release
 TEXT_MARKDOWN    1.000031
 HTML_TREEBUILDER 5.07
 POD_SIMPLE_XHTML 3.45

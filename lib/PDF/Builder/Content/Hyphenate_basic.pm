@@ -209,6 +209,7 @@ sub splitWord {
 
     # sort final @splitLoc, remove any split points violating "min" settings
     # set $leftWord and $rightWord if find successful split
+    # TBD consider hierarchy of desirable splits, rather than equal weight
     if (@splitLoc) {
         @splitLoc = sort { $a <=> $b } @splitLoc;
 	# unnecessary to have unique values
@@ -257,11 +258,11 @@ sub splitWord {
 	    $len = $self->advancewidth("$trial$h", %opts);
 	    if ($len > $width) { next; }
 
-	    # any letter doubling needed?
+	    # TBD any letter doubling needed?
 	    $leftWord = $trial.$h;
 	    $rightWord = substr($word, $j+1); 
 	    last;
-	}
+	} # while splitLoc has content
 	# if fell through because no fragment was short enough, $leftWord and
 	# $rightWord were never reassigned, and effect is to leave the entire
 	# word for the next line.

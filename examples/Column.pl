@@ -487,22 +487,40 @@ each other and one will not interfere with the other if both are installed.
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/PhilterPaper/Perl-PDF-Builder/graphs/commit-activity)
 
 This archive contains the distribution PDF::Builder.
-See **Changes** file for the version.
+See **Changes** file for the version and list of changes from the previous
+release.
 
-## Obtaining the Package
+## Obtaining and Installing the Package
 
 The installable Perl package may be obtained from
 "https://metacpan.org/pod/PDF::Builder", or via a CPAN installer package. If
 you install this product, only the run-time modules will be installed. Download
-the full `.tar.gz` file and unpack it (hint: on Windows,
-**7-Zip File Manager** is an excellent tool) to get utilities, test buckets,
-example usage, etc.
+the full `.tar.gz` file and unpack it (uncompress, then extract directory --
+hint: on Windows, **7-Zip File Manager** is an excellent tool) to get
+utilities, test buckets, example usage, etc.
 
 Alternatively, you can obtain the full source files from
 "https://github.com/PhilterPaper/Perl-PDF-Builder", where the ticket list
 (bugs, enhancement requests, etc.) is also kept. Unlike the installable CPAN
 version, this will have to be manually installed (copy files; there are no XS
 compiles at this time).
+
+Other than an installer for standard CPAN packages (such as 'cpan' on
+Strawberry Perl for Windows), no other tools or manually-installed prereqs are
+needed (worst case, you can unpack the `.tar.gz` file and copy files into
+place yourself!). Currently there are no compiles and links (Perl extensions)
+done during the install process, only copying of .pm Perl module files. 
+
+A package installer such as "cpan" (included with Strawberry Perl and some
+other systems) can retrieve the package, unpack and copy files, and run 
+installation tests without manual intervention. Not only PDF::Builder itself, 
+but any needed prerequisites, may be quickly installed in this manner. Some 
+Perl distributions (e.g., ActiveState) may repackage PDF::Builder and 
+prerequisites into their own install format, as may Linux distributions such
+as Red Hat or SUSE. Finally, it is possible to copy files directly from the 
+GitHub repository to your system, and manually run the "t" (installation) 
+tests, all without going through a `.tar.gz` CPAN package. There are many 
+possibilities.
 
 Note that there are several "optional" libraries (Perl modules) used to extend
 and improve PDF::Builder. Read about the list of optional libraries in
@@ -513,7 +531,7 @@ By default, none are installed.
 
 ### Perl
 
-**Perl 5.26** or higher. It will likely run on somewhat earlier versions, but
+**Perl 5.28** or higher. It will likely run on somewhat earlier versions, but
 the CPAN installer may refuse to install it. The reason this version was
 chosen was so that LTS (Long Term Support) versions of Perl going back about
 6 years are officially supported (by PDF::Builder), and older versions are not
@@ -522,14 +540,14 @@ are an artifact of old Perl releases.
 
 #### Older Perls
 
-If you MUST install on an older (pre 5.26) Perl, you can try the following for
+If you MUST install on an older (pre 5.28) Perl, you can try the following for
 Strawberry Perl (Windows). NO PROMISES! Something similar MAY work for other
 OS's and Perl installations:
 
 1. Unpack installation file (`.tar.gz`, via a utility such as 7-Zip) into a directory, and cd to that directory
-1. Edit META.json and change 5.026000 to 5.016000 or whatever level desired
-1. Edit META.yml and change 5.026000 to 5.016000 or whatever level desired
-1. Edit Makefile.PL and change `use 5.026000;` to `use 5.016000;`, change `\$PERL_version` from `5.026000` to `5.016000`
+1. Edit META.json and change 5.028000 to 5.016000 or whatever level desired
+1. Edit META.yml and change 5.028000 to 5.016000 or whatever level desired
+1. Edit Makefile.PL and change `use 5.028000;` to `use 5.016000;`, change `\$PERL_version` from `5.028000` to `5.016000`
 1. `cpan .`
 
 Note that some Perl installers MAY have a means to override or suppress the
@@ -539,8 +557,8 @@ edited directory back into a `.tar.gz` installable. YMMV.
 If all goes well, PDF::Builder will be installed on your system. Whether or
 not it will RUN is another matter. Please do NOT open a bug report (ticket)
 unless you're absolutely sure that the problem is not a result of using an old
-Perl release, e.g., PDF::Builder is using a feature introduced in Perl 5.018
-and you're trying to run Perl 5.002!
+Perl release, e.g., PDF::Builder is using a feature introduced in Perl 5.022
+and you're trying to run Perl 5.012!
 
 ### Libraries used
 
@@ -573,6 +591,13 @@ functionality.
 * Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc.pl utility to create HTML documentation)
 * SVGPDF (0.087 or higher, needed if using SVG image functions)
 
+If an optional package is needed for certain extended functionality, but not
+installed, sometimes PDF::Builder
+will be able to fall back to built-in partial functionality (TIFF and PNG
+images), but other times will fail. After installing the missing package, you
+may wish to then run the t-test suite for that library to confirm that it is
+properly running, as well as running the examples.
+
 **Note** that some of these packages, in turn, make use of various open source
 libraries (DLLs/shared libs) that you may need to hunt around for, and install
 on your system before you can install a given package. That is, they may not
@@ -582,21 +607,16 @@ packages are "pure Perl" and should install without trouble.
 #### Fixes needed to OPTIONAL packages
 
 Sometimes fixes or patches are needed for optional prerequisites. See the file
-INFO/Prereq\_fixes.md for a list of known issues.
+**INFO/Prereq\_fixes.md** for a list of known issues.
 
-#### ------------
+### External utilities
 
-If an optional package is needed, but not installed, sometimes PDF::Builder
-will be able to fall back to built-in partial functionality (TIFF and PNG
-images), but other times will fail. After installing the missing package, you
-may wish to then run the t-test suite for that library to confirm that it is
-properly running, as well as running the examples.
-
-Other than an installer for standard CPAN packages (such as 'cpan' on
-Strawberry Perl for Windows), no other tools or manually-installed prereqs are
-needed (worst case, you can unpack the `.tar.gz` file and copy files into
-place yourself!). Currently there are no compiles and links (Perl extensions)
-done during the install process, only copying of .pm Perl module files.
+t/tiff.t (install testing for TIFF support) makes use of GhostScript and 
+ImageMagick (convert utility). You may need to install these in order to get
+full testing (tests that need them will be skipped if they are not installed).
+Note that it has been reported that some versions of Mac Perl systems have
+a 'convert' utility that is missing the default Arial font, and thus will fail
+(see ticket 223).
 
 ## Manually building
 
@@ -615,8 +635,8 @@ Makefile.PL), but your system may have it under a different name, such as
 dmake, gmake (e.g., Strawberry Perl on Windows), or nmake.
 
 PDF::Builder does not currently compile and link anything, so `gcc`, `g++`,
-etc. will not be used. The build process merely copies .pm files around, and
-runs the "t" tests to confirm the proper installation.
+etc. will not be used. The build process merely copies .pm files into place,
+and runs the "t" tests to confirm the proper installation.
 
 ## Copyright
 
@@ -629,7 +649,8 @@ We would like to acknowledge the efforts and contributions of a number of
 users of PDF::Builder (and its predecessor, PDF::API2), who have given their
 time to report issues, ask for new features, and have even contributed code.
 Generally, you will find their names listed in the Changes and/or issue tickets
-related to some particular item.
+related to some particular item. See the **INFO/ACKNOWLEDGE.md** and
+**INFO/SPONSORS** files.
 
 ## License
 

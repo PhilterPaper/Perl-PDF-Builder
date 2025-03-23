@@ -74,23 +74,29 @@ By default, none are installed.
 
 ### Perl
 
-**Perl 5.26** or higher. It will likely run on somewhat earlier versions, but
+**Perl 5.28** or higher. It will likely run on somewhat earlier versions, but
 the CPAN installer may refuse to install it. The reason this version was
 chosen was so that LTS (Long Term Support) versions of Perl going back about
 6 years are officially supported (by PDF::Builder), and older versions are not
 supported. The intent is to not waste time and effort trying to fix bugs which
-are an artifact of old Perl releases.
+are an artifact of old Perl releases. 
+
+Usually about once a year the minimum level is bumped up, but this depends on 
+whether Strawberry releases the newest Perl level. As Strawberry Perl releases 
+new Perl levels, usually on an annual basis, we intend to bump up our required 
+minimum Perl level (even-numbered production releases), to keep support for the 
+last 6 calendar years of Perl releases, dropping older ones.
 
 #### Older Perls
 
-If you MUST install on an older (pre 5.26) Perl, you can try the following for
+If you MUST install on an older (pre 5.28) Perl, you can try the following for
 Strawberry Perl (Windows). NO PROMISES! Something similar MAY work for other
 OS's and Perl installations:
 
 1. Unpack installation file (`.tar.gz`, via a utility such as 7-Zip) into a directory, and cd to that directory
-1. Edit META.json and change 5.026000 to 5.016000 or whatever level desired
-1. Edit META.yml and change 5.026000 to 5.016000 or whatever level desired
-1. Edit Makefile.PL and change `use 5.026000;` to `use 5.016000;`, change `$PERL_version` from `5.026000` to `5.016000`
+1. Edit META.json and change 5.028000 to 5.016000 or whatever level desired
+1. Edit META.yml and change 5.028000 to 5.016000 or whatever level desired
+1. Edit Makefile.PL and change `use 5.028000;` to `use 5.016000;`, change `$PERL_version` from `5.028000` to `5.016000`
 1. `cpan .`
 
 Note that some Perl installers MAY have a means to override or suppress the
@@ -100,8 +106,8 @@ edited directory back into a `.tar.gz` installable. YMMV.
 If all goes well, PDF::Builder will be installed on your system. Whether or
 not it will RUN is another matter. Please do NOT open a bug report (ticket)
 unless you're absolutely sure that the problem is not a result of using an old
-Perl release, e.g., PDF::Builder is using a feature introduced in Perl 5.018
-and you're trying to run Perl 5.002!
+Perl release, e.g., PDF::Builder is using a feature introduced in Perl 5.022
+and you're trying to run Perl 5.012!
 
 ### Libraries used
 
@@ -134,6 +140,13 @@ functionality.
 * Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc.pl utility to create HTML documentation)
 * SVGPDF (0.087 or higher, needed if using SVG image functions)
 
+If an optional package is needed for cetain extended functionality, but not
+installed, sometimes PDF::Builder
+will be able to fall back to built-in partial functionality (TIFF and PNG
+images), but other times will fail. After installing the missing package, you
+may wish to then run the t-test suite for that library to confirm that it is
+properly running, as well as running the examples.
+
 **Note** that some of these packages, in turn, make use of various open source
 libraries (DLLs/shared libs) that you may need to hunt around for, and install
 on your system before you can install a given package. That is, they may not
@@ -143,15 +156,7 @@ packages are "pure Perl" and should install without trouble.
 #### Fixes needed to OPTIONAL packages
 
 Sometimes fixes or patches are needed for optional prerequisites. See the file
-INFO/Prereq\_fixes.md for a list of known issues.
-
-#### ------------
-
-If an optional package is needed, but not installed, sometimes PDF::Builder
-will be able to fall back to built-in partial functionality (TIFF and PNG
-images), but other times will fail. After installing the missing package, you
-may wish to then run the t-test suite for that library to confirm that it is
-properly running, as well as running the examples.
+**INFO/Prereq\_fixes.md** for a list of known issues.
 
 ### External utilities
 
@@ -179,8 +184,8 @@ Makefile.PL), but your system may have it under a different name, such as
 dmake, gmake (e.g., Strawberry Perl on Windows), or nmake.
 
 PDF::Builder does not currently compile and link anything, so `gcc`, `g++`,
-etc. will not be used. The build process merely copies .pm files around, and
-runs the "t" tests to confirm the proper installation.
+etc. will not be used. The build process merely copies .pm files into place,
+and runs the "t" tests to confirm the proper installation.
 
 ## Copyright
 
@@ -193,7 +198,8 @@ We would like to acknowledge the efforts and contributions of a number of
 users of PDF::Builder (and its predecessor, PDF::API2), who have given their
 time to report issues, ask for new features, and have even contributed code.
 Generally, you will find their names listed in the Changes and/or issue tickets
-related to some particular item.
+related to some particular item. See the **INFO/ACKNOWLEDGE.md** and
+**INFO/SPONSORS** files.
 
 ## License
 
@@ -221,13 +227,14 @@ a pointer to your work. The more cross-pollination, the better!
 
 ## See Also
 
+* INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues
+* INFO/DEPRECATED file for information on deprecated features
+* INFO/KNOWN\_INCOMP file for known incompatibilities with PDF::API2
+* INFO/Prereq\_fixes.md possible patches for prerequisites
 * CONTRIBUTING file for how to contribute to the project
 * LICENSE file for more on the license term
 * INFO/RoadMap file for the PDF::Builder road map
 * INFO/ACKNOWLEDGE.md for "thank yous" to those who contributed to this product
-* INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues
-* INFO/DEPRECATED file for information on deprecated features
-* INFO/KNOWN\_INCOMP file for known incompatibilities with PDF::API2
 * INFO/CONVERSION file for how to convert from PDF::API2 to PDF::Builder
 * INFO/Changes\* files for older change logs
 * INFO/PATENTS file for information on patents

@@ -25,3 +25,10 @@ report it.
 to check if your copy of HTML::Tagset is at least 3.22. If you can't update it,
 you will need to follow the above instructions.**
 
+-----------------------
+
+* **Running on older Macs:** It has been reported that some versions of Mac 
+Perl systems have a 'convert' utility that is missing the default Arial font, 
+and thus will fail (see ticket 223). You may need to install the Arial font on
+some Mac systems in order to properly test during installation.
+

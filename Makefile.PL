@@ -2,10 +2,10 @@
 
 use strict;
 use warnings;
-use 5.026000;
+use 5.028000;
 use ExtUtils::MakeMaker 6.66;
 
-my $PERL_version = '5.026000';  # Both here and in "use" statement above,
+my $PERL_version = '5.028000';  # Both here and in "use" statement above,
                                 # PDFbuild.pl updates from 'version' file
 my $MakeMaker_version = '6.66';
 my $version = '3.026';          # PDFbuild.pl updates from 'version' file

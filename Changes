@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2025-01-23  UNRELEASED
+3.027     2025-03-23  UNRELEASED
 * = work in progress
 
   ==== New features
@@ -12,7 +12,11 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       Oblique is a nice alternative. If you have other script fonts installed,
       you can easily override the script face with your choice. The use of
       an already-present font (Times Bold Italic core font) leads to changes
-      to reuse the font, rather than loading in a new copy.
+      to reuse the font, rather than loading in a new copy. Ref #213.
+
+    META.json, META.yml, Makefile.PL, README.md, examples/Column.pl,
+      lib/PDF/Builder.pm, version
+     Update minimum supported Perl level from 5.26 to 5.28.
 
     README.md, INFO/Prereq_fixes.md (new), MANIFEST, examples/Column.pl
      Move patches needed for some prerequisites (required or optional) to a
@@ -151,10 +155,6 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
      Correct placement of content of "object" and in POD elaborate on necessary
       corrections that may be needed.
 
-    lib/PDF/Builder.pm
-     Recommend workaround for problems with Adobe Acrobat Reader when 
-      displaying decimal (only) page labels (need to specify "start").
-
     (most .pm files) update POD for more consistent appearance, including links
       for major entries and methods.
     docs/buildDoc.pl put NAVIGATION links at the top of the Table of Contents,
@@ -166,17 +166,24 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 
   ==== Bug fixes
 
+    lib/PDF/Builder/Content/Text.pm
+     Correct the wrong width being used when Content::Hyphenate_basic::splitWord
+      is called from column(). Reported by @CtrlO.
+
 *   Truetype/Opentype fonts not properly embedding (#222)
+        PUSH OFF TO 3.028, HAVE SUGGESTED CHANGES
 
 *   More consistent handling of core fonts, especially Windows extensions (#213)
+        PUSH OFF TO 3.028, HAVE SUGGESTED CHANGES
+     Clarify use of Windows extended core fonts?
 
 *   In Column, some list entries get extra EOL after marker (line a little
     too long, not allowing for marker?)
 
-    README.md
-     Note on installing on older Macs: see #223 for dealing with strange errors
-      with the "convert" utility (ImageMagick). Apparently it was missing
-      the Arial font on some older releases.
+    README.md, INFO/prereq_fixes.md
+     Note on installing on older Macs: see #223 and INFO/prereq_fixes.md for 
+      dealing with strange errors with the "convert" utility (ImageMagick). 
+      Apparently it was missing the Arial font on some older releases.
 
     lib/PDF/Builder/Content.pm, t/text.t
      The advancewidth() function was not properly counting the space added by
@@ -201,7 +208,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
      Some PDF Readers (including some releases of Adobe Acrobat Reader) ignore 
       a request for decimal page numbers (and output a page label of "Page m 
       of n") if an explicit Start value isn't given. Default Start value to 1
-      (always explicitly specify to PDF Reader).
+      (and always explicitly specify to PDF Reader if page labels used).
 
     lib/PDF/Builder/Basic/PDF/File.pm
      Add newline after 'm n obj' to bring more in conformance with PDF/A
@@ -247,7 +254,8 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       and <del> tags cause unwanted paragraph breaks. The best solution, until
       the TreeBuilder prereq HTML::Tagset is fixed (and HTML::TreeBuilder
       updated to require the new version), is to edit HTML::Tagset and make a 
-      one line fix. These instructions are repeated and expanded upon in README.
+      one line fix. These instructions are repeated and expanded upon in 
+      INFO/prereq_fixes.md.
       
       In \Strawberry\perl\vendor\lib\HTML\Tagset.pm (location of Tagset.pm
       will vary on other Perls and OS's):

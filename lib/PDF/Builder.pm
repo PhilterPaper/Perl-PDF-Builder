@@ -171,11 +171,7 @@ release!
 
 =item * 
 
-5.26 current minimum supported version, until next PDF::Builder release after 23 June, 2024. This is currently the minimum tested version.
-
-=item * 
-
-5.28 future minimum supported version, until next PDF::Builder release after 22 May, 2025
+5.28 current minimum supported version, until next PDF::Builder release after 22 May, 2025. This is currently the minimum tested version.
 
 =item * 
 
