@@ -23,6 +23,10 @@ more powerful and versatile.
 require that it be installed. The two libraries are completely independent of
 each other and one will not interfere with the other if both are installed.
 
+**Gadzooks!** For a delightful look at the (rather grisly) origin of this
+typographical term, as well as many other terms, watch
+https://www.youtube.com/watch?v=cd5iFbuNKv8 .
+
 [Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full), including Documentation and Examples.
 
 [![Open Issues](https://img.shields.io/github/issues/PhilterPaper/Perl-PDF-Builder)](https://github.com/PhilterPaper/Perl-PDF-Builder/issues)
@@ -68,7 +72,7 @@ possibilities.
 Note that there are several "optional" libraries (Perl modules) used to extend
 and improve PDF::Builder. Read about the list of optional libraries in
 PDF::Builder::Docs, and decide whether or not you want to install any of them.
-By default, none are installed.
+By default, **none** are installed.
 
 ## Requirements
 
@@ -150,7 +154,8 @@ properly running, as well as running the examples.
 **Note** that some of these packages, in turn, make use of various open source
 libraries (DLLs/shared libs) that you may need to hunt around for, and install
 on your system before you can install a given package. That is, they may not
-necessarily come with your Operating System or Perl installation. Other
+necessarily come with your Operating System or Perl installation. Some such
+packages may try to use "Alien" to build such prereqs, if missing. Other
 packages are "pure Perl" and should install without trouble.
 
 #### Fixes needed to OPTIONAL packages
@@ -223,7 +228,7 @@ Art progresses! Just please be considerate and acknowledge the work of others
 that you are building on, as well as pointing back to this package. Drop us a
 note with news of your project (if based on the code and algorithms in
 PDF::Builder, or even just heavily inspired by it) and we'll be happy to make
-a pointer to your work. The more cross-pollination, the better!
+a pointer to _your_ work. The more cross-pollination, the better!
 
 ## See Also
 
@@ -257,3 +262,23 @@ We hope to more fully address this in the future, but for now, get the full
 installation and look at the `examples/` and `contrib/` directories for sample
 code that may help you figure out how to do things. The installation tests in
 the `t/` and `xt/` directories might also be useful to you.
+
+### A Note on Paper Sizes
+
+Per PDF specifications, the default paper (media) size set in PDF::Builder
+is 'US Letter' (8.5in x 11in, 216mm x 279mm). If you're in the civilized world,
+and don't measure things in "bananas",
+you may wish to specify 'A4' instead, in the `$pdf->mediabox('A4');` call.
+Note that A4 is narrower and taller than Letter. If you want to ensure that
+your output will be printable around the world, consider using the _universal_
+paper size: `$pdf->mediabox('universal');`. This will result in some wasted
+space at the top of a printed A4 page, or some wasted right margin on a printed
+Letter page, but it's better than having content cut off! It may also be
+satisfactory to leave sufficient margins (minimum .25"/18pt/6mm left and right,
+.5"/36pt/13mm top and bottom) around document content.
+
+Please see the discussion on `mediabox()` and other "box" calls, about how
+much of a page can actually be _printed_ on, allowing for pinch rollers and
+other paper transport mechanisms. The above suggested margins assume, in
+addition to Letter paper being .25" wider and .7" shorter than A4, that 1/8"
+(9pt, 3mm) of paper is unprintable around the edges; your printer may vary.

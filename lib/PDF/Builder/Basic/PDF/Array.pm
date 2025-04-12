@@ -72,6 +72,11 @@ sub outobjdeep {
 
     $fh->print('[ ');
     foreach my $obj (@{$self->{' val'}}) {
+	# if no graphics object (page->gfx), creates an invalid Contents object
+	# (unblessed HASH containing no keys) for this page's graphics, and
+	# this function blows up
+        if ($obj !~ /^PDF::Builder/) { next; }
+
         $obj->outobj($fh, $pdf);
         $fh->print(' ');
     }

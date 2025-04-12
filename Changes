@@ -1,22 +1,21 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2025-03-23  UNRELEASED
+3.027     2025-04-12  UNRELEASED
 * = work in progress
 
   ==== New features
 
-*    Font Manager adds default script face. For Windows, use ScriptMTBold
-      (TTF, comes with Windows), although FrenchScriptMT is a nice alternative.
-      Linux, etc. doesn't seem guaranteed to come with a script font, so use
-      Times Bold Italic as something reasonable, although Helvetica Bold 
-      Oblique is a nice alternative. If you have other script fonts installed,
-      you can easily override the script face with your choice. The use of
-      an already-present font (Times Bold Italic core font) leads to changes
-      to reuse the font, rather than loading in a new copy. Ref #213.
+    examples/FontManager.pl
+     Add more examples of non-standard fonts, and give more control over
+      which get displayed (if available). Note that not all these fonts come
+      with a given OS, and those that do almost certainly need their paths 
+      updated. "Script" is omitted for this release, as it still needs work on 
+      selecting a suitable default script font.
 
     META.json, META.yml, Makefile.PL, README.md, examples/Column.pl,
       lib/PDF/Builder.pm, version
-     Update minimum supported Perl level from 5.26 to 5.28.
+     Update minimum supported Perl level from 5.26 to 5.28. Also copyright
+      dates to 2025.
 
     README.md, INFO/Prereq_fixes.md (new), MANIFEST, examples/Column.pl
      Move patches needed for some prerequisites (required or optional) to a
@@ -34,7 +33,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       GNUplot interfaces, and enhanced barcode support; all of which make use
       of SVG.
 
-    lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Docs.pm, 
+*   lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Docs.pm, 
       lib/PDF/Builder/Content.pm, MANIFEST, README.md, tools/3_examples.pl, 
       examples/Column.pl, examples/Column_lists.pl (new), devtools/PDFbuild.pl
      Rearchitect list (ul and ol) generation to improve appearance and permit
@@ -57,6 +56,8 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
           '' (no change) for ol, 50% for ul;  "80%" for slightly reduced size
         _marker-weight (change marker font-weight)
           'bold' for ol, ul;  "normal" if don't want bold markers
+*       _marker-align (left/center/right justify marker text within 
+          marker_width). 'right' is default
       The defaults are the normal font-family, color, etc. inherited from
       the <ol> or <ul> tag, updated by the usual suspects (style, CSS, etc.),
       and finally overridden by _marker-* properties (inherited and set in the
@@ -66,15 +67,30 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       <li> list item! Instead, set "_marker-color" to affect only markers.
       Split out list examples from Column.pl examples, into Column_lists.pl.
 
-    lib/PDF/Builder/Content/Text.pm, examples/Column.pl
-     CSS text-align property for left, center, and right added. Also implement
-      <_move> tag: "x" attribute absolute positioning within column and/or 
-      "dx" attribute relative positioning. If $x is undefined, assume is at 0.
+*   lib/PDF/Builder/Content/Text.pm, examples/Column_lists.pl
+     Add "simple" list <_sl>, much like <ul> with 'none' for the 
+      list-style-type, that is, a list with no marker.
 
-    lib/PDF/Builder/Basic/PDF/File.pm
-     Per PDF::API2 commit 308e70f, die (crash) with message instead of
-      freezing up if a malformed PDF trailer's Prev keys result in a loop
-      or if multiple trailers use the same object ID and generation number.
+    lib/PDF/Builder/Content/Text.pm, examples/Column_lists.pl
+     Add CSS list-style-position property, with support for 'inside' and
+      'outside' (default). In addition, extend CSS by allowing N% value, where
+      the value is the percentage of marker_width to indent the left edge of
+      second, etc. lines of <li> text. This permits a "hanging marker" effect
+      without the full "outside" setting (0% = "inside", 100% = "outside").
+      Also, an Npt value may be given, which is the indent amount in points
+      (0 = "inside", marker_width pts = "outside"). In both cases, results may
+      be undesirable if N% is outside the range 0 to 100, or Npt is outside the
+      range 0 to marker_width. We recommend that you stay within these limits.
+
+    lib/PDF/Builder/Content/Text.pm, examples/Column.pl
+     CSS text-align property for left, center, and right added.
+
+    lib/PDF/Builder/Content/Text.pm, examples/Column.pl
+     Implement HTML extension <_move> tag: "x" attribute = absolute 
+      positioning within column and/or "dx" attribute = relative positioning. 
+      If $x is undefined, assume is at 0. This can be used to place text at
+      desired point(s) on a given line, such as a page title at the left and
+      page number at the right of a header or footer.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Basic/PDF/File.pm, 
        lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Content.pm, version, 
@@ -166,19 +182,24 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 
   ==== Bug fixes
 
+    lib/PDF/Builder/Basic/PDF/Array.pm, examples/ShowFont.pl
+     Fix a typo in ShowFont example, and a bug in Array.pm that led to Array's
+      outobjdeep() blowing up if there was no graphics object (page->gfx)
+      defined, but apparently only when dealing with TTF fonts! It has been
+      patched with a workaround, which will do for now, but a permanent fix
+      is a TBD item.
+
     lib/PDF/Builder/Content/Text.pm
      Correct the wrong width being used when Content::Hyphenate_basic::splitWord
       is called from column(). Reported by @CtrlO.
 
-*   Truetype/Opentype fonts not properly embedding (#222)
-        PUSH OFF TO 3.028, HAVE SUGGESTED CHANGES
-
-*   More consistent handling of core fonts, especially Windows extensions (#213)
-        PUSH OFF TO 3.028, HAVE SUGGESTED CHANGES
-     Clarify use of Windows extended core fonts?
-
 *   In Column, some list entries get extra EOL after marker (line a little
     too long, not allowing for marker?)
+
+    lib/PDF/Builder/Basic/PDF/File.pm
+     Per PDF::API2 commit 308e70f, die (crash) with message instead of
+      freezing up if a malformed PDF trailer's Prev keys result in a loop
+      or if multiple trailers use the same object ID and generation number.
 
     README.md, INFO/prereq_fixes.md
      Note on installing on older Macs: see #223 and INFO/prereq_fixes.md for 
@@ -248,30 +269,14 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
     lib/PDF/Builder/Resource/Font/CoreFont.pm
      Expand on descriptions of standard and Windows core fonts.
 
-    lib/PDF/Builder/Content/Text.pm, README.md, examples/Column.pl
+    INFO/prereq_fixes.md, lib/PDF/Builder/Content/Text.pm, README.md, 
+      examples/Column.pl
      There is a bug in HTML::TreeBuilder prerequisite HTML::Tagset
-      (https://rt.cpan.org/Public/Bug/Display.html?id=151970) where <ins> 
-      and <del> tags cause unwanted paragraph breaks. The best solution, until
-      the TreeBuilder prereq HTML::Tagset is fixed (and HTML::TreeBuilder
-      updated to require the new version), is to edit HTML::Tagset and make a 
-      one line fix. These instructions are repeated and expanded upon in 
-      INFO/prereq_fixes.md.
+      (https://rt.cpan.org/Public/Bug/Display.html?id=151970), prior to
+      version 3.22, where <ins> and <del> tags cause unwanted paragraph breaks
+      due to being missing from the list of inline tags. The instructions for
+      fixing this in HTML::Tagset are given in INFO/prereq_fixes.md.
       
-      In \Strawberry\perl\vendor\lib\HTML\Tagset.pm (location of Tagset.pm
-      will vary on other Perls and OS's):
-        1. Find  %isPhraseMarkup = map {; $_ => 1 } qw(
-        2. Below that find     b i u s tt small big
-        3. Add a new line below that:   ins del
-      This adds <ins> and <del> to the list of inline tags.
-
-      ===NOTE=== the recent 3.22 release of HTML::Tagset has this fixed. The
-      easiest course of action is to check the version of HTML::Tagset, and if
-      it is earlier than 3.22, update it. If you cannot update the package with
-      a package manager such as 'cpan' or 'cpanm', you will need to manually
-      make the above fix. At some point in the future, presumably 
-      HTML::TreeBuilder will receive an upgrade to prereq HTML::Tagset 3.22 
-      (minimum) and the update will be taken care of automatically.
-
     README.md, contrib/*, examples/*, tools/*, devtools/PDFbuild.pl, 
       devtools/PDFversion.pl, docs/buildDoc.pl
      Bite the bullet and change "my $LAST_UPDATE" to "our $LAST_UPDATE", and
