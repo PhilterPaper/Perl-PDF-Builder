@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2025-04-12  UNRELEASED
+3.027     2025-04-17  UNRELEASED
 * = work in progress
 
   ==== New features
@@ -33,7 +33,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       GNUplot interfaces, and enhanced barcode support; all of which make use
       of SVG.
 
-*   lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Docs.pm, 
+    lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Docs.pm, 
       lib/PDF/Builder/Content.pm, MANIFEST, README.md, tools/3_examples.pl, 
       examples/Column.pl, examples/Column_lists.pl (new), devtools/PDFbuild.pl
      Rearchitect list (ul and ol) generation to improve appearance and permit
@@ -67,7 +67,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       <li> list item! Instead, set "_marker-color" to affect only markers.
       Split out list examples from Column.pl examples, into Column_lists.pl.
 
-*   lib/PDF/Builder/Content/Text.pm, examples/Column_lists.pl
+    lib/PDF/Builder/Content/Text.pm, examples/Column_lists.pl
      Add "simple" list <_sl>, much like <ul> with 'none' for the 
       list-style-type, that is, a list with no marker.
 
@@ -182,19 +182,19 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 
   ==== Bug fixes
 
+    lib/PDF/Builder/Basic/PDF/Dict.pm
+     Per #221, don't let unblessed objects get through (causes error).
+
     lib/PDF/Builder/Basic/PDF/Array.pm, examples/ShowFont.pl
-     Fix a typo in ShowFont example, and a bug in Array.pm that led to Array's
-      outobjdeep() blowing up if there was no graphics object (page->gfx)
-      defined, but apparently only when dealing with TTF fonts! It has been
-      patched with a workaround, which will do for now, but a permanent fix
-      is a TBD item.
+     Fix a typo in ShowFont example (#222), and a bug in Array.pm that led to 
+      Array's outobjdeep() blowing up if there was no graphics object 
+      (page->gfx) defined, but apparently only when dealing with TTF fonts! It 
+      has been patched with a workaround, which will do for now, but a 
+      permanent fix is a TBD item.
 
     lib/PDF/Builder/Content/Text.pm
      Correct the wrong width being used when Content::Hyphenate_basic::splitWord
       is called from column(). Reported by @CtrlO.
-
-*   In Column, some list entries get extra EOL after marker (line a little
-    too long, not allowing for marker?)
 
     lib/PDF/Builder/Basic/PDF/File.pm
      Per PDF::API2 commit 308e70f, die (crash) with message instead of

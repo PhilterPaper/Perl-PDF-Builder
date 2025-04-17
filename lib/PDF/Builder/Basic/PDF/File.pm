@@ -1875,10 +1875,8 @@ sub out_trailer {
 
     if (defined $self->{'Size'}) {
         $tdict->{'Size'} = PDFNum($self->{' maxobj'} -1 );
-
     } else {
         $tdict->{'Size'} = PDFNum($self->{' maxobj'}    );
-
     }
 
     my $tloc = $fh->tell();

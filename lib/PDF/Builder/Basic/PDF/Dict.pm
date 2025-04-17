@@ -177,6 +177,8 @@ sub outobjdeep {
                      } keys %$self) {
         next if $key =~ m/^[\s\-]/o;
         next unless $self->{$key};
+	# some unblessed objects were sometimes getting through
+        next unless $self->{$key} =~ /^PDF::Builder/;
         $fh->print('/' . PDF::Builder::Basic::PDF::Name::string_to_name($key, $pdf) . ' ');
         $self->{$key}->outobj($fh, $pdf);
         $fh->print(' ');
