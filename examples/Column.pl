@@ -3,8 +3,8 @@
 use warnings;
 use strict;
 use PDF::Builder;
-use Data::Dumper; # for debugging
- $Data::Dumper::Sortkeys = 1; # hash keys in sorted order
+#use Data::Dumper; # for debugging
+# $Data::Dumper::Sortkeys = 1; # hash keys in sorted order
 
 # VERSION
 our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
@@ -27,6 +27,9 @@ my $magenta = '#ff00ff';
 my $fs = 15;
 my ($rc, $next_y, $unused);
 print "CAUTION: page 4 requires that your HTML::Tagset installation be patched\n  so that <ins> and <del> are handled properly!\n";
+# for debugging use
+if (0) { #############################################
+} #############################################
 
 print "======================================================= pg 1\n";
 $page = $pdf->page();
@@ -211,15 +214,19 @@ consequatur aut perferendis doloribus asperiores repellat.
 my $SLoremIpsum = join("\n",@ALoremIpsum);
 
 print "---- Lorem Ipsum array of string entries, default paragraphs\n";
+$text->column($page, $text, undef, 'html', 
+  "<h2>Paragraphs with default characteristics</h2>", 'rect'=>[50,730, 500,25]);
 # default paragraph indent and top margin
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'none', \@ALoremIpsum, 
-	          'rect'=>[50,750, 500,300], 'outline'=>$magenta );
+	          'rect'=>[50,700, 500,250], 'outline'=>$magenta );
 if ($rc) { 
     print STDERR "Lorem Ipsum array overflowed the column!\n";
 }
 print "---- Lorem Ipsum string entry, block-style paragraphs\n";
+$text->column($page, $text, undef, 'html', 
+  "<h2>Paragraphs with block style (no indent, vertical space)</h2>", 'rect'=>[50,380, 500,25]);
 # no indent, extra top margin
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
@@ -445,7 +452,7 @@ if ($use_Table) {
 }
 
 # more pages with more extensive MD
-print "======================================================= pg 5-9\n";
+print "======================================================= pg 5-10\n";
 print "---- A README.md file for PDF::Builder\n";
 $page = $pdf->page();
 $grfx = $page->gfx();
@@ -454,6 +461,8 @@ footer(++$page_num, $pdf, $text);
 #  might need three or four pages
 #  three <img> calls (GitHub buttons), several `code` 
 #  escape $ and \ in several lines, unescape \* 
+#  example block in Paper Sizes note needs manual reformat (revisit
+#    when <pre> supported)
 $content = <<"END_OF_CONTENT";
 # PDF::Builder release 3.027
 
@@ -479,6 +488,10 @@ more powerful and versatile.
 \\*Note that PDF::Builder is **not** built on PDF::API2, and does **not**
 require that it be installed. The two libraries are completely independent of
 each other and one will not interfere with the other if both are installed.
+
+**Gadzooks!** For a delightful look at the (rather grisly) origin of this
+typographical term, as well as many other terms, watch
+https://www.youtube.com/watch?v=cd5iFbuNKv8 .
 
 [Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full), including Documentation and Examples.
 
@@ -525,7 +538,7 @@ possibilities.
 Note that there are several "optional" libraries (Perl modules) used to extend
 and improve PDF::Builder. Read about the list of optional libraries in
 PDF::Builder::Docs, and decide whether or not you want to install any of them.
-By default, none are installed.
+By default, **none** are installed.
 
 ## Requirements
 
@@ -537,6 +550,12 @@ chosen was so that LTS (Long Term Support) versions of Perl going back about
 6 years are officially supported (by PDF::Builder), and older versions are not
 supported. The intent is to not waste time and effort trying to fix bugs which
 are an artifact of old Perl releases.
+
+Usually about once a year the minimum level is bumped up, but this depends on 
+whether Strawberry releases the newest Perl level. As Strawberry Perl releases 
+new Perl levels, usually on an annual basis, we intend to bump up our required 
+minimum Perl level (even-numbered production releases), to keep support for the 
+last 6 calendar years of Perl releases, dropping older ones.
 
 #### Older Perls
 
@@ -601,7 +620,8 @@ properly running, as well as running the examples.
 **Note** that some of these packages, in turn, make use of various open source
 libraries (DLLs/shared libs) that you may need to hunt around for, and install
 on your system before you can install a given package. That is, they may not
-necessarily come with your Operating System or Perl installation. Other
+necessarily come with your Operating System or Perl installation. Some such
+packages may try to use "Alien" to build such prereqs, if missing. Other
 packages are "pure Perl" and should install without trouble.
 
 #### Fixes needed to OPTIONAL packages
@@ -674,17 +694,18 @@ Art progresses! Just please be considerate and acknowledge the work of others
 that you are building on, as well as pointing back to this package. Drop us a
 note with news of your project (if based on the code and algorithms in
 PDF::Builder, or even just heavily inspired by it) and we'll be happy to make
-a pointer to your work. The more cross-pollination, the better!
+a pointer to _your_ work. The more cross-pollination, the better!
 
 ## See Also
 
+* INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues
+* INFO/DEPRECATED file for information on deprecated features
+* INFO/KNOWN\_INCOMP file for known incompatibilities with PDF::API2
+* INFO/Prereq\_fixes.md possible patches for prerequisites
 * CONTRIBUTING file for how to contribute to the project
 * LICENSE file for more on the license term
 * INFO/RoadMap file for the PDF::Builder road map
 * INFO/ACKNOWLEDGE.md for "thank yous" to those who contributed to this product
-* INFO/SUPPORT file for information on reporting bugs, etc. via GitHub Issues
-* INFO/DEPRECATED file for information on deprecated features
-* INFO/KNOWN\_INCOMP file for known incompatibilities with PDF::API2
 * INFO/CONVERSION file for how to convert from PDF::API2 to PDF::Builder
 * INFO/Changes\* files for older change logs
 * INFO/PATENTS file for information on patents
@@ -707,6 +728,41 @@ We hope to more fully address this in the future, but for now, get the full
 installation and look at the `examples/` and `contrib/` directories for sample
 code that may help you figure out how to do things. The installation tests in
 the `t/` and `xt/` directories might also be useful to you.
+
+### A Note on Paper Sizes
+
+Per PDF specifications, the default paper (media) size set in PDF::Builder
+is 'US Letter' (8.5in x 11in, 216mm x 279mm). If you're in the civilized world,
+and don't measure things in "bananas",
+you may wish to specify 'A4' instead, in the `\$pdf->mediabox('A4');` call.
+Note that A4 is narrower and taller than Letter. If you want to ensure that
+your output will be printable around the world, consider using the _universal_
+paper size: `\$pdf->mediabox('universal');`.
+This will result in some wasted
+space at the top of a printed A4 page, or some wasted right margin on a printed
+Letter page, but it's better than having content cut off! It may also be
+satisfactory to leave sufficient _margins_ around document content on standard
+US Letter _or_ A4 media, with the following **minimum** margins (allowing
+3mm/.125" for paper handling, plus extra for media size differences):
+
+`bottom: 3mm = .125" = 9pt`  (bottom same for all media)
+
+`left:   3mm = .125" = 9pt`  (left same for all media)
+
+
+`A4 top:     21mm = .83" = 60pt` (A4 taller than Letter)
+
+`Letter top: 3mm = .125" = 9pt`
+
+`Letter right:  9mm = .375" = 27pt` (Letter wider than A4)
+
+`A4 right:      3mm = .125" = 9pt`
+
+Please see the discussion on `mediabox()` and other "box" calls, about how
+much of a page can actually be _printed_ on, allowing for pinch rollers and
+other paper transport mechanisms. The above suggested margins assume, in
+addition to Letter paper being .25" wider and .7" shorter than A4, that 1/8"
+(9pt, 3mm) of paper is unprintable around the edges; your printer may vary.
 END_OF_CONTENT
 
 restore_props($text,$grfx);
@@ -733,7 +789,7 @@ while ($rc) {
 # for various lists, see Column_lists.pl
 
 # block quotes and font extent changes
-print "======================================================= pg 10\n";
+print "======================================================= pg 11\n";
 print "---- Block quotes\n";
 $page = $pdf->page();
 $grfx = $page->gfx();
@@ -800,7 +856,7 @@ if ($rc) {
 }
 
 # setting your own CSS for Markdown or none
-print "======================================================= pg 11\n";
+print "======================================================= pg 12\n";
 $page = $pdf->page();
 $grfx = $page->gfx();
 $text = $page->text();

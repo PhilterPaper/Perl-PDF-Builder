@@ -1,7 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.027     2025-04-17  UNRELEASED
-* = work in progress
+3.027     2025-04-18
 
   ==== New features
 
@@ -56,7 +55,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
           '' (no change) for ol, 50% for ul;  "80%" for slightly reduced size
         _marker-weight (change marker font-weight)
           'bold' for ol, ul;  "normal" if don't want bold markers
-*       _marker-align (left/center/right justify marker text within 
+        _marker-align (left/center/right justify marker text within
           marker_width). 'right' is default
       The defaults are the normal font-family, color, etc. inherited from
       the <ol> or <ul> tag, updated by the usual suspects (style, CSS, etc.),
@@ -70,6 +69,11 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
     lib/PDF/Builder/Content/Text.pm, examples/Column_lists.pl
      Add "simple" list <_sl>, much like <ul> with 'none' for the 
       list-style-type, that is, a list with no marker.
+
+    lib/PDF/Builder/Content/Text.pm, examples/Column_lists.pl
+     Support standard HTML attributes <ol type="f"> (1AaIi), <li value="n">,
+      <li type="f">. The <li> are useful for changing the count in the middle
+      of an ordered list, or overriding the list-style-type for one element.
 
     lib/PDF/Builder/Content/Text.pm, examples/Column_lists.pl
      Add CSS list-style-position property, with support for 'inside' and

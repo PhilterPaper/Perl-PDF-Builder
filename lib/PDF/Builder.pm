@@ -238,19 +238,26 @@ The full source is on https://github.com/PhilterPaper/Perl-PDF-Builder.
 
 The release distribution is on CPAN: https://metacpan.org/pod/PDF::Builder.
 
+A formatted copy of the documentation (POD) may be found online, for your
+convenience, at https://www.catskilltech.com/Documentation/PDF/Builder.html.
+
+Copies of most of the output of "examples/" sample programs may be found 
+online at https://www.catskilltech.com/Examples/PDF/Builder.html.
+
 Bug reports are on https://github.com/PhilterPaper/Perl-PDF-Builder/issues?q=is%3Aissue+sort%3Aupdated-desc 
 (with "bug" label), feature requests have an "enhancement" label, and general 
 discussions (architecture, roadmap, etc.) have a "general discussion" label.
 
 Do B<not> under I<any> circumstances open a PR (Pull Request) to report a bug. 
-It is a waste of both your and our time and effort. Open a regular ticket 
+That's B<not> what a PR is for, and 
+is a waste of both your and our time and effort. Open a regular ticket 
 (issue), and attach a Perl (.pl) program illustrating the problem, if possible. 
 If you believe that you have a program patch, and offer to share it as a PR, we 
 may give the go-ahead. Unsolicited PRs may be closed without further action.
 
 =head2 LICENSE
 
-This software is Copyright (c) 2017-2023 by Phil M. Perry.
+This software is Copyright (c) 2017-2025 by Phil M. Perry.
 
 This is free software, licensed under:
 

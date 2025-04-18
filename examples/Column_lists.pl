@@ -29,6 +29,7 @@ $grfx = $page->gfx();
 
 $content = <<"END_OF_CONTENT";
 <h2>Unordered (bulleted) lists with various markers</h2>
+<h3>Nested list <i>is</i> within &lt;li&gt; of parent</h3>
 <ul> <!-- default disc -->
   <li>Unordered 1A, disc and here is a bunch more text to try to cause a spill to a second line. Looks like we need a bit more filler here.</li>
   <li>Unordered 1B
@@ -41,19 +42,103 @@ $content = <<"END_OF_CONTENT";
       <ul style="list-style-type: box"> <!-- box (open square) -->
         <li>Unordered 4A, box. A &ldquo;box&rdquo; marker is non-standard &mdash; it is an empty square marker. A bit more filler here. How about a <i>lot</i> more, driving it to three lines in all? Oh yeah, that's the ticket!</li>
         <li>Unordered 4B
-        <ul style="list-style-type: disc"> <!-- and back to disc -->
-          <li>Unordered 5A, disc</li>
+        <ul> <!-- and back to disc -->
+          <li>Unordered 5A, default disc</li>
           <li>Unordered 5B</li>
 	</ul>
-	<ul> <!-- default (filled) square) -->
+	<ul style="list-style-type: square">
           <li>Unordered 6A, square</li>
           <li>Unordered 6B</li>
-	</ul></li>
-      </ul></li>
-    </ul></li>
-  </ul></li>
+	</ul></li> <!-- end li 4B -->
+      </ul></li> <!-- end li 3B -->
+    </ul></li> <!-- end li 2A -->
+  </ul></li> <!-- end li 1B -->
 </ul>
 
+<h3>Nested list is <i>not</i> within &lt;li&gt; of parent</h3>
+<ul> <!-- default disc -->
+  <li>Unordered 1A, disc and here is a bunch more text to try to cause a spill to a second line. Looks like we need a bit more filler here.</li>
+  <li>Unordered 1B
+  <ul> <!-- default circle -->
+    <li>Unordered 2A, circle</li>
+    <li>Unordered 2B and here is a bunch more text to try to cause a spill to a second line. Looks like we need a bit more filler here.</li>
+    <ul> <!-- default (filled) square -->
+      <li>Unordered 3A, square</li>
+      <li>Unordered 3B</li>
+      <ul style="list-style-type: box"> <!-- box (open square) -->
+        <li>Unordered 4A, box. A &ldquo;box&rdquo; marker is non-standard &mdash; it is an empty square marker. A bit more filler here. How about a <i>lot</i> more, driving it to three lines in all? Oh yeah, that's the ticket!</li>
+        <li>Unordered 4B</li>
+        <ul>
+          <li>Unordered 5A, default disc</li>
+          <li>Unordered 5B</li>
+	</ul>
+	<ul style="list-style-type: square">
+          <li>Unordered 6A, square</li>
+          <li>Unordered 6B</li>
+	</ul>
+      </ul>
+    </ul>
+  </ul>
+</ul>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ] );
+if ($rc) {
+    print STDERR "list example overflowed column!\n";
+}
+
+print "======================================================= pg 2\n";
+print "---- More list examples\n";
+
+$page = $pdf->page();
+$text = $page->text();
+$grfx = $page->gfx();
+
+# if you are using <ul> or <ol> with single digit numbers, it should be safe
+# to reduce marker_width and marker_gap
+$content = <<"END_OF_CONTENT";
+<h3>Nested list with narrower marker widths and gaps</h3>
+<ul> <!-- default disc -->
+  <li>Unordered 1A, disc and here is a bunch more text to try to cause a spill to a second line. Looks like we need a bit more filler here.</li>
+  <li>Unordered 1B
+  <ul> <!-- default circle -->
+    <li>Unordered 2A, circle</li>
+    <li>Unordered 2B and here is a bunch more text to try to cause a spill to a second line. Looks like we need a bit more filler here.
+    <ul> <!-- default (filled) square -->
+      <li>Unordered 3A, square</li>
+      <li>Unordered 3B
+      <ul style="list-style-type: box"> <!-- box (open square) -->
+        <li>Unordered 4A, box. A &ldquo;box&rdquo; marker is non-standard &mdash; it is an empty square marker. A bit more filler here. How about a <i>lot</i> more, driving it to three lines in all? Oh yeah, that's the ticket!</li>
+        <li>Unordered 4B
+        <ul> <!-- and back to disc -->
+          <li>Unordered 5A, default disc</li>
+          <li>Unordered 5B</li>
+	</ul>
+	<ul style="list-style-type: square">
+          <li>Unordered 6A, square</li>
+          <li>Unordered 6B</li>
+	</ul></li> <!-- end li 4B -->
+      </ul></li> <!-- end li 3B -->
+    </ul></li> <!-- end li 2A -->
+  </ul></li> <!-- end li 1B -->
+</ul>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[50,750, 500,300], 'outline'=>$magenta, 
+		  'marker_width'=>10, 'marker_gap'=>4,
+		  'para'=>[ 0, 0 ] );
+if ($rc) {
+    print STDERR "list example overflowed column!\n";
+}
+
+$content = <<"END_OF_CONTENT";
 <h2>Ordered (numbered) lists with various markers</h2>
 <ol> <!-- default decimal -->
   <li>Ordered 1A, decimal 1., 2.</li>
@@ -84,38 +169,39 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
-	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
+	          'rect'=>[50,425, 500,265], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ] );
 if ($rc) {
     print STDERR "list example overflowed column!\n";
 }
 
-print "======================================================= pg 2\n";
-print "---- More list examples\n";
+print "======================================================= pg 3\n";
+print "---- Mix of ul and ol\n";
+
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
 
 $content = <<"END_OF_CONTENT";
-<h2>Mixture of ordered and unordered with default markers</h2>
+<h2>Mixture of ordered and unordered with DEFAULT markers</h2>
 <ol> <!-- default decimal -->
   <li>Ordered 1A, decimal 1., 2.</li>
   <li>Ordered 1B
   <ul> <!-- default circle -->
-    <li>Unordered 2A, circle</li>
+    <li>Unordered 2A, open circle</li>
     <li>Unordered 2B
     <ol> <!-- default decimal -->
       <li>Ordered 3A, decimal 1., 2.</li>
       <li>Ordered 3B
-      <ul> <!-- default (filled) square -->
-        <li>Unordered 4A, square</li>
+      <ul> <!-- default (open) box -->
+        <li>Unordered 4A, box</li>
         <li>Unordered 4B
         <ol> <!-- default decimal -->
           <li>Ordered 5A, decimal 1., 2.</li>
           <li>Ordered 5B</li>
 	</ol>
-        <ul> <!-- default (filled) square -->
-          <li>Unordered 6A, square</li>
+        <ul> <!-- default (filled) disc -->
+          <li>Unordered 6A, disc</li>
           <li>Unordered 6B</li>
 	</ul></li>
       </ul></li>
@@ -123,15 +209,91 @@ $content = <<"END_OF_CONTENT";
   </ul></li>
 </ol>
 
-<!-- TBD position inside/outside
 <h2>list-style-position inside and outside, with multiline li's</h2>
--->
+<h3>Outside (explicitly)</h3>
+<ul style="list-style-position: outside;">
+  <li>This is going to show that continuation line(s) of a list item are
+  positioned "outside", per the default behavior, although we are explicitly
+  giving it in CSS.</li>
+  <li>Again, this is going to show that continuation line(s) of a list item are
+  positioned "outside", per the default behavior, although we are explicitly
+  giving it in CSS.
+  <ul style="list-style-position: outside;">
+    <li>This is going to show that continuation line(s) of a list item are
+    positioned "outside", per the default behavior, although we are explicitly
+    giving it in CSS.</li>
+    <li>Again, this is going to show that continuation line(s) of a list item are
+    positioned "outside", per the default behavior, although we are explicitly
+    giving it in CSS.</li>
+  </ul></li>
+</ul>
+
+<h3>Inside</h3>
+<ul style="list-style-position: inside;">
+  <li>This is going to show that continuation line(s) of a list item are
+  positioned "inside", which we are explicitly giving in CSS.</li>
+  <li>Again, this is going to show that continuation line(s) of a list item are
+  positioned "inside", which we are explicitly giving in CSS.
+  <ul style="list-style-position: inside;">
+    <li>This is going to show that continuation line(s) of a list item are
+    positioned "inside", which we are explicitly giving in CSS.</li>
+    <li>Again, this is going to show that continuation line(s) of a list item are
+    positioned "inside", which we are explicitly giving in CSS.</li>
+  </ul></li>
+</ul>
 END_OF_CONTENT
 
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
-	          'rect'=>[50,750, 500,450], 'outline'=>$magenta, 
+	          'rect'=>[50,750, 500,650], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ] );
+if ($rc) {
+    print STDERR "list example overflowed column!\n";
+}
+
+print "======================================================= pg 4\n";
+print "---- Extended list-style-position\n";
+
+$page = $pdf->page();
+$text = $page->text();
+$grfx = $page->gfx();
+
+$content = <<"END_OF_CONTENT";
+<h2>Extended functionality of list-style-position</h2>
+<h3>Indented 60% from 'inside' to 'outside'</h3>
+<ul style="list-style-position: 60%;">
+  <li>This is going to show that continuation line(s) of a list item are
+  positioned partially "inside" 60% of the way, which we are explicitly giving in CSS.</li>
+  <li>Again, this is going to show that continuation line(s) of a list item are
+  positioned partially "inside", which we are explicitly giving in CSS.
+  <ul style="list-style-position: 60%;">
+    <li>This is going to show that continuation line(s) of a list item are
+    positioned "inside" 60% of the way, which we are explicitly giving in CSS.</li>
+    <li>Again, this is going to show that continuation line(s) of a list item are
+    positioned partially "inside", which we are explicitly giving in CSS.</li>
+  </ul></li>
+</ul>
+
+<h3>Indented 12pt from 'inside'</h3>
+<ul style="list-style-position: 12pt;">
+  <li>This is going to show that continuation line(s) of a list item are
+  positioned partially "inside" 12 points in, which we are explicitly giving in CSS.</li>
+  <li>Again, this is going to show that continuation line(s) of a list item are
+  positioned partially "inside", which we are explicitly giving in CSS.
+  <ul style="list-style-position: 12pt;">
+    <li>This is going to show that continuation line(s) of a list item are
+    positioned partially "inside" 12 points in, which we are explicitly giving in CSS.</li>
+    <li>Again, this is going to show that continuation line(s) of a list item are
+    positioned partially "inside", which we are explicitly giving in CSS.</li>
+  </ul></li>
+</ul>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[50,750, 500,365], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ] );
 if ($rc) {
     print STDERR "list example overflowed column!\n";
@@ -153,14 +315,14 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[50,250, 500,200], 'outline'=>$magenta, 
+	          'rect'=>[50,350, 500,200], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ] );
 if ($rc) {
     print STDERR "list example overflowed column!\n";
 }
 
 # Counting down (reversed) ordered lists
-print "======================================================= pg 3\n";
+print "======================================================= pg 5\n";
 print "---- Count down list examples\n";
 $page = $pdf->page();
 $text = $page->text();
@@ -252,15 +414,15 @@ if ($rc) {
 }
 
 # Setting marker properties 
-print "======================================================= pg 4\n";
-print "---- Marker properties list examples\n";
+print "======================================================= pg 6\n";
 $page = $pdf->page();
 $text = $page->text();
 $grfx = $page->gfx();
 
+print "---- Marker properties list examples\n";
 # 4 with default marker, 5 with explicit marker
 $content = <<"END_OF_CONTENT";
-<h2>Marker colors and specific text</h2>
+<h3>Marker colors and specific text</h3>
 <ul style="_marker-color: blue;">
   <li>Why <span style="color: blue;">blue?</span> Why not?</li>
   <_marker style="_marker-color: red;"><li>Oh, oh, <span style="color: red;">red</span> means trouble!</li>
@@ -279,14 +441,14 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
-	          'rect'=>[50,750, 500,230], 'outline'=>$magenta, 
+	          'rect'=>[50,750, 500,215], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ] );
 if ($rc) {
     print STDERR "marker properties list 1 example overflowed column!\n";
 }
 
 $content = <<"END_OF_CONTENT";
-<h2>Marker size, weight, font, style</h2>
+<h3>Marker size, weight, font, style</h3>
 <h3>Notice that the marker_width needs to be set wider than default</h3>
 <ol style="_marker-font: sans-serif; _marker-size: 60%; _marker-weight: bold; 
            list-style-type: upper-roman; _marker-before: '('; 
@@ -302,14 +464,83 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
-	          'rect'=>[50,475, 500,180], 'outline'=>$magenta, 
+	          'rect'=>[50,515, 500,160], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ], 'marker_width'=>50 );
 if ($rc) {
     print STDERR "marker properties list 2 example overflowed column!\n";
 }
 
+print "---- Simple list examples\n";
+$content = <<"END_OF_CONTENT";
+<h3>Simple lists</h3>
+<ul style="list-style-type: none; list-style-position: inside;">
+  <li><b>U1A ul with "none" type, positioned inside.</b> Let's have enough content to wrap around to a second line. Is this enough?</li>
+  <li><b>U1B</b> Let's have enough content to wrap around to a second line. Add some more. Is this enough? OK, now it is.</li>
+  <ul style="list-style-type: none;">
+    <li><b>U2A ul with "none" type, positioned outside.</b> Let's have enough content to wrap around to a second line. Is this enough?</li>
+    <li><b>U2B</b> Let's have enough content to wrap around to a second line. Add some more. Is this enough?</li>
+  </ul>
+</ul> <!-- REPEAT with <_sl>, should look the same as above ============= -->
+<_sl style="list-style-position: inside;">
+  <li><b>S1A _sl, positioned inside.</b> Let's have enough content to wrap around to a second line. Is this enough?</li>
+  <li><b>S1B</b> Let's have enough content to wrap around to a second line. Add some more. Is this enough? Apparently it wasn't.</li>
+  <_sl>
+    <li><b>S2A _sl, positioned outside.</b> Let's have enough content to wrap around to a second line. Is this enough?</li>
+    <li><b>S2B</b> Let's have enough content to wrap around to a second line. Add some more. Is this enough? Now it is.</li>
+  </_sl>
+</_sl>
+END_OF_CONTENT
+
+if (0) {
+	# extra test material to append to above
+$content = <<"END_OF_CONTENT";
+<!-- see how HTML::TreeBuilder handles this -->
+<ul>
+	<li>Item A1</li>
+	<_marker><li>Item A2 with marker</li>
+	<_marker></_marker><li>Item A3 with full marker</li>
+	<_marker>*</_marker><li>Item A4 with full marker and text (notice * in Zapf Dingbats font)</li>
+	<!-- remember, this is ZapfDingbats font, * is a filled pointing hand -->
+</ul>
+<_sl>
+	<li>Item B1</li>
+	<_marker><li>Item B2 with marker</li>
+	<_marker></_marker><li>Item B3 with full marker</li>
+	<_marker>*</_marker><li>Item B4 with full marker and text (text removed for simple list)</li>
+	<!-- _marker text forced to '' -->
+</_sl>
+<!-- check also ul and sl IN li -->
+<ul style="list-style-type: none; list-style-position: inside;">
+  <li><b>U3A ul with "none" type, positioned inside.</b> Let's have enough content to wrap around to a second line. Is this enough?</li>
+  <li><b>U3B</b> Let's have enough content to wrap around to a second line. Add some more. Is this enough? Not quite. OK, now it is.
+  <ul style="list-style-type: none;">
+    <li><b>U4A ul with "none" type, positioned outside.</b> Let's have enough content to wrap around to a second line. Is this enough?</li>
+    <li><b>U4B</b> Let's have enough content to wrap around to a second line. Add some more. Is this enough?</li>
+  </ul></li>
+</ul> <!-- REPEAT with <_sl>, should look the same as above ============= -->
+<_sl style="list-style-position: inside;">
+  <li><b>S3A _sl, positioned inside.</b> Let's have enough content to wrap around to a second line. Is this enough?</li>
+  <li><b>S3B</b> Let's have enough content to wrap around to a second line. Add some more. Is this enough? Apparently it wasn't.
+  <_sl>
+    <li><b>S4A _sl, positioned outside.</b> Let's have enough content to wrap around to a second line. Is this enough?</li>
+    <li><b>S4B</b> Let's have enough content to wrap around to a second line. Add some more. Is this enough? Now it is.</li>
+  </_sl></li>
+</_sl>
+END_OF_CONTENT
+}
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[50,335, 500,300], 'outline'=>$magenta, 
+#                 'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ], );
+if ($rc) {
+    print STDERR "simple list example overflowed column!\n";
+}
+
 # Checking behavior in lists split across columns
-print "======================================================= pg 5\n";
+print "======================================================= pg 7\n";
 print "---- List behavior when split across columns\n";
 $page = $pdf->page();
 $text = $page->text();
@@ -384,7 +615,8 @@ if ($top_depth < $entire_depth) {
     print "...second column\n";
     ($rc, $next_y, $unused) =
         $text->column($page, $text, $grfx, 'pre', $unused, 
- 	              'rect'=>[50,750-$top_depth-20, 500,$entire_depth-$top_depth], 
+ 	              'rect'=>[50,750-$top_depth-10, 
+			       500,$entire_depth-$top_depth], 
 		      'outline'=>$magenta, 'para'=>[ 0, 2 ],
 	     );
 
@@ -392,6 +624,82 @@ if ($top_depth < $entire_depth) {
        print STDERR "split list check example overflowed column!\n";
    }
 }
+
+$content = <<"END_OF_CONTENT";
+<h3>Marker alignment</h3>
+<h4>Notice that the marker_width needs to be set wider than default</h4>
+<ol style="_marker-font: sans-serif; _marker-size: 60%; _marker-weight: bold; 
+           list-style-type: upper-roman; _marker-before: '('; 
+	   _marker-align: left;
+           _marker-after: ')'; _marker-style: italic;" start="1997">
+  <li><b>left justified</b> Mildly concerned</li>
+  <li>Quite concerned</li>
+  <li>Panic time!</li>
+  <li>That wasn't as bad as feared</li>
+  <li>Start worrying about Y2K38</li>
+</ol>
+<ol style="_marker-font: sans-serif; _marker-size: 60%; _marker-weight: bold; 
+           list-style-type: upper-roman; _marker-before: '('; 
+	   _marker-align: center;
+           _marker-after: ')'; _marker-style: italic;" start="1997">
+  <li><b>center justified</b> Mildly concerned</li>
+  <li>Quite concerned</li>
+  <li>Panic time!</li>
+  <li>That wasn't as bad as feared</li>
+  <li>Start worrying about Y2K38</li>
+</ol>
+<ol style="_marker-font: sans-serif; _marker-size: 60%; _marker-weight: bold; 
+           list-style-type: upper-roman; _marker-before: '('; 
+	   _marker-align: right;
+           _marker-after: ')'; _marker-style: italic;" start="1997">
+  <li><b>right justified (default, explicitly given)</b> Mildly concerned</li>
+  <li>Quite concerned</li>
+  <li>Panic time!</li>
+  <li>That wasn't as bad as feared</li>
+  <li>Start worrying about Y2K38</li>
+</ol>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[50,380, 500,340], 'outline'=>$magenta, 
+		  'para'=>[ 0, 0 ], 'marker_width'=>75 );
+if ($rc) {
+    print STDERR "marker-align example overflowed column!\n";
+}
+
+print "======================================================= pg 8\n";
+print "---- Ordered list behavior with li value and type\n";
+$page = $pdf->page();
+$text = $page->text();
+$grfx = $page->gfx();
+
+$content = <<"END_OF_CONTENT";
+<h2>OL with LI value, type attributes</h2>
+<ol>
+  <li>Item 1</li>
+  <li value="17">Item 2 is overridden by value="17"</li>
+  <li type="i">Item 18 formatted as 'xviii' due to type="i"</li>
+  <li type="A" value="4">Item 19 override to 4 and formatted as 'D' due to type="A"</li>
+</ol>
+<h3>OL with type attribute</h3>
+<ol type="I">
+  <li>Item I.</li>
+  <li>Item II.</li>
+  <li>Item III.</li>
+</ol>
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'html', $content, 
+	          'rect'=>[50,750, 500,220], 'outline'=>$magenta, 
+		  'marker_width'=>48 );
+
+   if ($rc) {
+       print STDERR "ol with li value, type overflowed column!\n";
+   }
 
 # ---------------------------------------------------------------------------
 # end of program

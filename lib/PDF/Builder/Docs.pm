@@ -2375,7 +2375,7 @@ B<<olE<gt>> tag (Markdown B<1.>) ordered (numbered) list. start and type support
 
 =item *
 
-B<<markerE<gt>>> tag (not standard HTML) provide a place to specify, on a
+B<<_markerE<gt>> tag (I<not> standard HTML) provide a place to specify, on a
 I<per list item basis>, overrides to default marker settings (see C<_marker-*>
 CSS extensions below). If omitted, the same HTML list markers and CSS properties are used for each list item (per usual practice)
 
@@ -2409,12 +2409,15 @@ B<<blockquoteE<gt>> tag (Markdown B<E<gt>>) indented both sides block of smaller
 
 =item * 
 
-B<<_markerE<gt>> tag (non-standard) to explicitly set list marker properties 
-(_marker-*) for one specific (immediately following) list item
+B<<_markerE<gt>> tag (non-standard) to explicitly set list marker properties (_marker-*) for one specific (immediately following) E<lt>liE<gt> list item
+
+=item * 
+
+B<<_moveE<gt>> tag (non-standard) to explicitly move current write point left or right. C<x="value"> is an absolute move (in points), while C<dx="value"> is a relative move
 
 =back
 
-I<Numbered> (decimal and hexadecimal) entities are supported, as well as I<named> entities (e.g., C<E<amp>mdash;>). Both lists get a "gutter" (for the marker) of I<marker_width> points wide, so list formats are consistent over the call.
+I<Numbered> (decimal and hexadecimal) entities are supported, as well as I<named> entities (e.g., C<E<amp>mdash;>). Both lists get a "gutter" (for the marker) of I<marker_width> points wide, so list alignments are consistent over the call.
 
 =head3 Current CSS supported
 
@@ -2456,11 +2459,11 @@ I<n> points or I<n>pt, thickness/size of horizontal rule B<ONLY>
 
 =item list-style-position
 
-I<outside> or I<inside>, currently only I<outside> supported
+I<outside> or I<inside>, or (CSS extension) C<Npt> or C<N%> (percentage of C<marker_width>) indent from inside position
 
-=item list-style-typemarker 
+=item list-style-type
 
-description, per standard CSS, plus "box" (I<extension>) for unordered list to give a box outline marker (not a filled "square")
+marker description, per standard CSS, plus "box" (I<extension> for unordered list to give a box I<outline> marker (an unfilled "square"))
 
 =item margin-top/right/bottom/left
 
@@ -2468,7 +2471,7 @@ per standard CSS. combined B<margin> in the future
 
 =item _marker-*
 
-I<extensions>: these are CSS property overides to the appearance of list item markers (the formatted counter or bullet in front of the item). These may be applied to an entire list by placing them in CSS <styleE<gt> or a style= attribute within <olE<gt> or <ulE<gt>, or to override a single list item's entry by placing it in an optional <markerE<gt> tag. 
+I<extensions>: these are CSS property overides to the appearance of list item markers (the formatted counter or bullet in front of the item). These may be applied to an entire list by placing them in CSS <styleE<gt> or a style= attribute within <olE<gt> or <ulE<gt>, or to override a single list item's entry by placing it in an optional <_markerE<gt> tag. 
 
 The corresponding CSS attributes (color, font-family, font-style, font-size, font-weight) are cascaded as usual, and the _marker-* attributes are cascaded as usual. When outputting a list's marker, if the final C<_marker-*> property is not empty (''), it overrides the corresponding CSS property. C<_marker-text>, if not '', overrides whatever text the list would have otherwise used (formatted counter or bullet).
 
@@ -2494,7 +2497,7 @@ override the default text color for this (or all) markers, e.g., 'blue' to set b
 
 =item _marker-font
 
-override the standard font family used for a list item I<marker>. The standard is to use whatever font-family was in effect at the list tag, for ordered lists (formatted counters), or ZapfDingbats for unordered (bulleted) lists
+override the standard font family used for a list item I<_marker>. The standard is to use whatever font-family was in effect at the list tag, for ordered lists (formatted counters), or ZapfDingbats for unordered (bulleted) lists
 
 =item _marker-style
 
@@ -2508,7 +2511,13 @@ override the font size ('font-size' property) for a list item marker. The standa
 
 override the font weight (boldness, 'normal' or 'bold') for a list item marker. The standard is to use 'bold' for both ordered and unordered lists
 
+=item _marker-align
+
+override the list marker alignment or justification (default: 'right') within the 'marker_width' gutter. 'left' and 'center' alignment are permitted
+
 =back
+
+B<Caution:> a I<nested> list will inherit the settings of its parent list, including any C<_marker-*> settings. You may need to explicitly cancel unwanted settings by making them ''
 
 =item text-decoration
 
@@ -2524,7 +2533,7 @@ paragraph etc. indentation, I<n> points, I<npt>, I<n%> of font size
 
 =item text-align
 
-align a string of text to I<start> at the current position (left-aligned, 'left'), be I<centered> at the current position ('center'), or I<end> at the current position ('right' align). You will normally need to first set the current position to write at, before outputting aligned text, using the C<<_moveE<gt>> tag.
+align a string of text to I<start> at the current position (left-aligned, 'left'), be I<centered> at the current position ('center'), or I<end> at the current position ('right' align). You will normally need to first set the current position to write at, before outputting aligned text, using the C<<_moveE<gt>> tag. For 'center' or 'right' alignment, use care to stay within the bounds of the column and not unsuccessfully try to wrap to the next line!
 
 =item width
 
@@ -2548,7 +2557,11 @@ default leading (text-height) ratio. Initially C<1.125>.
 
 =item marker_width
 
-points, set width of gutter where a list's marker goes. Initially C<2 * <font sizeE<gt>>.
+points, set width of gutter where a list's marker goes. Initially C<2 * <font sizeE<gt>> (2 em).
+
+=item marker_gap
+
+points, set width of additional space between the marker and the start of the list item text. Initially C<<font sizeE<gt>> (1 em).
 
 =item para
 
@@ -2563,6 +2576,40 @@ initial text and graphics color setting, in standard PDF::Builder formats. Initi
 CSS declarations to be applied after CSS properties initialization and before any global <style> tags, Initially C<''>.
 
 =back
+
+The Font Manager system is used to supply the requested fonts, so it is up to
+the application to pre-load the desired font information I<before> C<column()>
+is called. Any request to change the encoding within C<column()> will be
+ignored, as the fonts have already been specified for a specific encoding.
+Needless to say, the encoding used in creating the input text needs to match
+the specified font encoding.
+
+Absent any markup changing the font face or styling, whatever is defined by
+Font Manager as the I<current> font will be what is used. This way, you may
+inherit the font from the previous C<column()>, or call 
+C<$text->font($pdf-E<gt>get_font(), size)> to set both the font and size, or 
+just call C<$pdf->get_font()> to set only the font, relying on the C<font_size> 
+option or CSS markup to set the size.
+
+Line fitting (paragraph shaping) is currently quite primitive. Words will
+not be split (hyphenated).  I<It is planned to eventually add Knuth-Plass 
+paragraph shaping, along with proper language-dependent hyphenation.>
+
+Each change of font automatically supplies its maximum ascender and minimum
+descender, the B<extents> above and below the text line's baseline. Each block
+of text with a given face and variant, or change of font size, will be given
+the same I<vertical> extents -- the extents are font-wide, and not determined 
+on a per-glyph basis. So, unfortunately, a block of text "acemnorsuvwz" will 
+have the same vertical extents as a block of text "bdfghijklpqty". For a given
+line of text, the highest ascender and the lowest descender (plus leading) will
+be used to position the line at the appropriate distance below the previous 
+line (or the top of the column). No attempt is made to "fit" projections into
+recesses (jigsaw-puzzle like). If there is an inset into the side of a column,
+or it is otherwise not a straight vertical line,
+so long as the baseline fits within the column outline, no check is made 
+whether descenders or ascenders will fall outside the defined column (i.e., 
+project into the inset). We suggest that you try to keep font sizes fairly
+consistent, to keep reasonably consistent text vertical extents.
 
 =cut
 

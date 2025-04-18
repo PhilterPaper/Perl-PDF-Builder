@@ -271,12 +271,23 @@ and don't measure things in "bananas",
 you may wish to specify 'A4' instead, in the `$pdf->mediabox('A4');` call.
 Note that A4 is narrower and taller than Letter. If you want to ensure that
 your output will be printable around the world, consider using the _universal_
-paper size: `$pdf->mediabox('universal');`. This will result in some wasted
+paper size: `$pdf->mediabox('universal');`.
+This will result in some wasted
 space at the top of a printed A4 page, or some wasted right margin on a printed
 Letter page, but it's better than having content cut off! It may also be
-satisfactory to leave sufficient margins (minimum .25"/18pt/6mm left and right,
-.5"/36pt/13mm top and bottom) around document content.
+satisfactory to leave sufficient _margins_ around document content on standard
+US Letter _or_ A4 media, with the following **minimum** margins (allowing
+3mm/.125" for paper handling, plus extra for media size differences):
+```
+bottom: 3mm = .125" = 9pt  (bottom same for all media)
+left:   3mm = .125" = 9pt  (left same for all media)
 
+A4 top:     21mm = .83" = 60pt (A4 taller than Letter) 
+Letter top: 3mm = .125" = 9pt
+
+Letter right:  9mm = .375" = 27pt (Letter wider than A4)
+A4 right:      3mm = .125" = 9pt
+```
 Please see the discussion on `mediabox()` and other "box" calls, about how
 much of a page can actually be _printed_ on, allowing for pinch rollers and
 other paper transport mechanisms. The above suggested margins assume, in
