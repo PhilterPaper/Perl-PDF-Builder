@@ -253,11 +253,11 @@ Bspline.pl
 
 Column.pl
   Column.pdf
-   10 pages demonstrating column() method with markup
+   12 pages demonstrating column() method with markup
 
 Column_lists.pl
   Column_lists.pdf
-   3 pages demonstrating column() method output of ol and ul lists
+   8 pages demonstrating column() method output of ol and ul and other lists
 
 #Column_layouts.pl    TBD
 #  Column_layouts.pdf

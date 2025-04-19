@@ -20,8 +20,8 @@ sub update_version {
 
     my @types = ('pl', 'pm');  # places to look for pattern in
     my @read_only = (0, 0);  # places to expect to be R/O
-
     my ($SRC, $IN, $OUT);
+
     # open this directory for reading
     opendir($SRC, "$src") || die "unable to open dir '$src': $!";
 
@@ -48,9 +48,9 @@ sub update_version {
     closedir($SRC);
 
     while ($name = shift(@fileList)) {
-if ($name =~ m/ - Copy/) { next; }
+        if ($name =~ m/ - Copy/) { next; }
         # $name is full file path and name
-	$ro_flag = 0;
+	my $ro_flag = 0;
 	for (my $i=0; $i<scalar @types; $i++) {
 	    if ($read_only[$i] && $name =~ m/$types[$i]/) { $ro_flag = 1; }
 	}
@@ -68,7 +68,7 @@ if ($name =~ m/ - Copy/) { next; }
         while ($line = <$IN>) {
 	    # $line still has line-end \n
             $line =~ s/$pattern/$newVer/;
-	    print OUT $line;
+	    print $OUT $line;
         }
    
         close($IN);

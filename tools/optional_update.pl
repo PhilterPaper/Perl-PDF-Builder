@@ -18,8 +18,8 @@ use List::Util 'any';
 # t/00-all-usable.t and lib/PDF/Builder.pm, while also making use of the
 # optional prerequisites, do not need to exclude unused optionals.
 
-our $VERSION = '3.026'; # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $VERSION = '3.027'; # VERSION
+our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 # master list of optional prerequisites:
 # make sure that any updates to patterns etc. keep the same order
@@ -30,8 +30,7 @@ my %options = (
 	'4' => ["Text::Markdown",     "1.000031" ],
 	'5' => ["HTML::TreeBuilder",  "5.07"     ],
 	'6' => ["Pod::Simple::XHTML", "3.45"     ],
-	'7' => ["SVGPDF",             "0.086"    ], # 0.086.2 preferred
-              );
+	'7' => ["SVGPDF",             "0.087"    ], );
 
 print "\nHere are the available optional libraries. Select 0 or more of\n";
 print "them by entering their key numbers 1,2,3, etc. in a one-line list,\n";

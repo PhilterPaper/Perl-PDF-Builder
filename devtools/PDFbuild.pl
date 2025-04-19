@@ -32,7 +32,7 @@ to_continue();
 my ($VERSION, $PERL_V, $MAKE_MAKER, $TEST_EXCEPTION, $TEST_MEMORY_CYCLE,
 	$COMPRESS_ZLIB, $FONT_TTF, $GRAPHICS_TIFF, $HARFBUZZ_SHAPER,
 	$IMAGE_PNG_LIBPNG, $TEXT_MARKDOWN, $HTML_TREEBUILDER, 
-	$POD_SIMPLE_XHTML) 
+	$POD_SIMPLE_XHTML, $SVGPDF) 
           = read_version("./version");
 print "**** file 'version' contains following minimum versions.\n";
 print 
@@ -74,15 +74,17 @@ my $desktop = "C:\\Users\\Phil\\Desktop\\";
 my $temp = $desktop."temp";
 
 # location of 7-Zip
-$sevenZip = "\"C:\\Program Files\\7-Zip\\7z.exe\"";
-$cmd7Zip  = $sevenZip . " a -r ";
+my $sevenZip = "\"C:\\Program Files\\7-Zip\\7z.exe\"";
+my $cmd7Zip  = $sevenZip . " a -r ";
 
 # location of pod2html
-$pod2html = "pod2html";   # should be in PATH
+my $pod2html = "pod2html";   # should be in PATH
 
-$baseDirSrc = $desktop . "$GHname\\";
-#$outputBasename = "PDF-API2-" . substr($dirName, 1);
+my $baseDirSrc = $desktop . "$GHname\\";
+my $outputBasename = "$GHname-$VERSION";
 
+# absolute path so POD links will work (currently unused)
+my $podBase = "/Free.SW/PDF-Builder/$GHname/docs/lib/";
 # --------------------------------------
 
 # check for any files suffixed ~ or .bak (backup files) in source
@@ -467,7 +469,7 @@ sub makeHTML {
     # $input is full file path and name
     # $output is full file path and name
     # if dir for output doesn't exist yet, mkdir it
-    $outpath = $output;
+    my $outpath = $output;
     $outpath =~ s/^[a-z]://i;   # strip off drive
     $outpath =~ s/\\[^\\]+$//;
     if (!-d $outpath."\\") {
@@ -480,7 +482,7 @@ sub makeHTML {
     while ($outfile =~ m#<a>(.*?)</a>#) {
       # outfile $output contains <a> in need of fixup
       # presumably we won't find orphan <a>'s with </a> on next line
-      $href = $1;
+      my $href = $1;
       $href =~ s#::#/#g;  # globally change :: to /
       # expect href to start with PDF/, so podBase is /Free.SW...lib/
       $href = 'href="' . $podBase . $href . '.html"';  # absolute path, .html fileext
@@ -602,7 +604,7 @@ sub update_VERSION {
     my $src = shift;  # single directory to work in for this call
     my $ro_flag = shift;  # true if expect R/O file
 
-    my ($entry, $name, $entry, $line);
+    my ($entry, $name, $line);
     my $pattern = '^# VERSION';
     my $newVer  = "our \$VERSION = '$VERSION'; # VERSION";
 
@@ -680,7 +682,7 @@ sub update_VERSION {
 sub read_version {
     my $filename = shift();
 
-    my @var_list = qw(version perl_v make_maker test_exception test_memory_cycle compress_zlib font_ttf graphics_tiff harfbuzz_shaper image_png_libpng text_markdown html_treebuilder pod_simple_xhtml);
+    my @var_list = qw(version perl_v make_maker test_exception test_memory_cycle compress_zlib font_ttf graphics_tiff harfbuzz_shaper image_png_libpng text_markdown html_treebuilder pod_simple_xhtml svgpdf);
 
     my $VER;  # file handle for version input
     unless (open($VER, "<", "version")) {

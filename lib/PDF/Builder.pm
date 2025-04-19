@@ -5,7 +5,7 @@ use warnings;
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
-our $VERSION = '3.026'; # VERSION
+our $VERSION = '3.027'; # VERSION
 our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 
 # updated during CPAN build
@@ -15,7 +15,7 @@ my $LpngVersion  = 0.57;     # minimum version of Image::PNG::Libpng
 my $TextMarkdown = 1.000031; # minimum version of Text::Markdown
 my $HTMLTreeBldr = 5.07;     # minimum version of HTML::TreeBuilder
 my $PodSimpleXHTML = 3.45;   # minimum version of Pod::Simple::XHTML
-my $SVGPDFver    = 0.086;    # minimum version of SVGPDF
+my $SVGPDFver    = 0.087;    # minimum version of SVGPDF
 
 use Carp;
 use Encode qw(:all);
