@@ -952,7 +952,7 @@ See C<paragraph> for other C<%opts> you can use, such as C<align> and C<pndnt>.
 
 B<Alternate name:> paragraphs
 
-This is for compatibiity with PDF::API2.
+This is for compatibility with PDF::API2.
 
 =back
 
@@ -1408,7 +1408,7 @@ before processing, permitting paragraphs to span array elements if desired.
 At some time in the future, PDF::Builder may support additional extended
 HTML tags and CSS properties in order to better control document layout, such
 as controls to force a page break at a desired point under a given condition.
-Simple (markerless) and definition lists, and at least basic table layout, 
+Definition lists, and at least basic table layout, 
 are under consideration. Additional non-standard CSS may also be added.
 
 =back
@@ -1538,7 +1538,7 @@ These apply to all C<$markup> types.
 
 =item 'outline' => "color string"
 
-You may optionaly request that the column be outlined in a given color, to aid
+You may optionally request that the column be outlined in a given color, to aid
 in debugging fitting problems.
 
 =item 'color' => "color string"
@@ -1698,7 +1698,7 @@ what is used by the next column call (or other PDF::Builder text calls). This
 is done in order to allow you to easily chain from one column to the next,
 without having to manually tell the system what font, color, etc. you want
 to return to. On the other hand, in some cases you may want to start from the
-same initial coditions as usual. You
+same initial conditions as usual. You
 may want to add C<get_font()>, C<font()>, C<fillcolor()>, and
 C<strokecolor()> calls as necessary before the next text output, to get the
 expected text characteristics. Or, you can simply let C<restore> default to

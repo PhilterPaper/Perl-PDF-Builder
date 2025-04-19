@@ -1722,7 +1722,7 @@ where I<mode> is
 This is the B<default> behavior.
 This forces the last segment (to the last given input point)
 to be drawn as a cubic Bezier curve. This means that the direction of the curve
-goin to the last point is unconstrained (it will end up being a reflection
+going to the last point is unconstrained (it will end up being a reflection
 of the tangent at the next-to-last given point).
 
 =item line1
@@ -2491,9 +2491,9 @@ half the distance between the points (resulting in an arc that is a
 semicircle). This is a silent error, as even if the points are correct, due
 to rounding etc. they may not fall I<exactly> on the two circles.
 
-You can think of "looking" from I<P1> to I<P2>. In the dengenerate case, where
+You can think of "looking" from I<P1> to I<P2>. In the degenerate case, where
 the radius is exactly half the distance between the points, there is no
-difference between "small" and "large" arcs, and both cirles will coincide
+difference between "small" and "large" arcs, and both circles will coincide
 with their center half way between I<P1> and I<P2>. Only the direction matters.
 Once the radius is any larger, the two circles become distinct. The primary 
 circle is centered to your right, whose small arc is CW on your left; the 
@@ -3614,7 +3614,7 @@ sub wordspace {
 =over
 
 Sets the percentage of horizontal text scaling (relative sizing, I<not> 
-spacing). This is initally 100 (percent, i.e., no scaling). A scale of greater 
+spacing). This is initially 100 (percent, i.e., no scaling). A scale of greater 
 than 100 will stretch the text, while less than 100 will compress it.
 If C<$scale> is given, the current setting is replaced by that value and
 C<$self> is B<returned> (to permit chaining).
@@ -5336,7 +5336,7 @@ headers and/or footers. In some versions, this leaves the PDF page with a
 strange scaling (such as the page height in points divided by 3300) and the 
 Y-axis flipped so 0 is at the top. This causes problems when trying to add
 additional text or graphics in a new text or graphics record, where text is 
-flipped (mirrored) upsidedown and at the wrong end of the page. If this 
+flipped (mirrored) upside down and at the wrong end of the page. If this 
 happens, you might be able to cure it by adding
 
     $scale = .23999999; # example, 792/3300, examine PDF or experiment!

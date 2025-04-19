@@ -26,7 +26,7 @@ Inherits from L<PDF::Builder::Resource::ColorSpace::Indexed>
 
 =over
 
-Returns a new colorspace object created from an adobe color table file (ACT/8BCT).
+Returns a new colorspace object created from an Adobe color table file (ACT/8BCT).
 See
 Adobe Photoshop(R) 6.0 --
 File Formats Specification Version 6.0 Release 2,

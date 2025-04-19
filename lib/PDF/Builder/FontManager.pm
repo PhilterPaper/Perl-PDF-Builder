@@ -28,7 +28,7 @@ PDF::Builder::FontManager - Managing the font library for PDF::Builder
 These routines are called from the PDF::Builder class (see C<get_font(),
 add_font()> methods).
 
-    # core fonts come pre-loaded
+    # core fonts come preloaded
     # Add new a new font face and variants
     my $rc = $pdf->add_font(
         'face' => $unique_face_name,  # font family, e.g., Times
@@ -362,7 +362,7 @@ entries are:
 =item B<core>
 
 This is a core font, and is loaded via the C<CoreFont()> routine. Note that
-the core fonts are automatically pre-loaded (including additional ones on
+the core fonts are automatically preloaded (including additional ones on
 Windows systems), so you should not need to explicitly load any core fonts
 (at least, the 14 basic ones). All PDF installation are supposed to include
 these 14 basic core fonts, but the precise actual file type may vary among
@@ -465,7 +465,7 @@ useful to you for defining a generic style font.
 =item file => {anonymous hash of source files}
 
 This tells the Font Manager where to find the actual font file. For core fonts,
-it is the standard name, rather than a file (and remember, they are pre-loaded).
+it is the standard name, rather than a file (and remember, they are preloaded).
 For all other types, it lists from one to four of the following variants:
 
 =over

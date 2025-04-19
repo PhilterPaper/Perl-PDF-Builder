@@ -65,7 +65,11 @@ to_continue();
 #   * reformat PERL_V to something usable in Makefile.PL, (e.g.,
 #     '5.16.0' -> '5.016000' and update that file with it, just like VERSION
 
-print "**** have you rebuilt documentation and placed in an appropriate place?\n";
+print "**** have you rebuilt documentation (docs/buildDoc.pl --all)?\n     See Changes_new for instructions on updating online documentation.\n";
+to_continue();
+print "**** have you browsed all documentation in /docs, copy-pasted each\n     page to email and ask for spell check? Now is the time to fix spelling errors!\nlast full check 19 April 2025 -- check anything updated later.\n";
+to_continue();
+print "**** do all examples run OK?\n     See Changes_new for instructions on updating online examples\n";
 to_continue();
 
 # -------------------------------------- configuration

@@ -1551,7 +1551,7 @@ Outlines/Bookmarks column is usually fairly narrow.
 
 These are the "built-in" fonts, in the sense that any PDF Reader is guaranteed
 to supply and support them. The I<metrics> for the supported fonts are 
-shipped with PDF::Builder, but not the fonts themeselves.
+shipped with PDF::Builder, but not the fonts themselves.
 
 Core fonts are limited to B<single byte encodings>. The default encoding for 
 the core fonts is WinAnsiEncoding (roughly the CP-1252/Windows-1252 superset of 
@@ -2471,7 +2471,7 @@ per standard CSS. combined B<margin> in the future
 
 =item _marker-*
 
-I<extensions>: these are CSS property overides to the appearance of list item markers (the formatted counter or bullet in front of the item). These may be applied to an entire list by placing them in CSS <styleE<gt> or a style= attribute within <olE<gt> or <ulE<gt>, or to override a single list item's entry by placing it in an optional <_markerE<gt> tag. 
+I<extensions>: these are CSS property overrides to the appearance of list item markers (the formatted counter or bullet in front of the item). These may be applied to an entire list by placing them in CSS <styleE<gt> or a style= attribute within <olE<gt> or <ulE<gt>, or to override a single list item's entry by placing it in an optional <_markerE<gt> tag. 
 
 The corresponding CSS attributes (color, font-family, font-style, font-size, font-weight) are cascaded as usual, and the _marker-* attributes are cascaded as usual. When outputting a list's marker, if the final C<_marker-*> property is not empty (''), it overrides the corresponding CSS property. C<_marker-text>, if not '', overrides whatever text the list would have otherwise used (formatted counter or bullet).
 
@@ -2489,7 +2489,7 @@ text to insert I<after> ordered list marker
 
 =item _marker-text
 
-define a text string to use as the list item marker that is different from the defaut. It may include multi-character text (e.g., '=>' or an entity), but don't use multi-byte (e.g., UTF-8) characters unless your selected font (see C<_marker-font>) supports it
+define a text string to use as the list item marker that is different from the default. It may include multi-character text (e.g., '=>' or an entity), but don't use multi-byte (e.g., UTF-8) characters unless your selected font (see C<_marker-font>) supports it
 
 =item _marker-color
 
@@ -2578,7 +2578,7 @@ CSS declarations to be applied after CSS properties initialization and before an
 =back
 
 The Font Manager system is used to supply the requested fonts, so it is up to
-the application to pre-load the desired font information I<before> C<column()>
+the application to preload the desired font information I<before> C<column()>
 is called. Any request to change the encoding within C<column()> will be
 ignored, as the fonts have already been specified for a specific encoding.
 Needless to say, the encoding used in creating the input text needs to match

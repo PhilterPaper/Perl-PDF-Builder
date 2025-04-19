@@ -2642,7 +2642,7 @@ B<Note:> You can only import a page from an existing PDF file.
 
 B<Alternate name:> importpage
 
-This name is still valid in PDF::API2, so it is included here for compatiblity.
+This name is still valid in PDF::API2, so it is included here for compatibility.
 
 =back
 

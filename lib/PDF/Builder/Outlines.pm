@@ -16,7 +16,7 @@ PDF::Builder::Outlines - Further Outline handling
 
 Inherits from L<PDF::Builder::Outline>
 
-This creates the I<root> of any collection of Uutline entries. It is thus
+This creates the I<root> of any collection of Outline entries. It is thus
 limited to one instance in a document, although it may be called multiple
 times to provide the root to Outline calls (see Examples).
 
