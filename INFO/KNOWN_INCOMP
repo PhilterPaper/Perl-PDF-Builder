@@ -21,6 +21,14 @@ PDF::API2 if you have a package or library intended to run on both!
 
 ============================================================================
 
+3.028     2025-04-28
+
+   A while back, PDF::API2's Content.pm was modified to return the color just
+     set for strokecolor/stroke_color and fillcolor/fill_color (as an RGB list).
+     I have chosen to retain these methods returning '$self', so that they may
+     be chained if desired, rather than returning the same color you just gave 
+     them, which doesn't seem all that useful.
+
 3.024     2022-09-12
 
    PDF::API2 now initializes page display to a fairly tightly zoomed-in
