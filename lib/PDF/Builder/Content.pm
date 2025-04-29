@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
 
 use Carp;
 use Compress::Zlib qw();
@@ -2846,6 +2846,8 @@ sub clip {
 Ends the current path without explicitly enclosing it.
 That is, unlike C<close>, there is B<no> line segment 
 drawn back to the starting position.
+This is often used to end the current path without filling or
+stroking, for the side effect of changing the current clipping path.
 
 B<Alternate name:> C<end>
 

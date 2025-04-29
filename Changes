@@ -5,6 +5,9 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 
   ==== New features
 
+    lib/PDF/Builder/Content.pm
+     Per change in PDF::API2, add to description of endpath/end method.
+
   ==== Bug fixes
 
     lib/PDF/Builder/Basic/PDF/File.pm
