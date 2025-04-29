@@ -1,11 +1,15 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-04-18  UNRELEASED
+3.028     2025-04-28  UNRELEASED
 * = work in progress
 
   ==== New features
 
   ==== Bug fixes
+
+    lib/PDF/Builder/Basic/PDF/File.pm
+     Per #198, add 0 to object numbers when read in, to ensure that they are
+      seen as decimal numbers, and not misinterpreted as octal values.
 
 3.027     2025-04-18
 

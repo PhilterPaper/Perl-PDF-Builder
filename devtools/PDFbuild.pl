@@ -71,6 +71,8 @@ print "**** have you browsed all documentation in /docs, copy-pasted each\n     
 to_continue();
 print "**** do all examples run OK?\n     See Changes_new for instructions on updating online examples\n";
 to_continue();
+print "**** have you erased (or moved) all .pdf examples from examples/?\n";
+to_continue();
 
 # -------------------------------------- configuration
 my $make = 'gmake';  # dmake no longer available
