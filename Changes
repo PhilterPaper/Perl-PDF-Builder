@@ -1,9 +1,20 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-04-28  UNRELEASED
+3.028     2025-04-29  UNRELEASED
 * = work in progress
 
   ==== New features
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/Font/CoreFont.pm,
+      lib/PDF/Builder/FontManager.pm, lib/PDF/Builder/Docs.pm, 
+      t/font-corefont.t, examples/020_corefonts
+     Per API2 contribution by Johan Vromans, add two functions listing and
+      checking core fonts. For PDF::Builder, added ability to select normal 
+      core set (default), or add the 15 Windows core font extension. In
+      FontManager, always load the Windows core fonts -- can still produce a
+      document even if it can't be displayed on a non-Windows platform. In
+      contrast, in examples/020_corefonts, output Windows core fonts only if
+      running on Windows, as the intent is to be able to display them.
 
     lib/PDF/Builder/Content.pm
      Per change in PDF::API2, add to description of endpath/end method.

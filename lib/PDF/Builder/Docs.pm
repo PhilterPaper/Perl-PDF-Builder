@@ -4,12 +4,15 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
 
 # originally part of Builder.pm, it was split out due to its length
 #
 # WARNING: be sure to keep in synch with changes to POD elsewhere, especially
 #   for column() markup! (also list in #195 and in Content::Text)
+#
+#   do not attempt to use Unicode entities, such as E<euro> -- the POD to
+#   HTML converter will barf on them!
 
 =head1 NAME
 
@@ -1570,6 +1573,15 @@ I<usually> available on a Windows platform (but not guaranteed!). They are
 usually not installed by default on Linux, Mac, and other non-Windows 
 platforms, so use caution if specifying these fonts.
 
+PDF::Builder I<does> supply the B<metrics> for the Windows core fonts (as well
+as the standard ones), so it should be possible to use PDF::Builder to
+generate documents (PDF files) containing these fonts, even if your platform
+may not be able to I<display> them. For instance, Font Manager will load the
+Windows core fonts on all platforms. It is up to the user to take care in
+selecting fonts, if they plan to be able to view documents using those fonts!
+On the other hand, the 020_corefonts example will not attempt to create listings
+of Windows core fonts unless it is run on a Windows platform.
+
 =head4 Examples
 
     $font1 = $pdf->corefont('Times-Roman', encode => 'latin2');
@@ -1605,12 +1617,12 @@ does not give you access to).
 Do not confuse Unicode character points (such as given with an HTML entity) 
 with single byte values or multibyte characters. The only way to access a
 character defined for a given encoding is with a I<single> byte value in the 
-range 0 to 255. For example, if you can't directly type a "Euro" symbol, it is 
-C<\x80> in many encodings -- you would use that instead of the Unicode 
-C<\x{20AC}> code point or C<x\{E282AC}> UTF-8 byte string. It's a matter of 
-giving a single byte value that the PDF Reader can look up in its font 
-definition to get the desired glyph. If the "Euro" symbol is not found in the 
-encoding you're using, well, you're out of luck.
+range 0 to 255. For example, if you can't directly type a "Euro" symbol,
+it is C<\x80> in many encodings -- you would use that instead of the 
+Unicode C<\x{20AC}> code point or C<x\{E282AC}> UTF-8 byte string. It's a 
+matter of giving a single byte value that the PDF Reader can look up in its 
+font definition to get the desired glyph. If the "Euro" symbol is not 
+found in the encoding you're using, well, you're out of luck.
 
 =item *
 

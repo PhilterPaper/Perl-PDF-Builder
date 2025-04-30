@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.026'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
 
 use Carp;
 use Scalar::Util qw(weaken);
@@ -15,7 +15,7 @@ use Scalar::Util qw(weaken);
 # TBD (future)
 #  spec use of synfont() against a base to get
 #   fake bold, italic, bold+italic
-#   small caps, perhaps petite caps
+#   small caps (80% height), perhaps petite caps (1 ex height)
 #   condensed and expanded (or via hscale())
 #  support for UTF-8 subfonts for single byte encoding fonts
 
@@ -666,7 +666,7 @@ sub _initialize_core {
                 'file' => {'symbol' => 'ZapfDingbats'} );
 
 # apparently available on Windows systems
-    if ($^O eq 'MSWin32') {
+   #if ($^O eq 'MSWin32') { # always allow, even on non-Windows platforms
 
     $self->add_font('face' => 'Georgia', 'type' => 'core', 
                 'settings' => { 'encode' => $single }, 
@@ -714,7 +714,7 @@ sub _initialize_core {
 #                         #'bold-italic' => 'BankGothicBoldItalic'} 
 #                         } );
 
-    } # Windows additional core fonts
+   #} # Windows additional core fonts
 
     return;
 } # end of _initialize_core()

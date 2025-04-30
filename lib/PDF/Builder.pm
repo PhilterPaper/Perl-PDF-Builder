@@ -6,7 +6,7 @@ use warnings;
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
 our $VERSION = '3.027'; # VERSION
-our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
 
 # updated during CPAN build
 my $GrTFversion  = 19;       # minimum version of Graphics::TIFF
@@ -3854,6 +3854,56 @@ sub font {
     }
 }
 
+=head3 standard_fonts
+
+    @names = $pdf->standard_fonts($flag)
+ 
+Returns the names of the 14 standard (built-in) "core" fonts, if C<$flag> is
+omitted or "false" (0). See
+L<PDF::API2::Resource::Font::CoreFont> for details.
+B<Note> that these do I<not> include the 14 additional Windows "core"
+fonts extension, unless C<$flag> is given with a value of "true" (1).
+
+=cut
+
+sub standard_fonts {
+    my $self = shift;
+    my $Windows_ext = 0;
+    if (@_ and $_[0]) { $Windows_ext = 1; }
+
+    require PDF::Builder::Resource::Font::CoreFont;
+
+    my @cores = PDF::Builder::Resource::Font::CoreFont->names($Windows_ext);
+
+    return @cores;
+}
+ 
+=head3 is_standard_font
+
+    $boolean = PDF::Builder->is_standard_font($name);
+ 
+    $boolean = PDF::Builder->is_standard_font($name, $flag);
+ 
+Returns true if C<$name> is an exact, case-sensitive match for one of the
+standard font names.
+
+B<Note> that these do I<not> include the 14 additional Windows "core"
+fonts extension, unless C<$flag> is given with a value of "true" (1), in which case,
+C<$name> will also be checked against the additional font names.
+
+=cut
+
+sub is_standard_font {
+    my $self = shift;
+    my $name = shift;
+    my $Windows_ext = 0;
+    if (@_ and $_[0]) { $Windows_ext = 1; }
+
+    require PDF::Builder::Resource::Font::CoreFont;
+
+    return PDF::Builder::Resource::Font::CoreFont->is_standard($name, $Windows_ext);
+}
+ 
 =head3 font_path
 
     @directories = PDF::Builder->font_path()
