@@ -3538,7 +3538,7 @@ font definitions for the purpose of improving portability of PDF files. Note
 that font copyright and licensing terms vary by font provider, and some may 
 prohibit embedding of their fonts, either entirely, or allowing only the subset 
 of glyphs actually used in the document. You should be aware of the terms, and 
-use the C<noembed> or C<nosubset> flags as appropriate. The PDF::Builder font
+use the C<embed> and C<nosubset> flags as appropriate. The PDF::Builder font
 routines currently have no means to automatically detect any embedding 
 limitations for a given font, and cannot default their behavior accordingly!
 
@@ -3651,14 +3651,21 @@ sub ttfont {
     my ($self, $file, %opts) = @_;
     # copy dashed name options to preferred undashed format
     if (defined $opts{'-unicodemap'} && !defined $opts{'unicodemap'}) { $opts{'unicodemap'} = delete($opts{'-unicodemap'}); }
+
+    # noembed deprecated in API2, some may be using embed in code
     if (defined $opts{'-noembed'} && !defined $opts{'noembed'}) { $opts{'noembed'} = delete($opts{'-noembed'}); }
+    if (defined $opts{'-embed'} && !defined $opts{'embed'}) { $opts{'embed'} = delete($opts{'-embed'}); }
 
     # PDF::Builder doesn't set BaseEncoding for TrueType fonts, so text
     # isn't searchable unless a ToUnicode CMap is included.  Include
     # the ToUnicode CMap by default, but allow it to be disabled (for
     # performance and file size reasons) by setting 'unicodemap' to 0.
     $opts{'unicodemap'} = 1 unless exists $opts{'unicodemap'};
-    $opts{'noembed'}    = 0 unless exists $opts{'noembed'};
+    # if BOTH embed and noembed given, use embed
+    if (defined $opts{'noembed'} && !defined $opts{'embed'}) {
+	$opts{'embed'} = !$opts{'noembed'};
+    }
+    $opts{'embed'} //= 1;
 
     $file = _findFont($file);
     require PDF::Builder::Resource::CIDFont::TrueType;

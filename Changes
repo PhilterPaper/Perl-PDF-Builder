@@ -1,15 +1,27 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-04-29  UNRELEASED
+3.028     2025-05-10  UNRELEASED
 * = work in progress
 
   ==== New features
 
+*   lib/PDF/Builder.pm, lib/PDF/Builder/NamedDestination-Annotation-Docs.pm, 
+      examples/040_annotation-042_links, examples/resources/040_annotation.pdf,
+      examples/NamedDest.pl (new), examples/examples.output, examples/README,
+      t/named-destinations.t, MANIFEST, tools/3_examples.pl
+     Update documentation and examples to demonstrate use of Named Destinations,
+      per #202. 040_annotation had two Named Destinations added on page 2 
+      ('foo' whole page and 'bar' zoomed in) and the resources copy of the PDF 
+      was updated (referred to by 042_links). 042_links had two Named 
+      Destinations added on page 4 ('foo' whole page and 'bar' zoomed in), as 
+      well as links demonstrating the four Named Destination examples. Many
+      thanks to @sciurius for his help on figuring out ND's!
+
     lib/PDF/Builder.pm, lib/PDF/Builder/Resource/Font/CoreFont.pm,
       lib/PDF/Builder/FontManager.pm, lib/PDF/Builder/Docs.pm, 
       t/font-corefont.t, examples/020_corefonts
-     Per API2 contribution by Johan Vromans, add two functions listing and
-      checking core fonts. For PDF::Builder, added ability to select normal 
+     Per API2 contribution by Johan Vromans (PR #76), add two functions listing 
+      and checking core fonts. For PDF::Builder, added ability to select normal 
       core set (default), or add the 15 Windows core font extension. In
       FontManager, always load the Windows core fonts -- can still produce a
       document even if it can't be displayed on a non-Windows platform. In
@@ -20,6 +32,35 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
      Per change in PDF::API2, add to description of endpath/end method.
 
   ==== Bug fixes
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/CIDFont/TrueType.pm,
+      lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm
+     Some cleanup related to API2's change from -noembed flag for TTF to
+      -embed (-'s are optional, preferably omitted). Per PDF::API2 #90 and
+      possibly PDF::Builder #222. The data structure in a TTF file is 
+      'noembed', so presumably the ttfont() option was originally named 
+      'noembed' too (default 0/false), but recently changed to 'embed' 
+      (default 1/true) as being more straightforward. 'noembed' is still valid, 
+      although it is ignored if 'embed' is also given.
+*    Need to test if this fixes original #222 complaint (about subsetting)
+      It does fix noembed not working, but (at least for this type of TTF
+      file) noembed=>1/embed=>0 seems to be larger than it should be, defaults 
+      (embed=1, subset=1) is quite a bit larger than noembed (even though only 
+      one character was written), and only nosubset (full font) looks 
+      reasonably sized.
+
+    lib/PDF/Builder/Resource/Font/CoreFont/symbol.pm
+     While thinking about an implementation of #56 (fallback glyphs), I took
+      a deep look at the Symbol core font (for the eventual purpose of adding
+      the Greek alphabet to the TrueType fonts that lack it), using a glyph 
+      fallback mechanism. I added some notes in the code on what is the 
+      "regular" form of a given Greek letter, and what is the "variant" form 
+      (suffixed with "1", except that "sigma1" is the terminal form of sigma). 
+      It appears that Symbol swapped the two forms of "phi". What it calls 
+      "regular" phi (0x66) should be called the "variant" form, and what it 
+      calls "variant" phi ('phi1', 0x6A) is really the regular form. As the 
+      order of the alphabet is so scrambled, hopefully no one is simply using 
+      it "in order", but instead carefully picking each letter!
 
     lib/PDF/Builder/Basic/PDF/File.pm
      Per #198, add 0 to object numbers when read in, to ensure that they are

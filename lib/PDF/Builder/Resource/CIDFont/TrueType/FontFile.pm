@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
 
 use Carp;
 use Encode qw(:all);
@@ -325,11 +325,13 @@ sub readcffstructs {
 sub new {
     my ($class, $pdf, $file, %opts) = @_;
     # copy dashed option names to preferred undashed names
-    if (defined $opts{'-noembed'} && !defined $opts{'noembed'}) { $opts{'noembed'} = delete($opts{'-noembed'}); }
     if (defined $opts{'-isocmap'} && !defined $opts{'isocmap'}) { $opts{'isocmap'} = delete($opts{'-isocmap'}); }
     if (defined $opts{'-debug'} && !defined $opts{'debug'}) { $opts{'debug'} = delete($opts{'-debug'}); }
     if (defined $opts{'-cmaps'} && !defined $opts{'cmaps'}) { $opts{'cmaps'} = delete($opts{'-cmaps'}); }
     if (defined $opts{'-usecmf'} && !defined $opts{'usecmf'}) { $opts{'usecmf'} = delete($opts{'-usecmf'}); }
+    # ttfont() should have already set 'embed' properly, so ignore noembed too
+   #if (defined $opts{'-noembed'} && !defined $opts{'noembed'}) { $opts{'noembed'} = delete($opts{'-noembed'}); }
+   #if (defined $opts{'-embed'} && !defined $opts{'embed'}) { $opts{'embed'} = delete($opts{'-embed'}); }
 
     my $data = {};
 # some debug settings
@@ -350,7 +352,7 @@ sub new {
     $self->{' font'} = $font;
     $self->{' data'} = $data;
     
-    $data->{'noembed'} = ($opts{'noembed'}||0)==1? 1: 0;
+    $data->{'noembed'} = !$opts{'embed'};
     $data->{'iscff'} = (defined $font->{'CFF '})? 1: 0;
 
     $self->{'Subtype'} = PDFName('CIDFontType0C') if $data->{'iscff'};
@@ -416,7 +418,7 @@ sub new {
     $data->{'ascender'} = int($font->{'hhea'}->read()->{'Ascender'} * 1000 / $data->{'upem'});
     $data->{'descender'} = int($font->{'hhea'}{'Descender'} * 1000 / $data->{'upem'});
 
-    $data->{'flags'} = 0;
+    $data->{'flags'}  = 0;
     $data->{'flags'} |= 1 if $font->{'OS/2'}->read()->{'bProportion'} == 9;
     $data->{'flags'} |= 2 unless $font->{'OS/2'}{'bSerifStyle'} > 10 && 
                                  $font->{'OS/2'}{'bSerifStyle'} < 14;
@@ -682,7 +684,7 @@ sub new {
     $self->subsetByCId(0);
 
     return ($self, $data);
-}
+} # end of new()
 
 sub font { 
     return $_[0]->{' font'}; 
@@ -711,8 +713,8 @@ sub subsetByCId {
     my $self = shift;
     my $g = shift;
 
-    $self->data()->{'subset'} = 1;
-    vec($self->data()->{'subvec'}, $g, 1) = 1;
+    $self->data()->{'subset'} = 1; # global 'we have subset glyphs'
+    vec($self->data()->{'subvec'}, $g, 1) = 1; # this particular glyph into ss
     return if $self->iscff();
     # if loca table not defined in the font (offset into glyf table), is there
     # an alternative we can use, or just return undef? per Apple TT Ref:
@@ -747,11 +749,14 @@ sub outobjdeep {
     if ($self->iscff()) {
         $f->{'CFF '}->read_dat();
 	# OTF files were always being written into PDF, even if noembed = 1
-	if ($self->data()->{'noembed'} != 1) {
+	# TBD: however, API2 omits this check
+	unless ($self->data()->{'noembed'}) {
             $self->{' stream'} = $f->{'CFF '}->{' dat'};
 	}
     } else {
-        if ($self->data()->{'subset'} && !$self->data()->{'nosubset'}) {
+        if ($self->data()->{'subset'} && 
+	    (!defined $self->data()->{'nosubset'} ||
+	     !($self->data()->{'nosubset'}) || 0) ) {
 	  # glyf table is optional, according to Apple
 	  if (defined $f->{'glyf'}) {
             $f->{'glyf'}->read();
@@ -762,7 +767,7 @@ sub outobjdeep {
           }
         }
 
-	if ($self->data()->{'noembed'} != 1) {
+	unless ($self->data()->{'noembed'}) {
             $self->{' stream'} = "";
             my $ffh;
             CORE::open($ffh, '+>', \$self->{' stream'});
