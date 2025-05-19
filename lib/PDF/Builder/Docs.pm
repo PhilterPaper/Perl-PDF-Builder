@@ -34,6 +34,12 @@ package. All you need to do is install the CPAN package for PDF::Builder, and
 it will load the .pm files into your Perl library. If the other package prereqs
 PDF::Builder, its installer may download and install PDF::Builder automatically.
 
+Note that PDF::Builder has a number of I<optional> prerequisites. It will
+happily install and run without them, but advanced functionality (possibly
+including that needed by another package) will B<not> be available unless you
+manually install the desired packages. See L</Optional Libraries> or the 
+C<README> file for the list of optional packages.
+
 =item 2.
 
 You want to write a Perl program that uses PDF::Builder functions. In 
@@ -76,11 +82,19 @@ help out and expand PDF::Builder.
 
 PDF::Builder can make use of some optional libraries, which are not I<required>
 for a successful installation. If you want improved speed and capabilities for
-certain functions, you may want to install and use these libraries:
+certain functions, you may want to install and use these libraries. 
+PDF::Builder's C<README> file lists the minimum versions needed, and 
+C<INFO/Prereq_fixes> lists known updates needed for some.
 
 =over
 
-=item * 
+=item *
+
+Perl::Critic
+
+Needed if running C<tools/1_pc.pl> to check the library content.
+
+=item *
 
 Graphics::TIFF
 
@@ -142,6 +156,13 @@ documentation can also be found online at
 https://www.catskilltech.com/FreeSW/product/PDF-Builder/title/PDF%3A%3ABuilder/freeSW_full 
 under the "Documentation" link. This online documentation is updated at 
 every CPAN release, but not necessarily when the GitHub repository is updated.
+
+=item *
+
+SVGPDF
+
+This library is used to convert SVG image files into PDF primitives, so SVG
+images may be included in a PDF.
 
 =back
 
@@ -839,69 +860,99 @@ Print duplex by default and flip on the long edge of the sheet.
 
 These options are used for the C<firstpage> layout, as well as for 
 Annotations, Named Destinations and Outlines.
+For Annotations and Named Destinations, the first form given is for the
+fit as a hash element (option), while the second is as given as a list (before
+any options).
 
 =over
 
 =item 'fit' => 1
 
+=item 'fit'
+
 Display the page designated by C<$page>, with its contents magnified just
 enough to fit the entire page within the window both horizontally and
 vertically. If the required horizontal and vertical magnification
 factors are different, use the smaller of the two, centering the page
-within the window in the other dimension.
+within the window in the other dimension. Bottom line: the entire page is
+shown, as large as possible.
 
 =item 'fith' => $top
+
+=item 'fith', $top
 
 Display the page designated by C<$page>, with the vertical coordinate C<$top>
 positioned at the top edge of the window and the contents of the page
 magnified just enough to fit the entire width of the page within the
-window.
+window. Bottom line: like 'fit', but scrolled vertically to put desired y
+coordinate at the very top edge.
 
 =item 'fitv' => $left
+
+=item 'fitv', $left
 
 Display the page designated by C<$page>, with the horizontal coordinate
 C<$left> positioned at the left edge of the window and the contents of the
 page magnified just enough to fit the entire height of the page within
-the window.
+the window. Bottom line: like 'fit', but scrolled horizontally to put desired x
+coordinate at the very left edge.
 
 =item 'fitr' => [ $left, $bottom, $right, $top ]
+
+=item 'fitr', $left, $bottom, $right, $top
 
 Display the page designated by C<$page>, with its contents magnified just
 enough to fit the rectangle specified by the coordinates C<$left>, C<$bottom>,
 C<$right>, and C<$top> entirely within the window both horizontally and
 vertically. If the required horizontal and vertical magnification
 factors are different, use the smaller of the two, centering the
-rectangle within the window in the other dimension.
+rectangle within the window in the other dimension. Bottom line: defines a
+I<viewport> into the page by giving its corners. Cf. 'xyz', but all 4 corners
+of the viewport rectangle are given.
 
 =item 'fitb' => 1
+
+=item 'fitb'
 
 Display the page designated by C<$page>, with its contents magnified just
 enough to fit its bounding box entirely within the window both
 horizontally and vertically. If the required horizontal and vertical
 magnification factors are different, use the smaller of the two,
 centering the bounding box within the window in the other dimension.
+Similar to 'fit'.
 
 =item 'fitbh' => $top
+
+=item 'fitbh', $top
 
 Display the page designated by C<$page>, with the vertical coordinate C<$top>
 positioned at the top edge of the window and the contents of the page
 magnified just enough to fit the entire width of its bounding box
-within the window.
+within the window. Like 'fitb', but scrolled vertically so that C<$top> is
+at the top edge of the display.
 
 =item 'fitbv' => $left
+
+=item 'fitbv', $left
 
 Display the page designated by C<$page>, with the horizontal coordinate
 C<$left> positioned at the left edge of the window and the contents of the
 page magnified just enough to fit the entire height of its bounding
-box within the window.
+box within the window. Like 'fitb', but scrolled horizontally so that C<$left> 
+is at the left edge of the display.
 
 =item 'xyz' => [ $left, $top, $zoom ]
 
-Display the page designated by C<$page>, with the coordinates C<$[$left, $top]>
-positioned at the top-left corner of the window and the contents of
-the page magnified by the factor C<$zoom>. A zero (0) value for any of the
+=item 'xyz', $left, $top, $zoom
+
+Display the page designated by C<$page>, with the coordinates C<[$left, $top]>
+positioned at the B<top-left corner> of the viewport and the contents of
+the page B<magnified> by the factor C<$zoom>. An C<undef> value for any of the
 parameters C<$left>, C<$top>, or C<$zoom> specifies that the current value of 
-that parameter is to be retained unchanged.
+that parameter is to be retained unchanged. So, if you are viewing a page at
+a certain location and zoom factor, your new page should be positioned at the
+same x,y and be at the same zoom (if all three are C<undef>). Cf. 'fitr', but
+only one corner is given, along with the magnification.
 
 =back
 
@@ -1606,7 +1657,7 @@ as well as being built into FontManager
 You B<cannot> use UTF-8 or other multibyte encodings with core fonts, I<only>
 single byte encodings (256 characters maximum). A PDF Reader simply does not
 know what to do with a multibyte character, and likely will render it as a
-sequence of single characters (producing garbage). Although most single-byte 
+sequence of single characters (producing gibberish). Although most single-byte 
 encodings, at least for European languages, are supported, it is possible that 
 you might encounter an encoding that includes a character I<not> found in a 
 given font file, or vice-versa (the font includes characters that the encoding 
@@ -1749,11 +1800,11 @@ as well as being capable of being loaded into FontManager
 You B<cannot> use UTF-8 or other multibyte encodings with PS fonts, I<only>
 single byte encodings (256 characters maximum). A PDF Reader (or Writer!) 
 simply does not know what to do with a multibyte character, and likely will 
-render it as a sequence of single characters (producing garbage). Although most 
-single-byte encodings, at least for European languages, are supported, it is 
-possible that you might encounter an encoding that includes a character I<not> 
-found in a given font file, or vice-versa (the font includes characters that 
-the encoding does not give you access to).
+render it as a sequence of single characters (producing gibberish). Although 
+most single-byte encodings, at least for European languages, are supported, it 
+is possible that you might encounter an encoding that includes a character 
+I<not> found in a given font file, or vice-versa (the font includes characters 
+that the encoding does not give you access to).
 
 =item *
 

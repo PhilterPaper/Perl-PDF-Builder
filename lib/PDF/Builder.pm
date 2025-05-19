@@ -5209,13 +5209,25 @@ sub shading {
 
 =head2 named_destination
 
-    $ndest = $pdf->named_destination()
+    $ndest = $pdf->named_destination($cat, $name, $obj)
 
 =over
 
-Returns a new or existing named destination object.
+Returns a new named destination object. C<$cat> is the category,
+and is normally the string C<'Dests'> (it's a PDF keyword). The C<$name> is
+the B<unique> (within an entire PDF document) name, such as "foo" in the
+example below. 
+
+See L<PDF::Builder::NamedDestination> for more information.
+
+B<Example:>
 
 =back
+
+    my $dest = PDF::Builder::NamedDestination->new($pdf);
+    #$dest->goto($page, 'xyz' => [undef, undef, undef]);  old style
+    $dest->goto($page, 'xyz', (undef, undef, undef));
+    $pdf->named_destination('Dests', 'foo', $dest);
 
 =cut
 
