@@ -168,6 +168,8 @@ tested with each release thereafter
  HarfBuzz.pl     show use with HarfBuzz::Shaper to shape complex scripts as
                  well as ligatures and kerning in Latin fonts.
 
+ NamedDest.pl    show Named Destinations usage.
+
  RMtutorial.pl   Rich Measham's basic tutorial on using PDF::API2, updated
                  for PDF::Builder.
 

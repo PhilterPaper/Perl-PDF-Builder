@@ -133,6 +133,9 @@ my (@example_list, @example_results);
   push @example_results, "create examples/HarfBuzz.pdf, showing raw text output through text(), and\n the equivalent text output by textHS() after processing by HarfBuzz::Shaper.\n";
  }
 
+  push @example_list, "NamedDest.pl";
+  push @example_results, "create examples/this.pdf and that.pdf, demonstrating very basic usage of\n Named Destinations in PDF::Builder.\n";
+
   push @example_list, "RMtutorial.pl";
   push @example_results, "create examples/RMtutorial.pdf, demonstrating very basic usage of\n PDF::Builder text and graphics.\n";
 

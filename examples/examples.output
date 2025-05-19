@@ -347,6 +347,11 @@ HarfBuzz.pl
            you don't have HarfBuzz::Shaper installed) on the CTS
            website https://www.catskilltech.com/.
 
+NamedDest.pl
+  this.pdf, that.pdf
+   Create two PDFs which have intradocument links to Named Destinations and
+    interdocument links to Named Destinations.
+
 RMtutorial.pl
   RMtutorial.pdf
    one page Lorem Ipsum, photo, simple graphics as a demo

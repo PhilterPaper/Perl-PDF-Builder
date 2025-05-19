@@ -1,11 +1,14 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-05-10  UNRELEASED
+3.028     2025-05-19  UNRELEASED
 * = work in progress
 
   ==== New features
 
-*   lib/PDF/Builder.pm, lib/PDF/Builder/NamedDestination-Annotation-Docs.pm, 
+*   lib/PDF/Builder/Resource/CIDFont.pm
+     Update POD to try to document many utility routines.
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/NamedDestination-Annotation-Docs.pm, 
       examples/040_annotation-042_links, examples/resources/040_annotation.pdf,
       examples/NamedDest.pl (new), examples/examples.output, examples/README,
       t/named-destinations.t, MANIFEST, tools/3_examples.pl
@@ -36,18 +39,27 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
     lib/PDF/Builder.pm, lib/PDF/Builder/Resource/CIDFont/TrueType.pm,
       lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm
      Some cleanup related to API2's change from -noembed flag for TTF to
-      -embed (-'s are optional, preferably omitted). Per PDF::API2 #90 and
-      possibly PDF::Builder #222. The data structure in a TTF file is 
-      'noembed', so presumably the ttfont() option was originally named 
-      'noembed' too (default 0/false), but recently changed to 'embed' 
-      (default 1/true) as being more straightforward. 'noembed' is still valid, 
-      although it is ignored if 'embed' is also given.
-*    Need to test if this fixes original #222 complaint (about subsetting)
-      It does fix noembed not working, but (at least for this type of TTF
-      file) noembed=>1/embed=>0 seems to be larger than it should be, defaults 
-      (embed=1, subset=1) is quite a bit larger than noembed (even though only 
-      one character was written), and only nosubset (full font) looks 
-      reasonably sized.
+      -embed (-'s are optional, preferably omitted). 'embed' option now works.
+      Per PDF::API2 #90 and possibly PDF::Builder #222. 
+       Aside: the data structure in a TTF file is 'noembed', so presumably the 
+       ttfont() option was originally named 'noembed' too (default 0/false), 
+       but recently changed to 'embed' (default 1/true) as being more 
+       straightforward. 
+      'noembed' is still valid, although it is ignored if 'embed' is also given.
+*     Will have to think about 'subset' as option, and deprecate 'nosubset'?
+       And, if 'subset'/'nosubset' given, force 'embed'=1.
+*    Need to test if this fixes original #222 complaint (about subsetting).
+      /Windows/Fonts/Times.ttf: 
+       'noemb' noembed=>1/embed=>0 seems to be larger than it should be 
+         (includes 28k CMap stream... unnecessary? is full size too -- at the
+         least, should be able to reduce to subset size),
+       'defaults' (embed=1, subset=1) is quite a bit larger than noembed (even 
+         though only one character was written), both font and full size CMap,
+       'nosubset' (full font) looks reasonably sized. 
+      Desktop/font-related/FreeSerif.ttf: similar size and CMap behavior
+      /Windows/Fonts/NotoSansJP-Regular.otf: noembed quite large, nosub 
+       didn't seem to work at all (defaults same size as nosub, CMap entry
+       same size but different content!)
 
     lib/PDF/Builder/Resource/Font/CoreFont/symbol.pm
      While thinking about an implementation of #56 (fallback glyphs), I took

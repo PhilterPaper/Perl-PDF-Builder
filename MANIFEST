@@ -90,6 +90,7 @@ examples/Content.pl
 examples/ContentText.pl
 examples/FontManager.pl
 examples/HarfBuzz.pl
+examples/NamedDest.pl
 examples/RMtutorial.pl
 examples/Rotated.pl
 examples/ShowFont.pl
