@@ -14,6 +14,9 @@ our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 # -raw   show full output of each t-test run
 # -noOK  exclude "ok" lines so can easily spot error lines  DEFAULT
 
+# NOTE TO MAINTAINER;
+#  don't forget to update MANIFEST with any new t-tests
+
  # add after filter-lzwdecode when new TIFF code finished
  #   filter-ccittfaxdecode
 my @test_list = qw(

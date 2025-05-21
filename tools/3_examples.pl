@@ -7,7 +7,10 @@
 
 # NOTE TO MAINTAINER;
 #  keep in sync with examples/README, examples/examples.output, and
-#  INFO/old/examples.bat
+#   INFO/old/examples.bat [ ] remove old/* files
+#  don't forget to update MANIFEST, run tools/3_examples.pl -s and upload sample
+#   PDF files to /Examples/PDF/. update /Examples/PDF/Builder.php and 
+#   sitemap_exmpls.xml
 
 use strict;
 use warnings;

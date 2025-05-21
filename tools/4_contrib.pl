@@ -13,6 +13,9 @@ our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
 # command line:
 # 
 
+# NOTE TO MAINTAINER;
+#  don't forget to update MANIFEST with any new contributions
+
 # for Linux and Unix systems, the directory separator is /
 # for Windows systems, the directory separator is \\ (doubled again)
 #my $dirSep = '/';      # Unixy

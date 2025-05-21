@@ -103,6 +103,8 @@ sub makefile {
     my $dirpath = $0;
     $dirpath =~ s/NamedDest\.pl//; # includes final / or \
     $pdf->saveas("$dirpath$this");
+
+    return;
 }
 
 sub draw_buttons {

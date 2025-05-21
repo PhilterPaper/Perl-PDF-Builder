@@ -1,9 +1,15 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-05-19  UNRELEASED
+3.028     2025-05-21  UNRELEASED
 * = work in progress
 
   ==== New features
+
+*   lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Docs.pm, MANIFEST,
+      examples/column_xrefs.pl (new), examples/examples.output,
+      examples/README, tools/3_examples.pl, INFO/SPONSORS
+     Add cross references to column() to add internal (within a document) and 
+      external links to another document, both to a specific target point.
 
 *   lib/PDF/Builder/Resource/CIDFont.pm
      Update POD to try to document many utility routines.
