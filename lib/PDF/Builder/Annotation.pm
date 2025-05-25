@@ -243,14 +243,14 @@ sub goto {
 
 Defines the annotation as an B<external> PDF-file with filepath C<$pdffile>, 
 on page C<$page_number>, and options %opts (common parameters and I<fit>: see 
-descriptions below). This differs from the C<link> call in that the target 
+descriptions below). This differs from the C<goto> call in that the target 
 is found in a I<different> PDF file, not the current document. Your operating
 system may warn you that you are going to a different file.
 
 C<$page_number> is the physical page number, starting at 1: 1, 2,..., I<or> a 
 Named Destination defined in that document (a prefix of '#' or '/' is optional, 
 except when the Named Destination is entirely numeric, and then it is 
-required). 'foo', '#foo', and '#3659' are examples of Named Destinations.
+required). 'foo', '/foo', and '#3659' are examples of Named Destinations.
 If a Named Destination is used, the page fit (location) is ignored, as the 
 Named Destination handles that.
 

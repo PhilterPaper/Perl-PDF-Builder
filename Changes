@@ -1,18 +1,26 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-05-21  UNRELEASED
+3.028     2025-05-22  UNRELEASED
 * = work in progress
 
   ==== New features
 
-*   lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Docs.pm, MANIFEST,
-      examples/column_xrefs.pl (new), examples/examples.output,
-      examples/README, tools/3_examples.pl, INFO/SPONSORS
+*   lib/PDF/Builder.pm, lib/PDF/Builder/Content/Text.pm, 
+      lib/PDF/Builder/Docs.pm, MANIFEST, examples/column_xrefs.pl (new), 
+      examples/examples.output, examples/README, tools/3_examples.pl, 
+      INFO/SPONSORS
      Add cross references to column() to add internal (within a document) and 
-      external links to another document, both to a specific target point.
+      external links to another document, both to a specific target point (by
+      id) or a physical page number or a named destination.
+      <_ref tgtid= title= fit= >, <_reft id= title= >, <_nameddest name= >
 
 *   lib/PDF/Builder/Resource/CIDFont.pm
-     Update POD to try to document many utility routines.
+     Update POD to try to document many utility routines for TTFs.
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Content/Text.pm
+     'arabic' is permitted as a synomyn for 'decimal' numbering (1,2,3...)
+      for both page labels ($pdf->page_labels) and ordered lists in column()
+      (CSS list-style-type). Ref PDF::API2#40.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/NamedDestination-Annotation-Docs.pm, 
       examples/040_annotation-042_links, examples/resources/040_annotation.pdf,

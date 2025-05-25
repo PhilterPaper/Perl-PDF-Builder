@@ -17,7 +17,7 @@ use version;
 # any examples/ changes update Examples on website (AT release)
 
 # VERSION
-our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
 
 my $TextMarkdown = '1.000031'; # minimum version of Text::Markdown;
 my $HTMLTreeBldr = '5.07';     # minimum version of HTML::TreeBuilder
@@ -2033,6 +2033,7 @@ sub _default_css {
     $style{'_sl'}->{'margin-top'} = '50%';  # relative to text's font-size
     $style{'_sl'}->{'margin-bottom'} = '50%'; 
     $style{'ol'}->{'list-style-type'} = '.o'; # decimal, lower-roman, upper-roman, lower-alpha, upper-alpha, none
+                                              # arabic is synomyn for decimal
     $style{'ol'}->{'list-style-position'} = 'outside'; # or inside or numeric
     $style{'ol'}->{'display'} = 'block'; 
     $style{'ol'}->{'margin-top'} = '50%';  # relative to text's font-size
@@ -4383,7 +4384,7 @@ sub _marker {
     }
 
     # ordered lists
-    if      ($type eq 'decimal') {
+    if      ($type eq 'decimal' || $type eq 'arabic') {
 	$output = "$prefix$value$suffix";
     } elsif ($type eq 'upper-roman' || $type eq 'lower-roman') {
 	# TBD support overbar (1000x) for Roman numerals. what is exact format?

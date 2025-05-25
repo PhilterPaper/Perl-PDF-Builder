@@ -3046,7 +3046,8 @@ B<Supported Options:>
 B<Roman> (I,II,III,...), B<roman> (i,ii,iii,...), B<decimal> (1,2,3,...), 
 B<Alpha> (A,B,C,...), B<alpha> (a,b,c,...), or B<nocounter>. This is the 
 styling of the counter part of the label (unless C<nocounter>, in which case 
-there is no counter output).
+there is no counter output). Note that B<arabic> is permitted as a synomyn
+for B<decimal>.
 
 =item start
 
@@ -3223,6 +3224,7 @@ sub pageLabel {
                                     $opts->{'style'} eq 'roman' ? 'r' :
                                     $opts->{'style'} eq 'Alpha' ? 'A' :
                                     $opts->{'style'} eq 'alpha' ? 'a' :
+                                    $opts->{'style'} eq 'arabic' ? 'D' :
                                     $opts->{'style'} eq 'decimal' ? 'D' : 'D');
 	    } else {
 		# for nocounter (no styled counter), do not create /S entry
