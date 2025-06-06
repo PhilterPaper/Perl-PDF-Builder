@@ -3046,7 +3046,7 @@ B<Supported Options:>
 B<Roman> (I,II,III,...), B<roman> (i,ii,iii,...), B<decimal> (1,2,3,...), 
 B<Alpha> (A,B,C,...), B<alpha> (a,b,c,...), or B<nocounter>. This is the 
 styling of the counter part of the label (unless C<nocounter>, in which case 
-there is no counter output). Note that B<arabic> is permitted as a synomyn
+there is no counter output). Note that B<arabic> is permitted as a synonym
 for B<decimal>.
 
 =item start
@@ -4167,6 +4167,24 @@ See L<PDF::Builder::FontManager>/get_font for details.
 sub get_font {
     my $self = shift;
     return $self->{' FM'}->get_font(@_);
+}
+
+=head3 get_external_font
+
+    $rc = $pdf->get_external_font()
+
+=over
+
+See if there is already a predefined (opened) font that the user wants to use.
+See L<PDF::Builder::FontManager>/get_external_font for details.
+
+=back
+
+=cut
+
+sub get_external_font {
+    my $self = shift;
+    return $self->{' FM'}->get_external_font(@_);
 }
 
 =head3 dump_font_tables

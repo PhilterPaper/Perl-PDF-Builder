@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-05-22  UNRELEASED
+3.028     2025-06-06  UNRELEASED
 * = work in progress
 
   ==== New features
@@ -14,11 +14,37 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       id) or a physical page number or a named destination.
       <_ref tgtid= title= fit= >, <_reft id= title= >, <_nameddest name= >
 
+      This is an improvement over the existing <a href= > method, because it
+      can also handle external PDF files and Named Destinations, and can 
+      determine the page and location of the target (rather than requiring the 
+      author to manually enter this information into the "href" field) using
+      multiple passes over the text source.
+
 *   lib/PDF/Builder/Resource/CIDFont.pm
      Update POD to try to document many utility routines for TTFs.
 
+    lib/PDF/Builder.pm, lib/PDF/Builder/FontManager.pm, 
+      lib/PDF/Builder/Content/Text.pm
+     Fix inconsistency in no longer supporting the use of a preloaded font
+      before the column() call being used as the current body font. You may
+       * load a font, either by Builder primitives or FontManager, and use that
+       * NOT load a font, and if not otherwise overridden, use the FontManager
+         default (Times-Roman)
+      Specify several ways of overriding either the specified font or the
+      FontManager default current font, in the column() call:
+       * option 'font_info'=>'-fm-' says to apply the FontManager current 
+         (default) font
+       * option 'font_info'=>'face:style:weight' says to load as the current 
+         font a 'face' KNOWN TO FontManager, with optional specification of 
+         the style and weight (default both normal)
+         - style: 0/normal (default) = unitalicized, 1/italic = italicized
+         - weight: 0/normal (default) = normal weight, 1/bold = bold weight
+       * option 'style'=>'body { font-family: face; font-style =... }' CSS to
+         override anything else. The font-family etc. must be KNOWN to
+         FontManager (i.e., add_font() the new face if not a core default)
+
     lib/PDF/Builder.pm, lib/PDF/Builder/Content/Text.pm
-     'arabic' is permitted as a synomyn for 'decimal' numbering (1,2,3...)
+     'arabic' is permitted as a synonym for 'decimal' numbering (1,2,3...)
       for both page labels ($pdf->page_labels) and ordered lists in column()
       (CSS list-style-type). Ref PDF::API2#40.
 
@@ -49,6 +75,10 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
      Per change in PDF::API2, add to description of endpath/end method.
 
   ==== Bug fixes
+
+    lib/PDF/Builder/Content/Text.pm
+     Fix problem with not consistently supporting the 'style' option in
+      column().
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Resource/CIDFont/TrueType.pm,
       lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm

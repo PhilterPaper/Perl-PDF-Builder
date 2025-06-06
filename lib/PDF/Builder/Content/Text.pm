@@ -1331,7 +1331,7 @@ Supported CSS properties:
     font-size (pt, bare number = pt, % of current size)
     font-style (normal/italic) 
     font-weight (normal/bold)
-    height (pt, bare number) thickness of horizontal rule
+    height (pt, bare number) thickness (height) of horizontal rule
     list-style-position (outside, inside, number [%]) [*]
     list-style-type (marker description, see also _marker-text/before/after)
     list-style-image TBD
@@ -1342,7 +1342,7 @@ Supported CSS properties:
     text-height (leading, as ratio of baseline-spacing to font-size)
     text-indent (pt, bare number = pt, % of current font-size)
     text-align (left/center/right justify at current text position) [**]
-    width (pt, bare number) width of horizontal rule
+    width (pt, bare number) width (length) of horizontal rule
 
 [*]  Note on list-style-position: 'outside' (default) = 100 (%) indent, 'inside'
 = 0 indent, numeric value (explicit %) = percentage between inside/0 and 
@@ -1906,24 +1906,72 @@ sub column {
 sub _default_css {
     my ($pdf, $text, $font_size, $leading, %opts) = @_;
 
-   #my @cur_font = $pdf->get_font();
-   #my @cur_color = $text->fillcolor();
-    my $current_color = 'black';
-    my $cur_color = 'black';
-   #if (@cur_color == 1) { 
+    # font size is known
+    # if user wishes to set font OUTSIDE of column
+    # if FontManager called outside column() and wish to inherit settings for
+    #  face, style, weight, color (fill), 'font_info'=>'-fm-'
+    # if FontManager NOT used to set font externally, can just inherit font
+    #  (don't know what it is), current font = -external-. all styles and 
+    #  weights are this one font
+    # otherwise, 'font_info'=>'face:weight:style:color' where weight = bold
+    #  or normal, style = italic or normal, color = a color name e.g., black.
+    #  this face must be known to FontManager
+    # as last resort, if font not set outside of column, FontManager default
+    my (@cur_font, @cur_color, $current_color);
+    if (defined $opts{'font_info'}) {
+	# override any predefined font
+	if ($opts{'font_info'} eq '-fm-') {
+	    # use whatever FontManager thinks is the current font
+	    # presumably they used it earlier to set the font 
+	    # (it will always have a current font defined, even if not
+	    # explicitly called)
+            @cur_font = $pdf->get_font(); # use [0..2] of returned array
+        } else {
+	    # explicitly given font must be KNOWN to FontManager
+	    # family:style:weight (normal/0/italic/1, normal/0/bold/1)
+	    @cur_font = split /:/, $opts{'font_info'};
+	    # add normal style and weight if not given
+	    if (@cur_font == 2) { push @cur_font, 0; }
+	    if (@cur_font == 1) { push @cur_font, 0,0; }
+	    if ("$cur_font[1]" eq 'normal') { $cur_font[1] = 0; }
+	    if ("$cur_font[1]" eq 'italic') { $cur_font[1] = 1; }
+	    if ("$cur_font[2]" eq 'normal') { $cur_font[2] = 0; }
+	    if ("$cur_font[2]" eq 'bold'  ) { $cur_font[2] = 1; }
+	    # set the current font
+	    $pdf->get_font('face'=>$cur_font[0],
+		           'italic'=>$cur_font[1],
+		           'bold'=>$cur_font[2]);
+	}
+    } else {
+	# not using font_info to set font
+        # there IS a predefined font, from somewhere, to use?
+        if ($pdf->get_external_font($text)) {
+	    # failed to find a predefined font. use default
+        }
+        @cur_font = $pdf->get_font(); # use [0..2] of returned array
+    }
+    # @cur_font should have (at least) face, italic 0/1, bold 0/1
+    #  to load into 'body' properties later
+
+    @cur_color = $text->fillcolor();
+#   if (defined $opts{'font_color'}) {
+#	# request override of current text color on entry
+#	@cur_color = ($opts{'font_color'});
+#   }
+    if (@cur_color == 1) { 
    	# 'name', '#rrggbb' etc. suitable for CSS usage
 	# TBD: single gray scale value s/b changed to '#rrggbb'
-	#       (might be 0..1, 0..100, 0..ff)?
-   #	$current_color = $cur_color[0];
-   #} else {
+	#       (might be 0..1, 0..100, 0..ff)? 0 = black
+    	$current_color = $cur_color[0];
+    } else {
 	# returned an array of values, unsuitable for CSS
 	# TBD: 3 values 0..1 turn into #rrggbb
 	# TBD: 3 values 0..100 turn into #rrggbb
 	# TBD: 3 values 0..ff turn into #rrggbb
 	# TBD: 4 values like 3, but CMYK
 	# for now, default to 'black'
-   #	$current_color = 'black';
-   #}
+    	$current_color = 'black';
+    }
 
     my %style;
     $style{'tag'} = 'defaults';
@@ -1970,12 +2018,9 @@ sub _default_css {
     $style{'body'}->{'color'} = $color;
 
     # now for fixed settings
-   #$style{'body'}->{'font-family'} = $cur_font[0]; # face
-   #$style{'body'}->{'font-style'} = $cur_font[1]? 'italic': 'normal';
-   #$style{'body'}->{'font-weight'} = $cur_font[2]? 'bold': 'normal';
-    $style{'body'}->{'font-family'} = 'Times';
-    $style{'body'}->{'font-style'} = 'normal';
-    $style{'body'}->{'font-weight'} = 'normal';
+    $style{'body'}->{'font-family'} = $cur_font[0]; # face
+    $style{'body'}->{'font-style'} = $cur_font[1]? 'italic': 'normal';
+    $style{'body'}->{'font-weight'} = $cur_font[2]? 'bold': 'normal';
    #$style{'body'}->{'font-variant'} = 'normal'; # small-caps
     $style{'body'}->{'margin-top'} = '0'; 
     $style{'body'}->{'margin-right'} = '0'; 
@@ -2033,7 +2078,7 @@ sub _default_css {
     $style{'_sl'}->{'margin-top'} = '50%';  # relative to text's font-size
     $style{'_sl'}->{'margin-bottom'} = '50%'; 
     $style{'ol'}->{'list-style-type'} = '.o'; # decimal, lower-roman, upper-roman, lower-alpha, upper-alpha, none
-                                              # arabic is synomyn for decimal
+                                              # arabic is synonym for decimal
     $style{'ol'}->{'list-style-position'} = 'outside'; # or inside or numeric
     $style{'ol'}->{'display'} = 'block'; 
     $style{'ol'}->{'margin-top'} = '50%';  # relative to text's font-size
@@ -2241,6 +2286,8 @@ sub _tag_attributes {
             $tag eq 'defaults' || $tag eq 'style') {
 	    $mytext[$el]->{'empty_element'} = 1;
         }
+
+	# 'next' to here
     } # for loop through all user-defined elements
     return @mytext;
 } # end of _tag_attributes()
@@ -2297,13 +2344,14 @@ sub _output_text {
     #           changed and PDF::Builder routines need calling
     my @properties = ({}); # stack of properties from tags
     _update_properties($properties[0], $mytext[0], 'body');
+    _update_properties($properties[0], $mytext[1], 'body');
     my $call_get_font = 0;
     my %bad_tags; # keep track of invalid HTML tags
     my $x_adj = 0;  # ul, ol list marker move left from right-align position
     my $y_adj = 0;  # ul list marker elevation
 
     # mytext[0] should be default css values
-    # mytext[1] should be any <style> tags (consolidated)
+    # mytext[1] should be any <style> tags (consolidated) plus opts 'style'
     # user input tags/text start at mytext[2]
 
     # starting available space, will be updated as new line needed
@@ -3323,8 +3371,9 @@ sub _output_text {
 			$need_line = 1;
 			$start_y = $next_y;
 		    }
-		    next; # done with phrase loop if phrase empty
+ 		    next; # done with phrase loop if phrase empty
 
+		    # end of handling entire phrase fits
 	        } else {
 		    # existing line plus phrase is too long (overflows line)
 	            # entire phrase does NOT fit (case 2 or 3). start splitting 
@@ -3388,10 +3437,11 @@ sub _output_text {
 			$phrase = $remainder;
 			$remainder = '';
 		    }
-		    next;
+ 		    next;
 	            
 		} # phrase did not fit (else)
 
+	        # 'next' to here
             } # end of while phrase has content loop
 	    # remainder should be '' at this point, phrase may have content
 	    # either ran out of phrase, or ran out of column
@@ -3423,6 +3473,7 @@ sub _output_text {
 	    next;
 	}
 
+	# 'next' to here
     } # for $el loop through mytext array over multiple lines
 
     # if get to here, is it because we ran out of mytext (normal loop exit), or 
@@ -3932,11 +3983,6 @@ sub _html_hash {
             $text =~ s#$macro#$sub#g;
 	}
     }
-    # does call include a style initialization (opt in column() call)?
-    if (defined $opts{'style'}) {
-	# $style should be empty at this point
-        $style = _process_style_tag($style, $opts{'style'});
-    }
 
     $rc = eval {
 	require HTML::TreeBuilder;
@@ -4001,7 +4047,15 @@ sub _html_hash {
 	push @array, {'tag' => '', 'text' => $text};
     }
 
+    # does call include a style initialization (opt in column() call)?
+    # merge into any consolidated <style> tags
+    if (defined $opts{'style'}) {
+	# $style should be empty hash ptr at this point
+        $style = _process_style_tag($style, $opts{'style'});
+    }
+
     # always first element tag=style containing the hash, even if it's empty
+    # array[0] is default CSS, array[1] is consolidated <style> tags
     $style->{'tag'} = 'style';
     $style->{'text'} = '';
     unshift @array, $style;
@@ -4029,7 +4083,7 @@ sub _HTB_cleanup {
 
         my $tag = lc($mytext[$el]->{'tag'});
 	if (!defined $tag) { next; }
-	if ($tag =~ m#^/#) { next; }
+       #if ($tag =~ m#^/#) { next; }
 
         if ($tag eq 'li') {
 	    # dealing with <_marker> is a special case, driven by need to
@@ -4091,6 +4145,8 @@ sub _HTB_cleanup {
 
         # already added _sl to list of allowed list parents
         }
+
+	# 'next' to here
     } # for loop through all tags
 
     return @mytext;
@@ -4128,8 +4184,9 @@ sub _process_style_tag {
 	if ($text =~ s/^}\s*//) { # remove closing } and whitespace
 	    if ($text eq '') { last; }
 	}
-
-    }
+	
+        # 'next' to here
+    } # end while loop
 
     return $style;
 } # end of _process_style_tag()
@@ -4244,7 +4301,9 @@ sub _walkTree {
             # SCALAR (string) element
             push @array, {'tag' => '', 'text' => $element};
        }
-   } # loop through _content at this level
+
+       # 'next' to here
+   } # loop through _content at this level ($elIdx)
 
    return @array;
 } # end of _walkTree()
@@ -4594,7 +4653,7 @@ sub _revise_baseline {
 		   # adjusted to account for possible change in resulting 
 		   # position of Tm
 		   $i += length("$old_x old_$y") - ($i - $j);
-                } 
+                }  # end while(1) loop
 
 		# AFTER the Tm statement may come one or more strokes for
 		# underline, strike-through, and/or overline
@@ -4630,7 +4689,7 @@ sub _revise_baseline {
 		   # adjusted to account for possible change in resulting 
 		   # position of lS
 		   $i += length(" $old_x1 $old_y1 m $old_x2 $old_y2") - ($i - $j);
-                } 
+                } # end while(1) loop
 	    }
         }
     }

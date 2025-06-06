@@ -352,6 +352,16 @@ and the other a TTF font). Give them different names (face names are case
 I<sensitive>, so 'Times' is different from 'times'). The C<face> name is
 used to retrieve the desired font.
 
+The default core font face names
+(I<Times, Helvetica, Courier, Symbol, ZapfDingbats, 
+Georgia, Verdana, Trebuchet, Wingdings, Webdings>),
+as well as class names
+I<current, default, serif, sans-serif, constant, script, symbol, -external->
+are B<reserved> and should not be used for user-added faces.
+The MS Windows core extension I<BankGothic> is currently B<not> added to the
+core fonts automatically. I<-external-> may or may not be defined, and should
+not be used by user code.
+
 =item type => 'type string'
 
 This tells which Builder font routine to use to load the font. The allowed
@@ -374,7 +384,9 @@ loaded. These are Georgia, Verdana, Trebuchet, Wingdings, and Webdings faces.
 Use caution if making use of these additional core fonts, as non-Windows
 systems may not include them without explicit manual installation of these
 fonts. These fonts may be safe to use if you know that all your PDF readers
-will be running on Windows systems.
+will be running on Windows systems. Finally, PDF::Builder includes metrics
+for Bank Gothic, but this is not automatically loaded into the core set, as
+it is not clear whether all Windows systems actually include this font.
 
 =item B<ttf>
 
@@ -539,13 +551,13 @@ sub add_font {
 	}
     }
     # is this face name reserved?
-    foreach (qw/current default serif sans-serif constant script symbol/) {
-	if ($_ eq $info{'face'}) {
-	    carp "add_font finds face name '$info{'face'} is reserved!";
-	    $rc = 1;
-	    last;
-	}
-    }
+#   foreach (qw/current default serif sans-serif constant script symbol -external-/) {
+#       if ($_ eq $info{'face'}) {
+#           carp "add_font finds face name '$info{'face'} is reserved!";
+#           $rc = 1;
+#           last;
+#       }
+#   }
 
     if (!defined $info{'type'}) {
 	carp "add_font missing 'type' entry";
@@ -556,7 +568,8 @@ sub add_font {
 	$info{'type'} ne 'ttf' &&
         $info{'type'} ne 'type1' && 
 	$info{'type'} ne 'cjk' &&
-        $info{'type'} ne 'bdf') {
+        $info{'type'} ne 'bdf' &&
+        !($info{'type'} eq '?' && $info{'face'} eq '-external-')) {
 	carp "add_font unknown 'type' entry $info{'type'}";
 	$rc = 1;
     }
@@ -576,7 +589,8 @@ sub add_font {
 	$info{'style'} ne 'sans-serif' &&
         $info{'style'} ne 'constant' && 
 	$info{'style'} ne 'script' &&
-        $info{'style'} ne 'symbol') {
+        $info{'style'} ne 'symbol' &&
+        !($info{'style'} eq '?' && $info{'face'} eq '-external-')) {
 	carp "add_font unknown 'style' entry $info{'style'}";
 	$rc = 1;
     }
@@ -586,7 +600,8 @@ sub add_font {
 	$rc = 1;
     }
     if ($info{'width'} ne 'proportional' && 
-	$info{'width'} ne 'constant') {
+	$info{'width'} ne 'constant' &&
+        !($info{'width'} eq '?' && $info{'face'} eq '-external-')) {
 	carp "add_font unknown 'width' entry $info{'width'}";
 	$rc = 1;
     }
@@ -1071,6 +1086,65 @@ sub _filepath {
 
     return @out_list;
 }
+
+=head2 get_external_font
+
+    $rc = $pdf->get_external_font($text)
+
+=over
+
+If the user has already defined a font outside of C<FontManager>, in the 
+C<$text> text context, this call permits it to be retrieved as the 
+I<current font>, named B<-external->. If no font has been defined already,
+nothing is changed and the return code is 1.
+
+If C<$text-E<gt>{' font'}> has been defined, that font is stored in the
+internal cache (as an "already read" font) in a new "-external-" font, and
+it is made the current font. The return code is 0.
+
+=back
+
+=cut
+
+sub get_external_font {
+    my ($self, $text) = @_;
+
+    if (!defined $text->{' font'}) {
+	# there is no existing font defined
+	return 1;
+    }
+    my $font = $text->{' font'};
+    # does -external- already exist? search list of defined faces
+    my $index = $self->_face2index('-external-');
+    # $index == -1 if not found
+
+    if ($index == -1) {
+	# not yet added
+        $self->add_font(
+            'face' => '-external-',   # special reserved name
+	    'type' => '?',            # we know nothing about the actual font!
+	    'style' => '?',
+	    'width' => '?',
+            # will never be looking at for a filepath
+	    'file' => { 'roman'       => '?',
+	                'italic'      => '?',
+	                'bold'        => '?',
+	                'bold-italic' => '?' }
+        );
+        $index = $self->_face2index('-external-');
+    }
+
+    # -external- exists at $index, update $font entries
+    # unlike regular fonts, all variants point to the same font entry
+    foreach my $key (qw/roman italic bold bold-italic/) {
+        $self->{' font-list'}->[$index]->{'entry'}->{$key} = $font;
+    }
+    # set current font to -external-. italic and bold irrelevant
+    $self->{' current-font'} = {'face' => '-external-', 'index' => $index,
+                                'italic' => 0, 'bold' => 0};
+
+    return 0;
+} # end of get_external_font()
 
 =head2 dump_font_tables
 
