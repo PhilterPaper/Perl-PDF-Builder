@@ -1493,6 +1493,31 @@ C<font_size> option (overriding any font method inheritance); it may default to
 modified by the C<font> tag or by CSS styling C<font-size>. For Markdown, it
 may be modified by CSS styling.
 
+=item 'font_info' => $string
+
+This permits the user to specify the starting font used in C<column()> (body
+font-family, font-style, font-weight). C<column()> will pick up any font already
+loaded (C<$text-E<gt>font($font, $size);>, or using FontManager), and use that 
+as the "current" font. If no font has been loaded, and no other instructions
+are given, the FontManager default (Times-Roman) will be used.
+
+The C<font_info> option for C<column()> may be given to override either of the
+two above methods. You may specify a C<$string> of B<'-fm-'> to instruct
+C<column()> to use the present FontManager "current" font (which would have
+been changed if you used FontManager to load a font!). Or, you may pick a font
+face I<known> to FontManager (explicitly loaded if not one of the 28 core 
+fonts), and optionally give it style and weight: C<$string> of 
+B<'face:style:weight'>. The style defaults to 'normal' (non-italic), or 'normal'
+or '0' may be given. For italics, use 'italic' or '1'. The weight defaults to 
+'normal' (unbolded weight), or 'normal' or '0' may be given. For bold (heavy)
+text, use 'bold' or '1'.
+
+Finally, the C<style> option for C<column()> may be given to override any of 
+the above settigs, e.g., B<'style'=E<gt>{ body { font-family:... }> and set
+the initial current font. Remember that, as with anything font-related that
+C<column()> does, the 'face' (family) used must already be known to FontManager
+(explicitly loaded with C<add_font()> if not one of the 28 core fonts).
+
 =item 'marker_width' => $marker_width
 
 =item 'marker_gap' => $marker_gap

@@ -1102,6 +1102,10 @@ If C<$text-E<gt>{' font'}> has been defined, that font is stored in the
 internal cache (as an "already read" font) in a new "-external-" font, and
 it is made the current font. The return code is 0.
 
+This is a way for those using "markdown" formatting to define the font used,
+as an alternative to using C<'style'=E<gt>'body { font-family: ... '}> to
+define the body font.
+
 =back
 
 =cut
