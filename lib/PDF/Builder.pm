@@ -3669,7 +3669,8 @@ sub ttfont {
     }
     $opts{'embed'} //= 1;
 
-    $file = _findFont($file);
+    $file = UNIVERSAL::isa($file, 'Font::TTF::Font')? $file:
+            _findFont($file) or croak "Unable to find font \"$file\"";
     require PDF::Builder::Resource::CIDFont::TrueType;
     my $obj = PDF::Builder::Resource::CIDFont::TrueType->new($self->{'pdf'}, $file, %opts);
 
@@ -3760,7 +3761,8 @@ format. Returns the font object, to be used by L<PDF::Builder::Content>.
 
 The font C<$name> is either the name of one of the standard 14 fonts 
 (L<PDF::Builder::Resource::Font::CoreFont/STANDARD FONTS>), such as
-C<Helvetica> or the path to a font file (including an extension/filetype).
+C<Helvetica>, a C<Font::TTF::Font> object, or the path to a font file 
+(including an extension/filetype).
 There are 15 additional core fonts on a Windows system.
 Note that the exact name of a core font needs to be given.
 The file extension (if path given) determines what type of font file it is.
@@ -3841,6 +3843,7 @@ sub font {
     }
 
     my $format = $opts{'format'};
+    $format //= 'truetype' if UNIVERSAL::isa($name, 'Font::TTF::Font');
     $format //= ($name =~ /\.[ot]tf$/i ? 'truetype' :
                  $name =~ /\.pf[ab]$/i ? 'type1'    :
                  $name =~ /\.t1$/i ?     'type1'    :

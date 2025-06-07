@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-06-06  UNRELEASED
+3.028     2025-06-07  UNRELEASED
 * = work in progress
 
   ==== New features
@@ -22,6 +22,15 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 
 *   lib/PDF/Builder/Resource/CIDFont.pm
      Update POD to try to document many utility routines for TTFs.
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm
+     Per PDF::API2 PR#92, contributed by Johan Vromans, add the ability to 
+      pass in an already-existing TTF/OTF font object (Font::TTF::Font) to 
+      ttfont() and font(). This is useful if you already have such an object, 
+      such as already read-in as an embedded font or built on-the-fly, rather 
+      than having to write out a TTF font file and read it back in via ttfont().
+      It is also expected to prove useful for future TTC (TrueType Collection) 
+      support.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/FontManager.pm, 
       lib/PDF/Builder/Content/Text.pm

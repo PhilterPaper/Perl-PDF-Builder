@@ -341,8 +341,14 @@ sub new {
 #$opts{'cmaps'} = 'find_ms;   find_ms ';
 #$opts{'usecmf'} = 1;
 
-    confess "cannot find font '$file'" unless -f $file;
-    my $font = Font::TTF::Font->open($file);
+    my $font;
+    # if the file is already a suitable font object, use it
+    if (UNIVERSAL::isa($file, 'Font::TTF::Font')) {
+	$font = $file;
+    } else {
+        confess "cannot find font '$file'" unless -f $file;
+        $font = Font::TTF::Font->open($file);
+    }
     $data->{'obj'} = $font;
 
     $class = ref $class if ref $class;
@@ -373,14 +379,22 @@ sub new {
         ExtraExpanded
         UltraExpanded
     ];
-    $data->{'fontstretch'} = $stretch[$font->{'OS/2'}->{'usWidthClass'}] || 'Normal';
+    if (defined $font->{'OS/2'}->{'usWidthClass'}) {
+        $data->{'fontstretch'} = $stretch[$font->{'OS/2'}->{'usWidthClass'}] || 'Normal';
+    } else {
+        $data->{'fontstretch'} = 'Normal';
+    }
 
     $data->{'fontweight'} = $font->{'OS/2'}->{'usWeightClass'};
 
-    $data->{'panose'} = pack('n', $font->{'OS/2'}->{'sFamilyClass'});
+    if (defined $font->{'OS/2'}->{'sFamilyClass'}) {
+        $data->{'panose'} = pack('n', $font->{'OS/2'}->{'sFamilyClass'});
 
-    foreach my $p (qw[bFamilyType bSerifStyle bWeight bProportion bContrast bStrokeVariation bArmStyle bLetterform bMidline bXheight]) {
-        $data->{'panose'} .= pack('C', $font->{'OS/2'}->{$p});
+        foreach my $p (qw[bFamilyType bSerifStyle bWeight bProportion bContrast bStrokeVariation bArmStyle bLetterform bMidline bXheight]) {
+	    if (defined $font->{'OS/2'}->{$p}) {
+                $data->{'panose'} .= pack('C', $font->{'OS/2'}->{$p});
+            }
+        }
     }
 
     $data->{'apiname'} = join('', map { ucfirst(lc(substr($_, 0, 2))) } split m/[^A-Za-z0-9\s]+/, $data->{'fontname'});
@@ -419,12 +433,22 @@ sub new {
     $data->{'descender'} = int($font->{'hhea'}{'Descender'} * 1000 / $data->{'upem'});
 
     $data->{'flags'}  = 0;
-    $data->{'flags'} |= 1 if $font->{'OS/2'}->read()->{'bProportion'} == 9;
-    $data->{'flags'} |= 2 unless $font->{'OS/2'}{'bSerifStyle'} > 10 && 
-                                 $font->{'OS/2'}{'bSerifStyle'} < 14;
-    $data->{'flags'} |= 8 if $font->{'OS/2'}{'bFamilyType'} == 2;
-    $data->{'flags'} |= 32; # if $font->{'OS/2'}{'bFamilyType'} > 3;
-    $data->{'flags'} |= 64 if $font->{'OS/2'}{'bLetterform'} > 8;
+    if (defined $font->{'OS/2'}) {
+	if (defined $font->{'OS/2'}->read()->{'bProportion'}) {
+            $data->{'flags'} |= 1 if $font->{'OS/2'}->read()->{'bProportion'} == 9;
+	}
+	if (defined $font->{'OS/2'}{'bSerifStyle'}) {
+            $data->{'flags'} |= 2 unless $font->{'OS/2'}{'bSerifStyle'} > 10 && 
+                                         $font->{'OS/2'}{'bSerifStyle'} < 14;
+	}
+	if (defined $font->{'OS/2'}{'bFamilyType'}) {
+            $data->{'flags'} |= 8 if $font->{'OS/2'}{'bFamilyType'} == 2;
+            $data->{'flags'} |= 32; # if $font->{'OS/2'}{'bFamilyType'} > 3;
+	}
+	if (defined $font->{'OS/2'}{'bLetterform'}) {
+            $data->{'flags'} |= 64 if $font->{'OS/2'}{'bLetterform'} > 8;
+	}
+    }
 
     $data->{'capheight'} = $font->{'OS/2'}->{'CapHeight'} || int($data->{'fontbbox'}->[3]*0.8);
     $data->{'xheight'} = $font->{'OS/2'}->{'xHeight'} || int($data->{'fontbbox'}->[3]*0.4);
@@ -484,6 +508,11 @@ sub new {
 	    }
 	}
     }
+    if (!defined $CMapfile) {
+	# CMapfile no longer '', but now undefined!
+	$CMapfile = '';
+    }
+
     my $CMap = $CMapfile;  # save original name for later
     if ($CMapfile ne '' && $opts{'usecmf'}) {
         my $ccmap = _look_for_cmap($CMapfile);
