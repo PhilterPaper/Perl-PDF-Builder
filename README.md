@@ -23,10 +23,6 @@ more powerful and versatile.
 require that it be installed. The two libraries are completely independent of
 each other and one will not interfere with the other if both are installed.
 
-**Gadzooks!** For a delightful look at the (rather grisly) origin of this
-typographical term, as well as many other terms, watch
-https://www.youtube.com/watch?v=cd5iFbuNKv8 .
-
 [Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full), including Documentation and Examples.
 
 [![Open Issues](https://img.shields.io/github/issues/PhilterPaper/Perl-PDF-Builder)](https://github.com/PhilterPaper/Perl-PDF-Builder/issues)

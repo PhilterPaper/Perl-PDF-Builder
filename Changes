@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-06-07  UNRELEASED
+3.028     2025-06-08  UNRELEASED
 * = work in progress
 
   ==== New features
@@ -23,6 +23,9 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 *   lib/PDF/Builder/Resource/CIDFont.pm
      Update POD to try to document many utility routines for TTFs.
 
+    META.json, META.yml, devtools/PDFBuild.pl
+     Add "provides" section to build description.
+
     SECURITY.md (new), MANIFEST
      Although, given its nature, it is unlikely that there are any potential 
       security vulnerabilities in PDF::Builder, all package providers and 
@@ -36,7 +39,8 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       such as already read-in as an embedded font or built on-the-fly, rather 
       than having to write out a TTF font file and read it back in via ttfont().
       It is also expected to prove useful for future TTC (TrueType Collection) 
-      support. FUTURE: ability to register such a font object in FontManager.
+      support. FUTURE: ability to register such a font object in FontManager
+      (object as a "file name" may work OK, not yet tested).
 
     lib/PDF/Builder.pm, lib/PDF/Builder/FontManager.pm, 
       lib/PDF/Builder/Content/Text.pm

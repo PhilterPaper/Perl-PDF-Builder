@@ -44,6 +44,66 @@
          }
       }
    },
+   "provides" : {
+     "PDF::Builder" : {
+       "file" : "lib/PDF/Builder.pm",
+       "version" : "v3.027"
+     },
+     "PDF::Builder::Annotation" : {
+       "file" : "lib/PDF/Builder/Annotation.pm"
+     },
+     "PDF::Builder::Content" : {
+       "file" : "lib/PDF/Builder/Content.pm"
+     },
+     "PDF::Builder::Content::Hyphenate_basic" : {
+       "file" : "lib/PDF/Builder/Content/Hyphenate_basic.pm"
+     },
+     "PDF::Builder::Content::Text" : {
+       "file" : "lib/PDF/Builder/Content/Text.pm"
+     },
+     "PDF::Builder::Docs" : {
+       "file" : "lib/PDF/Builder/Content/Docs.pm"
+     },
+     "PDF::Builder::FontManager" : {
+       "file" : "lib/PDF/Builder/FontManager.pm"
+     },
+     "PDF::Builder::NamedDestination" : {
+       "file" : "lib/PDF/Builder/NamedDestination.pm"
+     },
+     "PDF::Builder::Outline" : {
+       "file" : "lib/PDF/Builder/Outline.pm"
+     },
+     "PDF::Builder::Outlines" : {
+       "file" : "lib/PDF/Builder/Outlines.pm"
+     },
+     "PDF::Builder::Page" : {
+       "file" : "lib/PDF/Builder/Page.pm"
+     },
+     "PDF::Builder::Resource::ColorSpace" : {
+       "file" : "lib/PDF/Builder/Resource/ColorSpace.pm"
+     },
+     "PDF::Builder::Resource::Colors" : {
+       "file" : "lib/PDF/Builder/Resource/Colors.pm"
+     },
+     "PDF::Builder::Resource::Font" : {
+       "file" : "lib/PDF/Builder/Resource/Font.pm"
+     },
+     "PDF::Builder::Resource::PaperSizes" : {
+       "file" : "lib/PDF/Builder/Resource/PaperSizes.pm"
+     },
+     "PDF::Builder::Resource::XObject" : {
+       "file" : "lib/PDF/Builder/Resource/XObject.pm"
+     },
+     "PDF::Builder::Resource::XObject::Form" : {
+       "file" : "lib/PDF/Builder/Resource/XObject/Form.pm"
+     },
+     "PDF::Builder::Resource::XObject::Image" : {
+       "file" : "lib/PDF/Builder/Resource/XObject/Image.pm"
+     },
+     "PDF::Builder::ViewerPreferences" : {
+       "file" : "lib/PDF/Builder/ViewerPreferences.pm"
+     }
+   },
    "release_status" : "stable",
    "resources" : {
       "bugtracker" : {

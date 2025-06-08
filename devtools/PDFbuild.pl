@@ -15,6 +15,7 @@ my $product = 'Builder';
 my $master  = 'Builder.pm';
 my $GHname  = 'PDF-Builder';
 
+print "=======> next run, check META.* provides 'version' entries (new) correct update\n";
 print "**** check https://en.wikipedia.org/wiki/Leap_second to see if any
      leap seconds have been added since 12/31/2016. Update $master.\n";
 to_continue();
@@ -559,6 +560,7 @@ sub update_with_version {
 #           '^(version = )\d\.\d{3}(\s)$', 
 #           '^(   "version" : ")\d\.\d{3}(",\s)$',
 #           '^(version: \')\d\.\d{3}(\'\s)$'
+#           '^(version: v)\d\.\d{3}(\s)$'
 #          );
 ##  my @name = ($builder, "lib\\$hiDir\\$master", 'INFO\\old\\dist.ini.old');
 ##  my @pattern = ('^(\s*my \$version\s*=\s*\')\d\.\d{3}(\';.*)$',
@@ -941,6 +943,9 @@ sub update_META {
 	            "\"Pod::Simple::XHTML\"\\s:\\s*\"[\\d._]+\"",
 	            "\"SVGPDF\"\\s:\\s*\"[\\d._]+\"",
 		    # meta-spec version has no "" around value, no update
+		    # provides version (indented, with 'v')
+	            "^\\s*\"version\"\\s*:\\s*\"v\\d\\.\\d{3}\"",
+		    # META version (unindented, with quotes)
 	            "\"version\"\\s*:\\s*\"\\d\\.\\d{3}\"",
 	           );
     my @Jnewpat  = (
@@ -957,6 +962,7 @@ sub update_META {
 		    "$HTML_TREEBUILDER",
 		    "$POD_SIMPLE_XHTML",
 		    "$SVGPDF",
+	            "$VERSION",
 	            "$VERSION",
 	 	   );
     # META.yml
@@ -976,6 +982,9 @@ sub update_META {
                     "Font::TTF:\\s*'[\\d._]+'",
 	            "perl:\\s*'\\d\\.\\d{6}'",
 	            # there is meta-spec version: which is indented, no update
+		    # provides version (indented, with 'v')
+	            "^\\s*version:\\s*v\\d\\.\\d{3}",
+		    # META version (unindented, with quotes)
 	            "^version:\\s*'\\d\\.\\d{3}'",
 	           );
     my @Ynewpat  = (
@@ -992,6 +1001,7 @@ sub update_META {
 		    "$COMPRESS_ZLIB",
 		    "$FONT_TTF",
 	            "$PERL_V",
+	            "$VERSION",
 	            "$VERSION",
                    );
     my @infiles = ('META.json', 'META.yml');

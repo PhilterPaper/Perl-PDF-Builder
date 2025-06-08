@@ -82,6 +82,7 @@ examples/Bspline.pl
 examples/Column.pl
 examples/Column_lists.pl
 #examples/Column_layouts.pl
+#examples/Column_xrefs.pl
 examples/Content.pl
 examples/ContentText.pl
 examples/FontManager.pl
