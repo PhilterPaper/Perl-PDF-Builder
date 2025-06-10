@@ -985,10 +985,17 @@ sub get_font {
 	$font = $self->{' pdf'}->corefont($file, %$settings);
 
     } elsif ($type eq 'ttf') {
-	foreach my $filepath ($self->_filepath($file)) {
-	    if (!(-f $filepath && -r $filepath)) { next; }
-	    $font = $self->{' pdf'}->ttfont($filepath, %$settings);
-	    if (defined $font) { last; }
+	if (ref($file) eq 'Font::TTF::Font') {
+	    # it's a Font::TTF::Font object, not a real file
+	    # may be used as input to ttfont() to get a real font out of it
+	    $font = $self->{' pdf'}->ttfont($file, %$settings);
+	} else {
+	    # it's a regular real file
+	    foreach my $filepath ($self->_filepath($file)) {
+	        if (!(-f $filepath && -r $filepath)) { next; }
+	        $font = $self->{' pdf'}->ttfont($filepath, %$settings);
+	        if (defined $font) { last; }
+            }
         }
 
     } elsif ($type eq 'type1') {
