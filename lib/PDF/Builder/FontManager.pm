@@ -476,8 +476,19 @@ useful to you for defining a generic style font.
 
 =item file => {anonymous hash of source files}
 
-This tells the Font Manager where to find the actual font file. For core fonts,
-it is the standard name, rather than a file (and remember, they are preloaded).
+This tells the Font Manager where to find the actual font file. 
+
+Various font paths are tried from the C<font_path> list to find an actual file. 
+TrueType and OpenType fonts
+(C<'type'=E<gt>'ttf'>) may instead be given as a C<Font::TTF::Font> I<object>,
+such as one extracted from a TTC (TrueType Collection) file, one per "file"
+('roman', 'italic', etc.). In a dump of the FontManager tables 
+(C<dump_font_tables()>), these will show up as a file "name" of 
+C<Font::TTF::Font=HASH(....)>. B<Other ways of specifying TTC fonts are 
+expected to be added in the future.>
+
+For core fonts, it is the standard I<name>, rather than a I<file> (and 
+remember, they are preloaded).
 For all other types, it lists from one to four of the following variants:
 
 =over
