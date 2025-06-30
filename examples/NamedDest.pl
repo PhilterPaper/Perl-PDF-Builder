@@ -10,10 +10,10 @@ use utf8;
 
 use PDF::Builder;
 
-# this.pdf multiple links (pages 1, 4) to 'foo' & 'bar' ND in that.pdf (pp 2,3)
-# that.pdf multiple links (pages 1, 4) to 'foo' & 'bar' ND in this.pdf (pp 2,3)
-makefile("this.pdf", "that.pdf" );
-makefile("that.pdf", "this.pdf" );
+# NDthis.pdf multiple links (pages 1, 4) to 'foo' & 'bar' ND in NDthat.pdf (pp 2,3)
+# NDthat.pdf multiple links (pages 1, 4) to 'foo' & 'bar' ND in NDthis.pdf (pp 2,3)
+makefile("NDthis.pdf", "NDthat.pdf" );
+makefile("NDthat.pdf", "NDthis.pdf" );
 
 sub makefile {
     my ( $this, $that ) = @_;
