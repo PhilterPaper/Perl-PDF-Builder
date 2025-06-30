@@ -61,7 +61,7 @@ add_font()> methods).
 Some of the global data, which can be reset via the C<font_settings()> method:
 
     * default-face:  initialized to Times-Roman (core), used if you start
-      formatting text without explicitly setting a face
+      formatting text without explicitly setting a face, or inheriting one
     * default-serif: initialized to Times-Roman (core), used if you want
       a "generic" serif typeface
     * default-sansserif: initialized to Helvetica (core), used if you want
@@ -661,6 +661,7 @@ sub _initialize_core {
     my $single = 'cp-1252';  # let's try this one for single byte encodings
     # the universal core fonts. note that some systems may have similar
     # fonts substituted (but the metrics should be the same)
+    # index = 0
     $self->add_font('face' => 'Times', 'type' => 'core', 
 	        'settings' => { 'encode' => $single },
 	        'style' => 'serif', 'width' => 'proportional',
@@ -668,6 +669,7 @@ sub _initialize_core {
                            'italic' => 'Times-Italic',
                            'bold' => 'Times-Bold', 
                            'bold-italic' => 'Times-BoldItalic'} );
+    # index = 1
     $self->add_font('face' => 'Helvetica', 'type' => 'core', 
 	        'settings' => { 'encode' => $single },
 	        'style' => 'sans-serif', 'width' => 'proportional',
@@ -675,6 +677,7 @@ sub _initialize_core {
                            'italic' => 'Helvetica-Oblique',
                            'bold' => 'Helvetica-Bold', 
                            'bold-italic' => 'Helvetica-BoldOblique'} );
+    # index = 2
     $self->add_font('face' => 'Courier', 'type' => 'core', 
 	        'settings' => { 'encode' => $single },
 	        'style' => 'serif', 'width' => 'constant',
@@ -682,10 +685,12 @@ sub _initialize_core {
                            'italic' => 'Courier-Oblique',
                            'bold' => 'Courier-Bold', 
                            'bold-italic' => 'Courier-BoldOblique'} );
+    # index = 3
     $self->add_font('face' => 'Symbol', 'type' => 'core', 
 	        'settings' => { 'encode' => $single },
 	        'style' => 'symbol', 'width' => 'proportional',
                 'file' => {'symbol' => 'Symbol'} );
+    # index = 4
     $self->add_font('face' => 'ZapfDingbats', 'type' => 'core', 
 	        'settings' => { 'encode' => $single },
 	        'style' => 'symbol', 'width' => 'proportional',
@@ -694,6 +699,7 @@ sub _initialize_core {
 # apparently available on Windows systems
    #if ($^O eq 'MSWin32') { # always allow, even on non-Windows platforms
 
+    # index = 5
     $self->add_font('face' => 'Georgia', 'type' => 'core', 
                 'settings' => { 'encode' => $single }, 
 		'style' => 'serif', 'width' => 'proportional',
@@ -701,6 +707,7 @@ sub _initialize_core {
                            'italic' => 'GeorgiaItalic',
                            'bold' => 'GeorgiaBold',
                            'bold-italic' => 'GeorgiaBoldItalic'} );
+    # index = 6
     $self->add_font('face' => 'Verdana', 'type' => 'core', 
                 'settings' => { 'encode' => $single }, 
 		'style' => 'sans-serif', 'width' => 'proportional',
@@ -708,6 +715,7 @@ sub _initialize_core {
                            'italic' => 'VerdanaItalic',
                            'bold' => 'VerdanaBold',
                            'bold-italic' => 'VerdanaBoldItalic'} );
+    # index = 7
     $self->add_font('face' => 'Trebuchet', 'type' => 'core', 
                 'settings' => { 'encode' => $single }, 
 		'style' => 'sans-serif', 'width' => 'proportional',
@@ -715,10 +723,12 @@ sub _initialize_core {
                            'italic' => 'TrebuchetItalic',
                            'bold' => 'TrebuchetBold',
                            'bold-italic' => 'TrebuchetBoldItalic'} );
+    # index = 8
     $self->add_font('face' => 'Wingdings', 'type' => 'core', 
                 'settings' => { 'encode' => $single }, 
 		'style' => 'symbol', 'width' => 'proportional',
                 'file' => {'symbol' => 'Wingdings'} );
+    # index = 9
     $self->add_font('face' => 'Webdings', 'type' => 'core', 
                 'settings' => { 'encode' => $single }, 
 		'style' => 'symbol', 'width' => 'proportional',

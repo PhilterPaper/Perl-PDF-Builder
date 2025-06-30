@@ -7,7 +7,7 @@ use PDF::Builder;
 # $Data::Dumper::Sortkeys = 1; # hash keys in sorted order
 
 # VERSION
-our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
 
 # README.md is used below on page 5. Be sure to insert a fresh copy at build 
 #  time, and check if goes more pages. \ -> \\, $PERL_version -> \$PERL_version
@@ -35,21 +35,25 @@ print "======================================================= pg 1\n";
 $page = $pdf->page();
 $grfx = $page->gfx();
 $text = $page->text();
-footer(++$page_num, $pdf, $text);
+footer(++$page_num, $pdf, $text); # current font known to FontManager
+                                  # is sans-serif (Helvetica)
 
 print "---- single string entries\n";
 $text->column($page, $text, $grfx, 'none', 
 	      "This is a single string text.\n\nWith two paragraphs.", 
+	      'font_info'=>'-fm-',
 	      'rect'=>[50,750, 500,50], 'outline'=>$magenta);
 
 restore_props($text, $grfx);
 $text->column($page, $text, $grfx, 'md1', 
 	      "This is a _single string_ **MD** text.\n\nIt should have two paragraphs.", 
+	      'font_info'=>'-fm-',
 	      'rect'=>[50,650, 500,50], 'outline'=>$magenta);
 
 restore_props($text, $grfx);
 $text->column($page, $text, $grfx, 'html', 
 	      "<p>This is a <i>single <b>string</b></i> HTML text.</p><p>With two paragraphs.</p>", 
+	      'font_info'=>'-fm-',
 	      'rect'=>[50,550, 500,50], 'outline'=>$magenta);
 
 print "---- array of string entries\n";
@@ -57,16 +61,19 @@ print "---- array of string entries\n";
 restore_props($text, $grfx);
 $text->column($page, $text, $grfx, 'none', 
 	      ["This is an array.","Of single string texts. Two paragraphs."], 
+	      'font_info'=>'-fm-',
 	      'rect'=>[50,450, 500,50], 'outline'=>$magenta);
 
 restore_props($text, $grfx);
 $text->column($page, $text, $grfx, 'md1', 
 	      ["This is an **array**\n \n","Of single _string_ MD texts, two paragraphs."], 
+	      'font_info'=>'-fm-',
 	      'rect'=>[50,350, 500,50], 'outline'=>$magenta);
 
 restore_props($text, $grfx);
 $text->column($page, $text, $grfx, 'html', 
 	      ['<p>This is an <b>array</b></p>','<p>of single <i>string</i> HTML texts. Two paragraphs.</p>'], 
+	      'font_info'=>'-fm-',
 	      'rect'=>[50,250, 500,50], 'outline'=>$magenta);
 
 restore_props($text, $grfx);
@@ -90,8 +97,9 @@ $text->column($page, $text, $grfx, 'pre', [
 	{'text'=>'!', 'tag'=>''},
 	{'text'=>'', 'tag'=>'/b'},
 	{'text'=>'', 'tag'=>'/i'},
-	{'text'=>'', 'tag'=>'/p'},
-], 'rect'=>[50,150, 500,50], 'outline'=>$magenta);
+	{'text'=>'', 'tag'=>'/p'}, ], 
+	'font_info'=>'-fm-',
+        'rect'=>[50,150, 500,50], 'outline'=>$magenta);
 
 # larger font size and narrower columns to force line wraps
 print "======================================================= pg 2\n";
@@ -215,22 +223,27 @@ my $SLoremIpsum = join("\n",@ALoremIpsum);
 
 print "---- Lorem Ipsum array of string entries, default paragraphs\n";
 $text->column($page, $text, undef, 'html', 
-  "<h2>Paragraphs with default characteristics</h2>", 'rect'=>[50,730, 500,25]);
+  "<h2>Paragraphs with default characteristics</h2>", 
+  'font_info'=>'-fm-', 'rect'=>[50,730, 500,25]);
 # default paragraph indent and top margin
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'none', \@ALoremIpsum, 
-	          'rect'=>[50,700, 500,250], 'outline'=>$magenta );
+	    'font_info'=>'-fm-', 
+	    'rect'=>[50,700, 500,250], 'outline'=>$magenta );
 if ($rc) { 
     print STDERR "Lorem Ipsum array overflowed the column!\n";
 }
 print "---- Lorem Ipsum string entry, block-style paragraphs\n";
 $text->column($page, $text, undef, 'html', 
-  "<h2>Paragraphs with block style (no indent, vertical space)</h2>", 'rect'=>[50,380, 500,25]);
+  "<h2>Paragraphs with block style (no indent, vertical space)</h2>", 
+	    'font_info'=>'-fm-', 
+            'rect'=>[50,380, 500,25]);
 # no indent, extra top margin
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'none', $SLoremIpsum, 
+	          'font_info'=>'-fm-', 
 	          'rect'=>[50,350, 500,300], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ] );
 if ($rc) { 
@@ -286,6 +299,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', 
 	          $content, 
+	          'font_info'=>'-fm-', 
 		  'rect'=>[50,750, 500,708], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ] );
 if ($rc) { 
@@ -374,12 +388,14 @@ if ($use_Table) {
     restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'html', 
 	          '<font color="red">This is some red text</font>', 
+	          'font_info'=>'-fm-', 
 		  'rect'=>[55,$next_y-(5+$row_num*$cell_height), 240,20], 
 		  'font_size'=>12, 'para'=>[ 0, 0 ] );
 
     restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'html', 
 	          '<span style="color:green">This is some green text</span>', 
+	          'font_info'=>'-fm-', 
 		  'rect'=>[305,$next_y-(5+$row_num*$cell_height), 240,20], 
 		  'font_size'=>12, 'para'=>[ 0, 0 ] );
     $row_num++;
@@ -388,12 +404,14 @@ if ($use_Table) {
     restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'html', 
 	          'This is a red cross: <font face="ZapfDingbats" color="red">8</font>.', 
+	          'font_info'=>'-fm-', 
 		  'rect'=>[55,$next_y-(5+$row_num*$cell_height), 240,20], 
 		  'font_size'=>12, 'para'=>[ 0, 0 ] );
  
     restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'html', 
 	          "This is a green tick: <span style=\"font-family:ZapfDingbats; color:green\">4</span>.", 
+	          'font_info'=>'-fm-', 
 		  'rect'=>[305,$next_y-(5+$row_num*$cell_height), 240,20], 
 		  'font_size'=>12, 'para'=>[ 0, 0 ] );
     $row_num++;
@@ -402,6 +420,7 @@ if ($use_Table) {
     restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'md1', 
 	          "This is a red cross substitute: %cross%.", 
+	          'font_info'=>'-fm-', 
 		  'rect'=>[55,$next_y-(5+$row_num*$cell_height), 240,20], 
 		  'font_size'=>12, 'para'=>[ 0, 0 ], 
 		  'substitute'=>[
@@ -412,6 +431,7 @@ if ($use_Table) {
     restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'html', 
 	          "This is a green tick substitute: %tick%.", 
+	          'font_info'=>'-fm-', 
 		  'rect'=>[305,$next_y-(5+$row_num*$cell_height), 240,20], 
 		  'font_size'=>12, 'para'=>[ 0, 0 ], 
 		  'substitute'=>[
@@ -424,6 +444,7 @@ if ($use_Table) {
     restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'none', 
 	          "Plain old text",
+	          'font_info'=>'-fm-', 
 		  'rect'=>[55,$next_y-(5+$row_num*$cell_height), 240,20], 
 		  'font_size'=>12, 'para'=>[ 0, 0 ], 
 	         );
@@ -431,6 +452,7 @@ if ($use_Table) {
     restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'none', 
 	          "More plain text",
+	          'font_info'=>'-fm-', 
 		  'rect'=>[305,$next_y-(5+$row_num*$cell_height), 240,20], 
 		  'font_size'=>12, 'para'=>[ 0, 0 ], 
 	         );
@@ -464,7 +486,7 @@ footer(++$page_num, $pdf, $text);
 #  example block in Paper Sizes note needs manual reformat (revisit
 #    when <pre> supported)
 $content = <<"END_OF_CONTENT";
-# PDF::Builder release 3.027
+# PDF::Builder release 3.028
 
 A Perl library to create and modify PDF (Portable Document Format) files
 
@@ -488,10 +510,6 @@ more powerful and versatile.
 \\*Note that PDF::Builder is **not** built on PDF::API2, and does **not**
 require that it be installed. The two libraries are completely independent of
 each other and one will not interfere with the other if both are installed.
-
-**Gadzooks!** For a delightful look at the (rather grisly) origin of this
-typographical term, as well as many other terms, watch
-https://www.youtube.com/watch?v=cd5iFbuNKv8 .
 
 [Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full), including Documentation and Examples.
 
@@ -758,6 +776,13 @@ US Letter _or_ A4 media, with the following **minimum** margins (allowing
 
 `A4 right:      3mm = .125" = 9pt`
 
+If not using the _Universal_ size, you can choose _Letter_ size, with an
+extra-wide right margin of at least 27pt, or _A4_ size media with an extra
+deep top margin of at least 60pt. In both cases, allow a minimum of 9pt for
+left and bottom margins, for paper-handling purposes. This should give you
+results printable on either US Letter or A4 media, anywhere in the world,
+without accidentally losing content.
+
 Please see the discussion on `mediabox()` and other "box" calls, about how
 much of a page can actually be _printed_ on, allowing for pinch rollers and
 other paper transport mechanisms. The above suggested margins assume, in
@@ -769,6 +794,7 @@ restore_props($text,$grfx);
 # page 5
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
+	          'font_info'=>'-fm-', 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ] );
 # pages 6-8
@@ -782,8 +808,9 @@ while ($rc) {
 #print Dumper($unused) if $page_num == 7;
     ($rc, $next_y, $unused) =
         $text->column($page, $text, $grfx, 'pre', $unused, 
-		      'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
-		      'para'=>[ 0, 5 ] );
+	          'font_info'=>'-fm-', 
+		  'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
+		  'para'=>[ 0, 5 ] );
 }
 
 # for various lists, see Column_lists.pl
@@ -831,6 +858,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
+	          'font_info'=>'-fm-', 
 	          'rect'=>[50,750, 500,300], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ] );
 if ($rc) { 
@@ -849,6 +877,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
+	          'font_info'=>'-fm-', 
 	          'rect'=>[50,425, 500,380], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ] );
 if ($rc) { 
@@ -882,6 +911,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
+	          'font_info'=>'-fm-', 
 	          'rect'=>[50,750, 500,125], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
@@ -906,6 +936,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
+	          'font_info'=>'-fm-', 
 	          'rect'=>[50,585, 500,185], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
@@ -925,6 +956,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
+	          'font_info'=>'-fm-', 
 	          'rect'=>[50,375, 500,100], 'outline'=>$magenta, 
 		  'para'=>[ 0, 10 ],
 	         );
@@ -951,6 +983,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
+	          'font_info'=>'-fm-', 
 	          'rect'=>[50,260, 500,60], 'outline'=>$magenta, 
 		  'para'=>[ 0, 10 ],
 	         );
@@ -970,6 +1003,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
+	          'font_info'=>'-fm-', 
 	          'rect'=>[100,187, 400,13], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
@@ -986,6 +1020,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
+	          'font_info'=>'-fm-', 
 	          'rect'=>[100,174, 400,13], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
@@ -1002,13 +1037,12 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
+	          'font_info'=>'-fm-', 
 	          'rect'=>[100,161, 400,13], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
 if ($rc) { 
     print STDERR "3. <_move> and text-align example overflowed column!\n";
-print "rc=$rc, leftover text =\n";
-print Dumper(@$unused);
 }
  
 $content = <<"END_OF_CONTENT";
@@ -1022,6 +1056,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
+	          'font_info'=>'-fm-', 
 	          'rect'=>[100,144, 400,13], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
@@ -1039,6 +1074,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
+	          'font_info'=>'-fm-', 
 	          'rect'=>[100,131, 400,13], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
@@ -1085,6 +1121,8 @@ sub footer {
 }
 # -----------------------
 
+# note that the columns are deliberately quite narrow, which will trigger
+# some odd word breaks
 sub multicol {
     my ($page, $text, $grfx, $markup, $content, $rect, $outline, $fs) = @_;
 
@@ -1092,12 +1130,14 @@ sub multicol {
 
     ($rc, $start_y, $content) = 
         $text->column($page, $text, $grfx, $markup, $content, 
-		      'rect'=>$rect, 'outline'=>$outline, 'font_size'=>$fs);
+	          'font_info'=>'-fm-', 
+		  'rect'=>$rect, 'outline'=>$outline, 'font_size'=>$fs);
     while ($rc == 1) { # ran out of column, do another
 	$rect->[0] += 50+$rect->[2];
         ($rc, $start_y, $content) = 
             $text->column($page, $text, $grfx, 'pre', $content, 
-		          'rect'=>$rect, 'outline'=>$outline, 'font_size'=>$fs);
+	          'font_info'=>'-fm-',
+		  'rect'=>$rect, 'outline'=>$outline, 'font_size'=>$fs);
     }
     return;
 }
