@@ -259,6 +259,10 @@ Column_lists.pl
   Column_lists.pdf
    8 pages demonstrating column() method output of ol and ul and other lists
 
+Column_xrefs.pl
+  Column_xrefs.pdf
+   2 pages demonstrating cross references (inter- and intra-PDF links)
+
 #Column_layouts.pl    TBD
 #  Column_layouts.pdf
 #   ? pages demonstrating column() method output with different column shapes
@@ -348,9 +352,10 @@ HarfBuzz.pl
            website https://www.catskilltech.com/.
 
 NamedDest.pl
-  this.pdf, that.pdf
+  NDthis.pdf, NDthat.pdf
    Create two PDFs which have intradocument links to Named Destinations and
-    interdocument links to Named Destinations.
+    interdocument links to Named Destinations. Note that the PDF names differ
+    from the creation program.
 
 RMtutorial.pl
   RMtutorial.pdf

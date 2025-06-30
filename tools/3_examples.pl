@@ -118,6 +118,9 @@ my (@example_list, @example_results);
   push @example_list, "Column_lists.pl";
   push @example_results, "create examples/Column_lists.pdf, showing examples of the various list\n capabilities of the Content/Text.pm column() library methods\n";
 
+  push @example_list, "Column_xrefs.pl";
+  push @example_results, "create examples/Column_xrefs.pdf, showing examples of the various cross-\n referencing (link) capabilities of the Content/Text.pm column()\n library methods\n";
+
  #push @example_list, "Column_layouts.pl";
  #push @example_results, "create examples/Column_layouts.pdf, showing examples of various column layout\n (shape) capabilities of the Content/Text.pm column() library methods\n";
 
@@ -137,7 +140,7 @@ my (@example_list, @example_results);
  }
 
   push @example_list, "NamedDest.pl";
-  push @example_results, "create examples/this.pdf and that.pdf, demonstrating very basic usage of\n Named Destinations in PDF::Builder.\n";
+  push @example_results, "create examples/NDthis.pdf and NDthat.pdf, demonstrating very basic usage of\n Named Destinations in PDF::Builder.\n";
 
   push @example_list, "RMtutorial.pl";
   push @example_results, "create examples/RMtutorial.pdf, demonstrating very basic usage of\n PDF::Builder text and graphics.\n";

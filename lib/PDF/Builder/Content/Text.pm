@@ -8,7 +8,7 @@ use Carp;
 use List::Util qw(min max);
 use version;
 #use Data::Dumper;  # for debugging
-#  $Data::Dumper::Sortkeys = 1;  # hash keys in sorted order
+# $Data::Dumper::Sortkeys = 1;  # hash keys in sorted order
     # print Dumper(var);  usage of Dumper
  
 # >>>>>>>>>>>>>>>>>> CRITICAL !!!! <<<<<<<<<<<<<<<<<<<<<<
@@ -792,7 +792,8 @@ B<Options:>
 =item 'pndnt' => $indent
 
 Give the amount of indent (positive) or outdent (negative, for "hanging")
-for paragraph first lines). This setting is ignored for centered text.
+for paragraph first lines. The unit is I<ems>. 
+This setting is ignored for centered text.
 
 =item 'align' => $choice
 
@@ -887,6 +888,7 @@ sub paragraph {
 	# now, need to indent (move line start) right for 'l' and 'j'
 	if ($lw < $width && ($align eq 'l' || $align eq 'j')) {
         $self->cr($leading); # go UP one line
+	    # 88*10 text space units per em, negative to right for TJ
 	    $self->nl(88*abs($indent)); # come down to right line and move right
 	}
 
@@ -934,17 +936,17 @@ C<$continue> is 0 for the first call of section(), and then use the value
 returned from the previous call (1 if a paragraph was cut in the middle) to 
 prevent unwanted indenting or outdenting of the first line being printed.
 
-For compatibility with recent changes to PDF::API2, B<paragraphs> is accepted
-as an I<alias> for C<section>.
-
 B<Options:>
 
 =over
 
 =item 'pvgap' => $vertical
 
-Additional vertical space (unit: pt) between paragraphs (default 0). Note that this space
-will also be added after the last paragraph printed.
+Additional vertical space (unit: pt) between paragraphs (default 0). 
+Note that this space will also be added after the last paragraph printed,
+B<unless> you give a negative value. The |pvgap| is the value used (positive);
+negative tells C<section> I<not> to add the gap (space) after the last
+paragraph in the section.
 
 =back
 
@@ -952,7 +954,7 @@ See C<paragraph> for other C<%opts> you can use, such as C<align> and C<pndnt>.
 
 B<Alternate name:> paragraphs
 
-This is for compatibility with PDF::API2.
+This is for compatibility with PDF::API2, which renamed C<section>.
 
 =back
 
@@ -970,9 +972,13 @@ sub section {
 
     my $overflow = ''; # text to return if height fills up
     my $pvgap = defined($opts{'pvgap'})? $opts{'pvgap'}: 0;
+    my $pvgapFlag = ($pvgap >= 0)?1 :0; 
+    $pvgap = abs($pvgap);
     # $continue =0 if fresh paragraph, or =1 if continuing one cut in middle
 
-    foreach my $para (split(/\n/, $text)) {
+    my @paras = split(/\n/, $text);
+    for (my $i=0; $i<@paras; $i++) {
+	my $para = $paras[$i];
 	# regardless of whether we've run out of space vertically, we will
 	# loop through all the paragraphs requested
 	
@@ -987,15 +993,22 @@ sub section {
 	$continue = 0;
 	if (length($para) > 0) {
 	    # we cut a paragraph in half. set flag that continuation doesn't
-	    # get indented/outdented
+	    # get indented/outdented (continue current left margin)
             $overflow .= $para;
 	    $continue = 1;
 	}
 
-	# inter-paragraph vertical space?
+	# inter-paragraph vertical space? (0 length $para means that the 
+	# entire paragraph was consumed)
 	# note that the last paragraph will also get the extra space after it
-	if (length($para) == 0 && $pvgap != 0) { 
-	    $self->cr(-$pvgap);
+	# and first paragraph did not
+	# if this is the last paragraph in the section, still want a gap to
+	# the next section's starting paragraph, so can't simply omit gap.
+	# however, want to avoid a pending gap (Td) if that's the last of all.
+	if (length($para) == 0 && $pvgap != 0 && 
+	    ($i < scalar(@paras)-1 || $pvgapFlag)) { 
+            # move DOWN page by pvgap amount (is > 0)
+	    $self->cr(-$pvgap); # creates pending Td command
 	    $height -= $pvgap;
         }
     }
@@ -1168,6 +1181,7 @@ sub textlabel {
     return $wht;
 }
  
+# --------------------- start of column() section ---------------------------
 # WARNING: be sure to keep in synch with changes to POD elsewhere, especially
 #   list in #195 and Docs.pm
 
@@ -1295,6 +1309,18 @@ and non-standard HTML "tags" (extensions)
                         where 'x' setting left you
 	   Warning: if you move beyond the baseline in either direction,
 	            results are unpredictable)
+    '_ref' (reference [link] to another point in this or another document)
+	    "tgtid" (required) is target specification
+            "title" is primary link text to use
+	    "fit" is page fit. for 'xyz', it is allowed to use %x,%y rather
+	      than the numeric values (x-100 and y+100 are values used)
+    '_reft' (reference target for a <_ref> link)
+            "id" (required) is id to link to
+	    "title" is default for <_ref> if its own title not given.
+	       its fallback is "natural text" such as a heading's text
+    '_nameddest' (create an externally visible Named Destination here).
+           "name" (required) attribute is Named Destination to create 
+           "fit" (default 'xyz,x-100,y+100,null') gives the fit
     '_sl' (simple list, like 'ul' but no marker)
     '_ovl' (TBD -- overline similar to underline/strike-through)
     '_k' (TBD -- kerning left/right shift). up/down too?
@@ -1319,8 +1345,8 @@ Selectors are quite simple: a single tag name (e.g., B<body>),
 a single class (.cname), or a single ID (#iname). 
 There are I<no> combinations (e.g., 
 C<p.abstract> or C<ol, ul>), hierarchies (e.g., C<ol E<gt> li>), specified 
-number of appearance, or other such complications as found in a browser's CSS. 
-Sorry!
+number of appearance, pseudotags, or other such complications as found in a 
+browser's CSS. Sorry!
 
 Supported CSS properties: 
 
@@ -1496,27 +1522,30 @@ may be modified by CSS styling.
 =item 'font_info' => $string
 
 This permits the user to specify the starting font used in C<column()> (body
-font-family, font-style, font-weight). C<column()> will pick up any font already
+font-family, font-style, font-weight, color). C<column()> will pick up any 
+font already
 loaded (C<$text-E<gt>font($font, $size);>, or using FontManager), and use that 
 as the "current" font. If no font has been loaded, and no other instructions
-are given, the FontManager default (Times-Roman) will be used.
+are given, the FontManager default (core Times-Roman) will be used.
 
 The C<font_info> option for C<column()> may be given to override either of the
 two above methods. You may specify a C<$string> of B<'-fm-'> to instruct
-C<column()> to use the present FontManager "current" font (which would have
-been changed if you used FontManager to load a font!). Or, you may pick a font
-face I<known> to FontManager (explicitly loaded if not one of the 28 core 
+C<column()> to use the FontManager "default" font (Times face core font).
+Or, you may pick a font
+face I<known> to FontManager (added by user code if not one of the 28 core 
 fonts), and optionally give it style and weight: C<$string> of 
-B<'face:style:weight'>. The style defaults to 'normal' (non-italic), or 'normal'
-or '0' may be given. For italics, use 'italic' or '1'. The weight defaults to 
-'normal' (unbolded weight), or 'normal' or '0' may be given. For bold (heavy)
-text, use 'bold' or '1'.
+B<'face:style:weight:color'>. The style defaults to 'normal' (non-italic), or 
+'normal' or '0' may be given. For italics, use 'italic' or '1'. The weight 
+defaults to 'normal' (unbolded weight), or 'normal' or '0' may be given. For 
+bold (heavy) text, use 'bold' or '1'. Finally, a color may be given.
 
 Finally, the C<style> option for C<column()> may be given to override any of 
 the above settigs, e.g., B<'style'=E<gt>{ body { font-family:... }> and set
 the initial current font. Remember that, as with anything font-related that
 C<column()> does, the 'face' (family) used must already be known to FontManager
-(explicitly loaded with C<add_font()> if not one of the 28 core fonts).
+(explicitly loaded with C<add_font()> if not one of the 28 core fonts). 
+Remember that the first 14 fonts are standard PDF, and the second 14 are 
+normally supplied with Windows (but not always with other operating systems).
 
 =item 'marker_width' => $marker_width
 
@@ -1609,6 +1638,76 @@ as C<|>, so don't use them as delimiters (e.g., C<|cross|>). You don't I<have>
 to wrap your macro name in delimiters, but it can make the text structure
 clearer, and may be necessary in order not to do substitutions in the wrong 
 place.
+
+=item 'state' => \%state
+
+This is the state of processing, including (in particular), information on all
+the requested references (<_ref>) and targets (<_reft> and specific id's). 
+Before use, it must be created and initialized. During multiple passes across
+multiple column() calls, 'state' preserves all the link information. It can
+even preserve information across the creation of multiple related PDFs, though
+this may require writing and reading back from a file. There is no information
+in 'state' that is likely to be of interest to a user (i.e., all internal data).
+If 'state' is not given, it will (in most cases) be impossible to define various
+kinds of links (including cross references).
+
+=item 'page' => [ $ppn, $extfile, $fpn, $LR, $bind ]
+
+This array of values gives C<column()> information needed for generating links
+(both I<goto> and I<pdf> annotations), and (TBD) left- and right-hand page
+processing, including how much to shift C<column()> definitions to the outside
+of the page for binding purposes. The link information is as follows:
+
+=over
+
+=item $ppn
+
+This is the Physical Page Number of the page currently being generated. It is 
+always an integer greater than 0, and takes a value 1,2,3,... It is needed if
+this page is used as the target for an external (across PDFs) link, using a
+physical page number and not a Named Destination. 
+Remember to increment it every time the code calls the C<page()> method. 
+It may be left undefined if you are sure you're never going to generate a link 
+(via C<pdf> call, not using a Named Destination) to this PDF file from another 
+PDF.
+
+=item $extfile
+
+This describes the external path, filename, and extension of B<this> PDF being
+created. It is needed if this page is used as the target for an external 
+(across PDFs) link. Remember that this is the I<final> location and name of
+where this file will live when in use, not necessarily where it is being
+I<created> at this moment!
+It may be left undefined if you are sure you're never going to generate a link 
+(via C<pdf> call) to this PDF file from another PDF.
+
+=item $fpn
+
+This is the I<Formatted> Page Number of the page being generated. In the 
+simplest case, it is equal to the Physical Page Number, but often you will want
+to "get fancy" with numbering, such as a prefix for an appendix ('C-2',
+'Glossary-5', etc.), lowercase Roman numerals in the front matter, etc. You
+might even want to carry one single sequence of decimal page numbers across 
+multiple PDFs, thus starting at other than "1". If you leave it undefined,
+certain kinds of links and cross reference formats (where the formatted page
+number is shown) will not be possible.
+
+=item $LR
+
+This says whether it's a left-hand page or a right-hand page, for purposes of
+formatting layout and shifting the C<column()> outline left or right (towards
+the "outside" of the page) to allow binding space. If undefined, it defaults
+to an 'R' right-hand page.
+
+=item $bind
+
+This is the number of points to shift the C<column()> coordinates towards the
+"outside" of the page for purposes of binding multiple pages together, whether
+left-right alternation or all right-hand pages (e.g., punched for a notebook or
+spiral binding, or just stapled on the inside, or glued or sewn into a 
+paperback or hard-cover binding). If undefined, the default is 0.
+
+=back
 
 =item 'restore' => flag
 
@@ -1773,10 +1872,68 @@ It contains nothing to be used.
 
 There is additional information on this subject in L<PDF::Builder::Docs/MARKUP>.
 
+=head4 Special notes on saving and restoring the font
+
+To reiterate the font selection upon entry, if nothing special is done, 
+C<column()> will look to see if user code has already loaded a font in this
+text context. It will label that font B<-external-> and use it as the current
+font. I<However>, be aware that C<column()> will B<not> know the actual face
+(font-family) of whatever font this is, and thus can not change the font-weight
+(bold) or font-style (italic). These changes will be ignored. If no font is
+already loaded, the FontManager's default "current" font (Times-Roman) will
+be selected (and no "-external-" font defined).
+
+Once C<column()> has already been called within a given text context, whatever
+font is in force at the end of the call will be preserved by the text context,
+and picked up by the next C<column()> call within this text context. Note that
+a text context is limited to a single page of a PDF, at most. The user code
+may of course choose to load a new font externally to C<column()>, in order to
+use that one upon entry.
+
+It is important to let C<column()> know what font face (font-family), weight,
+and style to use, so it can switch between normal, bold, and italic as desired.
+There are several methods to I<explicitly select> a font face (font-family) and
+its variants (weight, style) upon entry to C<column()>. One is to use the
+C<font_info> option to C<column>, including "-fm-" to use FontManager's
+default font. Another is to use the C<style> option to
+C<column()> to override the B<body> default CSS. A third, if using HTML or
+Markdown, is to add a E<lt>styleE<gt> tag to the beginning of the text markup,
+in order to set the B<body> CSS (as with C<style>). All of these methods will
+set the B<body>'s font.
+
+Any font "face" used must be first registered with FontManager. The standard
+core fonts (as well as Windows extensions) are preregistered. If user code
+loads an arbitrary font outside of C<column()>, it will only be known as
+"-external-" (as described above). C<column()> calls (including CSS font-family)
+only recognize registered faces, so it knows where to find the font file and
+other information, and can cache the loaded font. It can keep track of which
+font is currently being used, and know how to set bold and italic variants.
+
+When the end of the defined column is reached (before the text source is
+exhausted), all open tags are preserved, so that the next C<column()> call 
+(with I<pre> formatting) can pick up with the same font settings as before.
+However, this works only as long as the complete font description is set in
+the tags (including the face). If the font face is not given in the tags, it
+will not be known, and bold and italic will likely not work at the next change. 
+If the text is in the middle of a highlighted phrase (e.g., bold or italic, or 
+a different font), that particular font should be picked up again. However, the 
+B<body> font face and variant may not be correctly resumed if it is assumed 
+that the proper font has been inherited by the next C<column()> call. 
+Explicitly setting the B<body> font should allow the font to return to a known 
+starting condition, although it is possible that (based on nesting of font 
+changes at the column break) other aspects might be incorrect.
+
+To summarize, the best practice is to register (C<add_font>) to FontManager any
+fonts you wish to use, and then explicitly use C<font_info> or C<style> to
+let C<column()> know what the base font is for your text. This is better than
+externally loading a font, and depending on its being inherited from the text
+context, which may in turn may leave it in some other state after a C<column()>
+call, as well as not being able to change bold and italic.
+
 =cut
 
 # TBD, future:
-#  * = not official HTML5 or CSS (i.e., extension)
+#  * = not official HTML5 or CSS (i.e., an extension)
 # perhaps 3.028?  
 #   arbitrary paragraph shapes (path)
 #   at a minimum, hyphenate-basic usage including &SHY;
@@ -1847,6 +2004,8 @@ sub column {
     my $marker_gap = $font_size;   # 1em space between list marker and item
     if (defined $opts{'marker_width'}) { $marker_width=$opts{'marker_width'}; }
     if (defined $opts{'marker_gap'}) { $marker_gap=$opts{'marker_gap'}; }
+    my $page_numbers = 0; # default: formatted pgno not used in links (TBD)
+   #if (defined $opts{'page_numbers'}) { $page_numbers=$opts{'page_numbers'}; }
 
     my $restore = 0; # restore text state and color at end
     if (defined $opts{'restore'}) { $restore = $opts{'restore'}; }
@@ -1877,7 +2036,7 @@ sub column {
     my @outline = _get_column_outline($grfx, $outline_color, %opts);
     my ($col_min_x, $col_min_y, $col_max_x, $col_max_y) = 
         _get_col_extents(@outline);
-    my $start_y = $col_max_y; # default is a top of column
+    my $start_y = $col_max_y; # default is at top of column
     my $para = 1; # paragraph is at top of column, don't use margin-top
     $start_y = $opts{'start_y'} if defined $opts{'start_y'};
     if ($start_y != $col_max_y) { 
@@ -1885,10 +2044,58 @@ sub column {
 	$para = 0; # go ahead with any extra top margin
     }
 
+    # 'page' parameters
+    my ($pass_count, $max_passes, $ppn, $extfilepath, $fpn, $LR, $bind);
+    $ppn = $extfilepath = $fpn = undef;
+      # physical page number 1,2,..., filepath/name/ext for THIS output,
+      # formatted page number string (all for link creation)
+    $LR = 'R';  # for now, just right-hand page
+    $bind = 0;  # for now, offset column by 0 points to "outside" of page
+    if (defined $opts{'page'}) {
+	if (!( ref($opts{'page'}) eq 'ARRAY' &&
+	       7 == @{$opts{'page'}} )) {
+	    carp "page not anonymous array of length 7, ignored.";
+	} else {
+	    $pass_count  = $opts{'page'}->[0];
+	    $max_passes  = $opts{'page'}->[1];
+	    $ppn         = $opts{'page'}->[2];
+	    if (defined $ppn && $ppn !~ /^[1-9]\d*$/) {
+		carp "physical page number must be integer > 0";
+		$ppn = 1;
+	    }
+	    $extfilepath = $opts{'page'}->[3];
+	    # external name for THIS output (other docs can link to it)
+	    # undef OK, if will never link to this from outside. this name
+	    # is the path and name of this output file in its FINAL home,
+	    # not necessarily where it is created!
+	    $fpn         = $opts{'page'}->[4];
+	    # formatted page string (THIS page)
+	    $LR          = $opts{'page'}->[5];
+	    if (!defined $LR) { $LR = 'R'; }
+	    if (defined $LR && $LR ne 'L' && $LR ne 'R') {
+		carp "LR setting should be L or R. force to R";
+		$LR = 'R';
+	    }
+	    # TBD handle 'L' and 'R', for now ignore $LR
+	    $bind        = $opts{'page'}->[6];
+	    # TBD for now, ignore $bind
+        }
+    }
+
+    # what is the state of %state parameter (hashref $state)
+    my $state = undef;  # OK, but xrefs and other links disallowed!
+    # TBD everywhere $state used, check if defined!
+    #      disable all the _ref and _reft stuff if no state
+    if (defined $opts{'state'} && ref($opts{'state'}) eq 'HASH') {
+	$state = $opts{'state'};
+        # TBD {source} {target} {params} to read in, write out
+	#     before first pass of first PDF (if multiple), external initialize
+    }
+
     # what is the content of $text: string, array, or array of hashes?
     # (or already set up, per 'pre' markup)
     # break up text into array of hashes so we have one common input
-    my @mytext = _break_text($txt, $markup, %opts);
+    my @mytext = _break_text($txt, $markup, %opts,'page_numbers'=>$page_numbers);
     unshift @mytext, $default_css;
 
     # each element of mytext is an anonymous hash, with members text=>text
@@ -1904,7 +2111,7 @@ sub column {
     # attribute list. on exit from tag, set attributes to restore settings
     @mytext = _tag_attributes($markup, @mytext);
 
-    ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $page, $text, $grfx, $restore, $para, $font_size, $markup, $marker_width, $marker_gap, $leading, @mytext);
+    ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $page, $text, $grfx, $restore, $para, $font_size, $markup, $marker_width, $marker_gap, $leading, $opts{'page'}, $page_numbers, $pass_count, $max_passes, $state, @mytext);
 
     if ($rc > 1) {
 	# restore = 2 request restore to @entry_state for rc=0, 3 for 1
@@ -1938,22 +2145,22 @@ sub _default_css {
     # if FontManager NOT used to set font externally, can just inherit font
     #  (don't know what it is), current font = -external-. all styles and 
     #  weights are this one font
-    # otherwise, 'font_info'=>'face:weight:style:color' where weight = bold
-    #  or normal, style = italic or normal, color = a color name e.g., black.
+    # otherwise, 'font_info'=>'face:style:weight:color' where style = italic
+    #  or normal, weight = bold or normal, color = a color name e.g., black.
     #  this face must be known to FontManager
     # as last resort, if font not set outside of column, FontManager default
     my (@cur_font, @cur_color, $current_color);
     if (defined $opts{'font_info'}) {
 	# override any predefined font
 	if ($opts{'font_info'} eq '-fm-') {
-	    # use whatever FontManager thinks is the current font
-	    # presumably they used it earlier to set the font 
-	    # (it will always have a current font defined, even if not
-	    # explicitly called)
-            @cur_font = $pdf->get_font(); # use [0..2] of returned array
+	    # use whatever FontManager thinks is the default font
+            $pdf->get_font('face'=>'default'); # set current font to default
+            @cur_font = $pdf->get_font(); 
+	    $cur_font[1] = $cur_font[2] = 0; # no italic or bold
+            # use [0..2] of returned array
         } else {
 	    # explicitly given font must be KNOWN to FontManager
-	    # family:style:weight (normal/0/italic/1, normal/0/bold/1)
+	    # family:style:weight:color (normal/0/italic/1, normal/0/bold/1)
 	    @cur_font = split /:/, $opts{'font_info'};
 	    # add normal style and weight if not given
 	    if (@cur_font == 2) { push @cur_font, 0; }
@@ -1963,9 +2170,11 @@ sub _default_css {
 	    if ("$cur_font[2]" eq 'normal') { $cur_font[2] = 0; }
 	    if ("$cur_font[2]" eq 'bold'  ) { $cur_font[2] = 1; }
 	    # set the current font
+	    if (@cur_font == 4) { $text->fillcolor($cur_font[3]); } # color
 	    $pdf->get_font('face'=>$cur_font[0],
 		           'italic'=>$cur_font[1],
 		           'bold'=>$cur_font[2]);
+	    @cur_font = $pdf->get_font();
 	}
     } else {
 	# not using font_info to set font
@@ -1973,7 +2182,8 @@ sub _default_css {
         if ($pdf->get_external_font($text)) {
 	    # failed to find a predefined font. use default
         }
-        @cur_font = $pdf->get_font(); # use [0..2] of returned array
+        @cur_font = $pdf->get_font(); # use [0..2] of returned array,
+	                 # either predefined -external- font, or default font
     }
     # @cur_font should have (at least) face, italic 0/1, bold 0/1
     #  to load into 'body' properties later
@@ -2019,6 +2229,9 @@ sub _default_css {
     $style{'b'} = {};
     $style{'strong'} = {};
     $style{'hr'} = {};
+    $style{'_ref'} = {};
+    $style{'_reft'} = {};  # no visible content
+    $style{'_nameddest'} = {};  # no visible content
 
     $style{'body'}->{'font-size'} = $font_size;
     $style{'body'}->{'_fs'} = $font_size; # carry current value
@@ -2199,6 +2412,11 @@ sub _default_css {
     $style{'blockquote'}->{'text-height'} = '1.00'; # close spacing
     $style{'blockquote'}->{'font-size'} = '80%'; # smaller type
 
+    $style{'_ref'}->{'color'} = '#660066';  # default link for xrefs
+    $style{'_ref'}->{'font-style'} = 'italic'; 
+    $style{'_ref'}->{'display'} = 'inline'; 
+    # <_reft> and <_nameddest> no visible content, so no styling
+
    #$style{'sc'}->{'font-size'} = '80%'; # smaller type TBD
    #$style{'sc'}->{'_expand'} = '110%'; # wider type   TBD _expand
    #likewise for pc (petite caps) TBD
@@ -2320,9 +2538,22 @@ sub _tag_attributes {
 # the workhorse of the library: output text (modified by tags) in @mytext
 sub _output_text {
     my ($start_y, $min_y, $outl, $pdf, $page, $text, $grfx, $restore, $para, 
-	$font_size, $markup, $marker_width, $marker_gap, $leading, @mytext)
+	$font_size, $markup, $marker_width, $marker_gap, $leading, $optpage,
+	$page_numbers, $pass_count, $max_passes, $state, @mytext)
         = @_;
     my @outline = @$outl;
+
+    # 'page' in opts, for cross references and left-right paging
+    my $pc = 1;
+    my $mp = 1;
+    my $ppn = 1;
+    my $filename = '';
+    my $fpn = '1';
+    my $LR = 'R';
+    my $bind = 0; # global item
+    if (defined $optpage) {
+	($pc, $mp, $ppn, $filename, $fpn, $LR, $bind) = @$optpage;
+    }
 
     # start_y is the lowest extent of the previous line, or the highest point
     #   of the column outline, and is where we start the next one. 
@@ -2397,6 +2628,7 @@ sub _output_text {
 	    # to points.
 	    my $tag = lc($mytext[$el]->{'tag'});
 
+	    # ================ <tag> tags ==========================
 	    if (substr($tag, 0, 1) ne '/') {
 	        # take care of 'beginning' tags. dup the top of the properties
 		# stack, update properties in the stack top element. note that
@@ -2870,6 +3102,159 @@ sub _output_text {
 		    $desired_x = $x;
 		    # HTML::TreeBuilder may have left a /_move tag. problem?
 
+		} elsif ($tag eq '_ref') {
+		    # cross reference tag   tgtid= fit=
+		    # $mytext[$el] is this tag, $el+1 is link text (update
+		    #  from target if empty or undefined), so there IS a
+		    #  child text and end tag for _ref
+		    # add 'annot' info to link text field. output only current 
+		    #  text of link, save link data for very end.
+		    my ($tgtid, $fit, $title);
+                    $tgtid = $mytext[$el]->{'tgtid'};  # required!
+		    if (!defined $tgtid) { croak "<_ref> missing tgtid=."; }
+                    $fit   = $mytext[$el]->{'fit'};  # optional
+		    $fit //= ''; # use default fit
+                    $title = $mytext[$el]->{'title'};  # optional
+		    $title //= '';
+		    $title = "[no title given]" if $title eq '';
+                    # if no title, try to get from target 
+		    # TBD override of page_numbers
+
+                    my ($tfn, $tppn, $tid);
+                    # split up tgtid into various fields
+		    if      ($tgtid =~ /##/) {
+			 # external link's file, and ppn of target
+			 ($tfn, $tppn) = split /##/, $tgtid;
+			 $tfn //= '';
+			 $tid = "##$tppn";
+		    } elsif ($tgtid =~ /#/) {
+			 # external link's file, and Named Destination
+			 ($tfn, $tppn) = split /#/, $tgtid; 
+			 $tfn //= '';
+			 $tid = "#$tppn";
+		    } else {
+			 # an id= 
+			 $tfn = ''; # internal link only
+			 $tppn = -1; # unknown at this time
+			 $tid = $tgtid;
+		    }
+
+		    # add a new array entry to xrefs, or update existing one
+		    # knowing title, fit, tid, tfn, tppn from <_ref>
+		    # sptr = pointer (ref) to this entry in xrefs
+		    # tptr = pointer (ref) to matching target in xreft
+		    my $sindex = $state->{'sindex'};
+		    my ($sptr, $tfpn, $tptr);
+		    if ($pass_count == 1) {
+			# add new entry at $sindex
+			$state->{'xrefs'}->[$sindex] = {};
+			# ptr to hash {id} and its siblings (see Builder.pm)
+		        $sptr = $state->{'xrefs'}->[$sindex]; 
+			# the following items should never change after the
+			#  first pass
+			# it's possible that this _ref is totally self-contained
+			#  and does not refer to any target id
+			$sptr->{'id'}    = $tid;
+			$sptr->{'fit'}   = $fit;
+			$sptr->{'tfn'}   = $tfn;
+			# items that CAN change between passes
+			$sptr->{'title'} = $title;
+                        $sptr->{'tx'}    = 0;
+                        $sptr->{'ty'}    = 0;
+                        $sptr->{'tfpn'}  = '';
+		    } else {
+			# entry already exists, at $sindex
+			# update anything that might change pass-to-pass
+			# set 'changed' flag only if updated AFTER this pass's
+			#  title text and other_pg have been laid down. 
+			#  if $page_numbers == 2, a change in ppn's either 
+			#  source or target is of concern TBD
+		        $sptr = $state->{'xrefs'}->[$sindex];
+			# nothing in this section to warrant changed flag
+			#  and we're about to output a fresh copy of link text
+			#  and 'other_pg' text
+		    }
+
+		    # whether pass 1 initialization or pass 2+ update
+		    # the following can change without forcing another pass
+		    #
+                    $sptr->{'tppn'} = $tppn;
+
+		    # have we found this target id already?
+		    if (defined $state->{'xreft'}{'_reft'}{$tid}) {
+			$tptr = $state->{'xreft'}{'_reft'}{$tid};
+		    } else {
+			$tptr = undef; # just to be certain
+		    }
+
+		    if (defined $tptr) {
+		        # does the title need an update from target?
+			if ($sptr->{'title'} eq '[no title given]' &&
+			    $tptr->{'title'} ne '[no title given]') {
+			    $sptr->{'title'} = $tptr->{'title'};
+			    # no need to mark as changed, as about to output 
+			    # the link text (title, other_pg)
+			   #$state->{'changed_target'}->{$tid} = 1;
+			    # update child text
+			    $mytext[$el+1]{'text'} = $sptr->{'title'};
+		        }
+
+			# other fields that may change
+                        $sptr->{'tx'} = $tptr->{'tx'};
+                        $sptr->{'ty'} = $tptr->{'ty'}; 
+                        $sptr->{'tfpn'} = $tptr->{'tfpn'}; # affects other_pg
+			# other fields that may be overridden by target
+                        $sptr->{'tppn'} = $tptr->{'tppn'} 
+			    if ($sptr->{'tppn'} == -1); # affects other_pg
+                        $sptr->{'tag'} = $tptr->{'tag'};
+		    }
+		    # TBD figure 'other_pg' text when actually output it,
+		    #      and update field and set flag if changed (pass > 1)
+		    $sptr->{'other_pg'} = $sptr->{'prev_other_pg'} = ''; # TBD
+			    # once know sppn and tppn (in same PDF) and
+			    # $page_numbers > 0. note that a _ref can override
+			    # the global page_numbers with its own (e.g., to
+			    # force = 1 'on page N' when global == 2)
+		    #
+		    # Note that Named Destinations do not get a page 
+		    #  designation output (no "on page $" etc.) regardless 
+		    #  of $page_numbers setting. TBD what about internal jumps?
+		    # may not know page of an external jump.
+
+		    # via 'annot' flag tell title text to grab rectangle corners
+		    # and stick in {'click'} area array. may be multiple such
+		    # rectangles (click areas) if text wraps. also determine
+		    # 'other_pg' string and update entry (TBD)
+		    $sptr->{'click'} = [];
+		    # TBD title that includes embedded tags to support
+		    $mytext[$el+1]->{'annot'} = $sindex;
+
+		    $state->{'sindex'} = ++$sindex;
+
+		} elsif ($tag eq '_reft') {
+		    # cross reference target tag  id=
+		    # for markdown, only target available
+		    my $id = $mytext[$el]->{'id'};  # required!
+		    if (!defined $id) { croak "<_reft> missing id=."; }
+                    my $title = $mytext[$el]->{'title'};  # optional
+		    # code handling id= and checking tag_lists from here on out
+		    # to deal with <_reft>
+
+		} elsif ($tag eq '_nameddest') {
+		    # define a Named Destination at this point
+		    # possibly a fit attribute is defined
+		    my $name = $mytext[$el]->{'name'};  # required!
+		    if (!defined $name) { croak "<_nameddest> missing name=."; }
+		    my $fit  = $mytext[$el]->{'fit'};  #optional
+		    $fit //= '';
+
+		    my $ptr = $state->{'nameddest'};
+		    $ptr->{$name} = {};
+		    $ptr->{$name}{'fit'} = $fit;
+		    $ptr->{$name}{'ppn'} = $ppn; # this and following can change
+		    $ptr->{$name}{'x'}   = $x;   # on subsequent passes
+		    $ptr->{$name}{'y'}   = $y;
+
 		} else {
 		    # unsupported or invalid tag found
 		    # keep list of those found, error message once per tag
@@ -2881,6 +3266,102 @@ sub _output_text {
 	            $tag = $mytext[$el]->{'tag'} = 'span';
 		}
 
+		# does this tag have an id attribute, and is it in one or
+		# more of the watch lists to add to references?
+                # _reft tags already checked that id= given
+		if (exists $mytext[$el]->{'id'}) {
+		    my $id = $mytext[$el]->{'id'};
+		    # might have a title, too
+                    my $title = $mytext[$el]->{'title'};  # optional (_reft)
+		    $title = '' if !defined $title; 
+		    # if no title in source or target tags, will have to
+		    # look at child text of various tags
+		     
+		    # yes, it has an id. now check against lists
+		    # this tag will produce an entry in xreft for each list 
+		    #  that it is in TBD find way to consolidate into one?
+		    my %tag_lists = %{$state->{'tag_lists'}};
+		    # will contain at least _reft list with _reft tag
+		    # goes into xreft/listname/id structure
+		    foreach my $list (keys %tag_lists) { # _reft, TOC, etc
+			my @tags = @{$tag_lists{$list}}; # tags to check
+			foreach my $xtag (@tags) {
+			    if ($tag eq $xtag) {
+				# this tag (with id=) is being used by target 
+				#  list $list (e.g., '_reft')
+				# add (or update) this tag's data into the $list
+				my $tptr;
+
+		                $tptr = $state->{'xreft'}->{$list}->{$id};
+		                if (!defined $tptr) {
+                                    $state->{'xreft'}->{$list}->{$id} = {};
+		                    $tptr = $state->{'xreft'}->{$list}->{$id};
+			            # add new entry or overwrites old one
+			            # perhaps pass > 1 see if $id already exists
+			            # these three should never change on update
+			            $tptr->{'tfn'} = $filename;
+			            $tptr->{'title'} = $title;
+			            $tptr->{'tag'} = $tag;
+				    # if title empty, look for child text
+				    # use this title if no title= on <_ref>
+				    if ($title eq '') {
+					# heading has child text, add others
+					# as useful
+					if ($tag =~ /^h\d$/ ||
+				            $tag eq '_part' || 
+					    $tag eq '_chap') {
+					    $title = _get_child_text(
+						         \@mytext, $el );
+					    # might still be ''
+				        }
+					$tptr->{'title'} = $title;
+				    }
+                                } # add a new id= to xreft, or update existing
+				# these may change from pass to pass
+		                $tptr->{'tppn'} = $ppn;
+		                $tptr->{'tfpn'} = $fpn;
+		                $tptr->{'tx'} = $x//0; # sometimes undef
+		                $tptr->{'ty'} = $y;
+				# done creating or updating an entry
+
+				# every link source using this id gets update
+				# and "changed" flag set for visible text change
+				for (my $sindex=0; 
+				     $sindex < scalar(@{$state->{'xrefs'}});
+				     $sindex++) {
+				    if ($state->{'xrefs'}->[$sindex]->{'id'} eq $id) {
+			                # yes, link source exists. update it and
+				        # set flag if need another pass
+				        my $another_pass = 0;
+					my $sptr = $state->{'xrefs'}->[$sindex];
+				        if ($sptr->{'title'} eq '[no title given]' &&
+				            $tptr->{'title'} ne '[no title given]') {
+				            $sptr->{'title'} = $tptr->{'title'};
+					    $another_pass = 1;
+				        }
+					# 'other_pg' determined elsewhere
+				        $state->{'changed_target'}{$id} = 1
+				            if $another_pass;
+
+                                        # other fields in xrefs to update
+					#  from xreft entry
+					$sptr->{'tx'} = $tptr->{'tx'};
+					$sptr->{'ty'} = $tptr->{'ty'};
+					$sptr->{'tag'} = $tptr->{'tag'};
+					$sptr->{'tfn'} = $tptr->{'tfn'}
+					  if $sptr->{'tfn'} eq '';
+					$sptr->{'tfpn'} = $tptr->{'tfpn'}
+					  if $sptr->{'tfpn'} eq '';
+					$sptr->{'tppn'} = $tptr->{'tppn'}
+					  if $sptr->{'tppn'} < 1;
+
+				    } # link source targeting this id
+				} # loop sindex through all link sources
+			    } # found a tag of interest in a list
+			} # check against list of tags
+		    } # search through target tag lists
+		} # tag with id=  see if wanted for target lists
+		
 	        if (defined $mytext[$el]->{'empty_element'}) {
 	            # empty/void tag, no end tag, pop property stack
 		    # as this tag's actions have already been taken
@@ -2893,7 +3374,7 @@ sub _output_text {
 
 		# end of handling starting tags <tag>
 
-	    } else {
+	    } else { # ================ </tags> end tags ======================
 		# take care of 'end' tags. some end tags need some special 
 		# processing if they do something that isn't just a 
 		# property change. current_prop should be up to date.
@@ -2959,8 +3440,7 @@ sub _output_text {
 
 	    # end of tag processing
 
-	} else {
-            # ===================================== text to output
+	} else { # ========================== text to output =================
             # normally text is not empty '', but sometimes such may come
 	    # through. a blank text is still valid
             if ($mytext[$el]->{'text'} eq "\n") { next; } # EOL too
@@ -3096,6 +3576,23 @@ sub _output_text {
 	    # TBD blank preserve for <code> or <pre> (CSS white-space)
 	    $phrase =~ s/\s+/ /g;
 
+	    # if 'annot' field (attribute) exists for a text, we want to define
+	    # a rectangle around it for an annotation click area (several
+	    # rectangles, even across multiple columns, are possible if the
+	    # phrase is long enough to split in the middle).
+	    # value = element number in state->xrefs array to update rect
+	    # with [ UL, LR ] values being assembled
+	    # at end (when LR done), push to state->xrefs->[elno]{click}
+	    #  (could already have one or more subarrays)
+	    my $click_ele;
+	    if (defined $mytext[$el]->{'annot'}) {
+		$click_ele = $mytext[$el]->{'annot'};
+		$click_ele = $state->{'xrefs'}->[$click_ele]{'click'};
+		# for every chunk of text the phrase gets split into, push
+		# an element on the 'click' anonymous array, consisting of
+		# the [sppn, [ULx,ULy, LRx,LRy]]
+	    }
+
 	    # a phrase may have multiple words. see if entire thing fits, and if
 	    # not, start trimming off right end (split into a new element)
     
@@ -3111,6 +3608,7 @@ sub _output_text {
 		#    fit on the full line. it must be split somewhere to fit 
 		#    the line.
 
+		my ($x_click, $y_click, $y_click_bot);
 		my $full_line = 0;
 	        # this is to force start of a new line at start_y?
 		# phrase still has content, and there may be remainder.
@@ -3157,6 +3655,9 @@ sub _output_text {
 
                     # stuff to remember if need to shift line down due to 
 		    #   vertical extents increase
+		    # TBD: may need to change LR corner of last line of an
+		    #      annotation click area if content further along line
+		    #      moves baseline down
 		    @line_extents = ();
 		    push @line_extents, $start_x; # current baseline's start
 		    push @line_extents, $x; # current baseline 
@@ -3294,6 +3795,13 @@ sub _output_text {
 		    # if rc == 2, current written line doesn't fit narrower line
 		    # if rc == 3, revised line won't fit in column! (vertically)
 		    # TBD need to check $rc once column width can vary
+		    # if annotation click area, remember x and y
+		    if (defined $click_ele) {
+		        # UL corner, best guess for y value
+		        $x_click = int($x +0.5);
+		        $y_click = int($y + 0.8*$fs +0.5);
+		        $y_click_bot = int($y_click - $leading*$fs +0.5);
+		    }
 	            $text->text($phrase);  # have already corrected start point
 		    # if adjusted x and/or y, undo it and zero out
 		    if ($x_adj || $y_adj) {
@@ -3380,6 +3888,21 @@ sub _output_text {
 		    # need to move current x to right end of text just written
 		    # TBD: revise if RTL/bidirectional
 	            $x += $w;
+
+		    # whether or not the full phrase fit, we need to create the
+		    # annotation click area and the annotation for this line
+		    if (defined $click_ele) {
+		        my $ele = [$ppn, [$x_click,$y_click, $x,$y_click_bot]];
+			# push this element 'ele' onto the list at click_ele
+			my @click = @$click_ele; # initially empty
+			push @click, $ele;
+			$click_ele = \@click;
+			$state->{'xrefs'}->[$mytext[$el]->{'annot'}]{'click'} = $click_ele;
+			# TBD when last chunk of phrase has been output, if
+			# 'other_pg' used, need to update that text element
+			# (following </_ref>) as well as set flag that this
+			# has changed (if true)
+		    }
 
 		    $full_line = 0;
 		    $need_line = 0;
@@ -3844,6 +4367,8 @@ sub _get_baseline {
 
 sub _break_text {
     my ($text, $markup, %opts) = @_;
+    my $page_numbers = 0;
+    $page_numbers = $opts{'page_numbers'} if defined $opts{'page_numbers'};
 
     my @array = ();
 
@@ -3885,12 +4410,12 @@ sub _break_text {
     } else { # should be 'html'
         if       (ref($text) eq '') {
 	    # is a single string (scalar)
-            @array = _html_hash($text, %opts);
+            @array = _html_hash($page_numbers, $text, %opts);
 	    
         } elsif (ref($text) eq 'ARRAY') {
 	    # array ref, elements should be text
 	    # consolidate into one string. 
-            @array = _html_hash(join("\n", @$text), %opts);
+            @array = _html_hash($page_numbers, join("\n", @$text), %opts);
 	}
     }
 
@@ -3949,6 +4474,8 @@ sub _none_hash {
 # convert md1 string to html, returning array of hashes
 sub _md1_hash {
     my ($text, %opts) = @_;
+    my $page_numbers = 0;
+    $page_numbers = $opts{'page_numbers'} if defined $opts{'page_numbers'};
 
     my @array;
     my ($html, $rc);
@@ -3976,7 +4503,7 @@ sub _md1_hash {
     #   by _html_hash()
 
     # blank-line separated paragraphs already wrapped in <p> </p>
-    @array = _html_hash($html, %opts);
+    @array = _html_hash($page_numbers, $html, %opts);
 
     return @array;
 } # end of _md1_hash()
@@ -3986,7 +4513,7 @@ sub _md1_hash {
 # returns array (list) of tags and text, and as a side effect, element [0] is
 # consolidated <style> tags (may be empty hash)
 sub _html_hash {
-    my ($text, %opts) = @_;
+    my ($page_numbers, $text, %opts) = @_;
 
     my $style = {};  # <style> hashref to return
     my @array;       # array of body tags and text to return
@@ -4024,6 +4551,7 @@ sub _html_hash {
 	# HTML converter appears to be installed, so use it
 	my $tree = HTML::TreeBuilder->new();
         $HTML::Tagset::isList{'_sl'} = 1; # add new list parent
+	$HTML::Tagset::emptyElement{'_reft'} = 1; # don't add closing tag
 	$tree->ignore_unknown(0);  # don't discard non-HTML recognized tags
 	$tree->no_space_compacting(1);  # preserve spaces
 	$tree->warn(1);  # warn if syntax error found
@@ -4087,7 +4615,7 @@ sub _html_hash {
      
     # HTML::TreeBuilder does some undesirable things with custom tags
     # it doesn't understand. clean them up.
-    @array = _HTB_cleanup(@array);
+    @array = _HTB_cleanup($page_numbers, $opts{'debug'}, @array);
 
     return @array;
 } # end of _html_hash()
@@ -4096,19 +4624,20 @@ sub _html_hash {
 # this is done at creation of the tag/content array, so no need to worry
 # about 'pre' input format and the like.
 sub _HTB_cleanup {
-    my @mytext = @_;
+    my ($page_numbers, $debug, @mytext) = @_;
 
     my @current_list = ('empty');
 
     # loop through all elements, looking for specific patterns
-    # start at [2], so defaults and styles skipped
-    for (my $el=2; $el < @mytext; $el++) {
+    # start at [1], so defaults and styles skipped
+    for (my $el=1; $el < @mytext; $el++) {
 	if (ref($mytext[$el]) ne 'HASH') { next; }
 	if ($mytext[$el]->{'tag'} eq '') { next; }
 
         my $tag = lc($mytext[$el]->{'tag'});
+        $mytext[$el]->{'tag'} = $tag; # lc the tag
 	if (!defined $tag) { next; }
-       #if ($tag =~ m#^/#) { next; }
+       #if ($tag =~ m#^/#) { next; } # ignore end tags?
 
         if ($tag eq 'li') {
 	    # dealing with <_marker> is a special case, driven by need to
@@ -4169,8 +4698,102 @@ sub _HTB_cleanup {
 	    pop @current_list;
 
         # already added _sl to list of allowed list parents
+
+	} elsif ($tag eq '_ref') {
+	    # should be followed by empty text and then /_ref tag,
+	    # add if either missing. fill in text content with any title=
+	    # attribute in _ref
+	    # tgtid= is mandatory
+	    if (!defined $mytext[$el]->{'tgtid'}) {
+		carp "Warning! No 'tgtid' defined for a <_ref> tag, no link.";
+		$mytext[$el]->{'tgtid'} = '';
+	    }
+
+	    my $text = $mytext[$el]->{'title'} // '[no title given]';
+	    $text =~ s/\n/ /sg; # any embedded line ends turn to spaces
+            # most likely, the /_ref has been put AFTER the following text,
+	    # resulting in el=_ref, el+1=random text, >el+1=/_ref
+	    #   >el+1 end tag will be deleted
+            if      ($mytext[$el+1]->{'tag'} eq '/_ref') {
+		# <_ref></_ref> insert text with title text
+	        splice(@mytext, ++$el, 0, {'tag'=>'', 'text'=>$text});
+		$el++;
+	    } elsif ($mytext[$el+1]->{'tag'} eq '' &&
+	             $mytext[$el+1]->{'text'} ne '') {
+		# <_ref><other text></_ref> insert text=$text and /_ref
+		# giving <_ref><title text></_ref><other text>
+		splice(@mytext, ++$el, 0, {'tag'=>'', 'text'=>$text});
+		splice(@mytext, ++$el, 0, {'tag'=>'/_ref', 'text'=>''});
+		# superfluous /_ref will be deleted
+	    } elsif ($mytext[$el+1]->{'tag'} eq '' &&
+	             $mytext[$el+1]->{'text'} eq '') {
+		# <_ref><empty text></_ref> update text with title text
+		$mytext[++$el]->{'text'} = $text;
+		# is following /_ref missing?
+		if ($mytext[++$el]->{'tag'} ne '/_ref') {
+		    splice(@mytext, $el, 0, {'tag'=>'/_ref', 'text'=>''});
+		}
+	    } else {
+		# just <_ref>. add text and end tag
+	        splice(@mytext, ++$el, 0, {'tag'=>'', 'text'=>$text});
+	        splice(@mytext, ++$el, 0, {'tag'=>'/_ref', 'text'=>''});
+	    }
+	    if ($page_numbers != 0 &&
+	        $mytext[$el]->{'tgtid'} !~ /#[^#]/) {
+	        # insert a <text> after </_ref> to hold " on page $", 
+		# " on facing page", etc. TBD page&nbsp;$
+		# do NOT insert for Named Destination (single # in tgtid)
+	        splice(@mytext, ++$el, 0, {'tag'=>'', 'text'=>" on page \$"});
+	    }
+	} elsif ($tag eq '/_ref') {
+            # TreeBuilder often puts end tag after wrong text
+	    splice(@mytext, $el--, 1);
+
+	} elsif ($tag eq '_reft') {
+	    # leave title in place for <_reft>, but delete any text and </_reft>
+	    if      ($mytext[$el+1]->{'tag'} eq '' && 
+		     $mytext[$el+2]->{'tag'} eq '/_reft') {
+		splice(@mytext, $el+1, 2);
+	    } elsif ($mytext[$el+1]->{'tag'} eq '/_reft') {
+	        splice(@mytext, $el+1, 1);
+	    }
+	} elsif ($tag eq '/_reft') {
+            # TreeBuilder often puts end tag after wrong text
+	    splice(@mytext, $el--, 1);
+
+	} elsif ($tag eq '_nameddest') {
+	    # delete any text and </_nameddest>
+	    if      ($mytext[$el+1]->{'tag'} eq '' && 
+		     $mytext[$el+2]->{'tag'} eq '/_nameddest') {
+		splice(@mytext, $el+1, 2);
+	    } elsif ($mytext[$el+1]->{'tag'} eq '/_nameddest') {
+	        splice(@mytext, $el+1, 1);
+	    }
+	    if (defined $debug && $debug == 1) {
+		# insert tags to write a blue | bar at beginning of text
+		# $el should point to _nameddest tag itself
+		splice(@mytext, $el++, 0, {'tag'=>'span', 'text'=>'',
+	               'style'=>'color: #0000FF; font-weight: bold;'});
+		splice(@mytext, $el++, 0, {'tag'=>'', 'text'=>'|'});
+		splice(@mytext, $el++, 0, {'tag'=>'/span', 'text'=>''});
+		# still pointing at _nameddest tag
+	    }
+	} elsif ($tag eq '/_nameddest') {
+            # TreeBuilder often puts end tag after wrong text
+	    splice(@mytext, $el--, 1);
+
         }
 
+	# if a tag has id=, assume it's a link target
+	# insert tags to write a red | bar at beginning of link text
+	# $el should point to tag itself
+	if (defined $mytext[$el]->{'id'} && defined $debug && $debug == 1) {
+	    splice(@mytext, ++$el, 0, {'tag'=>'span', 'text'=>'',
+		   'style'=>'color: #FF0000; font-weight: bold;'});
+	    splice(@mytext, ++$el, 0, {'tag'=>'', 'text'=>'|'});
+	    splice(@mytext, ++$el, 0, {'tag'=>'/span', 'text'=>''});
+	    # still pointing at original tag
+	}
 	# 'next' to here
     } # for loop through all tags
 
@@ -4580,7 +5203,6 @@ sub _revise_baseline {
 	$o_desc_leading, $text, $line_start_offset, 
 	$grfx, $line_start_offsetg, $start_y, $min_y,
 	$outline, $margin_left, 
-       #$margin_left_nest, 
 	$margin_right, $asc, $desc, $desc_leading, $text_w) = @_;
 
     my $rc = 0; # everything OK so far
@@ -4652,7 +5274,9 @@ sub _revise_baseline {
 	    } else { # should have room to write new text
 		$rc = 0;
 	    
-		# revise (move in x,y) any existing text in this line (Tm cmd)
+		# revise (move in x,y) any existing text in this line (Tm cmd),
+		# INCLUDING this text chunk's Tm if still in Tpending buffer.
+		$text->_Tpending();
                 my $i = $line_start_offset;
 		my $delta_x = $start_x - $o_start_x;
 		my $delta_y = $y - $o_y;
@@ -4677,8 +5301,8 @@ sub _revise_baseline {
                    # no need to change line_start_offset, but $i has to be 
 		   # adjusted to account for possible change in resulting 
 		   # position of Tm
-		   $i += length("$old_x old_$y") - ($i - $j);
-                }  # end while(1) loop
+		   $i += length("$old_x $old_y") - ($i - $j);
+                }  # end while(1) loop adjusting Tm's on this line
 
 		# AFTER the Tm statement may come one or more strokes for
 		# underline, strike-through, and/or overline
@@ -4714,7 +5338,7 @@ sub _revise_baseline {
 		   # adjusted to account for possible change in resulting 
 		   # position of lS
 		   $i += length(" $old_x1 $old_y1 m $old_x2 $old_y2") - ($i - $j);
-                } # end while(1) loop
+                } # end while(1) loop adjusting line stroke positions
 	    }
         }
     }
@@ -4733,4 +5357,395 @@ sub _pause {
     return;
 }
 
+=head4 init_state
+
+    %state = PDF::Builder->init_state(%lists)
+
+This creates the state structure (hash) to be passed to C<column()> calls, and
+it saves information from invocation to invocation. It must be initialized
+I<before> the first pass of the loop which invokes one or more C<column()> 
+formatting calls at each pass (for a different part of the document).
+
+It is defined in PDF::Builder (Builder.pm) as L<PDF::Builder::init_state>, 
+rather than here in PDF::Builder::Content::Column, because C<$text> does not 
+yet exist when it needs to be called.
+
+=cut
+
+=head4 pass_start_state
+
+    $rc = $pdt->pass_start_state($pass_count, $max_passes, %state)
+
+This does whatever is necessary at the I<start> of a pass (number $pass_number).
+Currently, this is resetting the 'changed_target' hash list.
+
+It is defined in PDF::Builder (Builder.pm) as 
+L<PDF::Builder::pass_start_state>, rather than here in 
+PDF::Builder::Content::Column, because C<$text> does not yet exist when it 
+needs to be called.
+
+=cut
+
+=head4 pass_end_state
+
+    $rc = $text->pass_end_state($pass_count, $max_passes, $state)
+
+This examines the state structure (hash), resolves any content changes that
+need to be made, and builds a list of all refs (by target id C<tgtid>) which
+are still changing at this pass. If any have changed, a non-zero return code
+(number of cases) is returned, but if everything has settled down, the return
+code is 0. 
+
+=over
+
+=item $pass_count
+
+What pass number we are on. Start at 1, and must be no greater than 
+C<max_passes>.
+
+=item $max_passes
+
+The pass number of the last permitted pass, if reached. We may exit before
+this if things settle down quickly enough. If 
+
+    1. page numbers are not output in link text (C<page_numbers == 0>) _and_
+    2. C<title=> is given in all '\_ref' tags, _or_ all \_ref's without title 
+       attributes are backwards references (all forward \_ref's have a title)
+
+you may often be able to get away with a single pass (C<max_passes == 1>).
+You still may be informed that not all cross references have settled.
+
+=item $pdf
+
+The PDF object.
+
+=item $state
+
+Hashref to state structure, which includes, among other things, lists of
+link sources (_ref tags) and link targets (_reft and other listed tags.
+
+=item %opts
+
+Options. Currently only 'debug'=>1 to draw border around link text.
+
+=back
+
+If all references include their own title string and do B<not> show a page 
+(only the title string as the annotation link text), a document should take 
+only one pass. Often two passes are enough to resolve even forward references
+which need to pick up text from later in the document,
+but sometimes (especially if special formatting of page numbers is involved),
+a target may move back and forth between two pages and not settle down. In
+such cases, you may need to simplify or rearrange the text, such as moving a
+target back from the end of a page, or changing from specialty formats (such
+as "on following page" to a fixed "on page N".
+
+B<Fields in %state structure:>
+
+    settings       = hold settings between column() calls
+      TBD
+
+    xrefs          = source of link (<_ref>) info needed
+      [  ]           = array of each link source
+        id             = target's id, tag that defines a target
+	fit            = any fit information provided
+        tfn            = target filename (FINAL position and name) used for 
+                         external links
+        tppn           = physical page number (integer > 0)
+	other_pg       = text for "other page" if page_numbers > 0
+	 prev_other_pg  = previous value (to detect change)
+        tfpn           = formatted page number (string, may be '')
+        tx,ty          = coordinates of target on page (used for fit)
+        title          = text for link. if not defined in <_ref>, use one
+                         in <_reft> (if defined), else "natural text" such
+                         as heading <hX> child text
+	 prev_title     = previous value (to detect change)
+        tag            = tag that produced this target (useful for formatting,
+                         e.g., indenting TOC entries based on hX level)
+	click          = [ ] of one or more click areas, each element is
+	                 [sppn, [x,y, x,y]]
+
+    xreft          = tag that created a target for a link (<_reft> et al.)
+      _reft          = entries for cross reference targets (_reft list)
+        id
+	  tfn        = filepath for external links
+	  tppn       = target physical page number
+	  tfpn       = target formatted page number
+	  tx,ty      = coordinates of target on page
+	  title      = title, defaulting to "natural text", to update source
+	  tag        = tag type that produced this entry
+      $another_list  = other tag list name list of targets (e.g., TOC)
+        id...
+      etc.
+
+    changed_target = hash of tgtids (in xrefs id) that changed AFTER link text
+                     and page text output, requiring another pass
+
+    tag_lists      = anon list of tags (with id) to put in various lists.
+                     see 'init_state()' for building tag lists
+      _reft          = [ ] predefined for cross references, may add more (such
+                       as hX heading tags)
+      TOC            = [ ] NOT predefined, add if desired
+      Index          = [ ] NOT predefined, add if desired, etc.
+
+   nameddest = hash of named destinations to be defined
+      $name  = name of the destination
+        fit  = fit information (location, parms)
+	ppn  = physical page number in this PDF
+        x,y  = x and y coordinates on page  
+
+Note that the link text ('title') and any page information ('on page X') need
+to be output at each pass, to detemine where everything is, while other
+information is stored until the last pass, to actually generate the annotation
+links. The "last pass" will be either when it is found that all link information
+has "settled down", or the C<max_passes> limit is reached.
+
+=cut
+
+sub pass_end_state {
+    my ($self, $pass_count, $max_passes, $pdf, $state, %opts) = @_;
+    # $state = ref to %state structure
+
+    my $rc = scalar(keys %{$state->{'changed_target'}}); 
+        # length of changed_target key list
+
+    # are we either clear to finish, or at max number of passes? if so,
+    # output all annotations. each page should have its complete text already,
+    # as well as a record of the annotations in %state
+
+    if (!$rc || $pass_count == $max_passes) {
+        # go through list of annotations to create at '_ref' tag links
+	my $cur_src_page = 0; # minimize openings of source page. min valid 1
+	my $cur_tgt_page = 0; # minimize openings of target page. min valid 1
+	my ($src_page, $tgt_page); # opened page objects
+	my $link_border;
+	if (defined $opts{'debug'} && $opts{'debug'} == 1) {
+	    # debug: draw border around link text
+	    $link_border = [ 0, 0, 1 ]; 
+        } else {
+            # production: no border around link text
+	    $link_border = [ 0, 0, 0 ];
+	}
+
+	for (my $source=0; $source<@{$state->{'xrefs'}}; $source++) {
+	    my $sptr = $state->{'xrefs'}->[$source];
+	    # source filename of target link (final name and position!)
+	    my $tfn  = $sptr->{'tfn'};
+	    # target's physical page number
+	    my $tppn = $sptr->{'tppn'};
+	    # target's formatted page number is not of interest here (link
+	    #  text already output, if includes fpn)
+	   #my $tfpn = $sptr->{'tfpn'};
+	    # target's tag that produced the entry is not of interest here
+	   #my $ttag = $sptr->{'tag'};
+	    # title is not of interest here (link text already output)
+	   #my $title = $sptr->{'title'};
+	    # other_pg is not of interest here (link text already output)
+	   #my $other_pg = $sptr->{'other_pg'};
+	    # target's x and y coordinates (for fit entry)
+	    my $tx = $sptr->{'tx'};
+	    my $ty = $sptr->{'ty'};
+            # target id/ND/etc. information and fit
+	    my $tid = $sptr->{'id'};
+	    my $fit = $sptr->{'fit'};
+		# if fit includes two % fields, replace by tx and ty
+		# (for xyz fit: 'xyz,%x,%y,null')
+		my $val = max(int($tx-100),0);
+		$fit =~ s/%x/$val/;
+		$val = int($ty+100);  # TBD min with page height
+		$fit =~ s/%y/$val/;
+	        # replace any 'undef' by 'null' in $fit
+	        $fit =~ s/undef/null/g;
+
+	    # list of pairs of source physical page number and annot rectangle
+	    #  coordinates, to place link at. usually one per link, but
+	    #  sometimes 2 or more due to wrapping
+	    my @links = @{ $sptr->{'click'} };
+	    for (my $click=0; 
+		    $click<@links; # most often, 1
+		    $click++) {
+	        # usually only one click area to place an annotation in, but 
+		#  could spread over two or more lines, and even into the
+		#  next column (or page). annotation click area to be placed
+		#  in page object $src_page at coordinates $rect
+		my @next_click_area = @{ $links[$click] };
+		my $sppn = $next_click_area[0];
+                if ($sppn != $cur_src_page) {
+                    $src_page = $pdf->openpage($sppn);
+		    $cur_src_page = $sppn;
+		}
+		# click area corners [ULx,y, LRx,y]
+		my $rect = $next_click_area[1];  # leave as pointer
+		my $annot = $src_page->annotation();
+
+		# three flavors of 'tid':
+                if      ($tid =~ /^##/) {
+	            # physical page number target, may be internal or external
+		    # reuse $tppn since explicitly giving
+		    $tppn = substr($tid, 2);
+                    # have target file (if ext) and physical page number
+		    $fit = 'fit' if $fit eq ''; # default show whole page
+		    if ($tfn eq '') {
+		        # internal link to page object at $tx,$ty fit
+                        if ($tppn != $cur_tgt_page) {
+                            $tgt_page = $pdf->openpage($tppn);
+			    $cur_tgt_page = $tppn;
+		        }
+			$annot->goto($tgt_page, 
+				     (split /,/, $fit), 
+				     'rect'=>$rect, 'border'=>$link_border);
+		    } else {
+		        # external link to physical page
+			$annot->pdf($tfn, $tppn,
+				    (split /,/, $fit), 
+				    'rect'=>$rect, 'border'=>$link_border);
+		    }
+
+	        } elsif ($tid =~ /^#/) {
+		    # Named Destination given (ignore 'fit' if given)
+		    # external if filepath not ''
+		    my $nd = substr($tid, 1);
+		    if ($tfn eq '') {
+		        # internal link to named destination
+			$annot->goto($nd,
+				     'rect'=>$rect, 'border'=>$link_border);
+		    } else {
+		        # external link to named destination
+			$annot->pdf($tfn, $nd,
+				    'rect'=>$rect, 'border'=>$link_border);
+		    }
+
+	        } else {
+		    # id defined elsewhere, at $tgt_page from target
+		    if ($fit eq '') {
+		        # default fit is xyz x-100,y+100,undef
+		        # x,y from location of target on page
+		        $fit = "xyz,".max(int($tx)-100,0).",".
+		                      (int($ty)+100).",null";
+		    }
+		    # internal link to page object at $tx,$ty fit
+                    if ($tppn != $cur_tgt_page) {
+                        $tgt_page = $pdf->openpage($tppn);
+		        $cur_tgt_page = $tppn;
+		    }
+		    $annot->goto($tgt_page, 
+			         (split /,/, $fit), 
+			         'rect'=>$rect, 'border'=>$link_border);
+                }
+	    } # have gone through one or more click areas to create for this
+	      #  one link
+	} # done looping through all the requested annotations in xrefs
+	    
+        # output any named destinations defined
+	my $ptr = $state->{'nameddest'};
+	foreach my $name (keys %$ptr) {
+	    my $fit = $ptr->{$name}{'fit'};
+	    my $ppn = $ptr->{$name}{'ppn'};
+	    my $x   = $ptr->{$name}{'x'};
+	    my $y   = $ptr->{$name}{'y'};
+
+	    # if no fit given, set to xyz,x-100,y+100,undef
+	    if ($fit eq '') {
+		$fit = "xyz,".max(int($x)-100,0).",".
+		              (int($y)+100).",null";
+	    }
+	    # if $x and $y in fit, replace with integer values
+	    my $val = max(int($x)-100,0);
+	    $fit =~ s/\$x/$val/;
+	    $val = int($y)+100;
+	    $fit =~ s/\$y/$val/;
+            my @fits = ();
+	    @fits = split /,/, $fit;
+	    for (my $i=0; $i<@fits; $i++) {
+		# if the user specified a fit with 'undef' (string) parms
+		if ($fits[$i] eq 'undef') { $fits[$i] = 'null'; }
+	    }
+            my $dest = PDF::Builder::NamedDestination->new($pdf);
+	    my $page = $pdf->openpage($ppn);
+	    $dest->goto($page, @fits);
+	    $pdf->named_destination('Dests', $name, $dest);
+	}
+
+    } # end of outputting annotations and named destinations
+
+    return $rc;
+}
+
+=head4 unstable_state
+
+    @list = $text->unstable_state(\%state)
+
+This returns a list (array) of string target ids (tgtid) which appear to still
+be changing at the end of the loop, i.e., have not settled down.
+
+If this method is called when C<check_state()> returned a 0, the list will
+be empty. It may also be called at each pass, for diagnostic purposes.
+
+=cut
+
+# list target ids in state holder that are still changing
+sub unstable_state {
+    my ($self, $state) = @_;
+    # $state = ref to %state structure
+
+    my @list = sort(keys %{$state->{'changed_target'}});
+    # would prefer target ids to be returned in order encountered, but
+    # since no idea what order hash keys will be in, might as well sort
+    # in alphabetical order
+    return @list;  # hopefully empty at some point
+}
+
+# mytext array at element $el, extract full child text of this element
+# may be sub tags and their own child text, all to be returned
+#
+# actually, all tags have already been removed and the overall text will
+# now be a series of text and tags and their children (arbitrarily deep)
+# e.g. <h2 id=target>This is <i>italic</i> text</h2> would be
+#   tag=>'h2'
+#     id=>'target'
+#   tag=>''
+#     text=>'This is '
+#   tag=>'i'
+#   tag=>''
+#     text=>'italic'
+#   tag=>'/i'
+#   tag=>''
+#     text=>' text'
+#   tag=>'/h2'
+# desired output: 'This is italic text'
+#
+# the big problem is to know what element to stop at (the end tag to
+# $el element, not necessarily the next /tag, in case there's another 'tag'
+# embedded within the child text)
+# TBD: consider also copying tags (markup) within child text, to appear 
+#       formatted in title (per _ref, and global, flag to flatten)
+sub _get_child_text {
+    my ($mytext, $el) = @_;
+
+    my $output = '';
+    my @tags = ($mytext->[$el]->{'tag'});
+    for (my $elx=$el+1; ; $elx++) {
+	# found end of this tag we seek child text from?
+	if ($mytext->[$elx]->{'tag'} eq "/$tags[0]" && 
+	    scalar(@tags)==1) { last; }
+        # found some text in it? add to output
+        if ($mytext->[$elx]->{'tag'} eq '') {
+	    $output .= $mytext->[$elx]->{'text'};
+	    next;
+	}
+	# an end tag? pop stack (assume properly nested!)
+	if ($mytext->[$elx]->{'tag'} =~ /^\//) {
+	    pop @tags;
+	    next;
+	}
+        # must be another tag. push it on tag stack
+	push @tags, $mytext->[$elx]->{'tag'};
+    }
+
+    # also convert line ends to blanks
+    $output =~ s/\s+/ /sg;
+    return $output;
+} # end _get_child_text()
+
+# --------------------- end of column() section -----------------------------
 1;

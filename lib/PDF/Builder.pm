@@ -5286,6 +5286,187 @@ sub named_destination {
     return $obj;
 } # end of named_destination()
 
+=head2 init_state
+
+    %state = PDF::Builder->init_state(%lists)
+
+    %state = PDF::Builder->init_state()
+
+This method is used in L<PDF::Builder::Content::Text> to create and initialize 
+the hash structure that permits transfer of data between
+C<column()> calls, as well as accumulating link information to build
+intra- and inter-PDF file jumps for a variety of uses.
+
+B<%lists> is optional, and allows the user to define tags (which have an id= )
+lists for various purposes. These are anonymous lists. Element '_reft' is 
+predefined for cross reference targets, and already includes the <_reft> tag 
+as '_reft'. B<Do not add '_reft' to the '_reft' list!> The user may wish to add 
+other tags (which have id= ) to be used, and define other lists to be 
+accumulated. For example, 
+
+    {'_reft' => [ 'h1', 'h2', 'h3', 'h4' ],
+     'TOC'   => [ '_part', '_chap', 'h1', 'h2', 'h3' ], }
+
+adds the top 4 heading levels to cross references ('_reft' is already there), 
+and creates a 5-level list of tags to build a Table of Contents. Additional
+lists might include for an Index, glossary, List of Tables, List of Figures
+(Illustrations, Photos), List of Equations, etc.
+
+If no C<%lists> parameter is given, you will be limited to cross references
+from <_reft> only, and no entries specifically for TOC etc. will be defined.
+Remember, only tags with C<id=>s in your markup will be used as link targets.
+
+If you are using **markdown** for your source, you may not be able to define
+C<id=>s for your "tags" (HTML tags produced after translation from markdown), 
+and thus will be limited to inserting C<E<lt>_refE<gt>>s for link placements 
+and C<E<lt>_reftE<gt>>s as link targets, which should be passed through to 
+HTML. For applications such as a TOC, you I<may> be able to postprocess the 
+_reft list to separate out (based on id given) this large group of target ids 
+into groups for specific purposes, such as a TOC.
+
+It is defined here rather than in the 'text' object, as the 'text' object
+normally will not yet have been defined.
+
+=cut
+
+# initialize state holder hash
+sub init_state {
+    my ($self, $lists) = @_;
+
+    my %state = ();
+    $state{'settings'} = {}; # hold settings between column() calls, TBD
+    # remember: multiple xrefs may point to the same target xreft, so no
+    #             way to automatically point back to link source in xrefs!
+    #           self-contained links (Named Destination, physical page) will
+    #             have a '#' or '##' target id and not match an xreft list entry
+    #           self-contained links have xrefs entry with or without a 
+    #             filepath (for external or internal links, respectively)
+    $state{'sindex'} = 0;  # current size/next write of xrefs array
+    $state{'xrefs'} = [];  # source (<_ref>) link data
+      # each array element is an anonymous hash containing:
+      #
+      # {'id'} target's id ('#ND' or '##ppn if self-contained link)
+      # {'tfn'} filepath (final position and name) for external links 
+      #     give for all links, even if internal, to permit external linking
+      # {'tppn'} physical page number of target
+      # {'fit'} fit information ('' if not given)
+      # {'tfpn'} formatted page number of target
+      # {'page_numbers'} TBD in case want to override global default
+      # {'other_pg'} # other page text ("on page N", "on facing page", etc.) 
+      #              if $page_numbers > 0 (TBD)
+      #   {'prev_other_pg'}* see if 'other_pg' changed
+      # {'tx'} and {'ty'} location on page of target
+      # {'title'} title= or natural text for link
+      #     if none found yet, '[no title text]' is used
+      #     for Index, user-defined term
+      # {'tag'} # tag (type) that produced this target 
+      #     useful for formatting TOC, etc
+      # {'click'} [] of click area(s) for this _ref, each [sppn, [x,y, x,y]]
+      #
+      # * = for discovering changes to visible text, requiring another pass
+    $state{'xreft'} = ();  # target (<_reft> et al.) link data
+      #
+      # {$listname}  e.g., '_reft', 'TOC', etc.
+      #   {'id'} target id=
+      #     {'tfn'} filepath (final position and name) for external links 
+      #         give for all links, even if internal, to permit external linking
+      #     {'tppn'}* physical page number of target
+      #     {'tfpn'}* formatted page number of target
+      #         used if $page_number > 0 (TBD)
+      #     {'tx'}* and {'ty'}* location on page of target
+      #     {'title'} title= or natural text for link
+      #         if none found yet, '[no title text]' is used
+      #         copied to xrefs entry if it does not have its own title
+      #     {'tag'} tag (type) that produced this entry
+      #        useful for formatting TOC, etc.
+      #
+      # * liable to change as text shifts around. copy to xrefs. if visible
+      #   change (change to title and/or formatted page number) -- will need
+      #   another pass (see 'changed_target')
+    $state{'changed_target'} = {};  # list of tgtids whose data changed
+      #   enough (AFTER the last text output by xrefs) to change the printed 
+      #   content and thus require another pass
+    $state{'tag_lists'} = {};  # user-defined lists of tags, e.g., TOC for
+      # {$list_name} = [ tag1, tag2, ... ]
+      #   to define what tags (with ids) get listed as targets. 
+      #   _reft is predefined with '_reft' for use as <_ref> tgtids.
+      #   add TOC for table of contents, Index for index, LoT for List of 
+      #   Tables, etc.
+    $state{'nameddest'} = {}; # <_nameddest> defs save up for final output
+      #  these are ND's defined in THIS document, NOT targets in links
+      # {'name'}  name of Named Destination
+      #   {'ppn'}  physical page number
+      #   {'x'}    x location in page
+      #   {'y'}    y location in page
+      #   {'fit'}  fit (location, parms) information
+
+    # predefined (started) lists
+    $state{'tag_lists'}{'_reft'} = [ '_reft' ];
+
+    # extend _reft and add additional tags lists per user input
+    foreach my $listname (keys %{$lists}) {
+	# add the anonymous list of tag names to an existing list ($listname
+	# element) by this key, or create if none already exists.
+	# a given tag may appear in multiple lists
+	my @list;  # one user-given tag list
+	if (exists $state{'tag_lists'}{$listname}) {
+	    @list = @{ $state{'tag_lists'}{$listname} };
+	    push @list, @{ $lists->{$listname} };
+	} else {
+	    # create new list
+	    $state{'tag_lists'}{$listname} = []; # empty, so far
+	    @list = @{ $lists->{$listname} };
+	}
+	# cull any duplicates from the list, such as user misunderstanding and
+	# explicitly specifying '_reft' in the _reft tag list
+	for (my $ti=0; $ti<scalar(@list)-1; $ti++) {
+	    for (my $tj=$ti+1; $tj<@list; $tj++) {
+		if ($list[$ti] eq $list[$tj]) {
+		    # duplicate found, delete second one
+		    splice(@list, $tj--, 1);
+		}
+	    }
+	}
+	# fill or replace existing entry
+	$state{'tag_lists'}{$listname} = \@list;
+
+        # create xreft target list heads
+        $state{'xreft'}->{$listname} = {}; # always will have _reft list
+    }
+
+    return %state;
+}
+
+=head2 pass_start_state
+
+    $rc = $pdf->pass_start_state($pass_no, $max_passes, \%state)
+
+This does whatever is necessary at the I<start> of a pass (number C<pass_no>).
+Currently, this is resetting the 'changed_target' hash list.
+It is defined here rather than in the 'text' object, as the 'text' object
+may not yet have been defined.
+
+=cut
+
+sub pass_start_state {
+    my ($self, $pass_no, $max_passes, $state) = @_;
+    # $state = ref to %state structure
+
+    # TBD this may disappear, if clear changed_target flag upon text output
+    if ($pass_no > 1) {
+        $state->{'changed_target'} = {};  # clear all
+
+	# changed visible text (fpn), reset "previous" version
+        for (my $sindex=0; $sindex<scalar(@{$state->{'xrefs'}}); $sindex++) {
+	    $state->{'prev_other_pg'} = $state->{'other_pg'}; # not always used
+	}
+    }
+    $state->{'sindex'} = 0; # position to write on first pass, update > 1
+
+
+    return;
+}
+
 # ==================================================
 # input: level of checking, PDF as a string
 #   level: 0 just return with any version override

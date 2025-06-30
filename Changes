@@ -1,18 +1,19 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-06-08  UNRELEASED
+3.028     2025-06-29  UNRELEASED
 * = work in progress
 
   ==== New features
 
 *   lib/PDF/Builder.pm, lib/PDF/Builder/Content/Text.pm, 
-      lib/PDF/Builder/Docs.pm, MANIFEST, examples/column_xrefs.pl (new), 
-      examples/examples.output, examples/README, tools/3_examples.pl, 
+      lib/PDF/Builder/Docs.pm, MANIFEST, examples/Column_xrefs.pl (new), 
+      examples/README, examples/examples.output, tools/3_examples.pl, 
       INFO/SPONSORS
      Add cross references to column() to add internal (within a document) and 
       external links to another document, both to a specific target point (by
       id) or a physical page number or a named destination.
       <_ref tgtid= title= fit= >, <_reft id= title= >, <_nameddest name= >
+      Sponsored by Amtivo Group.
 
       This is an improvement over the existing <a href= > method, because it
       can also handle external PDF files and Named Destinations, and can 
@@ -23,6 +24,16 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 *   lib/PDF/Builder/Resource/CIDFont.pm
      Update POD to try to document many utility routines for TTFs.
 
+    lib/PDF/Builder/Content.pm, lib/PDF/Builder/Content/Text.pm,
+      examples/ContentText.pl
+      The section()/paragraphs() method is updated to permit a negative 
+      'pvgap' value. The |pvgap| value is still used to add additional vertical 
+      space between paragraphs, but if negative, no space is added after the 
+      last paragraph in the section(). The ContentText example is updated.
+
+    examples/Content.pl, examples/ContentText.pl
+     Update to change old-style -name options to 'name'.
+
     META.json, META.yml, devtools/PDFBuild.pl
      Add "provides" section to build description.
 
@@ -32,18 +43,19 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       maintainers have been asked to provide a standardized guide for 
       reporting suspected security-related problems.
 
-    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm
+    lib/PDF/Builder.pm, lib/PDF/Builder/Resource/CIDFont/TrueType/FontFile.pm,
+      lib/PDF/Builder/FontManager.pm
      Per PDF::API2 PR#92, contributed by Johan Vromans, add the ability to 
       pass in an already-existing TTF/OTF font object (Font::TTF::Font) to 
       ttfont() and font(). This is useful if you already have such an object, 
       such as already read-in as an embedded font or built on-the-fly, rather 
       than having to write out a TTF font file and read it back in via ttfont().
       It is also expected to prove useful for future TTC (TrueType Collection) 
-      support. FUTURE: ability to register such a font object in FontManager
-      (object as a "file name" may work OK, not yet tested).
+      support. The ability to register such a font object in FontManager
+      (object as a "file name") has been added.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/FontManager.pm, 
-      lib/PDF/Builder/Content/Text.pm
+      lib/PDF/Builder/Content/Text.pm, examples/Column-Column_lists.pl
      Fix inconsistency in no longer supporting the use of a preloaded font
       before the column() call being used as the current body font. You may
        * load a font, either by Builder primitives or FontManager, and use that
@@ -51,8 +63,8 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
          default (Times-Roman)
       Specify several ways of overriding either the specified font or the
       FontManager default current font, in the column() call:
-       * option 'font_info'=>'-fm-' says to apply the FontManager current 
-         (default) font
+       * option 'font_info'=>'-fm-' says to apply the FontManager default 
+         (Times Roman) font
        * option 'font_info'=>'face:style:weight' says to load as the current 
          font a 'face' KNOWN TO FontManager, with optional specification of 
          the style and weight (default both normal)
@@ -107,7 +119,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
        Aside: the data structure in a TTF file is 'noembed', so presumably the 
        ttfont() option was originally named 'noembed' too (default 0/false), 
        but recently changed to 'embed' (default 1/true) as being more 
-       straightforward. 
+       straightforward for coders. 
       'noembed' is still valid, although it is ignored if 'embed' is also given.
 *     Will have to think about 'subset' as option, and deprecate 'nosubset'?
        And, if 'subset'/'nosubset' given, force 'embed'=1.

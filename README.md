@@ -1,4 +1,4 @@
-# PDF::Builder release 3.027
+# PDF::Builder release 3.028
 
 A Perl library to create and modify PDF (Portable Document Format) files
 
@@ -284,6 +284,13 @@ Letter top: 3mm = .125" = 9pt
 Letter right:  9mm = .375" = 27pt (Letter wider than A4)
 A4 right:      3mm = .125" = 9pt
 ```
+If not using the _Universal_ size, you can choose _Letter_ size, with an
+extra-wide right margin of at least 27pt, or _A4_ size media with an extra
+deep top margin of at least 60pt. In both cases, allow a minimum of 9pt for
+left and bottom margins, for paper-handling purposes. This should give you
+results printable on either US Letter or A4 media, anywhere in the world,
+without accidentally losing content.
+
 Please see the discussion on `mediabox()` and other "box" calls, about how
 much of a page can actually be _printed_ on, allowing for pinch rollers and
 other paper transport mechanisms. The above suggested margins assume, in
