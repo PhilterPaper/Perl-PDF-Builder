@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
 
 use Carp;
 use POSIX qw(floor);
@@ -610,7 +610,7 @@ boundaries if called without arguments.
 This is an alternate method provided for compatibility with PDF::API2.
 
     # Set
-    $page->boundaries(
+    %boundaries = $page->boundaries(
         # 13x19 inch physical sheet size
         'media' => '13x19',
         # sheet content is 11x17 with 0.25" bleed
@@ -619,17 +619,19 @@ This is an alternate method provided for compatibility with PDF::API2.
         'trim'  => 0.25 * 72,
     );
 
+The C<%boundaries> hash contains one or more page boundary keys (see Page
+Boundaries) to set or replace, each with a corresponding size (see Page Sizes). 
+The resulting boundaries hash will be returned.
+
     # Get
     %boundaries = $page->boundaries();
     ($x1,$y1, $x2,$y2) = $page->boundaries('trim');
 
-The C<%boundaries> hash contains one or more page boundary keys (see Page
-Boundaries) to set or replace, each with a corresponding size (see Page Sizes). 
-
 If called without arguments, the returned hashref will contain (Get) all five 
 boundaries. If called with one string argument, it returns the coordinates for 
-the specified page boundary. If more than one boundary type is given, only the 
-first is processed, and a warning is given that the remainder are ignored.
+the specified page (media, crop, bleed, trim, or art) boundary. If more than 
+one boundary type is given, only the first is processed, and a warning is 
+given that the remainder are ignored.
 
 =back
 
@@ -698,6 +700,8 @@ human-friendly. The following formats are available:
 Aliases for the most common paper sizes are built in (case-insensitive).
 US: Letter, Legal, Ledger, Tabloid (and others)
 Metric: 4A0, 2A0, A0 - A6, 4B0, 2B0, and B0 - B6 (and others)
+
+See L<PDF::Builder::Resource::PaperSizes> for the full list.
 
 =item a "WxH" string in inches
 
