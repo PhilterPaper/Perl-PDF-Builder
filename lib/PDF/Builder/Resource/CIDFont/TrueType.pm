@@ -233,7 +233,7 @@ sub fontobj {
 
 =over
 
-Returns unscaled glyph width, given the glyph ID (CID).
+Returns unscaled glyph width, given its glyph ID (CID).
 
 =back
 

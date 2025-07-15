@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-07-14  UNRELEASED
+3.028     2025-07-15  UNRELEASED
 * = work in progress
 
   ==== New features
@@ -21,8 +21,10 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       author to manually enter this information into the "href" field) using
       multiple passes over the text source.
 
-*   lib/PDF/Builder/Resource/CIDFont.pm
-     Update POD to try to document many utility routines for TTFs.
+    lib/PDF/Builder/Resource/CIDFont.pm, 
+      lib/PDF/Builder/Resource/CIDFont/TrueType-CJKFont.pm
+     Make a start at updating POD to try to document many font-related
+      utility routines, especially for TTFs.
 
     lib/PDF/Builder/Content.pm, lib/PDF/Builder/Content/Text.pm,
       examples/ContentText.pl
@@ -126,20 +128,11 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
        but recently changed to 'embed' (default 1/true) as being more 
        straightforward for coders. 
       'noembed' is still valid, although it is ignored if 'embed' is also given.
-*     Will have to think about 'subset' as option, and deprecate 'nosubset'?
-       And, if 'subset'/'nosubset' given, force 'embed'=1.
-*    Need to test if this fixes original #222 complaint (about subsetting).
-      /Windows/Fonts/Times.ttf: 
-       'noemb' noembed=>1/embed=>0 seems to be larger than it should be 
-         (includes 28k CMap stream... unnecessary? is full size too -- at the
-         least, should be able to reduce to subset size),
-       'defaults' (embed=1, subset=1) is quite a bit larger than noembed (even 
-         though only one character was written), both font and full size CMap,
-       'nosubset' (full font) looks reasonably sized. 
-      Desktop/font-related/FreeSerif.ttf: similar size and CMap behavior
-      /Windows/Fonts/NotoSansJP-Regular.otf: noembed quite large, nosub 
-       didn't seem to work at all (defaults same size as nosub, CMap entry
-       same size but different content!)
+      Note that #222 is not fully resolved. Although the size of 'noembed' <
+       size of 'subset' (default) < size of 'nosubset' (full font embed), it
+       appears that there is still some extra font-related material (such as
+       a full CMap?) in the noembed and subset usages. This still needs to be
+       looked at.
 
     lib/PDF/Builder/Resource/Font/CoreFont/symbol.pm
      While thinking about an implementation of #56 (fallback glyphs), I took

@@ -3194,7 +3194,9 @@ sub fillcolor {
 	    } else {
                 $self->add($string);
 	    }
-    }
+        }
+
+	return $self;
     } else {
 
         return @{$self->{' fillcolor'}};
