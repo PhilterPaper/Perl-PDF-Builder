@@ -5264,11 +5264,11 @@ sub _revise_baseline {
 	    # we don't know the nature of the new material attempting to add,
 	    #   so can't resolve insufficient space issues here
 	    # $x should already account for margin_left
-	    if      ($start_x + $x > $endx) {
+ 	    if      ($x > $endx) {
 	        # if current (already written) line can't fit (due to much 
 		#     shorter line), rc = 2
                 $rc = 2;
-	    } elsif ($start_x + $x + $text_w > $endx) {
+	    } elsif ($x + $text_w > $endx) {
 	        # if adding new text will overflow line, rc = 1
 		$rc = 1;
 	    } else { # should have room to write new text

@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-07-15  UNRELEASED
+3.028     2025-07-16  UNRELEASED
 * = work in progress
 
   ==== New features
@@ -108,6 +108,12 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
      Per change in PDF::API2, add to description of endpath/end method.
 
   ==== Bug fixes
+
+
+    lib/PDF/Builder/Content/Text.pm
+     When revising the baseline due to taller text, there was a miscalculation
+      of the length of the line, resulting in false reports of the line being
+      too long, and the baseline revision therefore not being performed.
 
     lib/PDF/Builder.pm, lib/PDF/Page.pm
      Ref #230, clarify POD (documentation) on what is returned when *setting*
