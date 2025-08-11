@@ -1440,8 +1440,9 @@ are under consideration. Additional non-standard CSS may also be added.
 =back
 
 I<There are other markup languages out there, such as HTML-like Pango, 
-nroff-like man page, and Perl's POD, that 
-I<might> be supported in the future. It is very unlikely that TeX or LaTeX will 
+nroff-like man page, and Perl's POD, that> 
+might I<be supported in the future (provided there are supported Perl libraries
+for them). It is very unlikely that TeX or LaTeX will 
 ever be supported, as they both already have excellent PDF output.>
 
 B<$txt> is the input text: a string, an array reference to multiple strings,
@@ -1874,32 +1875,42 @@ There is additional information on this subject in L<PDF::Builder::Docs/MARKUP>.
 
 =head4 Special notes on saving and restoring the font
 
-To reiterate the font selection upon entry, if nothing special is done, 
-C<column()> will look to see if user code has already loaded a font in this
-text context. It will label that font B<-external-> and use it as the current
-font. I<However>, be aware that C<column()> will B<not> know the actual face
-(font-family) of whatever font this is, and thus can not change the font-weight
-(bold) or font-style (italic). These changes will be ignored. If no font is
-already loaded, the FontManager's default "current" font (Times-Roman) will
-be selected (and no "-external-" font defined).
-
-Once C<column()> has already been called within a given text context, whatever
-font is in force at the end of the call will be preserved by the text context,
-and picked up by the next C<column()> call within this text context. Note that
-a text context is limited to a single page of a PDF, at most. The user code
-may of course choose to load a new font externally to C<column()>, in order to
-use that one upon entry.
-
 It is important to let C<column()> know what font face (font-family), weight,
 and style to use, so it can switch between normal, bold, and italic as desired.
 There are several methods to I<explicitly select> a font face (font-family) and
 its variants (weight, style) upon entry to C<column()>. One is to use the
-C<font_info> option to C<column>, including "-fm-" to use FontManager's
-default font. Another is to use the C<style> option to
-C<column()> to override the B<body> default CSS. A third, if using HTML or
-Markdown, is to add a E<lt>styleE<gt> tag to the beginning of the text markup,
-in order to set the B<body> CSS (as with C<style>). All of these methods will
-set the B<body>'s font.
+C<font_info> option to C<column>, including "-fm-" (default) to use 
+FontManager's default font (core Times-Roman). Another is to use the C<style> 
+option to C<column()> to override the B<body> default CSS. A third, if using 
+HTML or Markdown, is to add a E<lt>styleE<gt> tag to the beginning of the text 
+markup, in order to set the B<body> CSS (as with C<style>). All of these 
+methods will set the B<body>'s font.
+
+If nothing special is done, the font selection upon entry to C<column()> will 
+default to using the default FontManager settings (core Times-Roman, equivalent
+to C<'font_info'=E<gt>'-fm-'>). C<font_info> may also be explicitly set to 
+specify the body text font-family (optionally also style, weight, and color). 
+C<'font_info'=E<gt>'-ext-'> may be given to tell FontManager to pick up an 
+already-loaded font in this text context. It will label that font 
+B<-external-> and use it as the current font. I<However>, be aware that if 
+doing this, C<column()> will B<not> know the actual face (font-family) of 
+whatever font this is, and thus can not change the font-weight (bold) or 
+font-style (italic). These change requests will be ignored. If no font is 
+already loaded, the FontManager's default font (C<-fm-> core Times-Roman) will 
+be selected (and no "-external-" font defined). Whatever way is used to specify
+he body font-family on the command line, it may be overridden by a 
+C<E<lt>styleE<gt>> tag or C<'style'=E<gt>> command line CSS specification. 
+
+Once C<column()> has already been called within a given text context, whatever
+font is in force at the end of the call will be preserved by the text context,
+available to be picked up by the next C<column()> call with 
+C<'font_info'=E<gt>'-ext'> within I<this> text context. I<column() will still
+B<not> know the font-family, since this information is not carried in the text
+context!> Note that a text context is limited to a single page of a PDF, at 
+most (it must be defined by the C<$page-E<gt>text()> call, and is reset with
+each new page). The user code may of course choose to load a 
+new font externally to C<column()>, in order to use that one upon entry. An
+C<-external-> font still cannot change style or weight.
 
 Any font "face" used must be first registered with FontManager. The standard
 core fonts (as well as Windows extensions) are preregistered. If user code
@@ -2150,40 +2161,43 @@ sub _default_css {
     #  this face must be known to FontManager
     # as last resort, if font not set outside of column, FontManager default
     my (@cur_font, @cur_color, $current_color);
-    if (defined $opts{'font_info'}) {
-	# override any predefined font
-	if ($opts{'font_info'} eq '-fm-') {
-	    # use whatever FontManager thinks is the default font
-            $pdf->get_font('face'=>'default'); # set current font to default
-            @cur_font = $pdf->get_font(); 
-	    $cur_font[1] = $cur_font[2] = 0; # no italic or bold
-            # use [0..2] of returned array
-        } else {
-	    # explicitly given font must be KNOWN to FontManager
-	    # family:style:weight:color (normal/0/italic/1, normal/0/bold/1)
-	    @cur_font = split /:/, $opts{'font_info'};
-	    # add normal style and weight if not given
-	    if (@cur_font == 2) { push @cur_font, 0; }
-	    if (@cur_font == 1) { push @cur_font, 0,0; }
-	    if ("$cur_font[1]" eq 'normal') { $cur_font[1] = 0; }
-	    if ("$cur_font[1]" eq 'italic') { $cur_font[1] = 1; }
-	    if ("$cur_font[2]" eq 'normal') { $cur_font[2] = 0; }
-	    if ("$cur_font[2]" eq 'bold'  ) { $cur_font[2] = 1; }
-	    # set the current font
-	    if (@cur_font == 4) { $text->fillcolor($cur_font[3]); } # color
-	    $pdf->get_font('face'=>$cur_font[0],
-		           'italic'=>$cur_font[1],
-		           'bold'=>$cur_font[2]);
-	    @cur_font = $pdf->get_font();
-	}
-    } else {
-	# not using font_info to set font
+    if (!defined $opts{'font_info'}) {
+	# default action: -fm-
+	$opts{'font_info'} = '-fm-';
+    }
+    # override any predefined font
+    if      ($opts{'font_info'} eq '-fm-') {
+	# use whatever FontManager thinks is the default font
+        $pdf->get_font('face'=>'default'); # set current font to default
+        @cur_font = $pdf->get_font(); 
+	$cur_font[1] = $cur_font[2] = 0; # no italic or bold
+        # use [0..2] of returned array
+    } elsif ($opts{'font_info'} eq '-ext-') {
+	# requesting preloaded font, as '-external-'
         # there IS a predefined font, from somewhere, to use?
         if ($pdf->get_external_font($text)) {
 	    # failed to find a predefined font. use default
+            $pdf->get_font('face'=>'default'); # set current font to default
         }
         @cur_font = $pdf->get_font(); # use [0..2] of returned array,
 	                 # either predefined -external- font, or default font
+    } else {
+	# explicitly given font must be KNOWN to FontManager
+	# family:style:weight:color (normal/0/italic/1, normal/0/bold/1)
+	@cur_font = split /:/, $opts{'font_info'};
+	# add normal style and weight if not given
+	if (@cur_font == 2) { push @cur_font, 0; }
+	if (@cur_font == 1) { push @cur_font, 0,0; }
+	if ("$cur_font[1]" eq 'normal') { $cur_font[1] = 0; }
+	if ("$cur_font[1]" eq 'italic') { $cur_font[1] = 1; }
+	if ("$cur_font[2]" eq 'normal') { $cur_font[2] = 0; }
+	if ("$cur_font[2]" eq 'bold'  ) { $cur_font[2] = 1; }
+	# set the current font
+	if (@cur_font == 4) { $text->fillcolor($cur_font[3]); } # color
+	$pdf->get_font('face'=>$cur_font[0],
+		       'italic'=>$cur_font[1],
+		       'bold'=>$cur_font[2]);
+	@cur_font = $pdf->get_font();
     }
     # @cur_font should have (at least) face, italic 0/1, bold 0/1
     #  to load into 'body' properties later
@@ -5624,7 +5638,8 @@ sub pass_end_state {
 		                      (int($ty)+100).",null";
 		    }
 		    # internal link to page object at $tx,$ty fit
-                    if ($tppn != $cur_tgt_page) {
+                    # skip if Named Destination instead of a phys page no
+		    if ($tppn =~ m/^\d+$/ && $tppn != $cur_tgt_page) {
                         $tgt_page = $pdf->openpage($tppn);
 		        $cur_tgt_page = $tppn;
 		    }

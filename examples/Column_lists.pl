@@ -86,7 +86,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
-		  'font_info'=>'-fm-', 'para'=>[ 0, 0 ] );
+		  'para'=>[ 0, 0 ] );
 if ($rc) {
     print STDERR "list example overflowed column!\n";
 }
@@ -133,7 +133,7 @@ restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,750, 500,300], 'outline'=>$magenta, 
 		  'marker_width'=>10, 'marker_gap'=>4,
-		  'font_info'=>'-fm-', 'para'=>[ 0, 0 ] );
+		  'para'=>[ 0, 0 ] );
 if ($rc) {
     print STDERR "list example overflowed column!\n";
 }
@@ -170,7 +170,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,425, 500,265], 'outline'=>$magenta, 
-		  'font_info'=>'-fm-', 'para'=>[ 0, 0 ] );
+		  'para'=>[ 0, 0 ] );
 if ($rc) {
     print STDERR "list example overflowed column!\n";
 }
@@ -247,7 +247,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,750, 500,650], 'outline'=>$magenta, 
-		  'font_info'=>'-fm-', 'para'=>[ 0, 0 ] );
+		  'para'=>[ 0, 0 ] );
 if ($rc) {
     print STDERR "list example overflowed column!\n";
 }
@@ -294,7 +294,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,750, 500,365], 'outline'=>$magenta, 
-		  'font_info'=>'-fm-', 'para'=>[ 0, 0 ] );
+		  'para'=>[ 0, 0 ] );
 if ($rc) {
     print STDERR "list example overflowed column!\n";
 }
@@ -316,7 +316,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,350, 500,200], 'outline'=>$magenta, 
-		  'font_info'=>'-fm-', 'para'=>[ 0, 0 ] );
+		  'para'=>[ 0, 0 ] );
 if ($rc) {
     print STDERR "list example overflowed column!\n";
 }
@@ -360,7 +360,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,750, 500,425], 'outline'=>$magenta, 
-		  'font_info'=>'-fm-', 'para'=>[ 0, 0 ] );
+		  'para'=>[ 0, 0 ] );
 if ($rc) {
     print STDERR "reversed list example overflowed column!\n";
 }
@@ -380,7 +380,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,275, 500,100], 'outline'=>$magenta, 
-		  'font_info'=>'-fm-', 'para'=>[ 0, 0 ] );
+		  'para'=>[ 0, 0 ] );
 if ($rc) { 
     print STDERR "Markdown CSS example overflowed column!\n";
 }
@@ -400,7 +400,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,165, 500,100], 'outline'=>$magenta, 
-		  'font_info'=>'-fm-', 'para'=>[ 0, 0 ],
+		  'para'=>[ 0, 0 ],
 	          'style'=>"
         ol { _marker-before: '(' ; _marker-after: ')' ; }
         li { margin-top: 0; margin-bottom: 0 } 
@@ -442,7 +442,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,750, 500,215], 'outline'=>$magenta, 
-		  'font_info'=>'-fm-', 'para'=>[ 0, 0 ] );
+		  'para'=>[ 0, 0 ] );
 if ($rc) {
     print STDERR "marker properties list 1 example overflowed column!\n";
 }
@@ -465,7 +465,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,515, 500,160], 'outline'=>$magenta, 
-		  'font_info'=>'-fm-', 'para'=>[ 0, 0 ], 'marker_width'=>50 );
+		  'para'=>[ 0, 0 ], 'marker_width'=>50 );
 if ($rc) {
     print STDERR "marker properties list 2 example overflowed column!\n";
 }
@@ -534,7 +534,7 @@ restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,335, 500,300], 'outline'=>$magenta, 
 #                 'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
-		  'font_info'=>'-fm-', 'para'=>[ 0, 0 ], );
+		  'para'=>[ 0, 0 ], );
 if ($rc) {
     print STDERR "simple list example overflowed column!\n";
 }
@@ -609,7 +609,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,750, 500,$top_depth], 'outline'=>$magenta, 
-		  'font_info'=>'-fm-', 'para'=>[ 0, 2 ] );
+		  'para'=>[ 0, 2 ] );
 
 if ($top_depth < $entire_depth) {
     print "...second column\n";
@@ -617,7 +617,7 @@ if ($top_depth < $entire_depth) {
         $text->column($page, $text, $grfx, 'pre', $unused, 
  	              'rect'=>[50,750-$top_depth-10, 
 			       500,$entire_depth-$top_depth], 
-		      'font_info'=>'-fm-', 
+		      
 		      'outline'=>$magenta, 'para'=>[ 0, 2 ],
 	     );
 
@@ -665,7 +665,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,380, 500,340], 'outline'=>$magenta, 
-		  'font_info'=>'-fm-', 'para'=>[ 0, 0 ], 'marker_width'=>75 );
+		  'para'=>[ 0, 0 ], 'marker_width'=>75 );
 if ($rc) {
     print STDERR "marker-align example overflowed column!\n";
 }
@@ -696,7 +696,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,750, 500,220], 'outline'=>$magenta, 
-		  'font_info'=>'-fm-', 'marker_width'=>48 );
+		  'marker_width'=>48 );
 
    if ($rc) {
        print STDERR "ol with li value, type overflowed column!\n";

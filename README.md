@@ -22,6 +22,8 @@ more powerful and versatile.
 \*Note that PDF::Builder is **not** built on PDF::API2, and does **not**
 require that it be installed. The two libraries are completely independent of
 each other and one will not interfere with the other if both are installed.
+However, you should _not_ try mixing the two libraries within one running
+program, as they still share many routine names!
 
 [Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full), including Documentation and Examples.
 
@@ -236,6 +238,7 @@ a pointer to _your_ work. The more cross-pollination, the better!
 * LICENSE file for more on the license term
 * INFO/RoadMap file for the PDF::Builder road map
 * INFO/ACKNOWLEDGE.md for "thank yous" to those who contributed to this product
+* INFO/SPONSORS for "thank yous" to those who financially sponsored this product
 * INFO/CONVERSION file for how to convert from PDF::API2 to PDF::Builder
 * INFO/Changes\* files for older change logs
 * INFO/PATENTS file for information on patents

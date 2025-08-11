@@ -5444,7 +5444,7 @@ sub init_state {
     $rc = $pdf->pass_start_state($pass_no, $max_passes, \%state)
 
 This does whatever is necessary at the I<start> of a pass (number C<pass_no>).
-Currently, this is resetting the 'changed_target' hash list.
+Currently, this is deleting any existing pages added by C<column()>.
 It is defined here rather than in the 'text' object, as the 'text' object
 may not yet have been defined.
 
@@ -5455,14 +5455,15 @@ sub pass_start_state {
     # $state = ref to %state structure
 
     # TBD this may disappear, if clear changed_target flag upon text output
-    if ($pass_no > 1) {
-        $state->{'changed_target'} = {};  # clear all
+#    if ($pass_no > 1) {
+#        $state->{'changed_target'} = {};  # clear all
+#
+#	# changed visible text (fpn), reset "previous" version
+#        for (my $sindex=0; $sindex<scalar(@{$state->{'xrefs'}}); $sindex++) {
+#	    $state->{'prev_other_pg'} = $state->{'other_pg'}; # not always used
+#	}
+#    }
 
-	# changed visible text (fpn), reset "previous" version
-        for (my $sindex=0; $sindex<scalar(@{$state->{'xrefs'}}); $sindex++) {
-	    $state->{'prev_other_pg'} = $state->{'other_pg'}; # not always used
-	}
-    }
     $state->{'sindex'} = 0; # position to write on first pass, update > 1
 
 

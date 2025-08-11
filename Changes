@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-07-16  UNRELEASED
+3.028     2025-08-10  UNRELEASED
 * = work in progress
 
   ==== New features
@@ -12,19 +12,66 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
      Add cross references to column() to add internal (within a document) and 
       external links to another document, both to a specific target point (by
       id) or a physical page number or a named destination.
-      <_ref tgtid= title= fit= >, <_reft id= title= >, <_nameddest name= >
-      Sponsored by Amtivo Group.
+      <a href="#pgno-x-y-zoom">link title</a> existing internal PDF link
+              "#pgno"            new int link in doc
+              "ePDF#pgno"        new ext link to another PDF
+              "url"              existing link to browser URL (start with p://)
+              "id"               new (int or ext) link to doc by id
+              "##nameddest"      new int link to a ND
+              "ePDF##nameddest"  new ext link to ND in another doc
+      "ePDF" is a path (usually relative) to a PDF document.
+      For native Markdown, [link text](href string). As an *alternative*, the 
+      new extended HTML tag may be given in either HTML or Markdown:
+        <_ref tgtid="href" title="link title" fit="fit info">
+      If no convenient HTML or Markdown tag is available with an id to link
+      to, a reference target extended HTML tag is provided:
+        <_reft id="unique id" title="optional link title fallback">.
+      Sponsored by Amtivo Group. Future plans call for extension of this
+      functionality to generate Tables of Contents, Lists of Figures/Tables/
+      Equations, etc., indexes, glossaries, bibliographies, footnotes/chapter
+      notes/endnotes, etc.
 
       This is an improvement over the existing <a href= > method, because it
       can also handle external PDF files and Named Destinations, and can 
       determine the page and location of the target (rather than requiring the 
       author to manually enter this information into the "href" field) using
-      multiple passes over the text source.
+      multiple passes over the text source. 
+
+      "link title" may be given in the <a> tag's child text (before </a>). If 
+      missing (empty or blank), use any link title given in the target, and if 
+      that is also missing, use any target child text (such as a heading's 
+      text). 
+
+      "fit" is PDF target page fit, consisting of the type, followed by any 
+      parameters. E.g., 'xyz,200,400,1.5' for a window on the page at 200,400 
+      with 150% scale; or 'fit' to fit the entire page in the viewer.
+
+*     The Markdown specification permits an id to be defined in a heading 
+      (#...) entry by appending {#id-name} to the heading text. Although 
+      Text::Markdown does not natively support this, Builder has been extended
+      to look for such a substring, and to pull it out into an id= attribute. 
+      It is further extended to look for such an id definition in any tag with
+      child text, such as <p>, <i>, <blockquote>, etc. Note that most HTML tags 
+      can already explicitly receive an id= attribute, so this is intended 
+      primarily for Markdown usage.
+
+*     Markdown specifies a way to get an HTML title= attribute in links:
+      [link text](url hover-title-text) but at this time it does not seem to
+      be useful for PDF purposes, and is ignored. {#id-name} (to define an ID)
+      has been extended with additional fields such as %fit and ^title (e.g., 
+      {$myid %myfit ^mytitle}) so that Markdown usage has all the capabilities 
+      of HTML usage.
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Content/Text.pm,
+      examples/Column_xrefs.pl
+     Add inline definition of a Named Destination in column(). The extended 
+      HTML tag <_nameddest name="unique name" fit="optional fit info"> may be 
+      used in either HTML or Markdown to define a Named Destination.
 
     lib/PDF/Builder/Resource/CIDFont.pm, 
       lib/PDF/Builder/Resource/CIDFont/TrueType-CJKFont.pm
      Make a start at updating POD to try to document many font-related
-      utility routines, especially for TTFs.
+      utility routines, especially for TTFs (TrueType).
 
     lib/PDF/Builder/Content.pm, lib/PDF/Builder/Content/Text.pm,
       examples/ContentText.pl
@@ -60,21 +107,32 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       lib/PDF/Builder/Content/Text.pm, examples/Column-Column_lists.pl
      Fix inconsistency in no longer supporting the use of a preloaded font
       before the column() call being used as the current body font. You may
-       * load a font, either by Builder primitives or FontManager, and use that
-       * NOT load a font, and if not otherwise overridden, use the FontManager
-         default (Times-Roman)
-      Specify several ways of overriding either the specified font or the
-      FontManager default current font, in the column() call:
-       * option 'font_info'=>'-fm-' says to apply the FontManager default 
-         (Times Roman) font
-       * option 'font_info'=>'face:style:weight' says to load as the current 
-         font a 'face' KNOWN TO FontManager, with optional specification of 
-         the style and weight (default both normal)
+       * option 'font_info'=>'-ext-' says that user code has ALREADY loaded a 
+         font (either by Builder primitives or through FontManager), and to use
+         that (font-family named '-external-) as the body font. If there is no 
+         preloaded font, use the FontManager default (core Times-Roman).
+       * default (or option 'font_info'=>'-fm-') load the FontManager
+         default font (core Times-Roman) as the body font.
+       * option 'font_info'=>'face:style:weight:color' says to load as the 
+         current font a 'face' KNOWN TO FontManager, with optional specification
+         of the style and weight (default both normal) and color (unchanged).
          - style: 0/normal (default) = unitalicized, 1/italic = italicized
          - weight: 0/normal (default) = normal weight, 1/bold = bold weight
-       * option 'style'=>'body { font-family: face; font-style =... }' CSS to
-         override anything else. The font-family etc. must be KNOWN to
-         FontManager (i.e., add_font() the new face if not a core default)
+         - color: named color or gray value 0 to 1. defaults to current color
+      There are several ways of overriding the column() call's specified font 
+      (whether set by default or via 'font_info').
+       * in the column() call, use option 
+         'style'=>'body { font-family: face; font-style =... }' CSS to
+         override anything else. 
+       * in Markdown or HTML source, add a <style> tag at the beginning, to
+         specify CSS to set the body's font-family.
+
+      In all cases, the font-family etc. must be KNOWN to FontManager (i.e., 
+      add_font() the new face if not a core default), except for an external
+      font (font_info -ext-), which can be from any source. However, keep in 
+      mind that column() can NOT switch to and from italic or bold if an 
+      -external- font is being used, as it does NOT know the font-family and 
+      FontManager face, and thus how to get to the italic or bold face.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Content/Text.pm
      'arabic' is permitted as a synonym for 'decimal' numbering (1,2,3...)

@@ -86,7 +86,6 @@ restore_props($text, $grfx);
 		  'para'=>[ 0, 5 ], 'start_y'=>$next_y,
 	          'state'=>\%state, 'debug'=>$debug,
 		 #'font_info'=>'Times:normal:normal:black',
-		  'font_info'=>'-fm-',
 		  'page'=> [ $pass_count, $max_passes, $ppn, 'zz', $fpn, 'R', 0 ] );
 if ($rc) {
     print STDERR "xref example 1A overflowed column!\n";
@@ -140,7 +139,6 @@ restore_props($text, $grfx);
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ], 'start_y'=>$next_y,
 	          'state'=>\%state, 'debug'=>$debug,
-		  'font_info'=>'-fm-',
 		  'page'=> [ $pass_count, $max_passes, $ppn, 'zz', $fpn, 'R', 0 ] );
 if ($rc) {
     print STDERR "xref example 1B overflowed column!\n";
@@ -182,7 +180,6 @@ restore_props($text, $grfx);
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ],
 	          'state'=>\%state, 'debug'=>$debug,
-		  'font_info'=>'-fm-',
 		  'page'=> [ $pass_count, $max_passes, $ppn, 'zz', $fpn, 'R', 0 ] );
 if ($rc) {
     print STDERR "xref example 2A overflowed column!\n";
@@ -251,7 +248,6 @@ restore_props($text, $grfx);
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ], 'start_y'=>$next_y,
 	          'state'=>\%state, 'debug'=>$debug,
-		  'font_info'=>'-fm-',
 		  'page'=> [ $pass_count, $max_passes, $ppn, 'zz', $fpn, 'R', 0 ] );
 if ($rc) {
     print STDERR "xref example 2B overflowed column!\n";
