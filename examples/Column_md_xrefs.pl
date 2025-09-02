@@ -3,8 +3,8 @@
 use warnings;
 use strict;
 use PDF::Builder;
-#use Data::Dumper; # for debugging
-# $Data::Dumper::Sortkeys = 1; # hash keys in sorted order
+ use Data::Dumper; # for debugging
+  $Data::Dumper::Sortkeys = 1; # hash keys in sorted order
 
 # VERSION
 our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
@@ -38,7 +38,7 @@ my %state = PDF::Builder->init_state(       # various settings
 
 my ($ppn, $fpn);
 
-for (my $pass_count=1; $pass_count <= $max_passes; $pass_count++) {
+for (my $pass_count=1; $pass_count<=$max_passes; $pass_count++) {
     # $pdf is global and only defined once, while everything else is
     # processed possibly multiple times until all content settles down
     print "**************************** pass $pass_count\n";
@@ -65,19 +65,20 @@ $text->column($page, $text, $grfx, 'html', $content,
 	      'rect'=>[50,25, 500,25]);
 
 $content = <<"END_OF_CONTENT";
-<h1 id="chap1">Chapter One, the End of the Beginning</h1>
 
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod 
+# Chapter One, the End of the Beginning {#chap1}
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod 
 tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
 quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo 
-consequat. See <a href="xpage">Explanation 1</a> for more. Duis aute 
+consequat. See [Explanation 1](xpage) for more. Duis aute 
 irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat 
 nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa 
-qui officia deserunt mollit anim id est laborum.</p>
+qui officia deserunt mollit anim id est laborum.
 
-<h2 id="lesser">Something of lesser importance</h2>
+## {#lesser} Something of lesser importance
 
-<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium 
+Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium 
 doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore 
 veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim 
 ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia 
@@ -85,16 +86,16 @@ consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque
 porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, 
 adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et 
 dolore magnam aliquam quaerat voluptatem. <_reft id="back1" 
-title="My Own Title">. Ut enim ad minima veniam, quis nostrum exercitationem 
+title="My Own Title" />. Ut enim ad minima veniam, quis nostrum exercitationem 
 ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? 
 Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam 
 nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas 
-nulla pariatur?</p>
+nulla pariatur?
 END_OF_CONTENT
 
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
-    $text->column($page, $text, $grfx, 'html', $content, 
+    $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ], 'start_y'=>$next_y,
 	          'state'=>\%state, 'debug'=>$debug,
@@ -103,8 +104,10 @@ if ($rc) {
     print STDERR "xref example 1A overflowed column!\n";
 }
 
+#print "=================== state after 1A\n"; print Dumper(%state);
 $content = <<"END_OF_CONTENT";
-<p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis 
+
+At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis 
 praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias 
 excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui 
 officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum 
@@ -112,48 +115,47 @@ quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta
 nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat 
 facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Look
 back at the very beginning of this document, 
-<a href="chap1">Chapter One (shortened)</a>. 
+[Chapter One (shortened)](chap1). 
 Temporibus autem quibusdam et aut officiis debitis aut rerum 
 necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non 
 recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut 
 reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus 
-asperiores repellat.</p>
+asperiores repellat.
 
-<p><_reft id="Lorem" title="Lorem ipsum place">Lorem ipsum dolor sit amet, 
+<_reft id="Lorem" title="Lorem ipsum place" />Lorem ipsum dolor sit amet, 
 consectetur adipiscing elit. Proin id ante 
 turpis. In aliquam id enim sed pharetra. Aenean cursus at nisi consectetur 
 semper. Ut risus libero, finibus a aliquet ac, venenatis sit amet ligula. 
 Praesent accumsan sapien vel cursus scelerisque. Integer nibh massa, porttitor 
-eu fringilla sit amet, finibus vel purus. <a href="lesser">A Link to 
-the Second Heading</a>. Nunc laoreet metus eget malesuada pharetra. Sed nulla 
+eu fringilla sit amet, finibus vel purus. [A Link to the Second 
+Heading](#lesser). Nunc laoreet metus eget malesuada pharetra. Sed nulla 
 enim, consequat non blandit id, pretium sed erat. Just for the halibut, let's
-<a href="back1">go back a little</a> on this page. Donec in auctor 
+[go back a little](back1) on this page. Donec in auctor 
 elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere 
 cubilia curae; Duis placerat sollicitudin lacinia. Phasellus quis finibus diam, 
-at fringilla ex.</p>
+at fringilla ex.
 END_OF_CONTENT
 
 if ($fwd_ref) {
     $content .=
 "
-<h3>Forward references causing a second pass</h3>
+### Forward references causing a second pass
 
-<p>This is a forward reference using a <i>title=</i> given at the target:
-<a href=\"xpage\"></a>. 
-And here is one using the target's natural text: <a href=\"someother\"></a>.
-</p>";
+This is a forward reference using a *title* given at the target: [](xpage). 
+And here is one using the target's natural text: [](someother).
+";
 #
-#<p>This is a forward reference with no title, target title, or natural text:
-#<a href=\"Linking\"></a>. It should say \"[no title given]\" as the link text.
-#This is a forward reference to a non-existent target: <a href="glotz"></a>.
+#This is a forward reference with no title, target title, or natural text:
+#[](Linking). It should say \"\[no title given\]\" as the link text.
+#This is a forward reference to a non-existent target: [](glotz).
 #There should be an error message for a dead link, as well as 
-#\"[no title given]\".</p>
+#\"\[no title given\]\".
 #"
 }
 
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
-    $text->column($page, $text, $grfx, 'html', $content, 
+    $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ], 'start_y'=>$next_y,
 	          'state'=>\%state, 'debug'=>$debug,
@@ -163,6 +165,7 @@ if ($rc) {
 }
 
 $ppn++;
+#print "=================== state after 1B\n"; print Dumper(%state);
 print "======================================================= page $ppn\n";
 $page = $pdf->page();
 $fpn = "#".$ppn;  # formatted page = #physical page
@@ -172,35 +175,36 @@ $grfx = $page->gfx();
 # output page number
 $content = "<p><_move x=\"50%\"><span style=\"font-family: Helvetica; text-align: center;\">$fpn</span></p>";
 $text->column($page, $text, $grfx, 'html', $content, 
-	      'rect'=>[50,25, 500,25],
-	      'font_info'=>'-fm-');
+	      'rect'=>[50,25, 500,25]);
 
 $content = <<"END_OF_CONTENT";
-<h2 id="someother">Here is a heading for something or other</h2>
 
-<p>In odio elit, feugiat eget diam mattis, convallis lacinia sapien. Fusce 
+## Here is a heading {#someother} for something or other
+
+In odio elit, feugiat eget diam mattis, convallis lacinia sapien. Fusce 
 convallis nunc enim, semper rhoncus eros porta vel. 
 Nullam non velit sodales lectus vulputate condimentum. 
-<a href="lesser">Eat more of these delicious condiments.</a>
+[Eat more of these delicious condiments.](lesser)
 Fusce convallis neque nec velit pellentesque, quis suscipit nisi 
 semper. Curabitur vitae ultrices dui. Nulla ut massa sit amet orci ultrices 
 vestibulum non in urna. Curabitur ullamcorper metus id elementum lobortis. 
 Suspendisse massa neque, tempor fermentum quam a, facilisis condimentum 
-dolor.</p>
+dolor.
 
-<p>Etiam sed vehicula ipsum. Nullam ac libero elit. Praesent vitae felis ut 
-nulla rhoncus tristique. Remember the first heading <a href="chap1">Big Shot</a>? There's a Named Destination right 
-here -&gt;<_nameddest name="foo">&lt;- here. 
+Etiam sed vehicula ipsum. Nullam ac libero elit. Praesent vitae felis ut 
+nulla rhoncus tristique. Remember the first heading [Big Shot](chap1)? There's 
+a Named Destination right 
+here -&gt;<_nameddest name="foo" />&lt;- here. 
 Phasellus congue eros quis tellus mollis, ac vehicula quam luctus. 
 Praesent nunc ipsum, fringilla nec odio ac, efficitur fermentum nisl. 
 Pellentesque suscipit augue eu sodales euismod. Donec a ex mauris. Aenean in 
 diam ut purus feugiat bibendum. Proin a orci convallis, gravida arcu ultricies, 
-dapibus magna. Go <a href="someother">back to this page heading</a>.</p>
+dapibus magna. Go [back to this page heading](someother).
 END_OF_CONTENT
 
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
-    $text->column($page, $text, $grfx, 'html', $content, 
+    $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ],
 	          'state'=>\%state, 'debug'=>$debug,
@@ -209,17 +213,19 @@ if ($rc) {
     print STDERR "xref example 2A overflowed column!\n";
 }
 
+#print "=================== state after 2A\n"; print Dumper(%state);
 $content = <<"END_OF_CONTENT";
-<p>Integer vel dolor neque. Vestibulum scelerisque, sem eu bibendum tincidunt, 
+
+Integer vel dolor neque. Vestibulum scelerisque, sem eu bibendum tincidunt, 
 libero odio rutrum ante, eu fringilla felis felis sit amet dolor. 
-<_reft id="xpage" title="Another Cross Page link">Cras et gravida arcu. 
+<_reft id="xpage" title="Another Cross Page link" />Cras et gravida arcu. 
 Etiam ut quam pellentesque, tempor nisi in, aliquet purus. Aenean feugiat lorem 
 sed eros suscipit, sit amet rhoncus urna dignissim. Nulla ac ipsum quis lorem 
 dapibus scelerisque. Etiam condimentum turpis consectetur leo ultrices dapibus. 
 Phasellus blandit mauris ac maximus facilisis. Vivamus convallis fringilla sem 
 vel luctus. Pellentesque habitant morbi tristique senectus et netus et 
 malesuada fames ac turpis egestas. Donec mattis ex id purus sagittis, a tempus 
-urna fermentum. Aliquam euismod massa et lorem mollis varius.</p>
+urna fermentum. Aliquam euismod massa et lorem mollis varius.
 
 Nam enim dui, efficitur eu tincidunt sed, fermentum a ipsum. Donec et velit ac 
 dolor aliquam vehicula. Class aptent taciti sociosqu ad litora torquent per 
@@ -232,41 +238,41 @@ nulla vitae felis iaculis, et lobortis enim ultricies. Donec lacinia justo nec
 metus convallis suscipit. Nam varius a augue eu rhoncus. In hac habitasse 
 platea dictumst. 
 
-<p>Link back to the heading, using its natural title: <a href="chap1"></a>.
+Link back to the heading, using its natural title: [](chap1).
 Now link to one using its specified title: 
-<a href="Lorem" fit="xyz,%x,%y,2"></a>.</p>
+[{%xyz,%x,%y,2}](Lorem).
 
-<h2>Fully specified links</h2>
+## Fully specified links
 
-<h3 id="intlinks">Internal Links</h3>
+### Internal Links {#intlinks}  
 
-<p><_reft id="Linking">Linking within the same document to 
-<a href="##foo">same PDF</a> with a Named Destination target. Then 
-link to it <a href="#1-50-600-undef">first page</a>
+<_reft id="Linking" />Linking within the same document to 
+[same PDF](##foo) with a Named Destination target. Then 
+link to it [first page](#1-50-600-undef)
 at x,y = 50,600 with xyz fit. Finally, 
-link to <a href="#1" fit="fitv,200">that page</a> on page 1 with a 
-specified fit.</p>
+link to [that page {%fitv,200}](#1) on page 1 with a 
+specified fit.
 
-<h3 id="extlinks">External Links</h3>
+### {#extlinks} External Links
 
-<p>Note that the following examples use fixed target (path and filename) files.
+Note that the following examples use fixed target (path and filename) files.
 If you do not have examples/resources/040_annotation.pdf in the right place (and
-built with the Named Destination), these links will probably <b>not</b> 
-work!</p>
+built with the Named Destination), these links will probably **not**
+work!
 
-<p>Rather than linking within the same document, let's try 
-<a href="resources/040_annotation.pdf##bar">finding Nemo</a>
+Rather than linking within the same document, let's try 
+[finding Nemo](resources/040_annotation.pdf##bar) 
 with a Named Destination target. Then link to it
-<a href="resources/040_annotation.pdf#2">on second page {%xyz,50,600,2.5}</a>
+[on second page {%xyz,50,600,2.5}](resources/040_annotation.pdf#2)
 at a specified x,y with xyz fit at a certain location.
 Finally, link to
-<a href="resources/040_annotation.pdf#2" fit="fith,200">that page</a>
-with a specified fit.</p>
+[{%fith,200} that page](resources/040_annotation.pdf#2)
+with a specified fit.
 END_OF_CONTENT
 
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
-    $text->column($page, $text, $grfx, 'html', $content, 
+    $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ], 'start_y'=>$next_y,
 	          'state'=>\%state, 'debug'=>$debug,
@@ -275,6 +281,7 @@ if ($rc) {
     print STDERR "xref example 2B overflowed column!\n";
 }
 
+#print "=================== state after 2B\n"; print Dumper(%state);
 # ---------------------------------------------------------------------------
 
     $rc = $text->pass_end_state($pass_count, $max_passes, $pdf, \%state

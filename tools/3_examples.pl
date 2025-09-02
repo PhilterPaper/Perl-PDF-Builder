@@ -119,7 +119,9 @@ my (@example_list, @example_results);
   push @example_results, "create examples/Column_lists.pdf, showing examples of the various list\n capabilities of the Content/Text.pm column() library methods\n";
 
   push @example_list, "Column_xrefs.pl";
-  push @example_results, "create examples/Column_xrefs.pdf, showing examples of the various cross-\n referencing (link) capabilities of the Content/Text.pm column()\n library methods\n";
+  push @example_results, "create examples/Column_xrefs.pdf, showing examples of the various cross-\n referencing (link) capabilities of the Content/Text.pm column()\n library methods (HTML source)\n";
+# push @example_list, "Column_md_xrefs.pl";
+# push @example_results, "create examples/Column_md_xrefs.pdf, showing examples of the various cross-\n referencing (link) capabilities of the Content/Text.pm column()\n library methods (Markdown source)\n";
 
  #push @example_list, "Column_layouts.pl";
  #push @example_results, "create examples/Column_layouts.pdf, showing examples of various column layout\n (shape) capabilities of the Content/Text.pm column() library methods\n";

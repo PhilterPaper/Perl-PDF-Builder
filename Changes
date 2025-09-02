@@ -1,32 +1,40 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-08-10  UNRELEASED
+3.028     2025-09-01  UNRELEASED
 * = work in progress
 
   ==== New features
 
-*   lib/PDF/Builder.pm, lib/PDF/Builder/Content/Text.pm, 
+    lib/PDF/Builder.pm, lib/PDF/Builder/Content/Text.pm, 
       lib/PDF/Builder/Docs.pm, MANIFEST, examples/Column_xrefs.pl (new), 
-      examples/README, examples/examples.output, tools/3_examples.pl, 
-      INFO/SPONSORS
+      examples/Column_md_xrefs.pl (new), examples/README, 
+      examples/examples.output, tools/3_examples.pl, INFO/SPONSORS
      Add cross references to column() to add internal (within a document) and 
       external links to another document, both to a specific target point (by
       id) or a physical page number or a named destination.
       <a href="#pgno-x-y-zoom">link title</a> existing internal PDF link
-              "#pgno"            new int link in doc
+              "ePDF#pgno-x-y-zoom"  new ext link to another PDF
+              "#pgno"            new int link in doc, default fit
               "ePDF#pgno"        new ext link to another PDF
               "url"              existing link to browser URL (start with p://)
               "id"               new (int or ext) link to doc by id
+                                 may have optional leading # unless the id
+                                   is all digits (numeric)
               "##nameddest"      new int link to a ND
               "ePDF##nameddest"  new ext link to ND in another doc
       "ePDF" is a path (usually relative) to a PDF document.
       For native Markdown, [link text](href string). As an *alternative*, the 
       new extended HTML tag may be given in either HTML or Markdown:
         <_ref tgtid="href" title="link title" fit="fit info">
+      but <a href="href"> also works, and is produced by Markdown links.
+
       If no convenient HTML or Markdown tag is available with an id to link
       to, a reference target extended HTML tag is provided:
         <_reft id="unique id" title="optional link title fallback">.
-      Sponsored by Amtivo Group. Future plans call for extension of this
+      As described below, any child text for a tag may contain {#idname} to
+      define an "id" for its parent Markdown tag.
+
+      Work sponsored by Amtivo Group. Future plans call for extension of this
       functionality to generate Tables of Contents, Lists of Figures/Tables/
       Equations, etc., indexes, glossaries, bibliographies, footnotes/chapter
       notes/endnotes, etc.
@@ -40,13 +48,17 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       "link title" may be given in the <a> tag's child text (before </a>). If 
       missing (empty or blank), use any link title given in the target, and if 
       that is also missing, use any target child text (such as a heading's 
-      text). 
+      text). For HTML markup, title="link title text" may be given, to override
+      use of the tag's child text. In either HTML or Markdown, {^title text}
+      may optionally be given in the tag's child text.
 
       "fit" is PDF target page fit, consisting of the type, followed by any 
       parameters. E.g., 'xyz,200,400,1.5' for a window on the page at 200,400 
-      with 150% scale; or 'fit' to fit the entire page in the viewer.
+      with 150% scale; or 'fit' to fit the entire page in the viewer. In HTML
+      markup, fit="fitv,200" attribute may be given. In either HTML or Markdown,
+      {%fitv,200} in the tag's child text (link text) may be given.
 
-*     The Markdown specification permits an id to be defined in a heading 
+      The Markdown specification permits an id to be defined in a heading 
       (#...) entry by appending {#id-name} to the heading text. Although 
       Text::Markdown does not natively support this, Builder has been extended
       to look for such a substring, and to pull it out into an id= attribute. 
@@ -55,12 +67,12 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       can already explicitly receive an id= attribute, so this is intended 
       primarily for Markdown usage.
 
-*     Markdown specifies a way to get an HTML title= attribute in links:
+      Markdown specifies a way to get an HTML title= attribute in links:
       [link text](url hover-title-text) but at this time it does not seem to
       be useful for PDF purposes, and is ignored. {#id-name} (to define an ID)
       has been extended with additional fields such as %fit and ^title (e.g., 
-      {$myid %myfit ^mytitle}) so that Markdown usage has all the capabilities 
-      of HTML usage.
+      {$myid}{%myfit}{^mytitle}) so that Markdown usage has all the 
+      capabilities of HTML usage.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Content/Text.pm,
       examples/Column_xrefs.pl

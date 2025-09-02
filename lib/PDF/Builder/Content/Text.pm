@@ -1282,15 +1282,30 @@ and CSS. Currently, standard HTML tags
     'ul', 'ol', 'li' (bulleted, numbered lists), 
     'img' (TBD, image, empty. hspace->margin-left/right, 
            vspace->margin-top/bottom, width, height), 
-    'a' (anchor/link, web page URL or this document target #p[-x-y[-z]]), 
+    'a' (anchor/link) href = web page URL, or [*]
+           #p[-x-y[-z]]] physical page in this document (with optional fit)
+	   ed#p[-x-y[-z]] in external document (path)
+	   id to known ID in this or another document [**]
+	   ##namedDest  to a Named Destination in this document
+	   ed##namedDest  to a Named Destination in another document
     'pre', 'code' (TBD, preformatted and code blocks),
     'h1' through 'h6' (headings)
     'hr' (horizontal rule)
-    'br' (TBD, line break, empty)
+    'br', 'nobr' (TBD, line break, empty)
     'sup', 'sub' (TBD superscript and subscript)
     's', 'strike', 'del' (line-through)
     'u', 'ins' (underline)
     'blockquote' (block quote)
+
+[*] All <aE<gt> links I<except> for URLs (browser calls) are internally 
+converted to <_refE<gt>, with its separate CSS settings. If either is used
+for PDF links (href is not a web page URL), you B<MUST> provide an initialized
+'state' environment. This is needed for proper handling of link sources and
+targets.
+
+[**] an id in a link may begin with a '#' I<unless> it contains only digits
+(or only digits before the first '-'), which which case it will be interpreted
+as a physical page number!
 
 and non-standard HTML "tags" (extensions)
 
@@ -1310,14 +1325,18 @@ and non-standard HTML "tags" (extensions)
 	   Warning: if you move beyond the baseline in either direction,
 	            results are unpredictable)
     '_ref' (reference [link] to another point in this or another document)
-	    "tgtid" (required) is target specification
+	    "tgtid" (required) is target specification (see <a> href)
             "title" is primary link text to use
 	    "fit" is page fit. for 'xyz', it is allowed to use %x,%y rather
 	      than the numeric values (x-100 and y+100 are values used)
+	 NOTE: use of <_ref> is optional. most <a> links are internally
+	       mapped to <_ref>, except for browser URLs.
     '_reft' (reference target for a <_ref> link)
             "id" (required) is id to link to
 	    "title" is default for <_ref> if its own title not given.
 	       its fallback is "natural text" such as a heading's text
+	 NOTE: <_reft> is provided as a convenience if there is no tag handy
+	       to insert an id into.
     '_nameddest' (create an externally visible Named Destination here).
            "name" (required) attribute is Named Destination to create 
            "fit" (default 'xyz,x-100,y+100,null') gives the fit
@@ -1945,7 +1964,7 @@ call, as well as not being able to change bold and italic.
 
 # TBD, future:
 #  * = not official HTML5 or CSS (i.e., an extension)
-# perhaps 3.028?  
+# perhaps 3.029?  
 #   arbitrary paragraph shapes (path)
 #   at a minimum, hyphenate-basic usage including &SHY;
 #   <img>, <sup>, <sub>, <pre>, <nobr>, <br>, <dl>/<dt>/<dd>, <center>*
@@ -1956,6 +1975,19 @@ call, as well as not being able to change bold and italic.
 #   CSS text transform, such as uppercase and lowercase flavors
 #   CSS em and ex sizes relative to current font size (like %), 
 #        other absolute sizes such as in, cm, mm, px (?)
+#
+#  TBD link page numbers: currently nothing shown ($page_numbers = 0)
+#    add <_link_page> text</_link_page> inserted BEFORE </_ref>
+#    page_numbers=1 " on page $fpn" (internal) " on [page $fpn]" (external)
+#                =2 " on this page" " on previous page" "on following page" etc
+#    permits user to choose formatting CSS that often will be a bit different
+#      from rest of link text, such as Roman while link text is italic
+#    consider $extname of some sort for external links not just [ ] e.g.,
+#      " on page [$extname $fpn]" extname not necessarily same as file name
+#    link to id already knows ppn and fpn. link to #p could use an additional
+#      pass for forward references to get the $fpn. link to ##ND ? might be
+#      able to determine physical and forrmatted page numbers
+#    local override (attribute, {&...}) of page_numbers to repair problem areas
 #
 #  possibly...
 #   <abbr>, <base>, <wbr>
@@ -1981,7 +2013,7 @@ call, as well as not being able to change bold and italic.
 #   <_keep>* material to keep together, such as headings and paragraph text
 #   leading (line-height) as a dimension instead of a ratio, convert to ratio
 #
-# 3.029 or later?
+# 3.030 or later?
 #  left/right auto margins? <center> may need this
 #  Text::KnuthLiang hyphenation
 #  <hyp>*, <nohyp>* control hypenation in a word (and remember
@@ -2091,6 +2123,16 @@ sub column {
 	    $bind        = $opts{'page'}->[6];
 	    # TBD for now, ignore $bind
         }
+    } else {
+	# for situations where $opts{'page'} is not passed in because 
+	# we're not doing links and similar. some will be used.
+	$pass_count = 1;
+	$max_passes = 1;
+	$ppn = 1;
+	$extfilepath = '';
+	$fpn = '1';
+	$LR = 'R';
+	$bind = 0;
     }
 
     # what is the state of %state parameter (hashref $state)
@@ -2237,12 +2279,12 @@ sub _default_css {
     $style{'h4'} = {};
     $style{'h5'} = {};
     $style{'h6'} = {};
-    $style{'a'} = {};
     $style{'i'} = {};
     $style{'em'} = {};
     $style{'b'} = {};
     $style{'strong'} = {};
     $style{'hr'} = {};
+    $style{'a'} = {};
     $style{'_ref'} = {};
     $style{'_reft'} = {};  # no visible content
     $style{'_nameddest'} = {};  # no visible content
@@ -2306,13 +2348,6 @@ sub _default_css {
     $style{'p'}->{'display'} = 'block';
     $style{'font'}->{'display'} = 'inline';
     $style{'span'}->{'display'} = 'inline';
-
-    $style{'a'}->{'text-decoration'} = 'underline'; 
-          # none, underline, overline, line-through or a combination
-	  # separated by spaces
-    $style{'a'}->{'color'} = 'blue'; 
-    $style{'a'}->{'display'} = 'inline'; 
-    $style{'a'}->{'_href'} = ''; 
 
     $style{'ul'}->{'list-style-type'} = '.u'; # disc, circle, square, box, none
     $style{'ul'}->{'list-style-position'} = 'outside'; # or inside or numeric
@@ -2425,6 +2460,15 @@ sub _default_css {
     $style{'blockquote'}->{'margin-right'} = '300%';
     $style{'blockquote'}->{'text-height'} = '1.00'; # close spacing
     $style{'blockquote'}->{'font-size'} = '80%'; # smaller type
+
+    # only browser (URL) applies here, so leave browser style
+    # other links changed to '_ref', with its own style
+    $style{'a'}->{'text-decoration'} = 'underline'; # browser style
+          # none, underline, overline, line-through or a combination
+	  # separated by spaces
+    $style{'a'}->{'color'} = 'blue'; 
+    $style{'a'}->{'display'} = 'inline'; 
+    $style{'a'}->{'_href'} = ''; 
 
     $style{'_ref'}->{'color'} = '#660066';  # default link for xrefs
     $style{'_ref'}->{'font-style'} = 'italic'; 
@@ -3135,6 +3179,42 @@ sub _output_text {
 		    # TBD override of page_numbers
 
                     my ($tfn, $tppn, $tid);
+		    # first, #id convert to just id (only at beginning), or
+		    # #p-x-y[-z] split into #p and fit
+		    if ($tgtid =~ /^#[^#]/) {
+			# starts with single #
+			my @fields = split /-/, $tgtid;
+			# if size 1, is just #id or #p
+			if      (@fields == 1) {
+			    # if just #p, see if p is integer 1+
+			    if ($tgtid =~ /^#[1-9]\d*$/) {
+				# is #p so leave $tgtid as is
+			    } else {
+				# is #id -- strip off leading #
+				$tgtid = substr($tgtid, 1);
+			    }
+			} elsif (@fields == 3 || @fields == 4) {
+			    # possibly #p-x-y-z default z = null
+			    # only checking if p is integer 1+
+			    # TBD check if x and y are numbers >= 0
+			    # TBD check if z is number > 0 or 'null' or 'undef'
+			    if ($fields[0] =~ /^#[1-9]\d*$/) {
+				# is #p so build $fit
+				$tgtid = $fields[0];
+				if (@fields == 3) { push @fields, 'null'; }
+				if ($fields[3] eq 'undef') { $fields[3] = 'null'; }
+				$fit = "xyz,$fields[1],$fields[2],$fields[3]";
+			    } else {
+				# is #id -- strip off leading #
+				$tgtid = substr($tgtid, 1);
+			    }
+		        } else {
+			    # wrong number of fields, is just #id
+			    # so strip off leading #
+			    $tgtid = substr($tgtid, 1);
+			}
+		    }
+
                     # split up tgtid into various fields
 		    if      ($tgtid =~ /##/) {
 			 # external link's file, and ppn of target
@@ -3283,7 +3363,7 @@ sub _output_text {
 		# does this tag have an id attribute, and is it in one or
 		# more of the watch lists to add to references?
                 # _reft tags already checked that id= given
-		if (exists $mytext[$el]->{'id'}) {
+		if (defined $state && exists $mytext[$el]->{'id'}) {
 		    my $id = $mytext[$el]->{'id'};
 		    # might have a title, too
                     my $title = $mytext[$el]->{'title'};  # optional (_reft)
@@ -4513,6 +4593,13 @@ sub _md1_hash {
 	$html = $text;
     }
 
+    # need to fix something in Text::Markdown -- custom HTML tags are
+    # disabled by changing < to &lt;. change them back!
+    $html =~ s/&lt;_ref /<_ref /g;
+    $html =~ s/&lt;_reft /<_reft /g;
+    $html =~ s/&lt;_nameddest /<_nameddest /g;
+    # probably could just do it with s/&lt;_/<_/ but the list is short
+    
     # dummy (or real) style element will be inserted at array element [0]
     #   by _html_hash()
 
@@ -4563,9 +4650,14 @@ sub _html_hash {
 
     if ($rc) {
 	# HTML converter appears to be installed, so use it
-	my $tree = HTML::TreeBuilder->new();
         $HTML::Tagset::isList{'_sl'} = 1; # add new list parent
+	push @HTML::Tagset::p_closure_barriers, '_sl';
 	$HTML::Tagset::emptyElement{'_reft'} = 1; # don't add closing tag
+	$HTML::Tagset::emptyElement{'_nameddest'} = 1; # don't add closing tag
+	$HTML::Tagset::isPhraseMarkup{'_ref'} = 1; 
+	$HTML::Tagset::isPhraseMarkup{'_reft'} = 1; 
+	$HTML::Tagset::isPhraseMarkup{'_nameddest'} = 1; 
+	my $tree = HTML::TreeBuilder->new();
 	$tree->ignore_unknown(0);  # don't discard non-HTML recognized tags
 	$tree->no_space_compacting(1);  # preserve spaces
 	$tree->warn(1);  # warn if syntax error found
@@ -4722,23 +4814,36 @@ sub _HTB_cleanup {
 		carp "Warning! No 'tgtid' defined for a <_ref> tag, no link.";
 		$mytext[$el]->{'tgtid'} = '';
 	    }
+	    # if tgtid is '#', check if following content is ^\d+-?. if
+	    # not, remove # (is a regular id)
+	    my $tgtid = $mytext[$el]->{'tgtid'};
+	    if ($tgtid =~ m/^#[^#]/) {
+		# starts with a single '#'
+	        if ($tgtid =~ m/^#\d+-?/) {
+		    # it's a physical page number link, leave it alone
+		} else {
+		    # it's #id, so strip off leading #
+		    $mytext[$el]->{'tgtid'} = substr($tgtid, 1);
+		}
+	    }
 
 	    my $text = $mytext[$el]->{'title'} // '[no title given]';
 	    $text =~ s/\n/ /sg; # any embedded line ends turn to spaces
             # most likely, the /_ref has been put AFTER the following text,
 	    # resulting in el=_ref, el+1=random text, >el+1=/_ref
-	    #   >el+1 end tag will be deleted
+	    #   >el+1 loose end tag will be deleted
             if      ($mytext[$el+1]->{'tag'} eq '/_ref') {
-		# <_ref></_ref> insert text with title text
+		# <_ref></_ref> insert child text with title
 	        splice(@mytext, ++$el, 0, {'tag'=>'', 'text'=>$text});
 		$el++;
 	    } elsif ($mytext[$el+1]->{'tag'} eq '' &&
 	             $mytext[$el+1]->{'text'} ne '') {
-		# <_ref><other text></_ref> insert text=$text and /_ref
-		# giving <_ref><title text></_ref><other text>
-		splice(@mytext, ++$el, 0, {'tag'=>'', 'text'=>$text});
-		splice(@mytext, ++$el, 0, {'tag'=>'/_ref', 'text'=>''});
-		# superfluous /_ref will be deleted
+	   #    # <_ref><other text></_ref> insert text=$text and /_ref
+	   #    # giving <_ref><title text></_ref><other text>
+	   #    splice(@mytext, ++$el, 0, {'tag'=>'', 'text'=>$text});
+	   #    splice(@mytext, ++$el, 0, {'tag'=>'/_ref', 'text'=>''});
+	   #    # superfluous /_ref will be deleted
+	        $el+=2;
 	    } elsif ($mytext[$el+1]->{'tag'} eq '' &&
 	             $mytext[$el+1]->{'text'} eq '') {
 		# <_ref><empty text></_ref> update text with title text
@@ -4752,6 +4857,7 @@ sub _HTB_cleanup {
 	        splice(@mytext, ++$el, 0, {'tag'=>'', 'text'=>$text});
 	        splice(@mytext, ++$el, 0, {'tag'=>'/_ref', 'text'=>''});
 	    }
+	    # $el should be pointing to /_ref tag
 	    if ($page_numbers != 0 &&
 	        $mytext[$el]->{'tgtid'} !~ /#[^#]/) {
 	        # insert a <text> after </_ref> to hold " on page $", 
@@ -4761,7 +4867,7 @@ sub _HTB_cleanup {
 	    }
 	} elsif ($tag eq '/_ref') {
             # TreeBuilder often puts end tag after wrong text
-	    splice(@mytext, $el--, 1);
+	   #splice(@mytext, $el--, 1);
 
 	} elsif ($tag eq '_reft') {
 	    # leave title in place for <_reft>, but delete any text and </_reft>
@@ -4796,8 +4902,120 @@ sub _HTB_cleanup {
             # TreeBuilder often puts end tag after wrong text
 	    splice(@mytext, $el--, 1);
 
+	} elsif ($tag eq '/_move') {
+            # TreeBuilder often puts end tag after wrong text
+	    splice(@mytext, $el--, 1);
+
+	} elsif ($tag eq 'a') {
+	    # if a URL, leave as-is. otherwise convert a /a to _ref /_ref
+	    if ($mytext[$el]->{'href'} =~ m#^[a-z0-9]+://#i) {
+		# protocol:// likely a URL
+	    } else {
+		# xref link: convert tag
+		# 1. a tag convert to _ref
+		$mytext[$el]->{'tag'} = '_ref';
+		# 1a. need to check if <a href></a> need to insert text?
+		if ($mytext[$el+1]->{'tag'} ne '') {
+		    # yep, missing child text
+		    splice(@mytext, $el+1, 0, { 'tag'=>'', 'text'=>'' });
+		}
+
+		# 2. /a tag convert to /_ref (next /a seen, does not nest)
+		for (my $i=$el+1; $i<@mytext; $i++) {
+		    if ($mytext[$i]->{'tag'} eq '/a') {
+			$mytext[$i]->{'tag'} = '/_ref';
+			last;
+		    }
+		}
+
+		# 3. href -> tgtid attribute
+		$mytext[$el]->{'tgtid'} = delete $mytext[$el]->{'href'};
+
+		# 4. child text -> title, id, fit attributes
+		# NOTE: any markup tags get removed, is plain text
+		my $newtitle = _get_special_info(\@mytext, $el, '{^', '}');
+		my $newfit   = _get_special_info(\@mytext, $el, '{%', '}');
+		my $newid    = _get_special_info(\@mytext, $el, '{#', '}');
+
+		if ($newtitle eq '') {
+		    $newtitle = _get_child_text(\@mytext, $el);
+		}
+		if (!defined $mytext[$el]->{'title'}) {
+		    $mytext[$el]->{'title'} = $newtitle;
+		}
+		# is child (title) text still empty after all this?
+		if ($mytext[$el+1]->{'text'} eq '') {
+		    $mytext[$el+1]->{'text'} = $mytext[$el]->{'title'};
+		}
+
+		# 5. fit info -> fit attribute (if none exists)
+		if (defined $mytext[$el]->{'fit'}) {
+		    # already exists, so only remove inline stuff
+		} else {
+		    if ($newfit ne '') { 
+			$mytext[$el]->{'fit'} = $newfit; 
+		    }
+		}
+
+		# 6. id info -> id attribute (if none exists)
+		if (defined $mytext[$el]->{'id'}) {
+		    # already exists, so only remove inline stuff
+		} else {
+		    if ($newid ne '') { 
+			$mytext[$el]->{'id'} = $newid; 
+		    }
+		}
+
+		# 7. child text is empty? replace by title text
+		if ($mytext[$el+1]->{'text'} eq '' &&
+		    defined $mytext[$el]->{'title'}) {
+		    $mytext[$el+1]->{'text'} = $mytext[$el]->{'title'};
+		}
+	    }
         }
 
+	# any child text (incl. link title) with {#id}? pull out into id=
+	# this is needed for Markdown (may define, for headings only). not
+	# necessarily supported by Text::Markdown, or yet by Builder.
+	# child text in: hX, a, span, p, li, i/em, b/strong, del, sub/sup, mark,
+	#   blockquote, dd/dd, code, pre, img (alt text or title text), th,td
+	if ($mytext[$el]->{'tag'} eq 'h1' ||
+	    $mytext[$el]->{'tag'} eq 'h2' ||
+	    $mytext[$el]->{'tag'} eq 'h3' ||
+	    $mytext[$el]->{'tag'} eq 'h4' ||
+	    $mytext[$el]->{'tag'} eq 'h5' ||
+	    $mytext[$el]->{'tag'} eq 'h6' ||
+	    $mytext[$el]->{'tag'} eq 'a' ||
+	    $mytext[$el]->{'tag'} eq 'span' ||
+	    $mytext[$el]->{'tag'} eq 'p' ||
+	    $mytext[$el]->{'tag'} eq 'li' ||
+	    $mytext[$el]->{'tag'} eq 'i' ||
+	    $mytext[$el]->{'tag'} eq 'em' ||
+	    $mytext[$el]->{'tag'} eq 'b' ||
+	    $mytext[$el]->{'tag'} eq 'strong' ||
+	    $mytext[$el]->{'tag'} eq 'del' ||
+	    $mytext[$el]->{'tag'} eq 'sub' ||
+	    $mytext[$el]->{'tag'} eq 'sup' ||
+	    $mytext[$el]->{'tag'} eq 'mark' ||
+	    $mytext[$el]->{'tag'} eq 'blockquote' ||
+	    $mytext[$el]->{'tag'} eq 'dt' ||
+	    $mytext[$el]->{'tag'} eq 'dd' ||
+	    $mytext[$el]->{'tag'} eq 'code' ||
+	    $mytext[$el]->{'tag'} eq 'pre' ||
+	    $mytext[$el]->{'tag'} eq 'img' ||
+	    $mytext[$el]->{'tag'} eq 'th' ||
+	    $mytext[$el]->{'tag'} eq 'td') {
+	    my $newid = _get_special_info(\@mytext, $el, '{#', '}');
+	    if ($newid ne '' && !defined $mytext[$el]->{'id'}) {
+		# do not replace existing id=
+	        $mytext[$el]->{'id'} = $newid;
+	    }
+	}
+	
+	# if _get_special_info() was used to extract an id {#id}, title
+	# {^title}, or fit {%fit}; it should have NOT left a blank child
+	# text string, though it may be empty
+	
 	# if a tag has id=, assume it's a link target
 	# insert tags to write a red | bar at beginning of link text
 	# $el should point to tag itself
@@ -5593,10 +5811,10 @@ sub pass_end_state {
 		my $annot = $src_page->annotation();
 
 		# three flavors of 'tid':
-                if      ($tid =~ /^##/) {
+                if      ($tid =~ /^#[^#]/) {
 	            # physical page number target, may be internal or external
 		    # reuse $tppn since explicitly giving
-		    $tppn = substr($tid, 2);
+		    $tppn = substr($tid, 1);
                     # have target file (if ext) and physical page number
 		    $fit = 'fit' if $fit eq ''; # default show whole page
 		    if ($tfn eq '') {
@@ -5615,7 +5833,7 @@ sub pass_end_state {
 				    'rect'=>$rect, 'border'=>$link_border);
 		    }
 
-	        } elsif ($tid =~ /^#/) {
+	        } elsif ($tid =~ /^##/) {
 		    # Named Destination given (ignore 'fit' if given)
 		    # external if filepath not ''
 		    my $nd = substr($tid, 1);
@@ -5761,6 +5979,85 @@ sub _get_child_text {
     $output =~ s/\s+/ /sg;
     return $output;
 } # end _get_child_text()
+
+# similar to _get_child_text(), but goes through looking for special section
+# AND trims out removed text from where it was found
+#
+# open text in a paragraph shouldn't have any special text, but
+# we need to look at tag attributes (title= ), heading text, link
+# child text, etc.
+sub _get_special_info {
+    my ($mytext, $el, $pattern, $endchar) = @_;
+
+    my $newtext = '';
+    my ($start, $end);
+
+    my @tags = ($mytext->[$el]->{'tag'});
+    for (my $elx=$el+1; $elx<@$mytext; $elx++) {
+	# found end of this tag we seek child text from?
+	if (@tags == 1 && $mytext->[$elx]->{'tag'} eq "/$tags[0]") { last; }
+        # found some desired text in it? extract to output
+        if ($mytext->[$elx]->{'tag'} eq '') {
+	    # assume no tags within text
+	    my $text = $mytext->[$elx]->{'text'};
+            $start = index($text, $pattern);
+            if ($start > -1) {
+                # starting pattern found within text string
+		$end = index($text, $endchar, $start+length($pattern));
+		if ($end > -1) {
+		    # ending pattern found within text string, after starting
+		    $newtext = substr($text, $start+length($pattern),
+			              $end-$start-length($pattern));
+
+                    # now remove entire thing plus up to one space
+		    $end += length($endchar)-1;
+		    my $space_before = 0;
+		    if ($start>0 && substr($text, $start-1, 1) eq ' ') {
+			$space_before = 1;
+		    }
+		    my $space_after = 0;
+		    if ($end < length($text)-1 &&
+		        substr($text, $end+1, 1) eq ' ') {
+			$space_after = 1;
+		    }
+
+		    if      ($start == 0) {
+			# at far left
+			if ($space_after) { $end++; }
+			$text = substr($text, $end+1);
+		    } elsif ($end == length($text)-1) {
+			# at far right
+			if ($space_before) { $start--; }
+			$text = substr($text, 0, $start);
+		    } elsif ($space_before && $space_after) {
+			# in middle with one space to delete at either end
+			$text = substr($text, 0, --$start) .
+			        substr($text, $end+1);
+		    } else {
+			# in middle with no space after or no space after,
+			# so preserve adjoining space
+			$text = substr($text, 0, $start) .
+			        substr($text, $end+1);
+		    }
+                }
+	    }
+	    $mytext->[$elx]->{'text'} = $text; # may be now empty
+	    next; # should be only occurence, but still need to clean up
+	}
+	# an end tag? pop stack (assume properly nested!)
+	if ($mytext->[$elx]->{'tag'} =~ /^\//) {
+	    pop @tags;
+	    next;
+	}
+        # must be another tag. push it on tag stack
+	push @tags, $mytext->[$elx]->{'tag'};
+    }
+
+    # trim enclosure and leading and trailing whitespace off it
+    $newtext =~ s/^$pattern\s+//;
+    $newtext =~ s/\s+$endchar$//;
+    return $newtext;
+} # end _get_special_info()
 
 # --------------------- end of column() section -----------------------------
 1;

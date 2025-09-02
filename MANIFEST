@@ -83,6 +83,7 @@ examples/Column.pl
 #examples/Column_layouts.pl TBD
 examples/Column_lists.pl
 examples/Column_xrefs.pl
+examples/Column_md_xrefs.pl
 examples/Content.pl
 examples/ContentText.pl
 examples/FontManager.pl

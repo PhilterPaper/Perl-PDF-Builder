@@ -3,8 +3,11 @@
 use warnings;
 use strict;
 use PDF::Builder;
-#use Data::Dumper; # for debugging
+# for debugging use
+#use Data::Dumper; 
 # $Data::Dumper::Sortkeys = 1; # hash keys in sorted order
+if (0) { #############################################
+} #############################################
 
 # VERSION
 our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
@@ -27,9 +30,6 @@ my $magenta = '#ff00ff';
 my $fs = 15;
 my ($rc, $next_y, $unused);
 print "CAUTION: page 4 requires that your HTML::Tagset installation be patched\n  so that <ins> and <del> are handled properly!\n";
-# for debugging use
-if (0) { #############################################
-} #############################################
 
 print "======================================================= pg 1\n";
 $page = $pdf->page();
@@ -265,9 +265,9 @@ And a numbered list:
 1. Item one
 2. Item two
 
-# We will need a heading
+# We will need a heading {#h1hdg}
 
-## And a subheading
+## And a subheading {#h2hdg}
 
 Finally we&#x92;ll need some [external links](https://duckduckgo.com).
 
@@ -282,6 +282,16 @@ at a time</span> are possible via style attribute, also via
 
 Then we need some styling features in tables as shown in the table below. There is no need to support this in text blocks, although it would be a nice feature (colored text is already available in text blocks using its options).
 END_OF_CONTENT
+# links that require state environment to be defined. See Column_xrefs.pl
+#This is a PDF id [Link Text PDF id](%id) there.
+#This is an internal phys page no [Link Text PDF int ppn](#5) there.
+#This is an external phys page no [Link Text PDF ext ppn](ext.pdf#4) there.
+#This is an internal p-x-y-z [Link Text old pp](#7-20-30-1.5) there.
+#This is an internal named dest [Link Text ND int](##NDi) there.
+#This is an external named dest [Link Text ND ext](ext2.pdf#NDe) there.
+#This is a browser URL [Link text URL](file.html) there.
+#This is a browser URL with anchor [Link text URL w/ anchor](file2.htm#blah) there.
+
 # TBD in above text, <u><s>nested</s></u> <del><ins>tags</ins></del> lost the
 # space between the words in Treebuilder? needs investigating
 
@@ -921,24 +931,26 @@ if ($rc) {
     print STDERR "HTML horizontal rule example overflowed column!\n";
 }
 
-print "---- PDF page link\n";
-$content = <<"END_OF_CONTENT";
-Let's try linking to [another page](#4) of this document.
-
-Also try a link to a [specific place](#4-50-200) unzoomed.
-
-While we're here, how about [linking](#4-50-200-1.5) with zoom-in?
-END_OF_CONTENT
-
-restore_props($text, $grfx);
-($rc, $next_y, $unused) =
-    $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[50,375, 500,100], 'outline'=>$magenta, 
-		  'para'=>[ 0, 10 ],
-	         );
-if ($rc) { 
-    print STDERR "PDF links example overflowed column!\n";
-}
+# the following links require 'state' environment to be initialized.
+# See Column_xrefs.pl instead
+#print "---- PDF page link\n";
+#$content = <<"END_OF_CONTENT";
+#Let's try linking to [another page](#4) of this document.
+#
+#Also try a link to a [specific place](#4-50-200) unzoomed.
+#
+#While we're here, how about [linking](#4-50-200-1.5) with zoom-in?
+#END_OF_CONTENT
+#
+#restore_props($text, $grfx);
+#($rc, $next_y, $unused) =
+#    $text->column($page, $text, $grfx, 'md1', $content, 
+#    'rect'=>[50,375, 500,100], 'outline'=>$magenta, 
+#    'para'=>[ 0, 10 ],
+#    );
+#if ($rc) { 
+#    print STDERR "PDF links example overflowed column!\n";
+#}
 
 # --------------
 # some bogus tags and CSS properties

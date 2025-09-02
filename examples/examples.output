@@ -263,6 +263,10 @@ Column_xrefs.pl
   Column_xrefs.pdf
    2 pages demonstrating cross references (inter- and intra-PDF links)
 
+Column_md_xrefs.pl
+  Column_md_xrefs.pdf
+   Same as Column_xrefs, except Markdown instead of HTML source
+
 #Column_layouts.pl    TBD
 #  Column_layouts.pdf
 #   ? pages demonstrating column() method output with different column shapes
