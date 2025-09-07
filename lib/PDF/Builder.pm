@@ -5288,47 +5288,12 @@ sub named_destination {
     return $obj;
 } # end of named_destination()
 
-=head2 init_state
+=head2 init_state()
 
-    %state = PDF::Builder->init_state(%lists)
-
-    %state = PDF::Builder->init_state()
-
-This method is used in L<PDF::Builder::Content::Text> to create and initialize 
-the hash structure that permits transfer of data between
-C<column()> calls, as well as accumulating link information to build
-intra- and inter-PDF file jumps for a variety of uses.
-
-B<%lists> is optional, and allows the user to define tags (which have an id= )
-lists for various purposes. These are anonymous lists. Element '_reft' is 
-predefined for cross reference targets, and already includes the <_reft> tag 
-as '_reft'. B<Do not add '_reft' to the '_reft' list!> The user may wish to add 
-other tags (which have id= ) to be used, and define other lists to be 
-accumulated. For example, 
-
-    {'_reft' => [ 'h1', 'h2', 'h3', 'h4' ],
-     'TOC'   => [ '_part', '_chap', 'h1', 'h2', 'h3' ], }
-
-adds the top 4 heading levels to cross references ('_reft' is already there), 
-and creates a 5-level list of tags to build a Table of Contents. Additional
-lists might include for an Index, glossary, List of Tables, List of Figures
-(Illustrations, Photos), List of Equations, etc.
-
-If no C<%lists> parameter is given, you will be limited to cross references
-from <_reft> only, and no entries specifically for TOC etc. will be defined.
-Remember, only tags with C<id=>s in your markup will be used as link targets.
-
-If you are using **markdown** for your source, you may not be able to define
-C<id=>s for your "tags" (HTML tags produced after translation from markdown), 
-and thus will be limited to inserting C<E<lt>_refE<gt>>s for link placements 
-and C<E<lt>_reftE<gt>>s as link targets, which should be passed through to 
-HTML. For applications such as a TOC, you I<may> be able to postprocess the 
-_reft list to separate out (based on id given) this large group of target ids 
-into groups for specific purposes, such as a TOC.
-
-It is defined here rather than in the 'text' object, as the 'text' object
-normally will not yet have been defined.
-
+Initialize 'state' variable that carries information across multiple
+document passes for C<column()> call.
+See L<PDF::Builder::Content::Column_docs> for documentation.
+ 
 =cut
 
 # initialize state holder hash
@@ -5351,6 +5316,7 @@ sub init_state {
       # {'tfn'} filepath (final position and name) for external links 
       #     give for all links, even if internal, to permit external linking
       # {'tppn'} physical page number of target
+      # {'sppn'} physical page number of source
       # {'fit'} fit information ('' if not given)
       # {'tfpn'} formatted page number of target
       # {'page_numbers'} TBD in case want to override global default
@@ -5373,6 +5339,7 @@ sub init_state {
       #     {'tfn'} filepath (final position and name) for external links 
       #         give for all links, even if internal, to permit external linking
       #     {'tppn'}* physical page number of target
+      #     {'sppn'}* physical page number of source
       #     {'tfpn'}* formatted page number of target
       #         used if $page_number > 0 (TBD)
       #     {'tx'}* and {'ty'}* location on page of target
@@ -5439,14 +5406,11 @@ sub init_state {
     return %state;
 }
 
-=head2 pass_start_state
+=head2 pass_start_state()
 
-    $rc = $pdf->pass_start_state($pass_no, $max_passes, \%state)
-
-This does whatever is necessary at the I<start> of a pass (number C<pass_no>).
-Currently, this is deleting any existing pages added by C<column()>.
-It is defined here rather than in the 'text' object, as the 'text' object
-may not yet have been defined.
+Update 'state' variable that carries information across multiple
+document passes for C<column()> call, at the beginning of each pass.
+See L<PDF::Builder::Content::Column_docs> for documentation.
 
 =cut
 

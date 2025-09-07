@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-09-01  UNRELEASED
+3.028     2025-09-06  UNRELEASED
 * = work in progress
 
   ==== New features
@@ -74,11 +74,11 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       {$myid}{%myfit}{^mytitle}) so that Markdown usage has all the 
       capabilities of HTML usage.
 
-    lib/PDF/Builder.pm, lib/PDF/Builder/Content/Text.pm,
-      examples/Column_xrefs.pl
-     Add inline definition of a Named Destination in column(). The extended 
-      HTML tag <_nameddest name="unique name" fit="optional fit info"> may be 
-      used in either HTML or Markdown to define a Named Destination.
+    lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm, 
+      lib/PDF/Builder/Content/Text.pm, 
+      lib/PDF/Builder/Content/Column_docs.pm (new), MANIFEST
+     Move POD cocerning the use of column() and related routines to one place, 
+      for easier reference, and update it.
 
     lib/PDF/Builder/Resource/CIDFont.pm, 
       lib/PDF/Builder/Resource/CIDFont/TrueType-CJKFont.pm

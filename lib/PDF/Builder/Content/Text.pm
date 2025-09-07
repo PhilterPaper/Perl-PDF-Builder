@@ -1183,782 +1183,11 @@ sub textlabel {
  
 # --------------------- start of column() section ---------------------------
 # WARNING: be sure to keep in synch with changes to POD elsewhere, especially
-#   list in #195 and Docs.pm
-
-=head2 Complex Column Output with Markup
+# Column_docs.pm
 
 =head3 column
 
-    ($rc, $next_y, $unused) = $text->column($page, $text, $grfx, $markup, $txt, %opts)
-
-=over
-
-This method fills out a column of text on a page, returning any unused portion
-that could not be fit, and where it left off on the page.
-
-Tag names, CSS entries, markup type, etc. are case-sensitive (usually 
-lower-case letters only). For example, you cannot give a <P> paragraph in
-HTML or a B<P> selector in CSS styling.
-
-B<$page> is the page context. Currently, its only use is for page annotations
-for links ('md1' []() and 'html' E<lt>aE<gt>), so if you're not using those, 
-you may pass anything such as C<undef> for C<$page> if you wish.
-
-B<$text> is the text context, so that various font and text-output operations
-may be performed. It is often, but not necessarily always, the same as the
-object containing the "column" method.
-
-B<$grfx> is the graphics (gfx) context. It may be a dummy (e.g., undef) if
-I<no> graphics are to be drawn, but graphical items such as the column outline 
-('outline' option) and horizontal rule (<hr> in HTML markup) use it. 
-Currently, I<text-decoration> underline (default for links, 'md1' C<[]()> and 
-'html' C<E<lt>aE<gt>>) or line-through or overline use the text context, but
-may in the future require a valid graphics context. Images (when implemented)
-will require a graphics context.
-
-B<$markup> is information on what sort of I<markup> is being used to format
-and lay out the column's text:
-
-=over
-
-=item  'pre'
-
-The input material has already been processed and is already in the desired
-form. C<$txt> is an array reference to the list of hashes. This I<must> be used 
-when you are calling C<column()> a second (or later)
-time to output material left over from the first call. It may also be used when
-the caller application has already processed the text into the appropriate
-format, and other markup isn't being used.
-
-=item  'none'
-
-If I<none> is specified, there is no markup in use. At most, a blank line or
-a new text array element specifies a new paragraph, and that's it. C<$txt> may
-be a single string, or an array (list) of strings.
-
-The input B<txt> is a list (anonymous array reference) of strings, each 
-containing one or more paragraphs. A single string may also be given. An empty 
-line between paragraphs may be used to separate the paragraphs. Paragraphs may 
-not span array elements.  
-
-=item  'md1'
-
-This specifies a certain flavor of Markdown compatible with Text::Markdown: 
-
-    * or _ italics, ** bold, *** bold+italic; 
-    bulleted list *, numbered list 1. 2. etc.; 
-    #, ## etc. headings and subheadings; 
-    ---, ===, ___ horizontal rule;
-    [label](URL) external links (to HTML page or within this document, see 'a')
-    ` (backticks) enclose a "code" section
-
-HTML (see below) may be mixed in as desired (although not within "code" blocks 
-marked by backticks, where <, >, and & get turned into HTML entities, disabling 
-the intended tags).
-Markdown will be converted into HTML, which will then be interpreted into PDF.
-I<Note that Text::Markdown may produce HTML for certain features, that is not 
-yet supported by HTML processing (see 'html' section below). Let us know if 
-you need such a feature!>
-
-The input B<txt> is a list (anonymous array reference) of strings, each 
-containing one or more paragraphs and other markup. A single string may also be 
-given. Per Markdown formatting, an empty line between paragraphs may be used to 
-separate the paragraphs. Separate array elements will first be glued together 
-into a single string before processing, permitting paragraphs to span array 
-elements if desired.  
-
-There are other flavors of Markdown, so other mdI<n> flavors I<may> be defined 
-in the future, such as POD from Perl code.
-
-=item  'html'
-
-This specifies that a subset of HTML markup is used, along with some attributes
-and CSS. Currently, standard HTML tags 
-
-    'i'/'em' (italic), 'b'/'strong' (bold), 
-    'p' (paragraph),
-    'font' (font face->font-family, color, size->font-size), 
-    'span' (needs style= attribute with CSS to do anything useful), 
-    'ul', 'ol', 'li' (bulleted, numbered lists), 
-    'img' (TBD, image, empty. hspace->margin-left/right, 
-           vspace->margin-top/bottom, width, height), 
-    'a' (anchor/link) href = web page URL, or [*]
-           #p[-x-y[-z]]] physical page in this document (with optional fit)
-	   ed#p[-x-y[-z]] in external document (path)
-	   id to known ID in this or another document [**]
-	   ##namedDest  to a Named Destination in this document
-	   ed##namedDest  to a Named Destination in another document
-    'pre', 'code' (TBD, preformatted and code blocks),
-    'h1' through 'h6' (headings)
-    'hr' (horizontal rule)
-    'br', 'nobr' (TBD, line break, empty)
-    'sup', 'sub' (TBD superscript and subscript)
-    's', 'strike', 'del' (line-through)
-    'u', 'ins' (underline)
-    'blockquote' (block quote)
-
-[*] All <aE<gt> links I<except> for URLs (browser calls) are internally 
-converted to <_refE<gt>, with its separate CSS settings. If either is used
-for PDF links (href is not a web page URL), you B<MUST> provide an initialized
-'state' environment. This is needed for proper handling of link sources and
-targets.
-
-[**] an id in a link may begin with a '#' I<unless> it contains only digits
-(or only digits before the first '-'), which which case it will be interpreted
-as a physical page number!
-
-and non-standard HTML "tags" (extensions)
-
-    '_marker' (gives ability to modify list markers. if given, must be 
-           immediately before a <li> tag. attributes: style). the marker text
-	   will be filled in for you (if given as empty or blank), and an end 
-           tag is optional if the marker text is empty.
-    '_move' (gives ability to move anywhere on the current baseline.
-           useful for positioning before centering and right-aligning with 
-           the text-align CSS property.
-	   attributes: x = N bare number (pts), Npt, or N% 0/0% = left end,
-	                50% = center, 100% = right end set new x position
-			relative to line start and width
-                       dx = N, Npt, or N% distance to move right + or left -
-                        relative to current position if 'x' not given, or 
-                        where 'x' setting left you
-	   Warning: if you move beyond the baseline in either direction,
-	            results are unpredictable)
-    '_ref' (reference [link] to another point in this or another document)
-	    "tgtid" (required) is target specification (see <a> href)
-            "title" is primary link text to use
-	    "fit" is page fit. for 'xyz', it is allowed to use %x,%y rather
-	      than the numeric values (x-100 and y+100 are values used)
-	 NOTE: use of <_ref> is optional. most <a> links are internally
-	       mapped to <_ref>, except for browser URLs.
-    '_reft' (reference target for a <_ref> link)
-            "id" (required) is id to link to
-	    "title" is default for <_ref> if its own title not given.
-	       its fallback is "natural text" such as a heading's text
-	 NOTE: <_reft> is provided as a convenience if there is no tag handy
-	       to insert an id into.
-    '_nameddest' (create an externally visible Named Destination here).
-           "name" (required) attribute is Named Destination to create 
-           "fit" (default 'xyz,x-100,y+100,null') gives the fit
-    '_sl' (simple list, like 'ul' but no marker)
-    '_ovl' (TBD -- overline similar to underline/strike-through)
-    '_k' (TBD -- kerning left/right shift). up/down too?
-
-are supported (fully or in part I<unless> "TBD"), along with limited CSS for 
-color, font-size, font-family, etc. 
-E<lt>styleE<gt> tags may be placed in an optional E<lt>headE<gt> section, or
-within the E<lt>bodyE<gt>. In the latter case, style tags will be pulled out
-of the body and added (in order) on to the end of any style tag(s) defined in 
-a head section. Multiple style tags will be condensed into a single collection 
-(later definitions of equal precedence overriding earlier). These stylings will
-have global effect, as though they were defined in the head. As with normal CSS,
-the hierarchy of a given property (in decreasing precedence) is
-
-    appearance in a style= tag attribute
-    appearance in a tag attribute (possibly a different name than the property)
-    appearance in a #IDname selector in a <style>
-    appearance in a .classname selector in a <style>
-    appearance in a tag name selector in a <style>
-
-Selectors are quite simple: a single tag name (e.g., B<body>),
-a single class (.cname), or a single ID (#iname). 
-There are I<no> combinations (e.g., 
-C<p.abstract> or C<ol, ul>), hierarchies (e.g., C<ol E<gt> li>), specified 
-number of appearance, pseudotags, or other such complications as found in a 
-browser's CSS. Sorry!
-
-Supported CSS properties: 
-
-    border-* TBD
-    color (foreground color)
-    display (inline/block)
-    font-family (name as defined to FontManager, e.g. Times)
-    font-size (pt, bare number = pt, % of current size)
-    font-style (normal/italic) 
-    font-weight (normal/bold)
-    height (pt, bare number) thickness (height) of horizontal rule
-    list-style-position (outside, inside, number [%]) [*]
-    list-style-type (marker description, see also _marker-text/before/after)
-    list-style-image TBD
-    margin-top/right/bottom/left (pt, bare number = pt, % of font-size)
-      margin TBD update four margin-* properties
-    text-decoration (none, underline, line-through, overline, may use more
-      than one (except 'none') separated by spaces)
-    text-height (leading, as ratio of baseline-spacing to font-size)
-    text-indent (pt, bare number = pt, % of current font-size)
-    text-align (left/center/right justify at current text position) [**]
-    width (pt, bare number) width (length) of horizontal rule
-
-[*]  Note on list-style-position: 'outside' (default) = 100 (%) indent, 'inside'
-= 0 indent, numeric value (explicit %) = percentage between inside/0 and 
-outside/100, or a length in pts. A numeric value is an extension to CSS.
-
-[**] Note on text-align: if center or right justified, keep text short enough
-to fit within the left and right bounds of the column. Center and right
-justification need an explicit position defined (usually via <_move>) and will 
-not properly wrap to a new line.
-
-Non-standard CSS "properties". You may want to set these in CSS:
-
-    _marker-before (constant text to insert before <ol> marker, default nothing)
-    _marker-after (constant text to insert after <ol> marker, default period)
-    _marker-text (define text to use as marker instead of default)
-    _marker-color (change color from default, such as color-coded ul bullets)
-    _marker-font (change marker font face)
-    _marker-style (change marker font style, e.g., italic)
-    _marker-size (change marker font size)
-    _marker-weight (change marker font weight)
-    _marker-align (left/center/right justify within marker_width)
-    list-style-position numeric (see previous notes)
-
-There are also C<marker_width> and C<marker_gap> parameters (see above) 
-which I<position> the first line of the list item in a uniform manner, so that 
-all lists more or less align.
-
-B<Note> that eventually we may support C<li::marker>, which is now standard CSS,
-but there does not appear to be a way to support changes via C<style=>, because
-the same property names (e.g., I<color>) would apply to both the marker and the
-list item text. This will require extensive changes to CSS style to permit 
-complex selectors, which C<column()> does not currently offer. Even doing that,
-we may retain the current "marker" tags and CSS introduced here. I think W3C
-may have missed the boat by not doing something like an optional C<_marker> to 
-permit normal properties for markers alone, but configurable in-line with
-C<style=>.
-
-Non-standard CSS "properties". You normally would not set these in CSS:
-
-    _fs (current running font size, in points, on the properties stack)
-    _href (URL for <a>, normally provided by href= attribute)
-    _left (running number of points to indent on the left, from margin-left and list nesting)
-    _left_nest (amount to indent next nested list)
-    _right (running number of points to indent on the right, from margin-right)
-
-Sizes may be '%' (of font-size), or 'pt' (the default unit). 
-More support may be added over time. B<CAUTION:> comments /* and */ are NOT
-currently supported in CSS -- perhaps in the future.
-
-Numeric entities (decimal &#nnn; and hexadecimal &#xnnn;) are supported, 
-as well as named entities (&mdash; for example).
-
-The input B<txt> is a list (anonymous array reference) of strings, each 
-containing one or more paragraphs and other markup. A single string may also be 
-given. Per normal HTML practice, paragraph tags should be used to mark
-paragraphs. I<Note that HTML::TreeBuilder is configured to automatically
-mark top body-level text with paragraph tags, in case you forget to do so,
-although it is probably better to do it yourself, to maintain more control
-over the processing.>
-Separate array elements will first be glued together into a single string 
-before processing, permitting paragraphs to span array elements if desired.  
-
-At some time in the future, PDF::Builder may support additional extended
-HTML tags and CSS properties in order to better control document layout, such
-as controls to force a page break at a desired point under a given condition.
-Definition lists, and at least basic table layout, 
-are under consideration. Additional non-standard CSS may also be added.
-
-=back
-
-I<There are other markup languages out there, such as HTML-like Pango, 
-nroff-like man page, and Perl's POD, that> 
-might I<be supported in the future (provided there are supported Perl libraries
-for them). It is very unlikely that TeX or LaTeX will 
-ever be supported, as they both already have excellent PDF output.>
-
-B<$txt> is the input text: a string, an array reference to multiple strings,
-or an array reference to hashes. See C<$markup> for details.
-
-B<%opts> Options -- a number of these are of course, mandatory.
-
-=over
-
-=item 'rect' => [x, y, width, height]
-
-This defines a column as a rectangular area of a given width and height (both
-in points) on the current page. I<In the future, it is expected that more
-elaborate non-rectangular areas will be definable, but for now, a simple
-rectangle is all that is permitted.> The column's upper left coordinate is
-C<x, y>.
-
-The top text baseline is assumed to be relative to the UL corner (based on the
-determined line height), and the column outline
-clips that baseline, as it does additional baselines down the page (interline
-spacing is C<leading> multiplied by the largest C<font_size> or image height
-needed on that line).
-
-I<Currently, 'rect' is required, as it is the only column shape supported.>
-
-=item 'relative' => [ x, y, scale(s) ]
-
-C<'relative'> defaults to C<[ 0, 0, 1, 1 ]>, and allows a column outline
-(currently only 'rect') to be either absolute or relative. C<x> and C<y> are
-added to each C<x,y> coordinate pair, I<after> scaling. Scaling values:
-
-=over
-
-=item (none)  The scaling defaults to 1 in both x and y dimensions (no change).
-
-=item scale (one value)  The scaling in both the x (width) and y (height)
-dimensions uses this value.
-
-=item scale_x, scale_y (two values)  There are two separate scaling factors
-for the x dimension (width) and y dimension (height).
-
-=back
-
-This permits a generically-shaped outline to be defined, scaled (perhaps
-not preserving the aspect ratio) and placed anywhere on the page. This could
-save you from having to define similarly-shaped columns from scratch multiple 
-times.
-If you want to define a relative outline, the lower left corner (whether or
-not it contains a point, and whether or not it's the first one listed) would 
-usually be C<0, 0>, to have scaling work as expected. In other works, your
-outline template should be in the lower left corner of the page.
-
-=item 'start_y' => $start_y
-
-If omitted, it is assumed that you want to start at the top of the defined
-column (the maximum C<y> value minus the maximum vertical extent of this line).
-If used, the normal value is the C<next_y> returned from the previous 
-C<column()> call. It is the deepest extent reached by the previous line (plus
-leading), and is the top-most point of the new first line of this C<column()>
-call.
-
-Note that the C<x> position will be determined by the column shape and size
-(the left-most point of the baseline), so there is no place to explicitly set 
-an C<x> position to start at.
-
-=item 'font_size' => $font_size
-
-This is the starting font size (in points) to be used. Over the course of
-the text, it may be modified by markup.
-
-The starting font size may be set in a number of ways. It may be inherited from
-a previous C<$text-E<gt>font(..., font-size)> statement; it may be set via the
-C<font_size> option (overriding any font method inheritance); it may default to 
-12pt (if neither explicit way is given). For HTML markup, it may of course be 
-modified by the C<font> tag or by CSS styling C<font-size>. For Markdown, it
-may be modified by CSS styling.
-
-=item 'font_info' => $string
-
-This permits the user to specify the starting font used in C<column()> (body
-font-family, font-style, font-weight, color). C<column()> will pick up any 
-font already
-loaded (C<$text-E<gt>font($font, $size);>, or using FontManager), and use that 
-as the "current" font. If no font has been loaded, and no other instructions
-are given, the FontManager default (core Times-Roman) will be used.
-
-The C<font_info> option for C<column()> may be given to override either of the
-two above methods. You may specify a C<$string> of B<'-fm-'> to instruct
-C<column()> to use the FontManager "default" font (Times face core font).
-Or, you may pick a font
-face I<known> to FontManager (added by user code if not one of the 28 core 
-fonts), and optionally give it style and weight: C<$string> of 
-B<'face:style:weight:color'>. The style defaults to 'normal' (non-italic), or 
-'normal' or '0' may be given. For italics, use 'italic' or '1'. The weight 
-defaults to 'normal' (unbolded weight), or 'normal' or '0' may be given. For 
-bold (heavy) text, use 'bold' or '1'. Finally, a color may be given.
-
-Finally, the C<style> option for C<column()> may be given to override any of 
-the above settigs, e.g., B<'style'=E<gt>{ body { font-family:... }> and set
-the initial current font. Remember that, as with anything font-related that
-C<column()> does, the 'face' (family) used must already be known to FontManager
-(explicitly loaded with C<add_font()> if not one of the 28 core fonts). 
-Remember that the first 14 fonts are standard PDF, and the second 14 are 
-normally supplied with Windows (but not always with other operating systems).
-
-=item 'marker_width' => $marker_width
-
-=item 'marker_gap' => $marker_gap
-
-This is the width of the gutter to the left of a list item, where (for the
-first line of the item) the marker lives. The marker contains the symbol (for
-bulleted/unordered lists) or formatted number and "before" and "after" text
-(for numbered/ordered lists). Both have a single space before the item text
-starts. The number is a length, in points.
-
-The default is 2 times the font_size passed to C<column()>, and is not adjusted
-for any changes of font_size in the markup. An explicit value passed in is 
-also not changed -- the gutter width for the marker will be the same in all 
-lists (keeping them aligned). If you plan to have exceptionally long markers, 
-such as an ordered list of years in Roman numerals, e.g., B<(MCMXCIX)>, you 
-may want to make this gutter a bit wider.
-
-A value may be given for the marker_gap, which is the gap between the 
-(C<$marker_width> wide) I<marker> and the start of the list item's text. 
-The default is $fs points (1 em), set by the font_size in the markup. 
-
-The C<list-style-position> CSS property may be given as the standard 'outside'
-(the default) or 'inside', or (extension to CSS) to indent the left side of
-second, third, etc. E<lt>liE<gt> lines to somewhere between the 'inside' and
-'outside' positions.
-
-=item 'leading' => $leading
-
-This is the leading I<ratio> used throughout the column text.
-The C<$x, $y> position through C<$x + width> is assumed to be the first
-text baseline. The next line down will be C<$y - $leading*$font_size>. If the
-font_size changes for any reason over the course of the column, the baseline
-spacing (leading * font_size) will also change. The B<default> leading ratio
-is 1.125 (12.5% added to font).
-
-=item 'para' => [ $indent, $top-margin ]
-
-When starting a new paragraph, these are the default indentation (in points),
-and the extra vertical spacing for a top margin on a paragraph. The default is
-C<[ 1*$font_size, 0 ]>. Either may be overridden by the appropriate CSS 
-settings. An I<outdent> may be defined with a negative indentation value. 
-These apply to all C<$markup> types.
-
-=item 'outline' => "color string"
-
-You may optionally request that the column be outlined in a given color, to aid
-in debugging fitting problems.
-
-=item 'color' => "color string"
-
-The color to draw the text (or rule or other graphic) in. The default is 
-black (#000000).
-
-=item 'style' => "CSS styling"
-
-You may define CSS (selectors and properties lists) to override the built-in
-CSS defaults. These will be applied for the entire C<column()> call. You can
-use this, or C<style> tags in 'html', but for 'none' or 'md1', you will need to
-use this method to set styling.
-
-=item 'substitute' => [ [ 'char or string', 'before', 'replace', 'after'],... ]
-
-When a certain Unicode code point (character) or string is found, insert 
-I<before> text before the character, replace the character or string with
-I<replace> text, and insert I<after> text after the character. This may make
-it easier to insert HTML code (font, color, etc.) into Markdown text, if the
-desired settings and character can not be produced by your Markdown editor.
-This applies both to 'md1' and 'html' markup. Multiple substitutions may be 
-defined via multiple array elements.
-If you want to leave the original character or string I<itself> unchanged, you
-should define the I<replace> text to be the same as C<'char or string'>. 
-'before' and/or 'after' text may be empty strings if you don't want to insert
-some sort of markup there.
-
-Example: to insert a red cross (X-out) and green tick (check) mark
-
-    'substitute' => [
-      [ '%cross%', '<font face="ZapfDingbats" color="red">', '8', '</font>' ],
-      [ '%tick%', '<font face="ZapfDingbats" color="green">', '4', '</font>' ],
-    ]
-
-should change C<%cross%> in Markdown text ('md1') or HTML text ('html')
-to C<E<lt>font face="ZapfDingbats" color="green"E<gt>8E<lt>/fontE<gt>> 
-and similarly for C<%tick%>. This is done I<after> the Markdown is converted 
-to HTML (but before HTML is parsed), so make sure that your macro text (e.g., 
-C<%tick%>) isn't something that Markdown will try to interpret by itself! Also, 
-Perl's regular expression parser seems to get upset with some characters, such 
-as C<|>, so don't use them as delimiters (e.g., C<|cross|>). You don't I<have> 
-to wrap your macro name in delimiters, but it can make the text structure
-clearer, and may be necessary in order not to do substitutions in the wrong 
-place.
-
-=item 'state' => \%state
-
-This is the state of processing, including (in particular), information on all
-the requested references (<_ref>) and targets (<_reft> and specific id's). 
-Before use, it must be created and initialized. During multiple passes across
-multiple column() calls, 'state' preserves all the link information. It can
-even preserve information across the creation of multiple related PDFs, though
-this may require writing and reading back from a file. There is no information
-in 'state' that is likely to be of interest to a user (i.e., all internal data).
-If 'state' is not given, it will (in most cases) be impossible to define various
-kinds of links (including cross references).
-
-=item 'page' => [ $ppn, $extfile, $fpn, $LR, $bind ]
-
-This array of values gives C<column()> information needed for generating links
-(both I<goto> and I<pdf> annotations), and (TBD) left- and right-hand page
-processing, including how much to shift C<column()> definitions to the outside
-of the page for binding purposes. The link information is as follows:
-
-=over
-
-=item $ppn
-
-This is the Physical Page Number of the page currently being generated. It is 
-always an integer greater than 0, and takes a value 1,2,3,... It is needed if
-this page is used as the target for an external (across PDFs) link, using a
-physical page number and not a Named Destination. 
-Remember to increment it every time the code calls the C<page()> method. 
-It may be left undefined if you are sure you're never going to generate a link 
-(via C<pdf> call, not using a Named Destination) to this PDF file from another 
-PDF.
-
-=item $extfile
-
-This describes the external path, filename, and extension of B<this> PDF being
-created. It is needed if this page is used as the target for an external 
-(across PDFs) link. Remember that this is the I<final> location and name of
-where this file will live when in use, not necessarily where it is being
-I<created> at this moment!
-It may be left undefined if you are sure you're never going to generate a link 
-(via C<pdf> call) to this PDF file from another PDF.
-
-=item $fpn
-
-This is the I<Formatted> Page Number of the page being generated. In the 
-simplest case, it is equal to the Physical Page Number, but often you will want
-to "get fancy" with numbering, such as a prefix for an appendix ('C-2',
-'Glossary-5', etc.), lowercase Roman numerals in the front matter, etc. You
-might even want to carry one single sequence of decimal page numbers across 
-multiple PDFs, thus starting at other than "1". If you leave it undefined,
-certain kinds of links and cross reference formats (where the formatted page
-number is shown) will not be possible.
-
-=item $LR
-
-This says whether it's a left-hand page or a right-hand page, for purposes of
-formatting layout and shifting the C<column()> outline left or right (towards
-the "outside" of the page) to allow binding space. If undefined, it defaults
-to an 'R' right-hand page.
-
-=item $bind
-
-This is the number of points to shift the C<column()> coordinates towards the
-"outside" of the page for purposes of binding multiple pages together, whether
-left-right alternation or all right-hand pages (e.g., punched for a notebook or
-spiral binding, or just stapled on the inside, or glued or sewn into a 
-paperback or hard-cover binding). If undefined, the default is 0.
-
-=back
-
-=item 'restore' => flag
-
-This integer flag determines what sort of cleanup C<column()> will do upon
-exit, to restore (or not) the font state (face, bold or normal weight, 
-italic or normal style, size, and color).
-
-=over
-
-=item for rc = 0 (all input markup was used up, without running out of column)
-
-=over
-
-=item restore => 0
-
-This is the B<default>. Upon exiting, C<column()> will attempt to restore the 
-state to what one would see if there was yet more text to be output. Note that
-this is I<not> necessarily what one would see if the entire state was restored
-to entry conditions. The intent is that another C<column()> call can be 
-immediately made, using whatever font state was left by the previous call, as
-though the two calls' markup inputs were concatenated.
-
-=item restore => 1
-
-This value of C<restore> commands that I<no> change be made to the font state,
-that is, C<column()> exits with the font state left in the last text output.
-This may or may not be desirable, especially if the last text output left the
-text in an unexpected state.
-
-=item restore => 2
-
-This value of C<restore> attempts to bring the font state all the way back to
-what it was upon I<entry> to the routine, as if it had never been called. Note
-that if C<column()> was called with no global font settings, that can not be
-undone, although the color I<can> be changed back to its original state, 
-usually black.
-
-B<CAUTION:> The Font Manager is not synchronized with whatever state the font
-is returned to. You should not request the 'current' font, but should instead
-explicitly set it to a specific face, etc., which resets 'current'.
-
-=back
-
-=item for rc = 1 (ran out of column space before all the input markup was used up)
-
-=over
-
-=item restore => 0
-
-This is the B<default>. Upon exiting, no changes will be made to the font
-state. As the code will be in the middle of some output, the font state is
-kept the same, so the next C<column()> call (for the overflow) can pick up 
-where the previous call left off, with regards to the font state.
-
-It is equivalent to C<restore = 1>.
-
-=item restore => 1
-
-This is the same as C<restore = 0>.
-
-=item restore => 2
-
-This value of C<restore> attempts to bring the font state all the way back to
-what it was upon I<entry> to the routine, as if it had never been called. Note
-that if C<column()> was called with no global font settings, that can not be
-undone, although the color I<can> be changed back to its original state, 
-usually black.
-
-B<CAUTION:> The Font Manager is not synchronized with whatever state the font
-is returned to. You should not request the 'current' font, but should instead
-explicitly set it to a specific face, etc., which resets 'current'.
-
-=back
-
-=back
-
-=back
-
-B<Data returned by this call>
-
-If there is more text than can be accommodated by the column size, the unused
-portion is returned, with a return code of 1. It is an empty list if all the 
-text could be formatted, and the return code is 0.
-C<next_y> is the y coordinate where any additional text (C<column()> call) 
-could be added to a column (as C<start_y>) that wasn't completely filled.
-This would be at the starting point of a new column (i.e., the
-last paragraph is ended). Note that the application code should check if this
-position is too far down the page (in the bottom margin) and not blindly use
-it! Also, as 'md1' is first converted to HTML, any unused portion will be 
-returned as 'pre' markup, rather than Markdown or HTML. Be sure to specify 
-'pre' for any continuation of the column (with one or more additional 
-C<column()> calls), rather than 'none', 'md1', or 'html'.
-
-=over
-
-=item $rc
-
-The return code.
-
-=over
-
-=item '0'
-
-A return code of 0 indicates that the call completed, while using up all the
-input C<$txt>. It did I<not> run out of defined column space.
-
-B<NOTE:> if C<restore> has a value of 1, the C<column()> call makes no effort 
-to "restore" conditions to any
-starting values. If your last bit of text left the "current" font with some
-"odd" face/family, size, I<italicized>, B<bolded>, or colored; that will be
-what is used by the next column call (or other PDF::Builder text calls). This
-is done in order to allow you to easily chain from one column to the next,
-without having to manually tell the system what font, color, etc. you want
-to return to. On the other hand, in some cases you may want to start from the
-same initial conditions as usual. You
-may want to add C<get_font()>, C<font()>, C<fillcolor()>, and
-C<strokecolor()> calls as necessary before the next text output, to get the
-expected text characteristics. Or, you can simply let C<restore> default to
-0 to get the same effect.
-
-=item '1'
-
-A return code of 1 indicates that the call completed by filling up the defined
-column space. It did I<not> run out of input C<$txt>. You will need to make
-one or more calls with empty column space (to fill), to use up the remaining
-input text (with "pre" I<$markup>).
-
-If C<restore> defaults to 0 (or is set to 1), the text settings in the 
-"current" font are left as-is, so that whatever you
-were doing when you ran out of defined column (as regards to font face/family,
-size, italic and bold states, and color) should automatically be the same when 
-you make the next C<column()> call to make more output.
-
-=back
-
-Additional return codes I<may> be added in the future, to indicate failures
-of one sort or another.
-
-=item $next_y
-
-The next page "y" coordinate to start at, if using the same column definition
-as the previous C<column()> definition did (i.e., you didn't completely fill
-the column, and received a return code of 0). In that case, C<$next_y> would
-give the page "y" coordinate to pass to C<column()> (as C<start_y>) to start a 
-new paragraph at.
-
-If the return code C<$rc> was 1 (column was used up), the C<$next_y> returned
-will be -1, as it would be meaningless to use it.
-
-=item $unused
-
-This is the unused portion of the input text (return code C<$rc> is 1), in a 
-format ("pre" C<$markup>) suitable for input as C<$txt>. It will be a
-I<reference> to an array of hashes.
-
-If C<$rc> is 0 (all input was used up), C<$unused> is an empty anonymous array.
-It contains nothing to be used.
-
-=back
-
-=back
-
-There is additional information on this subject in L<PDF::Builder::Docs/MARKUP>.
-
-=head4 Special notes on saving and restoring the font
-
-It is important to let C<column()> know what font face (font-family), weight,
-and style to use, so it can switch between normal, bold, and italic as desired.
-There are several methods to I<explicitly select> a font face (font-family) and
-its variants (weight, style) upon entry to C<column()>. One is to use the
-C<font_info> option to C<column>, including "-fm-" (default) to use 
-FontManager's default font (core Times-Roman). Another is to use the C<style> 
-option to C<column()> to override the B<body> default CSS. A third, if using 
-HTML or Markdown, is to add a E<lt>styleE<gt> tag to the beginning of the text 
-markup, in order to set the B<body> CSS (as with C<style>). All of these 
-methods will set the B<body>'s font.
-
-If nothing special is done, the font selection upon entry to C<column()> will 
-default to using the default FontManager settings (core Times-Roman, equivalent
-to C<'font_info'=E<gt>'-fm-'>). C<font_info> may also be explicitly set to 
-specify the body text font-family (optionally also style, weight, and color). 
-C<'font_info'=E<gt>'-ext-'> may be given to tell FontManager to pick up an 
-already-loaded font in this text context. It will label that font 
-B<-external-> and use it as the current font. I<However>, be aware that if 
-doing this, C<column()> will B<not> know the actual face (font-family) of 
-whatever font this is, and thus can not change the font-weight (bold) or 
-font-style (italic). These change requests will be ignored. If no font is 
-already loaded, the FontManager's default font (C<-fm-> core Times-Roman) will 
-be selected (and no "-external-" font defined). Whatever way is used to specify
-he body font-family on the command line, it may be overridden by a 
-C<E<lt>styleE<gt>> tag or C<'style'=E<gt>> command line CSS specification. 
-
-Once C<column()> has already been called within a given text context, whatever
-font is in force at the end of the call will be preserved by the text context,
-available to be picked up by the next C<column()> call with 
-C<'font_info'=E<gt>'-ext'> within I<this> text context. I<column() will still
-B<not> know the font-family, since this information is not carried in the text
-context!> Note that a text context is limited to a single page of a PDF, at 
-most (it must be defined by the C<$page-E<gt>text()> call, and is reset with
-each new page). The user code may of course choose to load a 
-new font externally to C<column()>, in order to use that one upon entry. An
-C<-external-> font still cannot change style or weight.
-
-Any font "face" used must be first registered with FontManager. The standard
-core fonts (as well as Windows extensions) are preregistered. If user code
-loads an arbitrary font outside of C<column()>, it will only be known as
-"-external-" (as described above). C<column()> calls (including CSS font-family)
-only recognize registered faces, so it knows where to find the font file and
-other information, and can cache the loaded font. It can keep track of which
-font is currently being used, and know how to set bold and italic variants.
-
-When the end of the defined column is reached (before the text source is
-exhausted), all open tags are preserved, so that the next C<column()> call 
-(with I<pre> formatting) can pick up with the same font settings as before.
-However, this works only as long as the complete font description is set in
-the tags (including the face). If the font face is not given in the tags, it
-will not be known, and bold and italic will likely not work at the next change. 
-If the text is in the middle of a highlighted phrase (e.g., bold or italic, or 
-a different font), that particular font should be picked up again. However, the 
-B<body> font face and variant may not be correctly resumed if it is assumed 
-that the proper font has been inherited by the next C<column()> call. 
-Explicitly setting the B<body> font should allow the font to return to a known 
-starting condition, although it is possible that (based on nesting of font 
-changes at the column break) other aspects might be incorrect.
-
-To summarize, the best practice is to register (C<add_font>) to FontManager any
-fonts you wish to use, and then explicitly use C<font_info> or C<style> to
-let C<column()> know what the base font is for your text. This is better than
-externally loading a font, and depending on its being inherited from the text
-context, which may in turn may leave it in some other state after a C<column()>
-call, as well as not being able to change bold and italic.
+See L<PDF::Builder::Content::Column_docs> for documentation.
 
 =cut
 
@@ -3273,6 +2502,7 @@ sub _output_text {
 		    # the following can change without forcing another pass
 		    #
                     $sptr->{'tppn'} = $tppn;
+                    $sptr->{'sppn'} = $ppn;
 
 		    # have we found this target id already?
 		    if (defined $state->{'xreft'}{'_reft'}{$tid}) {
@@ -3304,11 +2534,11 @@ sub _output_text {
 		    }
 		    # TBD figure 'other_pg' text when actually output it,
 		    #      and update field and set flag if changed (pass > 1)
-		    $sptr->{'other_pg'} = $sptr->{'prev_other_pg'} = ''; # TBD
 			    # once know sppn and tppn (in same PDF) and
 			    # $page_numbers > 0. note that a _ref can override
 			    # the global page_numbers with its own (e.g., to
 			    # force = 1 'on page N' when global == 2)
+		    $sptr->{'other_pg'} = $sptr->{'prev_other_pg'} = ''; # TBD
 		    #
 		    # Note that Named Destinations do not get a page 
 		    #  designation output (no "on page $" etc.) regardless 
@@ -4598,8 +3828,26 @@ sub _md1_hash {
     $html =~ s/&lt;_ref /<_ref /g;
     $html =~ s/&lt;_reft /<_reft /g;
     $html =~ s/&lt;_nameddest /<_nameddest /g;
+    $html =~ s/&lt;_sl /<_sl /g;
+    $html =~ s/&lt;_move /<_move /g;
+    $html =~ s/&lt;_marker /<_marker /g;
     # probably could just do it with s/&lt;_/<_/ but the list is short
     
+    # standard Markdown ~~ line-through (strike-out) not recognized
+    my $did_one = 1;
+    while ($did_one) {
+	$did_one = 0;
+	if ($html =~ s#~~([^~])#<del>$1#) {
+	    # just one at a time. replace ~~ by <del>
+	    $did_one = 1;
+	}
+	# should be another, replace ~~ by </del>
+	$html =~ s#~~([^~])#</del>$1#;
+    }
+
+    # standard Markdown === by itself not recognized as a horizontal rule
+    $html =~ s#<p>===</p>#<hr>#g;
+
     # dummy (or real) style element will be inserted at array element [0]
     #   by _html_hash()
 
@@ -5589,148 +4837,21 @@ sub _pause {
     return;
 }
 
-=head4 init_state
+=head4 init_state()
 
-    %state = PDF::Builder->init_state(%lists)
-
-This creates the state structure (hash) to be passed to C<column()> calls, and
-it saves information from invocation to invocation. It must be initialized
-I<before> the first pass of the loop which invokes one or more C<column()> 
-formatting calls at each pass (for a different part of the document).
-
-It is defined in PDF::Builder (Builder.pm) as L<PDF::Builder::init_state>, 
-rather than here in PDF::Builder::Content::Column, because C<$text> does not 
-yet exist when it needs to be called.
+See L<PDF::Builder> for code and L<PDF::Builder::Content::Column_docs> 
+for documentation.
 
 =cut
 
-=head4 pass_start_state
+=head4 pass_start_state()
 
-    $rc = $pdt->pass_start_state($pass_count, $max_passes, %state)
+See L<PDF::Builder> for code and L<PDF::Builder::Content::Column_docs>
+for documentation.
 
-This does whatever is necessary at the I<start> of a pass (number $pass_number).
-Currently, this is resetting the 'changed_target' hash list.
+=head4 pass_end_state()
 
-It is defined in PDF::Builder (Builder.pm) as 
-L<PDF::Builder::pass_start_state>, rather than here in 
-PDF::Builder::Content::Column, because C<$text> does not yet exist when it 
-needs to be called.
-
-=cut
-
-=head4 pass_end_state
-
-    $rc = $text->pass_end_state($pass_count, $max_passes, $state)
-
-This examines the state structure (hash), resolves any content changes that
-need to be made, and builds a list of all refs (by target id C<tgtid>) which
-are still changing at this pass. If any have changed, a non-zero return code
-(number of cases) is returned, but if everything has settled down, the return
-code is 0. 
-
-=over
-
-=item $pass_count
-
-What pass number we are on. Start at 1, and must be no greater than 
-C<max_passes>.
-
-=item $max_passes
-
-The pass number of the last permitted pass, if reached. We may exit before
-this if things settle down quickly enough. If 
-
-    1. page numbers are not output in link text (C<page_numbers == 0>) _and_
-    2. C<title=> is given in all '\_ref' tags, _or_ all \_ref's without title 
-       attributes are backwards references (all forward \_ref's have a title)
-
-you may often be able to get away with a single pass (C<max_passes == 1>).
-You still may be informed that not all cross references have settled.
-
-=item $pdf
-
-The PDF object.
-
-=item $state
-
-Hashref to state structure, which includes, among other things, lists of
-link sources (_ref tags) and link targets (_reft and other listed tags.
-
-=item %opts
-
-Options. Currently only 'debug'=>1 to draw border around link text.
-
-=back
-
-If all references include their own title string and do B<not> show a page 
-(only the title string as the annotation link text), a document should take 
-only one pass. Often two passes are enough to resolve even forward references
-which need to pick up text from later in the document,
-but sometimes (especially if special formatting of page numbers is involved),
-a target may move back and forth between two pages and not settle down. In
-such cases, you may need to simplify or rearrange the text, such as moving a
-target back from the end of a page, or changing from specialty formats (such
-as "on following page" to a fixed "on page N".
-
-B<Fields in %state structure:>
-
-    settings       = hold settings between column() calls
-      TBD
-
-    xrefs          = source of link (<_ref>) info needed
-      [  ]           = array of each link source
-        id             = target's id, tag that defines a target
-	fit            = any fit information provided
-        tfn            = target filename (FINAL position and name) used for 
-                         external links
-        tppn           = physical page number (integer > 0)
-	other_pg       = text for "other page" if page_numbers > 0
-	 prev_other_pg  = previous value (to detect change)
-        tfpn           = formatted page number (string, may be '')
-        tx,ty          = coordinates of target on page (used for fit)
-        title          = text for link. if not defined in <_ref>, use one
-                         in <_reft> (if defined), else "natural text" such
-                         as heading <hX> child text
-	 prev_title     = previous value (to detect change)
-        tag            = tag that produced this target (useful for formatting,
-                         e.g., indenting TOC entries based on hX level)
-	click          = [ ] of one or more click areas, each element is
-	                 [sppn, [x,y, x,y]]
-
-    xreft          = tag that created a target for a link (<_reft> et al.)
-      _reft          = entries for cross reference targets (_reft list)
-        id
-	  tfn        = filepath for external links
-	  tppn       = target physical page number
-	  tfpn       = target formatted page number
-	  tx,ty      = coordinates of target on page
-	  title      = title, defaulting to "natural text", to update source
-	  tag        = tag type that produced this entry
-      $another_list  = other tag list name list of targets (e.g., TOC)
-        id...
-      etc.
-
-    changed_target = hash of tgtids (in xrefs id) that changed AFTER link text
-                     and page text output, requiring another pass
-
-    tag_lists      = anon list of tags (with id) to put in various lists.
-                     see 'init_state()' for building tag lists
-      _reft          = [ ] predefined for cross references, may add more (such
-                       as hX heading tags)
-      TOC            = [ ] NOT predefined, add if desired
-      Index          = [ ] NOT predefined, add if desired, etc.
-
-   nameddest = hash of named destinations to be defined
-      $name  = name of the destination
-        fit  = fit information (location, parms)
-	ppn  = physical page number in this PDF
-        x,y  = x and y coordinates on page  
-
-Note that the link text ('title') and any page information ('on page X') need
-to be output at each pass, to detemine where everything is, while other
-information is stored until the last pass, to actually generate the annotation
-links. The "last pass" will be either when it is found that all link information
-has "settled down", or the C<max_passes> limit is reached.
+See L<PDF::Builder::Content::Column_docs> for documentation.
 
 =cut
 
@@ -5765,6 +4886,8 @@ sub pass_end_state {
 	    my $tfn  = $sptr->{'tfn'};
 	    # target's physical page number
 	    my $tppn = $sptr->{'tppn'};
+	    # source's physical page number
+	    my $sppn = $sptr->{'sppn'};
 	    # target's formatted page number is not of interest here (link
 	    #  text already output, if includes fpn)
 	   #my $tfpn = $sptr->{'tfpn'};
@@ -5904,19 +5027,13 @@ sub pass_end_state {
     return $rc;
 }
 
-=head4 unstable_state
+# list target ids in state holder that are still changing
+=head4 unstable_state()
 
-    @list = $text->unstable_state(\%state)
-
-This returns a list (array) of string target ids (tgtid) which appear to still
-be changing at the end of the loop, i.e., have not settled down.
-
-If this method is called when C<check_state()> returned a 0, the list will
-be empty. It may also be called at each pass, for diagnostic purposes.
+See L<PDF::Builder::Content::Column_docs> for documentation
 
 =cut
 
-# list target ids in state holder that are still changing
 sub unstable_state {
     my ($self, $state) = @_;
     # $state = ref to %state structure
@@ -5952,6 +5069,7 @@ sub unstable_state {
 # embedded within the child text)
 # TBD: consider also copying tags (markup) within child text, to appear 
 #       formatted in title (per _ref, and global, flag to flatten)
+
 sub _get_child_text {
     my ($mytext, $el) = @_;
 
