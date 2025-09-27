@@ -959,9 +959,9 @@ if ($rc) {
 # expect 'snork' CSS to be ignored
 #
 print "---- Bogus HTML tags and CSS property names\n";
-print "   You may see warnings about an invalid HTML tag <glotz> and\n";
-print "   possibly an invalid CSS property 'snork'. Don't worry about these\n";
-print "   messages. They're intentional.\n";
+print "   You may see warnings about an invalid HTML tag <glotz>. The invalid CSS\n";
+print "   property 'snork' does not yet have a message. Don't worry about these\n";
+print "   messages. They're intentional tests.\n";
 $content = <<"END_OF_CONTENT";
 <p>
 <glotz>This is within a 'glotz' tag</glotz>. 

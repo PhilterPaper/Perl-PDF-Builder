@@ -179,6 +179,12 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 
   ==== Bug fixes
 
+    examples/Column.pl
+     Clarify that the error message for tag <glotz> is a test and is expected
+      and normal, and that CSS property 'snork' does not produce a message (is
+      simply ignored). I will think about generating error messages for invalid
+      CSS properties, as this could be useful for misspelled property names.
+      Ref #235.
 
     lib/PDF/Builder/Content/Text.pm
      When revising the baseline due to taller text, there was a miscalculation
