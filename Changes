@@ -179,6 +179,12 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 
   ==== Bug fixes
 
+    lib/PDF/Builder/Docs.pm
+     Ref #231, explain that an externally produced PDF (from "Canva") was 
+      leaving the fill state as "transparent", and so any graphics fill or
+      text was disappearing. The solution is to use egstate() to reset fill
+      state to "opaque" (transparency to 0, see examples/060_transparency).
+
     examples/Column.pl
      Clarify that the error message for tag <glotz> is a test and is expected
       and normal, and that CSS property 'snork' does not produce a message (is

@@ -567,6 +567,19 @@ temporarily exiting (ET) to graphics mode to draw the lines, and then returning
 be easily made. Since "BT" resets some text settings, this needs to be done
 with care!
 
+There was a recent problem reported (ticket 231) which suggested that the 
+expected rendering order of output wasn't being respected. What it turned out
+to be was that a utility ("Canva") used to generate a template PDF was writing 
+graphics commands to a stream (a mixed graphics and text stream, rather than 
+separate streams, but that's not important here). Apparently it was leaving 
+the PDF it created with a graphics state of B<transparent> "fill" mode. Further
+text (as well as filled graphics draws) added by the user in PDF::Builder (open
+PDF, open_page, add graphics and text in new streams) was still being drawn, 
+but was made invisible when rendered! Remember that text is by default (render
+mode 0) drawn only with fill, not outlined. The solution was to first use the 
+C<egstate()> call to set transparency back to 0 (off), making "fill" opaque 
+again. See C<examples/060_transparency> for a code sample.
+
 =head2 Notes on Reader support of features
 
 PDF Readers are complex pieces of software, written by different groups at
