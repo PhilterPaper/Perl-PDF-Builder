@@ -1376,7 +1376,7 @@ needs to be called.
 # function in Content::Text
 =head2 pass_end_state
 
-    $rc = $text->pass_end_state($pass_count, $max_passes, $state)
+    $rc = $text->pass_end_state($pass_count, $max_passes, $pdf, $state, %opts)
 
 This examines the state structure (hash), resolves any content changes that
 need to be made, and builds a list of all refs (by target id C<tgtid>) which
@@ -1423,7 +1423,33 @@ link sources (_ref tags) and link targets (_reft and other listed tags).
 
 =item %opts
 
-Options. Currently only 'debug'=>1 to draw border around link text.
+Options.
+
+=over
+
+=item 'debug' => 1
+
+Draw a border around the link text (the source, not the target), so you can
+see where a click would take effect.
+
+=item 'deltas' => [ 20, 20 ]
+
+To show some context around the target text (if I<xyz> fit is used without a
+specific x and y), the upper left corner of the target window is placed these
+amounts (units I<points>) from the left (delta x) and top (delta y) edges of 
+the target text. The default is 20 (points) each, roughly a couple of lines' 
+worth. The left side is limited to the page edge, and the top side is limited
+to the page top.
+
+Note that the upper edge of the text is where the I<previous> line left off, 
+so if there is a top margin on the target text (e.g., it's a heading), the
+offset will be from there, not the text itself, and the view window may 
+therefore be up higher on the page than you would otherwise expect. This has
+been known to confuse users with a PDF Reader which displays a fixed-size popup 
+window showing the target a link will go to, which might even miss the target 
+text entirely if the deltas are too large.
+
+=back
 
 =back
 

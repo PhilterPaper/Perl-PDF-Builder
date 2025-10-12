@@ -13,7 +13,7 @@ use version;
  
 # >>>>>>>>>>>>>>>>>> CRITICAL !!!! <<<<<<<<<<<<<<<<<<<<<<
 # when update column() tags and CSS with new/changed support, also update 
-# Docs.pm (immediately) and #195 list (AT release).
+# Column_docs.pm (immediately) and perhaps #195 list (AT release).
 # any examples/ changes update Examples on website (AT release)
 
 # VERSION
@@ -4867,6 +4867,18 @@ sub pass_end_state {
     # as well as a record of the annotations in %state
 
     if (!$rc || $pass_count == $max_passes) {
+	# where to put UL corner of target window relative to target text
+        my $delta_x = 20; # 20pt to LEFT
+	my $delta_y = 20;
+	if (defined $opts{'deltas'} && ref($opts{'deltas'}) eq 'ARRAY') {
+	    my @deltas = @{ $opts{'deltas'} };
+	    if (@deltas == 2) {
+		$delta_x = $deltas[0];
+		$delta_y = $deltas[1];
+	    }
+	}
+	my @media_size = $pdf->mediabox(); # [0] min x, [3] max y
+
         # go through list of annotations to create at '_ref' tag links
 	my $cur_src_page = 0; # minimize openings of source page. min valid 1
 	my $cur_tgt_page = 0; # minimize openings of target page. min valid 1
@@ -4905,9 +4917,9 @@ sub pass_end_state {
 	    my $fit = $sptr->{'fit'};
 		# if fit includes two % fields, replace by tx and ty
 		# (for xyz fit: 'xyz,%x,%y,null')
-		my $val = max(int($tx-100),0);
+		my $val = max(int($tx-$delta_x),$media_size[0]);
 		$fit =~ s/%x/$val/;
-		$val = int($ty+100);  # TBD min with page height
+		$val = min(int($ty+$delta_y),$media_size[3]);
 		$fit =~ s/%y/$val/;
 	        # replace any 'undef' by 'null' in $fit
 	        $fit =~ s/undef/null/g;
@@ -4973,10 +4985,10 @@ sub pass_end_state {
 	        } else {
 		    # id defined elsewhere, at $tgt_page from target
 		    if ($fit eq '') {
-		        # default fit is xyz x-100,y+100,undef
+		        # default fit is xyz x-$delta_x,y+$delta_y,undef
 		        # x,y from location of target on page
-		        $fit = "xyz,".max(int($tx)-100,0).",".
-		                      (int($ty)+100).",null";
+		        $fit = "xyz,".max(int($tx)-$delta_x,$media_size[0]).",".
+		                      min(int($ty)+$delta_y,$media_size[3]).",null";
 		    }
 		    # internal link to page object at $tx,$ty fit
                     # skip if Named Destination instead of a phys page no
@@ -5000,15 +5012,15 @@ sub pass_end_state {
 	    my $x   = $ptr->{$name}{'x'};
 	    my $y   = $ptr->{$name}{'y'};
 
-	    # if no fit given, set to xyz,x-100,y+100,undef
+	    # if no fit given, set to xyz,x-$delta_x,y+$delta_y,undef
 	    if ($fit eq '') {
-		$fit = "xyz,".max(int($x)-100,0).",".
-		              (int($y)+100).",null";
+		$fit = "xyz,".max(int($x)-$delta_x,$media_size[0]).",".
+		              min(int($y)+$delta_y,$media_size[3]).",null";
 	    }
 	    # if $x and $y in fit, replace with integer values
-	    my $val = max(int($x)-100,0);
+	    my $val = max(int($x)-$delta_x,$media_size[0]);
 	    $fit =~ s/\$x/$val/;
-	    $val = int($y)+100;
+	    $val = min(int($y)+$delta_y,$media_size[3]);
 	    $fit =~ s/\$y/$val/;
             my @fits = ();
 	    @fits = split /,/, $fit;
