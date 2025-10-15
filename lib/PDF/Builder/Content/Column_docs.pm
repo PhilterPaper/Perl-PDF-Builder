@@ -15,7 +15,7 @@ our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
 
 =head1 NAME
 
-PDF::Builder::Content::Column_docs
+PDF::Builder::Content::Column_docs -- column text formatting system
 
 =head1 PDF::Builder::Content::Text/column and related routines
 

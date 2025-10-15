@@ -208,6 +208,73 @@ and for declaring output glyph generation).
 See L</Core Fonts>, L</PS Fonts> and L</TrueType Fonts> in L</FONT METHODS> 
 for additional information.
 
+=head2 Supported Perl Versions
+
+PDF::Builder intends to support all major Perl versions that were released in
+the past six years, plus one, in order to continue working for the life of
+most long-term-stable (LTS) server distributions.
+See the L<https://www.cpan.org/src/> table 
+B<First release in each branch of Perl> x.xxxx0 "Major" release dates.
+
+For example, a version of PDF::Builder released on 2018-06-05 would support 
+the last major version of Perl released I<on or after> 2012-06-05 (5.18), and 
+then one before that, which would be 5.16. Alternatively, the last major 
+version of Perl released I<before> 2012-06-05 is 5.16.
+
+The intent is to avoid expending unnecessary effort in supporting very old
+(obsolete) versions of Perl.
+
+=head3 Anticipated Support Cutoff Dates
+
+B<Note> that these are I<not> hard and fast dates. In particular, we develop
+on Strawberry Perl, which sometimes falls a little behind the official Perl
+release!
+
+=over
+
+=item * 
+
+5.30 current minimum supported version, until next PDF::Builder release after 20 June, 2026
+
+=item * 
+
+5.32 future minimum supported version, until next PDF::Builder release after 20 May, 2027.
+
+=item * 
+
+5.34 not released under Strawberry Perl, expected to be skipped
+
+=item * 
+
+5.36 future minimum supported version, until next PDF::Builder release after 28 May, 2028. This is currently our primary development
+version.
+
+=item * 
+
+5.38 future minimum supported version, until next PDF::Builder release after 02 Jul, 2029.
+
+=item * 
+
+5.40 future minimum supported version, until next PDF::Builder release after 09 June, 2030. This is currently the maximum tested version.
+
+=item * 
+
+5.42 future minimum supported version, until next PDF::Builder release after 03 July, 2031.
+
+=back
+
+If you need to use this module on a server with an extremely out-of-date version
+of Perl, consider using either plenv or Perlbrew to run a newer version of Perl
+without needing admin privileges.
+
+On the other hand, any feature in PDF::Builder should continue to work 
+unchanged for the life of most long-term-stable (LTS) server distributions.
+Their lifetime is usually about six (6) years. Note that this does B<not>
+constitute a statement of warranty, but that we I<intend> to try to keep any
+particular release of PDF::Builder working for a period of years. Of course,
+it helps if you periodically update your Perl installation to something
+released in the recent past.
+
 =head3 Some Internal Details
 
 Some of the following may be a bit scary or confusing to beginners, so don't 

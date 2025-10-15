@@ -1,9 +1,12 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-09-06  UNRELEASED
+3.028     2025-10-14  UNRELEASED
 * = work in progress
 
   ==== New features
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm, Version, Makefile.PL
+      Prepare for 3.028 release, new minimum Perl version is 5.30.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Content/Text.pm, 
       lib/PDF/Builder/Docs.pm, MANIFEST, examples/Column_xrefs.pl (new), 
