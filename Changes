@@ -1,14 +1,26 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-10-14  UNRELEASED
+3.028     2025-10-20  UNRELEASED
 * = work in progress
 
   ==== New features
 
-    lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm, Version, Makefile.PL
-      Prepare for 3.028 release, new minimum Perl version is 5.30.
+    lib/PDF/Builder/Content/Text-Column_docs.pm
+     Reduce heading (h1..h6) top margins, and bottom margins by somewhat more, 
+      to give a more balanced appearance and consume less vertical space.
+       h1 (200% font size) top/bottom margins 75%/75%   -> 40%/30%
+       h2 (150% font size) top/bottom margins 100%/100% -> 54%/40%
+       h3 (115% font size) top/bottom margins 130%/130% -> 68%/51%
+       h4 (100% font size) top/bottom margins 150%/150% -> 82%/61%
+       h5 (85% font size)  top/bottom margins 175%/175% -> 95%/71%
+       h6 (75% font size)  top/bottom margins 200%/200% -> 106%/80%
+      These are the default values. You are free to change them in CSS if you
+      find a different balance more pleasing to you.
 
-    lib/PDF/Builder.pm, lib/PDF/Builder/Content/Text.pm, 
+    lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm, Version, Makefile.PL
+     Prepare for 3.028 release, new minimum Perl version is 5.30.
+
+*   lib/PDF/Builder.pm, lib/PDF/Builder/Content/Text.pm, 
       lib/PDF/Builder/Docs.pm, MANIFEST, examples/Column_xrefs.pl (new), 
       examples/Column_md_xrefs.pl (new), examples/README, 
       examples/examples.output, tools/3_examples.pl, INFO/SPONSORS

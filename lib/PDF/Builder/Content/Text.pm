@@ -1612,38 +1612,38 @@ sub _default_css {
    #$style{'h6'}->{'text-transform'} = 'uppercase'; # heading this level CAPS
     $style{'h6'}->{'font-weight'} = 'bold'; # all headings bold
     $style{'h6'}->{'font-size'} = '75%'; # % of original font-size
-    $style{'h6'}->{'margin-top'} = '200%'; # relative to the font-size
-    $style{'h6'}->{'margin-bottom'} = '200%'; # relative to the font-size
+    $style{'h6'}->{'margin-top'} = '106%'; # relative to the font-size
+    $style{'h6'}->{'margin-bottom'} = '80%'; # relative to the font-size
     $style{'h6'}->{'display'} = 'block'; # block (start on new line)
 
     $style{'h5'}->{'font-weight'} = 'bold';
     $style{'h5'}->{'font-size'} = '85%';
-    $style{'h5'}->{'margin-top'} = '175%';
-    $style{'h5'}->{'margin-bottom'} = '175%';
+    $style{'h5'}->{'margin-top'} = '95%';
+    $style{'h5'}->{'margin-bottom'} = '71%';
     $style{'h5'}->{'display'} = 'block';
 
     $style{'h4'}->{'font-weight'} = 'bold';
-    $style{'h4'}->{'font-size'} = '100%';
-    $style{'h4'}->{'margin-top'} = '150%';
-    $style{'h4'}->{'margin-bottom'} = '150%';
+    $style{'h4'}->{'font-size'} = '95%';
+    $style{'h4'}->{'margin-top'} = '82%';
+    $style{'h4'}->{'margin-bottom'} = '61%';
     $style{'h4'}->{'display'} = 'block';
 
     $style{'h3'}->{'font-weight'} = 'bold';
     $style{'h3'}->{'font-size'} = '115%';
-    $style{'h3'}->{'margin-top'} = '130%';
-    $style{'h3'}->{'margin-bottom'} = '130%';
+    $style{'h3'}->{'margin-top'} = '68%';
+    $style{'h3'}->{'margin-bottom'} = '51%';
     $style{'h3'}->{'display'} = 'block';
 
     $style{'h2'}->{'font-weight'} = 'bold';
     $style{'h2'}->{'font-size'} = '150%';
-    $style{'h2'}->{'margin-top'} = '100%';
-    $style{'h2'}->{'margin-bottom'} = '100%';
+    $style{'h2'}->{'margin-top'} = '54%';
+    $style{'h2'}->{'margin-bottom'} = '40%';
     $style{'h2'}->{'display'} = 'block';
 
     $style{'h1'}->{'font-weight'} = 'bold';
     $style{'h1'}->{'font-size'} = '200%';
-    $style{'h1'}->{'margin-top'} = '75%';
-    $style{'h1'}->{'margin-bottom'} = '75%';
+    $style{'h1'}->{'margin-top'} = '40%';
+    $style{'h1'}->{'margin-bottom'} = '30%';
     $style{'h1'}->{'display'} = 'block';
 
     $style{'i'}->{'font-style'} = 'italic';

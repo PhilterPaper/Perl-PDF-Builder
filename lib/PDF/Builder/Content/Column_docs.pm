@@ -1123,7 +1123,9 @@ B<list-style-type> (marker description, see also _marker-text/before/after)
 
 =item *
 
-B<margin-top/right/bottom/left> (pt, bare number = pt, % of font-size)
+B<margin-top/right/bottom/left> (pt, bare number = pt, % of font-size). 
+Note that adjacent bottom and top margins will be collapsed to use the 
+I<larger> amount of the two.
 
 =item *
 
@@ -1229,7 +1231,7 @@ list-style-image (use an image as a list bullet)
 
 =item *
 
-margin (update the four C<margin-*> properties in one setting, and 'auto' value)
+margin (update the four C<margin-*> properties in one setting, add 'auto' value)
 
 =item *
 
