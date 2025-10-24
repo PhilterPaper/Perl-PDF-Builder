@@ -1,15 +1,9 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-10-21  UNRELEASED
+3.028     2025-10-24  UNRELEASED
 * = work in progress
 
   ==== New features
-
-    t/svg.t
-     Remove section of comparison that included 'gray' color as RGB. The old
-      SVGPDF library used 3 x 7F, while the new one uses a different color
-      library which defines gray as 3 x 80. This change allows testing with
-      either the old or the new version of SVGPDF. Re #237.
 
     lib/PDF/Builder/Content/Text-Column_docs.pm
      Reduce heading (h1..h6) top margins, and bottom margins by somewhat more, 
@@ -199,6 +193,16 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
      Per change in PDF::API2, add to description of endpath/end method.
 
   ==== Bug fixes
+
+    t/svg.t
+     Remove section of comparison that included 'gray' color as RGB. The old
+      SVGPDF library used 3 x 7F, while the new one uses a different color
+      library which defines gray as 3 x 80. This change allows testing with
+      either the old or the new version of SVGPDF. Re #237.
+
+    lib/PDF/Builder/Content/Text.pm
+     Fixed a code path where a paragraph top margin could be applied twice,
+      resulting in excessive space between paragraphs or with headings.
 
     lib/PDF/Builder/Docs.pm
      Ref #231, explain that an externally produced PDF (from "Canva") was 

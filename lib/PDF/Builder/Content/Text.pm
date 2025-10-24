@@ -1522,8 +1522,10 @@ sub _default_css {
     $style{'body'}->{'_fs'} = $font_size; # carry current value
     $style{'body'}->{'text-height'} = $leading;
 
+    # HARD-CODED default for paragraph indent, top margin
     my $para = [ 1, 1*$font_size, 0 ]; 
     # if font_size changes, change indentation
+    # REVISED default if 'para' option given
     if (defined $opts{'para'}) {
        #$para->[0]  # flag: 0 = <p> is normal top of paragraph (with indent
        #    and margin), 1 = at top of column, so suppress extra top margin
@@ -1533,6 +1535,7 @@ sub _default_css {
     }
     # $para flag determines whether these settings are used or ignored (=1, 
     # we are at the top of a column, ignore text-indent and margin-top)
+    # set paragraph CSS defaults, may be overridden below
     $style{'p'}->{'text-indent'} = $para->[1];
     $style{'p'}->{'margin-top'} = $para->[2];
 
@@ -2005,8 +2008,9 @@ sub _output_text {
 		        # at top of column, so suppress extra space
 		        $add_y = 0; # no extra top margin if at column top
 		        $para = 0; # for rest of column, extra top margin
-		    } else {
-		        $add_y = $properties[-1]->{'margin-top'}; # extra top margin
+		   #} else {
+		   #   	# extra top margin
+		   #    $add_y = _size2pt($properties[-1]->{'margin-top'}, $fs);
 		    }
 	            # p with cont=>1 is continuation of paragraph in new column 
 	            # no indent and no top margin... just start a new line

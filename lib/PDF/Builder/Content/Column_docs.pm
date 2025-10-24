@@ -270,11 +270,14 @@ is 1.125 (12.5% added to font).
 
 =item 'para' => [ $indent, $top-margin ]
 
-When starting a new paragraph, these are the default indentation (in points),
-and the extra vertical spacing for a top margin on a paragraph. The default is
+When starting a new paragraph, these are the I<default> indentation (in points),
+and the extra vertical spacing for a top margin on a paragraph. Otherwise, the 
+default is
 C<[ 1*$font_size, 0 ]> (1em indent, 0 additional vertical space). Either may 
 be overridden by the appropriate CSS settings. An I<outdent> may be defined 
 with a negative indentation value. These apply to all C<$markup> types.
+
+At the top of a column, any top margin (not just for paragraphs) is ignored.
 
 =item 'outline' => "color string"
 
