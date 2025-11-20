@@ -1137,7 +1137,13 @@ than one (except 'none') separated by spaces)
 
 =item *
 
-B<text-height> (leading, as ratio of baseline-spacing to font-size)
+B<line-height> (leading, as ratio of baseline-spacing to font-size). Currently,
+percentage of font-size and absolute units (e.g., pt) are B<not> supported. The
+default value is 1.125 (18pt line-to-line for font-size 16).
+
+B<Note:> B<text-height>, the former I<incorrect> name for this property, is 
+still supported (as an alias for B<line-height>) through release 3.029, but may 
+be withdrawn as soon as release 3.030. Update your code if you use it!
 
 =item *
 

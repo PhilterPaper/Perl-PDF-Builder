@@ -1270,7 +1270,7 @@ sub column {
    #if ($text->{' fontsize'} > 0) { $font_size = $text->{' fontsize'}; }
     if (defined $opts{'font_size'}) { $font_size = $opts{'font_size'}; }
     
-    my $leading = 1.125; # basic default, override with text-height
+    my $leading = 1.125; # basic default, override with line-height
     if (defined $opts{'leading'}) { $leading=$opts{'leading'}; }
     my $marker_width = 2*$font_size;  # 2em space for list markers
     my $marker_gap = $font_size;   # 1em space between list marker and item
@@ -1309,11 +1309,11 @@ sub column {
     my ($col_min_x, $col_min_y, $col_max_x, $col_max_y) = 
         _get_col_extents(@outline);
     my $start_y = $col_max_y; # default is at top of column
-    my $para = 1; # paragraph is at top of column, don't use margin-top
+    my $topCol = 1; # paragraph is at top of column, don't use margin-top
     $start_y = $opts{'start_y'} if defined $opts{'start_y'};
     if ($start_y != $col_max_y) { 
-	# para reset to 0 b/c not at top of column
-	$para = 0; # go ahead with any extra top margin
+	# topCol reset to 0 b/c not at top of column
+	$topCol = 0; # go ahead with any extra top margin
     }
 
     # 'page' parameters
@@ -1393,7 +1393,7 @@ sub column {
     # attribute list. on exit from tag, set attributes to restore settings
     @mytext = _tag_attributes($markup, @mytext);
 
-    ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $page, $text, $grfx, $restore, $para, $font_size, $markup, $marker_width, $marker_gap, $leading, $opts{'page'}, $page_numbers, $pass_count, $max_passes, $state, @mytext);
+    ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $page, $text, $grfx, $restore, $topCol, $font_size, $markup, $marker_width, $marker_gap, $leading, $opts{'page'}, $page_numbers, $pass_count, $max_passes, $state, @mytext);
 
     if ($rc > 1) {
 	# restore = 2 request restore to @entry_state for rc=0, 3 for 1
@@ -1520,7 +1520,7 @@ sub _default_css {
 
     $style{'body'}->{'font-size'} = $font_size;
     $style{'body'}->{'_fs'} = $font_size; # carry current value
-    $style{'body'}->{'text-height'} = $leading;
+    $style{'body'}->{'line-height'} = $leading;
 
     # HARD-CODED default for paragraph indent, top margin
     my $para = [ 1, 1*$font_size, 0 ]; 
@@ -1581,7 +1581,8 @@ sub _default_css {
     $style{'font'}->{'display'} = 'inline';
     $style{'span'}->{'display'} = 'inline';
 
-    $style{'ul'}->{'list-style-type'} = '.u'; # disc, circle, square, box, none
+    $style{'ul'}->{'list-style-type'} = '.u';
+      # disc, circle, square, box, none
     $style{'ul'}->{'list-style-position'} = 'outside'; # or inside or numeric
     $style{'ul'}->{'display'} = 'block'; 
     $style{'ul'}->{'margin-top'} = '50%';  # relative to text's font-size
@@ -1596,8 +1597,9 @@ sub _default_css {
     $style{'_sl'}->{'display'} = 'block'; 
     $style{'_sl'}->{'margin-top'} = '50%';  # relative to text's font-size
     $style{'_sl'}->{'margin-bottom'} = '50%'; 
-    $style{'ol'}->{'list-style-type'} = '.o'; # decimal, lower-roman, upper-roman, lower-alpha, upper-alpha, none
-                                              # arabic is synonym for decimal
+    $style{'ol'}->{'list-style-type'} = '.o';
+      # decimal, lower-roman, upper-roman, lower-alpha, upper-alpha, none
+      # arabic is synonym for decimal
     $style{'ol'}->{'list-style-position'} = 'outside'; # or inside or numeric
     $style{'ol'}->{'display'} = 'block'; 
     $style{'ol'}->{'margin-top'} = '50%';  # relative to text's font-size
@@ -1690,7 +1692,7 @@ sub _default_css {
     $style{'blockquote'}->{'margin-bottom'} = '56%';
     $style{'blockquote'}->{'margin-left'} = '300%';  # want 3em TBD
     $style{'blockquote'}->{'margin-right'} = '300%';
-    $style{'blockquote'}->{'text-height'} = '1.00'; # close spacing
+    $style{'blockquote'}->{'line-height'} = '1.00'; # close spacing
     $style{'blockquote'}->{'font-size'} = '80%'; # smaller type
 
     # only browser (URL) applies here, so leave browser style
@@ -1809,9 +1811,10 @@ sub _tag_attributes {
 
 	# VOID elements (br, hr, img, area, base, col, embed, input,
 	# link, meta, source, track, wbr) do not have a separate end
-	# tag. also incude style and defaults in this list in case a stray 
-	# one shows up (does not have an end tag). this is NOT really
-	# "self-closing", although the terms are often used interchangeably.
+	# tag (no children). also incude style and defaults in this list in 
+	# case a stray one shows up (does not have an end tag). this is NOT 
+	# really "self-closing", although the terms are often used 
+	# interchangeably.
 	if ($tag eq 'br' || $tag eq 'hr' || $tag eq 'img' || $tag eq 'area' ||
 	    $tag eq 'base' || $tag eq 'col' || $tag eq 'embed' || 
 	    $tag eq 'input' || $tag eq 'link' || $tag eq 'meta' ||
@@ -1827,7 +1830,7 @@ sub _tag_attributes {
 
 # the workhorse of the library: output text (modified by tags) in @mytext
 sub _output_text {
-    my ($start_y, $min_y, $outl, $pdf, $page, $text, $grfx, $restore, $para, 
+    my ($start_y, $min_y, $outl, $pdf, $page, $text, $grfx, $restore, $topCol, 
 	$font_size, $markup, $marker_width, $marker_gap, $leading, $optpage,
 	$page_numbers, $pass_count, $max_passes, $state, @mytext)
         = @_;
@@ -1909,7 +1912,7 @@ sub _output_text {
 	if (!keys %{$mytext[$el]}) { next; }
 	
 	if ($mytext[$el]->{'tag'} ne '') {
-            # ===================================== tags/end-tags
+            # tags/end-tags
 	    # should be a tag or end-tag element defined
 	    # for the most part, just set properties at stack top. sometimes
 	    # special actions need to be taken, with actual output (e.g.,
@@ -1926,16 +1929,7 @@ sub _output_text {
 		# processed. some tags need some special processing if they 
 		# do something that isn't just a property change
 
-                # special directives such as (TBD)
-		# <endc> force end of column here (while still filling line)
-		#   e.g., to prevent an orphan
-		# <nolig></nolig> forbid ligatures in this range
-		# <lig gid='nnn'>c</lig> replace character(s) by a ligature
-		# <alt gid='nnn'>c</alt> replace character(s) by alternate glyph
-		#   such as a swash. font-dependent
-		# <hyp>, <nohyp> control hypenation in a word (and remember
-		#   rules when see this word again)
-
+		# properties stack new element ---------------------------------
 	        # 1. dup the top of the properties stack for a new set of
 	        #   properties to be modified by attributes and CSS
                 push @properties, {};
@@ -1973,7 +1967,18 @@ sub _output_text {
 		#   the stack top, but anything not a real property will end
 		#   up not being used.
 	        _update_properties($properties[-1], $mytext[$el]);
+                # 6a. 3.028 and 3.029 releases, allow text-height as alias
+		#    for line-height (currently only multiplier of font size)
+		if (defined $properties[-1]->{'text-height'}) {
+		    $properties[-1]->{'line-height'} = 
+		      delete $properties[-1]->{'text-height'}; }
 	        
+		# update current_prop hash -------------------------------------
+		# properties stack already updated 
+		# some current_prop must be updated here, such as stroke
+		#   color for <hr>, font-size for top and bottom margins
+
+		# block level elements -----------------------------------------
 	        if ($properties[-1]->{'display'} eq 'block') {
 		    $need_line = 1; 
 		    $start_y = $next_y;
@@ -1999,15 +2004,15 @@ sub _output_text {
 		# current font size (pt) before properties applied
 		my $fs = $current_prop->{'font-size'};
 	        if      ($tag eq 'p') {
-                    # para=1 we're at top of column (no extra margin)
-		    # per $para (or default), drop down a line?, indent?
+                    # topCol=1 we're at top of column (no extra margin)
+		    # per $topCol (or default), drop down a line?, indent?
 		    # if CSS changed to display=inline for some reason, what to do?
 		    # no y change if at top of column, but still indent
 		    $add_x = $properties[-1]->{'text-indent'}; # indent by para indent amount
-		    if ($para) {
+		    if ($topCol) {
 		        # at top of column, so suppress extra space
 		        $add_y = 0; # no extra top margin if at column top
-		        $para = 0; # for rest of column, extra top margin
+		        $topCol = 0; # for rest of column, extra top margin
 		   #} else {
 		   #   	# extra top margin
 		   #    $add_y = _size2pt($properties[-1]->{'margin-top'}, $fs);
@@ -2055,16 +2060,17 @@ sub _output_text {
 		    # indent each list level by same amount (initially 0)
 	            $properties[-1]->{'_left'} = $properties[-1]->{'_left_nest'};
 		    $properties[-1]->{'_left_nest'} += $marker_width+$marker_gap;
-	        } elsif ($tag eq 'img') { # hspace and vspace already 
+	       #} elsif ($tag eq 'img') { # hspace and vspace already 
 		    # margins, width, height
-		    # TBD for 3.028 currently ignored
+		    # TBD for 3.029 currently ignored
 	        } elsif ($tag eq 'a') {
-	        } elsif ($tag eq 'pre') { 
+		    # no special treatment at this point
+	       #} elsif ($tag eq 'pre') { 
 	            # white-space etc. no consolidating whitespace
-                    # TBD for 3.028 currently ignored
-	        } elsif ($tag eq 'code') { # font-family sans-serif + 
+                    # TBD for 3.029 currently ignored
+	       #} elsif ($tag eq 'code') { # font-family sans-serif + 
 	            # constant width 75% font-size
-		    # TBD for 3.028 currently ignored
+		    # TBD for 3.029 currently ignored
 	        } elsif ($tag eq 'blockquote') {
 		} elsif ($tag eq 'li') {
 		    # where to start <li> text
@@ -2472,7 +2478,7 @@ sub _output_text {
 		    # tptr = pointer (ref) to matching target in xreft
 		    my $sindex = $state->{'sindex'};
 		    my ($sptr, $tfpn, $tptr);
-		    if ($pass_count == 1) {
+		    if ($pass_count == 1 && defined $sindex) {
 			# add new entry at $sindex
 			$state->{'xrefs'}->[$sindex] = {};
 			# ptr to hash {id} and its siblings (see Builder.pm)
@@ -2496,7 +2502,7 @@ sub _output_text {
 			#  title text and other_pg have been laid down. 
 			#  if $page_numbers == 2, a change in ppn's either 
 			#  source or target is of concern TBD
-		        $sptr = $state->{'xrefs'}->[$sindex];
+		        $sptr = $state->{'xrefs'}->[$sindex] if defined $sindex;
 			# nothing in this section to warrant changed flag
 			#  and we're about to output a fresh copy of link text
 			#  and 'other_pg' text
@@ -2583,17 +2589,29 @@ sub _output_text {
 		    $ptr->{$name}{'x'}   = $x;   # on subsequent passes
 		    $ptr->{$name}{'y'}   = $y;
 
+                # special directives such as (TBD)
+		# <_endc> force end of column here (while still filling line)
+		#   e.g., to prevent an orphan
+		# <_nolig></_nolig> forbid ligatures in this range
+		# <_lig gid='nnn'>c</_lig> replace character(s) by a ligature
+		# <_alt gid='nnn'>c</_alt> replace character(s) by alternate
+		#   glyph such as a swash. font-dependent
+		# <_hyp>, <_nohyp> control hypenation in a word (and remember
+		#   rules when see this word again)
+
 		} else {
 		    # unsupported or invalid tag found
 		    # keep list of those found, error message once per tag
+		    #         per column() call
 		    if (!defined $bad_tags{$tag}) {
-		        print STDERR "Tag '$tag' either invalid or currently unsupported.\n";
+		        print STDERR "Tag <$tag> either invalid or currently unsupported.\n";
 			$bad_tags{$tag} = 1;
 		    }
 		    # treat as <span>
 	            $tag = $mytext[$el]->{'tag'} = 'span';
 		}
 
+		# any common post-tag work -------------------------------------
 		# does this tag have an id attribute, and is it in one or
 		# more of the watch lists to add to references?
                 # _reft tags already checked that id= given
@@ -2702,7 +2720,8 @@ sub _output_text {
 
 		# end of handling starting tags <tag>
 
-	    } else { # ================ </tags> end tags ======================
+	    # ================ </tags> end tags ======================
+	    } else {
 		# take care of 'end' tags. some end tags need some special 
 		# processing if they do something that isn't just a 
 		# property change. current_prop should be up to date.
@@ -2712,6 +2731,7 @@ sub _output_text {
 		# time you hit the end tag
 		# this tag post-processing is BEFORE vertical margins and
 		#   popping of properties stack for this and nested tags
+		# processing specific to specific end tags ---------------------
 		if      ($tag eq 'ul') { 
 		    $list_depth_u--; 
 	        } elsif ($tag eq '_sl') {
@@ -2741,6 +2761,7 @@ sub _output_text {
 		    $current_prop->{'display'} = 'inline';
 	        }
 
+		# pop properties stack and remove element ----------------------
 		# last step is to pop the properties stack and remove this
 		# element, its start tag, and everything in-between. adjust 
 		# $el and loop again.
@@ -2768,7 +2789,8 @@ sub _output_text {
 
 	    # end of tag processing
 
-	} else { # ========================== text to output =================
+	# ========================== text to output =================
+	} else {
             # normally text is not empty '', but sometimes such may come
 	    # through. a blank text is still valid
             if ($mytext[$el]->{'text'} eq "\n") { next; } # EOL too
@@ -2859,9 +2881,9 @@ sub _output_text {
 	    # the incremental left margin, and the running total
 	    $current_prop->{'margin-left'} = _size2pt($properties[-1]->{'margin-left'}, $fs);
 	    $properties[-1]->{'_left'} += $current_prop->{'margin-left'};
-	    # text-height is expected to be a multiplier to font-size, so
+	    # line-height is expected to be a multiplier to font-size, so
 	    # % or pts value would have to be converted back to ratio TBD
-	    $current_prop->{'text-height'} = $properties[-1]->{'text-height'};
+	    $current_prop->{'line-height'} = $properties[-1]->{'line-height'};
 	    $current_prop->{'display'} = $properties[-1]->{'display'};
 	    $current_prop->{'list-style-type'} = $properties[-1]->{'list-style-type'};
 	    $current_prop->{'list-style-position'} = $properties[-1]->{'list-style-position'};
@@ -2875,13 +2897,13 @@ sub _output_text {
 	    $topm = $current_prop->{'margin-top'};
             my $vmargin = $botm;
 	    if ($botm < $topm) { $vmargin = $topm; }
-            if (!$para && $vmargin > 0) { 
+            if (!$topCol && $vmargin > 0) { 
 		# not at the top of the column, handle any requested vmargin
 		# TBD: consider checking that display=block before doing a
 		#      vertical margin?
 	        $start_y -= $vmargin; # could be too low for a new line!
 	    }
-	    $para = 0; # for rest of column honor vert margin requests
+	    $topCol = 0; # for rest of column honor vert margin requests
 	    # will set botm to new margin-bottom after this block is done
 
 	    # we're ready to roll, and output the actual text itself
@@ -2904,6 +2926,7 @@ sub _output_text {
 	    # TBD blank preserve for <code> or <pre> (CSS white-space)
 	    $phrase =~ s/\s+/ /g;
 
+	    # click areas ------------------------------------------------------
 	    # if 'annot' field (attribute) exists for a text, we want to define
 	    # a rectangle around it for an annotation click area (several
 	    # rectangles, even across multiple columns, are possible if the
@@ -2921,6 +2944,7 @@ sub _output_text {
 		# the [sppn, [ULx,ULy, LRx,LRy]]
 	    }
 
+	    # output text itself -----------------------------------------------
 	    # a phrase may have multiple words. see if entire thing fits, and if
 	    # not, start trimming off right end (split into a new element)
     
@@ -2943,14 +2967,14 @@ sub _output_text {
 		# don't forget to set the new start_y when need_line=1
 	        if ($need_line) {
 	            # first, set font (current, or something specified)
-		    if ($para) { # at top of column, font undefined
+		    if ($topCol) { # at top of column, font undefined
 	                $text->font($pdf->get_font('face'=>'current'), $fs);
 		    }
 
 	            # extents above and below the baseline (so far)?
 	            ($asc, $desc, $desc_leading) = 
 	                _get_fv_extents($pdf, $font_size, 
-				        $properties[-1]->{'text-height'});
+				        $properties[-1]->{'line-height'});
 	            $next_y = $start_y - $add_y - $asc + $desc_leading;
 	            # did we go too low? will return -1 (start_x) and 
 		    #   remainder of input
@@ -3110,7 +3134,7 @@ sub _output_text {
 	            # extents above and below the baseline (so far)?
 	            my ($n_asc, $n_desc, $n_desc_leading) = 
 	                _get_fv_extents($pdf, $current_prop->{'font-size'}, 
-				        $properties[-1]->{'text-height'});
+				        $properties[-1]->{'line-height'});
 		    $line_extents[1] = $x;  # current position
 		    ($rc, @line_extents) = 
 		        _revise_baseline(@line_extents, $n_asc, $n_desc, $n_desc_leading, $w);
@@ -3336,6 +3360,8 @@ sub _output_text {
             last;
 	    
 	}  # text to output
+
+	# =================== done with this element? ==========================
 	# end of processing this element in mytext, UNLESS it was text (phrase)
 	# and we ran out of column space!
 
@@ -3458,7 +3484,7 @@ sub _init_current_prop {
     # NOTE that all lengths must be in points (unitless), ratios are
     # pure numbers, named things are strings.
     $cur_prop->{'font-size'} = -1;
-    $cur_prop->{'text-height'} = 0;
+    $cur_prop->{'line-height'} = 0; # alias is text-height until release 3.030
     $cur_prop->{'text-indent'} = 0;
     $cur_prop->{'color'} = 'snork'; # PDF default is black
     $cur_prop->{'font-family'} = 'yoMama';  # force a change
@@ -3471,11 +3497,14 @@ sub _init_current_prop {
     $cur_prop->{'margin-left'} = '0'; 
     $cur_prop->{'text-align'} = 'left';
    #$cur_prop->{'text-transform'} = 'none';
-   #$cur_prop->{'border-style'} = 'none';
-   #$cur_prop->{'border-width'} = '1pt'; 
-   #$cur_prop->{'border-color'} = 'inherit'; 
+   #$cur_prop->{'border'} = 'none';   # NOT inherited
+   #$cur_prop->{'border-style'} = 'none';   # NOT inherited
+   #$cur_prop->{'border-width'} = '1pt';    # NOT inherited
+   #$cur_prop->{'border-color'} = 'inherit';    # NOT inherited
     $cur_prop->{'text-decoration'} = 'none';
-    $cur_prop->{'display'} = 'block';
+   #$cur_prop->{'text-decoration-skip-ink'}; for underline etc.
+    $cur_prop->{'display'} = 'block'; # inline, TBD inline-block, none
+    $cur_prop->{'width'} = '0';  # currently <hr> only, NOT inherited
     $cur_prop->{'list-style-type'} = '.u';
     $cur_prop->{'list-style-position'} = 'outside';
     $cur_prop->{'_marker-before'} = ''; 
@@ -3837,6 +3866,10 @@ sub _md1_hash {
     $html =~ s/&lt;_marker /<_marker /g;
     # probably could just do it with s/&lt;_/<_/ but the list is short
     
+    # blank lines within a list tend to create paragraphs in list items
+    $html =~ s/<li><p>/<li>/g;
+    $html =~ s#</p></li>#</li>#g;
+
     # standard Markdown ~~ line-through (strike-out) not recognized
     my $did_one = 1;
     while ($did_one) {
@@ -4527,7 +4560,6 @@ sub _size2pt {
 # for unordered, returns string .disc, .circle, .square, or .box
 #   (.box is nonstandard marker)
 #
-# TBD check that 'none' works properly (as <_sl>?)
 # TBD for ol, there are many other formats: cjk-decimal, decimal-leading-zero,
 #      lower-greek, upper-greek?, lower-latin = lower-alpha, upper-latin =
 #      upper-alpha, arabic-indic, -moz-arabic-indic, armenian, [-moz-]bengali, 
