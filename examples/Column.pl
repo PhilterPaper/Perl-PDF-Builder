@@ -465,8 +465,10 @@ if ($use_Table) {
 }
 
 # more pages with more extensive MD
-print "======================================================= pg 5-10\n";
+print "======================================================= pg 5-9\n";
 print "---- A README.md file for PDF::Builder\n";
+print "   You should see warnings about invalid or unknown tags <img>\n";
+print "   and <code>. These tags are not yet implemented and are ignored.\n";
 $page = $pdf->page();
 $grfx = $page->gfx();
 $text = $page->text();
@@ -808,7 +810,7 @@ while ($rc) {
 # for various lists, see Column_lists.pl
 
 # block quotes and font extent changes
-print "======================================================= pg 11\n";
+print "======================================================= pg 10\n";
 print "---- Block quotes\n";
 $page = $pdf->page();
 $grfx = $page->gfx();
@@ -875,7 +877,7 @@ if ($rc) {
 }
 
 # setting your own CSS for Markdown or none
-print "======================================================= pg 12\n";
+print "======================================================= pg 11\n";
 $page = $pdf->page();
 $grfx = $page->gfx();
 $text = $page->text();
@@ -955,16 +957,13 @@ if ($rc) {
 
 # --------------
 # some bogus tags and CSS properties
-# expect one message about invalid 'glotz' tag. notice that HTML::TreeBuilder
-#   does NOT insert an extra </glotz> tag into the stream, as one already found
-# expect 'snork' CSS to be ignored
 #
 print "---- Bogus HTML tags and CSS property names\n";
-print "   You may see warnings about an invalid HTML tag <glotz>. The invalid CSS\n";
-print "   property 'snork' does not yet have a message. Don't worry about these\n";
-print "   messages. They're intentional tests.\n";
+print "   You should see warnings about an invalid HTML tag <glotz> and invalid \n";
+print "   CSS properties 'snork' and 'snuck'. Don't worry about these messages,\n";
+print "   they're intentional tests.\n";
 $content = <<"END_OF_CONTENT";
-<p>
+<p> <!-- expect one message -->
 <glotz>This is within a 'glotz' tag</glotz>. 
 This is <glotz>within another.</glotz>
 </p>
@@ -977,6 +976,7 @@ restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,260, 500,60], 'outline'=>$magenta, 
 		  'para'=>[ 0, 10 ],
+                  'style'=>'color: green; snuck: shlump;',
 	         );
 if ($rc) { 
     print STDERR "Invalid tags and CSS example overflowed column!\n";
@@ -1068,6 +1068,196 @@ if ($rc) {
     print STDERR "5. <_move> and text-align example overflowed column!\n";
 }
  
+if (0) { ####################################### future MultiMarkdown
+##### needs <br>, <code>, <pre> support
+print "======================================================= pg 12-13\n";
+print "---- MultiMarkdown web page\n";
+$page = $pdf->page();
+$grfx = $page->gfx();
+$text = $page->text();
+footer(++$page_num, $pdf, $text);
+
+$content = << "END_OF_CONTENT";
+(This content is borrowed from the MultiMarkdown web page, https://fletcherpenney.net/multimarkdown)
+
+Title:	MultiMarkdown  
+Tags:	MultiMarkdown
+
+
+<!-- Navigational markup, not in MMD 
+<ul class="nav">
+<li class="nav-active"><a href="./">Intro</a></li>
+<li><a href="features/">Features</a></li>
+<li><a href="download/">Download</a></li>
+<li><a href="install/">Install</a></li>
+<li><a href="use/">Use</a></li>
+<li><a href="help/">Help</a></li>
+<li><a href="ports/">Ports</a></li>
+</ul> -->
+
+"As the world goes multi-platform with all of the new mobile operating
+systems, MultiMarkdown provides an easy way to share formatting between all of
+my devices. It's easy to learn (even for us mortals) and immediately useful."
+> --- David Sparks, [MacSparky.com](http://MacSparky.com/)
+
+"Personally, it's changed my game --- it's how I think now. Can't imagine
+writing more than a paragraph in anything that doesn't do MMD."
+> --- Merlin Mann, [kung fu
+> grippe](http://www.kungfugrippe.com/post/346554639/multimarkdown-in-case-that-last-thing-seemed-too)
+
+## What is MultiMarkdown? ##
+
+MultiMarkdown, or MMD,  is a tool to help turn  minimally marked-up plain text
+into  well formatted  documents,  including  HTML, PDF  (by  way of  [LaTeX]),
+[OPML], or  OpenDocument (specifically, Flat [OpenDocument]  or '.fodt', which
+can in  turn be converted into  [RTF], Microsoft Word, or  virtually any other
+word-processing format).
+
+MMD is a superset of the [Markdown] syntax, originally created by John Gruber.
+It adds multiple syntax features (tables,  footnotes, and citations, to name a
+few), in  addition to the various  output formats listed above  (Markdown only
+creates  HTML). Additionally,  it  builds in  "smart"  typography for  various
+languages (proper left- and right-sided quotes, for example).
+
+MultiMarkdown started as a Perl script, which was modified from the original
+Markdown.pl.
+
+MultiMarkdown v3 (aka 'peg-multimarkdown') was based on John MacFarlane's
+[peg-markdown].  It used a parsing expression grammar (PEG), and was written
+in C in order to compile on almost any operating system.  Thanks to work by
+Daniel Jalkut, MMD v3 was built so that it didn't have any external library
+requirements.
+
+MultiMarkdown v4 was basically a complete rewrite of v3.  It used the same
+basic PEG for parsing (Multi)Markdown text, but otherwise was almost
+completely rebuilt:
+
+MultiMarkdown v5 was largely the same codebase as v4, but the build system was
+restructured to use CMake.
+
+MultiMarkdown v6 is the biggest rewrite since v3.  The parser was completely
+rewritten to improve accuracy and (most importantly) performance.  v6 includes
+multiple new features, reimagines a couple of existing features, and
+deprecates one or two old syntax structures.
+
+For another description of what MultiMarkdown is, you can also check out a PDF
+[slide show] that describes and demonstrates how MultiMarkdown can be used.
+
+[slide show]:
+https://github.com/fletcher/MultiMarkdown-Gallery/raw/master/What-Is-MMD/what_is_mmd.pdf
+
+## Why should I use MultiMarkdown? ##
+
+Writing with MultiMarkdown allows you to separate the content and structure of
+your document  from the formatting. You  focus on the actual  writing, without
+having to  worry about  making the  styles of your  chapter headers  match, or
+ensuring the proper spacing between paragraphs. And with a little forethought,
+a single  plain text  document can  easily be  converted into  multiple output
+formats without having to rewrite the entire  thing or format it by hand. Even
+better, you  don't have to  write in  "computer-ese" to create  well formatted
+HTML or LaTeX commands. You just write, MultiMarkdown takes care of the rest.
+
+For example, instead of writing:
+
+	<p>In order to create valid 
+	<a href="http://en.wikipedia.org/wiki/HTML">HTML</a>, you 
+	need properly coded syntax that can be cumbersome for 
+	&#8220;non-programmers&#8221; to write. Sometimes, you
+	just want to easily make certain words <strong>bold
+	</strong>, and certain words <em>italicized</em> without
+	having to remember the syntax. Additionally, for example,
+	creating lists:</p>
+
+	<ul>
+	<li>should be easy</li>
+	<li>should not involve programming</li>
+	</ul>
+
+You simply write:
+
+	In order to create valid [HTML], you need properly
+	coded syntax that can be cumbersome for 
+	"non-programmers" to write. Sometimes, you just want
+	to easily make certain words **bold**, and certain 
+	words *italicized* without having to remember the 
+	syntax. Additionally, for example, creating lists:
+
+	* should be easy
+	* should not involve programming
+
+	[HTML]: http://en.wikipedia.org/wiki/HTML
+
+
+Additionally, you  can write a MultiMarkdown  document in any text  editor, on
+any operating system,  and know that it will be  compatible with MultiMarkdown
+on any other operating  system and processed into the same  output. As a plain
+text format, your documents  will be safe no matter how  many times you switch
+computers, operating  systems, or  favorite applications.  You will  always be
+able to open  and edit your documents,  even when the version  of the software
+you originally wrote them in is long gone.
+
+These features have prompted several people to use MultiMarkdown in the
+process of writing their books, theses, and countless other documents.
+
+There are many other reasons to use MultiMarkdown, but I won't get into all of
+them here.
+
+*By the way* --- this web site is created using MultiMarkdown. To view the MMD
+source for any  page, add `.txt` to the  end of the URL. If the  URL ends with
+`/`, then add `index.txt` to the end instead. This page, for example, would be
+["/multimarkdown/index.txt"](/multimarkdown/index.txt).
+
+## Enhancements for PDF::Builder ##
+### list problems with blank lines ###
+
+* bullet item 1
+
+* bullet item 2
+  second line
+
+* bullet item 3
+second line
+third line
+
+### support 3 x = horizontal rule ###
+
+===
+
+Should be a horizontal rule above
+
+### support double tilde strikeout ###
+Some text should be ~~struck out~~ inline.
+
+
+[LaTeX]:		http://en.wikipedia.org/wiki/LaTeX
+[OPML]:			http://en.wikipedia.org/wiki/OPML
+[Markdown]:		http://daringfireball.net/projects/markdown/
+[peg-markdown]:	https://github.com/jgm/peg-markdown
+[RTF]:			http://en.wikipedia.org/wiki/Rich_Text_Format
+[OpenDocument]:	http://en.wikipedia.org/wiki/OpenDocument
+[User's Manual]:
+http://fletcher.github.com/peg-multimarkdown/mmd-manual.pdf
+END_OF_CONTENT
+
+restore_props($text, $grfx);
+($rc, $next_y, $unused) =
+    $text->column($page, $text, $grfx, 'md2', $content, 
+	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
+		  'para'=>[ 0, 5 ] );
+while ($rc) { 
+    # new page. uses fixed column template, no headers/footers/page numbers
+    $page = $pdf->page();
+    $grfx = $page->gfx();
+    $text = $page->text();
+    footer(++$page_num, $pdf, $text);
+
+    ($rc, $next_y, $unused) =
+        $text->column($page, $text, $grfx, 'pre', $unused, 
+		  'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
+		  'para'=>[ 0, 5 ] );
+}
+} ####################################### end MultiMarkdown sample
+
 # Column_layouts.pl TBD
 # TBD figure out a good way to fall back for unavailable fonts
 # demonstrate balanced columns two long columns and one short, first pass

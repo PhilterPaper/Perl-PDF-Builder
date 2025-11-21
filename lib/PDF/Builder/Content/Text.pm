@@ -1392,6 +1392,7 @@ sub column {
     # and fixed default attributes in that order to fill in each tag's
     # attribute list. on exit from tag, set attributes to restore settings
     @mytext = _tag_attributes($markup, @mytext);
+    _check_CSS_properties(@mytext);
 
     ($rc, $start_y, $unused) = _output_text($start_y, $col_min_y, \@outline, $pdf, $page, $text, $grfx, $restore, $topCol, $font_size, $markup, $marker_width, $marker_gap, $leading, $opts{'page'}, $page_numbers, $pass_count, $max_passes, $state, @mytext);
 
@@ -1828,6 +1829,67 @@ sub _tag_attributes {
     return @mytext;
 } # end of _tag_attributes()
 
+# go through <style> tags (element 1) and all element style tags (elements 2+)
+# and find any bogus CSS property names. assume anything built into the code
+# (defaults, etc.) is legitimate -- this is only for user-supplied CSS.
+sub _check_CSS_properties {
+    my @mytext = @_;
+
+    my ($tag, $style, $stylehash);
+    my @supported_properties = qw(
+      color font-size line-height margin-top margin-right margin-bottom 
+      margin-left text-indent text-align font-family font-weight font-style 
+      display height width text-decoration _marker-before _marker-after 
+      _marker-color _marker-font _marker-size _marker-style _marker-text 
+      _marker-weight _marker-align list-style-type list-style-position
+    );
+    # 1. element 0 is default CSS, no need to check. 
+    #    element 1 is user-supplied <style> tags and style=> column() option.
+    foreach my $propname (sort keys %{ $mytext[1] }) {
+	# $propname is a property name
+	if ($propname eq 'tag' || $propname eq 'text') { next; }
+	my $found = 0;
+	for (my $sup=0; $sup < @supported_properties; $sup++) {
+            if ($propname eq $supported_properties[$sup]) {
+		$found = 1;
+		last;
+            }
+	}
+	if (!$found) {
+	    print STDERR "Warning: CSS property name '$propname' found in style option or <style>\n is either invalid, or is unsupported by PDF::Builder.\n";
+	}
+       #my $style_string = $mytext[1]->{$sel};  TBD check value
+    }
+     
+    # 2. elements 2 and up are tags and text. check tags for style attribute
+    #    and check property names there
+    for (my $el = 2; $el < @mytext; $el++) {
+	$tag = $mytext[$el]->{'tag'};
+	if ($tag eq '' || substr($tag, 0, 1) eq '/') { next; }
+        $style = $mytext[$el]->{'style'};
+	if (!defined $style) { next; }
+
+        $stylehash = _process_style_string({}, $style);
+        # look at each defined property. do we support it?
+	foreach (keys %$stylehash) {
+	    my $propname = $_;
+	    my $found = 0;
+	    for (my $sup=0; $sup < @supported_properties; $sup++) {
+                if ($propname eq $supported_properties[$sup]) {
+		    $found = 1;
+		    last;
+		}
+	    }
+	    if (!$found) {
+	        print STDERR "Warning: CSS property name '$propname' found in element $el (tag <$tag>)\n style is either invalid, or is unsupported by PDF::Builder.\n";
+	    }
+	}
+	# TBD stylehash->$_ check values here
+    }
+     
+    return;
+} # end of _check_CSS_properties
+
 # the workhorse of the library: output text (modified by tags) in @mytext
 sub _output_text {
     my ($start_y, $min_y, $outl, $pdf, $page, $text, $grfx, $restore, $topCol, 
@@ -1937,6 +1999,16 @@ sub _output_text {
 	            $properties[-1]->{$_} = $properties[-2]->{$_};
 	        }
 	        # current_prop is still previous text's properties
+		# 1a. "drop" any property which should not be inherited
+		#    unless value is 'inherit' (explicit inheritance, TBD)
+		#    width (used by <hr>), margin-*, TBD: border-*,
+		#    background-*, perhaps others. if list gets long enough,
+		#    put in separate routine.
+		$properties[-1]->{'width'} = 0;
+		$properties[-1]->{'margin-top'} = 0;
+		$properties[-1]->{'margin-bottom'} = 0;
+		$properties[-1]->{'margin-left'} = 0;
+		$properties[-1]->{'margin-right'} = 0;
 
 	        # 2. update properties top with element [0] (default CSS) 
 		#   per $tag
@@ -2604,7 +2676,7 @@ sub _output_text {
 		    # keep list of those found, error message once per tag
 		    #         per column() call
 		    if (!defined $bad_tags{$tag}) {
-		        print STDERR "Tag <$tag> either invalid or currently unsupported.\n";
+		        print STDERR "Warning: tag <$tag> either invalid or currently unsupported by PDF::Builder.\n";
 			$bad_tags{$tag} = 1;
 		    }
 		    # treat as <span>
@@ -3992,17 +4064,17 @@ sub _html_hash {
     }
 
     # does call include a style initialization (opt in column() call)?
-    # merge into any consolidated <style> tags
+    # merge into any consolidated <style> tags for user styling in [1]
     if (defined $opts{'style'}) {
-	# $style should be empty hash ptr at this point
-        $style = _process_style_tag($style, $opts{'style'});
+	# $style could be empty hash ptr at this point
+        $style = _process_style_string($style, $opts{'style'});
     }
 
     # always first element tag=style containing the hash, even if it's empty
     # array[0] is default CSS, array[1] is consolidated <style> tags
     $style->{'tag'} = 'style';
     $style->{'text'} = '';
-    unshift @array, $style;
+    unshift @array, $style; # [0] default CSS added later
      
     # HTML::TreeBuilder does some undesirable things with custom tags
     # it doesn't understand. clean them up.

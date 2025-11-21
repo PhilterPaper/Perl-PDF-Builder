@@ -1,9 +1,15 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-11-18  UNRELEASED
+3.028     2025-11-20  UNRELEASED
 * = work in progress
 
   ==== New features
+
+    lib/PDF/Builder/Content/Text.pm, examples/Column.pl
+     Add checks for valid (supported) CSS property names. Clarify that the 
+      warning message for the invalid tag <glotz> is a test and is expected and 
+      normal, and likewise the warnings for CSS properties 'snork' and 'snuck' 
+      are tests that are expected and normal. Ref #235.
 
     lib/PDF/Builder/Content/Text.pm
      For Markdown (md1), if extra blank lines between list items, Text::Markdown
@@ -223,13 +229,6 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       leaving the fill state as "transparent", and so any graphics fill or
       text was disappearing. The solution is to use egstate() to reset fill
       state to "opaque" (transparency to 0, see examples/060_transparency).
-
-    examples/Column.pl
-     Clarify that the error message for tag <glotz> is a test and is expected
-      and normal, and that CSS property 'snork' does not produce a message (is
-      simply ignored). I will think about generating error messages for invalid
-      CSS properties, as this could be useful for misspelled property names.
-      Ref #235.
 
     lib/PDF/Builder/Content/Text.pm
      When revising the baseline due to taller text, there was a miscalculation
