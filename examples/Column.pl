@@ -278,7 +278,7 @@ underlines. Show some <del>deleted</del> text, <strike>strike-out</strike> text,
 and <s>s'd out</s> text that show line-throughs. 
 More than <span style="text-decoration: 'underline line-through overline'">one
 at a time</span> are possible via style attribute, also via
-<u><s>nested tags</s></u>.
+<u><s>nested tags</s></u> and <del><ins>nested tags</ins></del>.
 
 Then we need some styling features in tables as shown in the table below. There is no need to support this in text blocks, although it would be a nice feature (colored text is already available in text blocks using its options).
 END_OF_CONTENT
@@ -291,9 +291,6 @@ END_OF_CONTENT
 #This is an external named dest [Link Text ND ext](ext2.pdf#NDe) there.
 #This is a browser URL [Link text URL](file.html) there.
 #This is a browser URL with anchor [Link text URL w/ anchor](file2.htm#blah) there.
-
-# TBD in above text, <u><s>nested</s></u> <del><ins>tags</ins></del> lost the
-# space between the words in Treebuilder? needs investigating
 
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =

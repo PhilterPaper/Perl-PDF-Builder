@@ -20,6 +20,7 @@ use version;
 our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
 
 my $TextMarkdown = '1.000031'; # minimum version of Text::Markdown;
+#my $TextMultiMarkdown = '1.005'; # TBD minimum version of Text::MultiMarkdown;
 my $HTMLTreeBldr = '5.07';     # minimum version of HTML::TreeBuilder
 
 =head1 NAME
@@ -1385,7 +1386,7 @@ sub column {
     #
     # if markup=pre, it's already in final form (array of hashes)
     # if none, separate out paragraphs into array of hashes
-    # if md1, convert to HTML (error if no converter)
+    # if md1 or md2, convert to HTML (error if no converter)
     # if html, need to interpret (error if no converter)
     # finally, resulting array of hashes is interpreted and fit in column
     # process style attributes, tag attributes, style tags, column() options,
@@ -3788,6 +3789,7 @@ sub _get_baseline {
 #   'md1' markup: empty lines separate paragraphs, array of texts permitted,
 #     paragraphs may span array elements, content is converted to HTML
 #     per Text::Markdown, one array element at a time.
+#   'md2' markup: similar to md1, but using Text::MultiMarkdown TBD
 #   'html' markup: single text string OR array of texts permitted (consolidated
 #     into one text), containing HTML markup. 
 #
@@ -3835,6 +3837,21 @@ sub _break_text {
 	    # array ref, elements should be text
             @array = _md1_hash(join("\n", @$text), %opts);
 	}
+
+#       ### no MultiMarkdown until br, code, pre tags supported
+#	    ### update Column.pl sample, README.md, Column_doc.pm
+#	    ### update TextMultiMarkdown min version in build routines
+#   } elsif ($markup eq 'md2') {
+#	    # process into HTML, then feed to HTML processing to make hash
+#	    # note that blank-separated lines already turned into paragraphs
+#        if      (ref($text) eq '') {
+# 	         # is a single string (scalar)
+#            @array = _md2_hash($text, %opts);
+#
+#        } elsif (ref($text) eq 'ARRAY') {
+# 	         # array ref, elements should be text
+#            @array = _md2_hash(join("\n", @$text), %opts);
+# 	     }
 
     } else { # should be 'html'
         if       (ref($text) eq '') {
@@ -3966,8 +3983,81 @@ sub _md1_hash {
     return @array;
 } # end of _md1_hash()
 
+# convert md2 string to html, returning array of hashes
+#sub _md2_hash {
+#    my ($text, %opts) = @_;
+#    my $page_numbers = 0;
+#    $page_numbers = $opts{'page_numbers'} if defined $opts{'page_numbers'};
+#
+#    my @array;
+#    my ($html, $rc);
+#    $rc = eval {
+#        require Text::MultiMarkdown;
+#	1;
+#    };
+#    if (!defined $rc) { $rc = 0; }  # else is 1
+#    if ($rc) {
+#	# installed, but not up to date?
+#	if (version->parse("v$Text::MultiMarkdown::VERSION")->numify() <
+#	    version->parse("v$TextMultiMarkdown")->numify()) { $rc = 0; }
+#    }
+#
+#    my $heading_ids = 0; # default no automatic id generation for hX
+#    if (defined $opts{'heading_ids'}) { $heading_ids = $opts{'heading_ids'}; }
+#
+#    if ($rc) {
+#	# MD converter appears to be installed, so use it
+#	$html = Text::MultiMarkdown->new(
+#		'heading_ids' => $heading_ids,
+#		'img_ids' => 0,
+#		'empty_element_suffix' => '>',
+#	)->markdown($text);
+#    } else {
+#	# leave as MD, will cause a chain of problems
+#	warn "Text::MultiMarkdown not installed, can't process Markdown";
+#	$html = $text;
+#    }
+#
+#   # need to fix something in Text::Markdown -- custom HTML tags are
+#    # disabled by changing < to &lt;. change them back!
+#    $html =~ s/&lt;_ref /<_ref /g;
+#    $html =~ s/&lt;_reft /<_reft /g;
+#    $html =~ s/&lt;_nameddest /<_nameddest /g;
+#    $html =~ s/&lt;_sl /<_sl /g;
+#    $html =~ s/&lt;_move /<_move /g;
+#    $html =~ s/&lt;_marker /<_marker /g;
+#    # probably could just do it with s/&lt;_/<_/ but the list is short
+#    
+#    # blank lines within a list tend to create paragraphs in list items
+#    $html =~ s/<li><p>/<li>/g;
+#    $html =~ s#</p></li>#</li>#g;
+#
+#    # standard Markdown ~~ line-through (strike-out) not recognized
+#    my $did_one = 1;
+#    while ($did_one) {
+#    	$did_one = 0;
+#    	if ($html =~ s#~~([^~])#<del>$1#) {
+#    	    # just one at a time. replace ~~ by <del>
+#    	    $did_one = 1;
+#    	}
+#    	# should be another, replace ~~ by </del>
+#    	$html =~ s#~~([^~])#</del>$1#;
+#    }
+#
+#    # standard Markdown === by itself not recognized as a horizontal rule
+#    $html =~ s#<p>===</p>#<hr>#g;
+#
+#    # dummy (or real) style element will be inserted at array element [0]
+#    #   by _html_hash()
+#
+#    # blank-line separated paragraphs already wrapped in <p> </p>
+#    @array = _html_hash($page_numbers, $html, %opts);
+#
+#    return @array;
+#} # end of _md2_hash()
+
 # convert html string to array of hashes. this is for both 'html' markup and
-# the final step of 'md1' markup.
+# the final step of 'md1' or 'md2' markup.
 # returns array (list) of tags and text, and as a side effect, element [0] is
 # consolidated <style> tags (may be empty hash)
 sub _html_hash {
