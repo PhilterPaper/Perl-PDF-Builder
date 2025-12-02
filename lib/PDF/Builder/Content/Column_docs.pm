@@ -1074,6 +1074,13 @@ C<p.abstract> or C<ol, ul>), hierarchies (e.g., C<ol E<gt> li>), specified
 number of appearance, pseudotags, or other such complications as found in a 
 browser's CSS. Sorry!
 
+Property values which are lengths (including font-size) may have units of pt 
+(points, 72 to the inch), px (pixels, currently 78 to the inch), in (inch),
+cm, mm, em (equal to font-size), en (0.5em), and ex (currently 0.5em, but in
+the future may be able to query the font's actual x-height). % (percentage) of
+the current font-size is allowed, although in the future something may be done
+with the enclosing object size.
+
 B<Note> that eventually we may support C<li::marker>, which is now standard CSS,
 but there does not appear to be a way to support changes via C<style=>, because
 the same property names (e.g., I<color>) would apply to both the marker and the

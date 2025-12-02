@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-11-20  UNRELEASED
+3.028     2025-11-30  UNRELEASED
 * = work in progress
 
   ==== New features
@@ -10,6 +10,13 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       warning message for the invalid tag <glotz> is a test and is expected and 
       normal, and likewise the warnings for CSS properties 'snork' and 'snuck' 
       are tests that are expected and normal. Ref #235.
+
+    lib/PDF/Builder/Content/Text-Column_docs.pm
+     Additional length units for CSS values in column(). In addition to pt and
+      % of current font size; em (= font size), en (= 1/2 font size), ex (= 1/2
+      font size), in (inches), cm, mm, and px (assume 78dpi display) are added.
+      Future plans are for ex to use the actual font x-height, if available,
+      and for some way to specify the screen resolution (dpi) for px.
 
     lib/PDF/Builder/Content/Text.pm
      For Markdown (md1), if extra blank lines between list items, Text::Markdown
