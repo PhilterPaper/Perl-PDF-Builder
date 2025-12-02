@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-11-30  UNRELEASED
+3.028     2025-12-02  UNRELEASED
 * = work in progress
 
   ==== New features
@@ -210,6 +210,10 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
      Per change in PDF::API2, add to description of endpath/end method.
 
   ==== Bug fixes
+
+    Makefile.PL, INFO/DEPRECATED
+     Add installation-time reminder to check DEPRECATED for anything scheduled
+      to be removed, including dashed option names.
 
     lib/PDF/Builder/Content/Text-Column_docs.pm
      Since the introduction, the CSS property 'text-height' has been used for

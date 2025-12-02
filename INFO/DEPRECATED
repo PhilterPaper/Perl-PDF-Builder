@@ -15,15 +15,6 @@ NOTE for maintainer: update t/deprecations.t with tests for both old
 
 In order of scheduled removal date:
 
-PDFStr()        method in Basic/PDF/Utils.pm
-   NOT scheduled to be removed, but use PDFString() instead. 
-
-PDFUtf()        method in Basic/PDF/Utils.pm
-   NOT scheduled to be removed, but use PDFString() instead. 
-
-openpage()      method in Builder.pm
-   Use open_page() instead. May be removed on or after June, 2023.
-
 default()       method in Builder.pm
    May be renamed in the future, as is flagged by Perl::Critic as reserved.
    Use with caution.
@@ -32,6 +23,27 @@ width(w),height(h)  methods in Resource/XObject/Image.pm
    The ability to SET an image's width and/or height is scheduled to be removed
    after October 2025. This setting ability appears not to work, but in case
    someone IS using it in some manner, it has not been immediately removed.
+ THIS ONE IS BEING REVIEWED, AS THE <img> TAG IN column() WILL REQUIRE 
+ IMPLEMENTATION OF WIDTH AND HEIGHT SETTING. NEVERTHELESS, THE CURRENT IMAGE
+ SUPPORT DOES NOT WORK.
+
+All cases of "dashed" option names (e.g., ->new('-compress' => 'none') will
+eventually be removed, leaving only "undashed" (->new('compress' => 'none')
+supported. This is your warning as of release 3.028 to go through your code 
+and change dashed option names to undashed. The next release after the one
+year anniversary of 3.028's release will introduce a warning message for any
+use of a dashed option name (although that option will still work with either
+dashed or undashed name). The next release one year after that will withdraw
+support for dashed option names -- they will simply be silently ignored.
+
+PDFStr()        method in Basic/PDF/Utils.pm
+   NOT scheduled to be removed, but use PDFString() instead. 
+
+PDFUtf()        method in Basic/PDF/Utils.pm
+   NOT scheduled to be removed, but use PDFString() instead. 
+
+openpage()      method in Builder.pm
+   NOT scheduled to be removed, but use open_page() instead. 
 
 *** If I have missed any deprecated interfaces, please let me know! ***
 
