@@ -1268,12 +1268,12 @@ sub column {
     my ($x, $y);
 
     my $font_size = 12; # basic default, override with font-size
-   #if ($text->{' fontsize'} > 0) { $font_size = $text->{' fontsize'}; }
+   #if ($text->{' fontsize'} > 0) { $font_size = $text->{' fontsize'}; } # already defined font size?
     if (defined $opts{'font_size'}) { $font_size = $opts{'font_size'}; }
     
     my $leading = 1.125; # basic default, override with line-height
     if (defined $opts{'leading'}) { $leading=$opts{'leading'}; }
-    my $marker_width = 2*$font_size;  # 2em space for list markers
+    my $marker_width = 1*$font_size;  # 2em space for list markers
     my $marker_gap = $font_size;   # 1em space between list marker and item
     if (defined $opts{'marker_width'}) { $marker_width=$opts{'marker_width'}; }
     if (defined $opts{'marker_gap'}) { $marker_gap=$opts{'marker_gap'}; }
@@ -1514,14 +1514,15 @@ sub _default_css {
     $style{'em'} = {};
     $style{'b'} = {};
     $style{'strong'} = {};
+    $style{'code'} = {};
     $style{'hr'} = {};
     $style{'a'} = {};
     $style{'_ref'} = {};
     $style{'_reft'} = {};  # no visible content
     $style{'_nameddest'} = {};  # no visible content
 
-    $style{'body'}->{'font-size'} = $font_size;
-    $style{'body'}->{'_fs'} = $font_size; # carry current value
+    $style{'body'}->{'font-size'} = $font_size; # must be in points
+    $style{'body'}->{'_parent-fs'} = $font_size; # carry current value
     $style{'body'}->{'line-height'} = $leading;
 
     # HARD-CODED default for paragraph indent, top margin
@@ -1548,8 +1549,12 @@ sub _default_css {
     # now for fixed settings
     $style{'body'}->{'font-family'} = $cur_font[0]; # face
     $style{'body'}->{'font-style'} = $cur_font[1]? 'italic': 'normal';
+    # TBD future: multiple gradations of weight, numeric and named
     $style{'body'}->{'font-weight'} = $cur_font[2]? 'bold': 'normal';
-   #$style{'body'}->{'font-variant'} = 'normal'; # small-caps
+   #$style{'body'}->{'font-variant'} = 'normal'; # small-caps, petite caps
+    # TBD future: optical size select subfont, slant separate from italic flagm,
+    #             stretch amount (expand/condense)
+    # TBD future: 'margin' consolidated entry
     $style{'body'}->{'margin-top'} = '0'; 
     $style{'body'}->{'margin-right'} = '0'; 
     $style{'body'}->{'margin-bottom'} = '0'; 
@@ -1563,17 +1568,18 @@ sub _default_css {
    #$style{'body'}->{'border-style'} = 'none'; # solid, dotted, dashed... TBD
    #$style{'body'}->{'border-width'} = '1pt'; 
    #$style{'body'}->{'border-color'} = 'inherit'; 
-   #   TBD border-* individually specify for top/right/bottom/left
+    # TBD border-* individually specify for top/right/bottom/left
+    #     also 'border' consolidated entry
     $style{'body'}->{'text-decoration'} = 'none';
     $style{'body'}->{'display'} = 'block'; 
-    $style{'body'}->{'width'} = '-1';  # TBD currently unused
-    $style{'body'}->{'height'} = '-1';  # TBD currently unused ex. hr size
+    $style{'body'}->{'width'} = '-1';  # used for <hr> length in pts, -1 is full column
+    $style{'body'}->{'height'} = '-1';  # used for <hr> size (thickness) in pts
     $style{'body'}->{'_href'} = ''; 
     $style{'body'}->{'_marker-before'} = ''; 
     $style{'body'}->{'_marker-after'} = '.'; 
     $style{'body'}->{'_marker-color'} = ''; 
     $style{'body'}->{'_marker-font'} = ''; 
-    $style{'body'}->{'_marker-size'} = ''; 
+    $style{'body'}->{'_marker-size'} = $font_size; 
     $style{'body'}->{'_marker-style'} = ''; 
     $style{'body'}->{'_marker-text'} = ''; 
     $style{'body'}->{'_marker-weight'} = ''; 
@@ -1587,6 +1593,7 @@ sub _default_css {
       # disc, circle, square, box, none
     $style{'ul'}->{'list-style-position'} = 'outside'; # or inside or numeric
     $style{'ul'}->{'display'} = 'block'; 
+    # TBD future: padding and padding-*
     $style{'ul'}->{'margin-top'} = '50%';  # relative to text's font-size
     $style{'ul'}->{'margin-bottom'} = '50%'; 
     $style{'ul'}->{'_marker-font'} = 'ZapfDingbats';
@@ -1611,7 +1618,7 @@ sub _default_css {
     $style{'ol'}->{'_marker-font'} = '';  # unchanged
     $style{'ol'}->{'_marker-style'} = 'normal';
     $style{'ol'}->{'_marker-weight'} = 'bold';
-    $style{'ol'}->{'_marker-size'} = '';  # unchanged
+    $style{'ol'}->{'_marker-size'} = '100%';
     $style{'ol'}->{'_marker-align'} = "right";
     $style{'li'}->{'display'} = 'inline';  # should inherit from ul or ol
                # marker is block, forcing new line, and li immediately follows
@@ -1661,6 +1668,9 @@ sub _default_css {
     $style{'em'}->{'display'} = 'inline';
     $style{'strong'}->{'font-weight'} = 'bold';
     $style{'strong'}->{'display'} = 'inline';
+    $style{'code'}->{'display'} = 'inline';
+    $style{'code'}->{'font-family'} = 'Courier'; # TBD why does ' default-constant' fail?
+    $style{'code'}->{'font-size'} = '85%';
 
     $style{'u'}->{'display'} = 'inline';
     $style{'u'}->{'text-decoration'} = 'underline';
@@ -1844,22 +1854,28 @@ sub _check_CSS_properties {
       _marker-color _marker-font _marker-size _marker-style _marker-text 
       _marker-weight _marker-align list-style-type list-style-position
     );
+
     # 1. element 0 is default CSS, no need to check. 
     #    element 1 is user-supplied <style> tags and style=> column() option.
-    foreach my $propname (sort keys %{ $mytext[1] }) {
-	# $propname is a property name
-	if ($propname eq 'tag' || $propname eq 'text') { next; }
-	my $found = 0;
-	for (my $sup=0; $sup < @supported_properties; $sup++) {
-            if ($propname eq $supported_properties[$sup]) {
-		$found = 1;
-		last;
-            }
-	}
-	if (!$found) {
-	    print STDERR "Warning: CSS property name '$propname' found in style option or <style>\n is either invalid, or is unsupported by PDF::Builder.\n";
-	}
-       #my $style_string = $mytext[1]->{$sel};  TBD check value
+    #   should be tag=>'style' and 'text'=>''
+    foreach my $tagname (keys %{ $mytext[1] }) {
+        if ($tagname eq 'tag') { next; }
+        if ($tagname eq 'text') { next; }
+       #print "tagname <$tagname> check\n";
+        foreach my $propname (keys %{ $mytext[1]->{$tagname} }) {
+           #print "checking <$tagname> property '$propname'\n";
+	    my $found = 0;
+	    for (my $sup=0; $sup < @supported_properties; $sup++) {
+                if ($propname eq $supported_properties[$sup]) {
+	   	    $found = 1;
+		    last;
+                }
+	    }
+	    if (!$found) {
+	        print STDERR "Warning: CSS property name '$propname' found in style option or <style>\n is either invalid, or is unsupported by PDF::Builder.\n";
+	    }
+           #my $style_string = $mytext[1]->{$sel};  TBD check value
+       }
     }
      
     # 2. elements 2 and up are tags and text. check tags for style attribute
@@ -1882,7 +1898,8 @@ sub _check_CSS_properties {
 		}
 	    }
 	    if (!$found) {
-	        print STDERR "Warning: CSS property name '$propname' found in element $el (tag <$tag>)\n style is either invalid, or is unsupported by PDF::Builder.\n";
+	        print STDERR "Warning: CSS property name '$propname' found in element $el (tag <$tag>)\n";
+                print STDERR " style is either invalid, or is unsupported by PDF::Builder.\n";
 	    }
 	}
 	# TBD stylehash->$_ check values here
@@ -1950,10 +1967,10 @@ sub _output_text {
     my $phrase='';
     my $remainder='';
     my $desired_x;  # leave undef, is correction for need_line reset of x
-    my $topm = 0; # adjoining top margin
-    my $botm = 0; # adjoining bottom margin
+    my @vmargin = (0, 0); # build up largest vertical margin (most negative and most positive)
     my $current_prop = _init_current_prop(); # determine if a property has 
-    #           changed and PDF::Builder routines need calling
+    #           changed and PDF::Builder routines need calling. see
+    #           _init_current_prop() for list of properties
     my @properties = ({}); # stack of properties from tags
     _update_properties($properties[0], $mytext[0], 'body');
     _update_properties($properties[0], $mytext[1], 'body');
@@ -1992,6 +2009,8 @@ sub _output_text {
 		# processed. some tags need some special processing if they 
 		# do something that isn't just a property change
 
+		# watch for INK HERE where PDF needs to be told to change
+
 		# properties stack new element ---------------------------------
 	        # 1. dup the top of the properties stack for a new set of
 	        #   properties to be modified by attributes and CSS
@@ -2005,11 +2024,23 @@ sub _output_text {
 		#    width (used by <hr>), margin-*, TBD: border-*,
 		#    background-*, perhaps others. if list gets long enough,
 		#    put in separate routine.
-		$properties[-1]->{'width'} = 0;
+		$properties[-1]->{'width'} = 0; # used for <hr>
+                $properties[-1]->{'height'} = 0; # used for <hr>
 		$properties[-1]->{'margin-top'} = 0;
 		$properties[-1]->{'margin-bottom'} = 0;
 		$properties[-1]->{'margin-left'} = 0;
 		$properties[-1]->{'margin-right'} = 0;
+                # 1b. unless first entry, save parent's font-size (points)
+                if (@properties > 1) {
+                    $properties[-1]->{'_parent-fs'} = $properties[-2]->{'font-size'};
+                } else {
+                    # very first tag in list, no parent (use body.font-size) should be points
+                    $properties[-1]->{'_parent-fs'} = $mytext[0]->{'body'}->{'font-size'};
+                    $properties[-1]->{'_parent-fs'} = $mytext[1]->{'body'}->{'font-size'}
+                        if defined $mytext[1]->{'body'}->{'font-size'};
+                    # strip off any 'pt' unit and leave as bare number
+                    $properties[-1]->{'_parent-fs'} =~ s/pt$//;
+                }
 
 	        # 2. update properties top with element [0] (default CSS) 
 		#   per $tag
@@ -2046,6 +2077,34 @@ sub _output_text {
 		    $properties[-1]->{'line-height'} = 
 		      delete $properties[-1]->{'text-height'}; }
 	        
+                # 7. update size properties to be simply bare points, rather than e.g., 75%
+                # remember that $current_prop->{'font-size'} init -1, is what was last written to PDF
+		# current font size (pt) before properties applied
+                my $fs = $properties[-1]->{'_parent-fs'}; # old font size (should always be one, in points > 0)
+                $fs = $properties[-1]->{'font-size'} = _size2pt($properties[-1]->{'font-size'}, $fs, 'usage'=>'font-size');
+                $fs = $font_size if $fs == -1; # just in case a -1 sneaks through, $font_size 
+                                               # should default to 12, override with 'font_size'=>value
+
+                $properties[-1]->{'margin-top'} = _size2pt($properties[-1]->{'margin-top'}, $fs, 'usage'=>'margin-top');
+                $properties[-1]->{'margin-right'} = _size2pt($properties[-1]->{'margin-right'}, $fs, 'usage'=>'margin-right');
+                $properties[-1]->{'margin-bottom'} = _size2pt($properties[-1]->{'margin-bottom'}, $fs, 'usage'=>'margin-bottom');
+                $properties[-1]->{'margin-left'} = _size2pt($properties[-1]->{'margin-left'}, $fs, 'usage'=>'margin-left');
+               #   border-* width (TBD, with border to set all four)
+               #   padding-* (TBD, with padding to set all four)
+               # width = length of <hr> in pts
+                $properties[-1]->{'width'} = _size2pt($properties[-1]->{'width'}, $fs, 'usage'=>'width');
+               #   height (thickness/size of <hr>) in pts
+                $properties[-1]->{'height'} = _size2pt($properties[-1]->{'height'}, $fs, 'usage'=>'height');
+                $properties[-1]->{'text-indent'} = _size2pt($properties[-1]->{'text-indent'}, $fs, 'usage'=>'text-indent');
+                $properties[-1]->{'_marker-size'} = _size2pt($properties[-1]->{'_marker-size'}, $fs, 'usage'=>'_marker-size');
+                # TBD should inside and outside be set to point values here?
+                if (defined $properties[-1]->{'list-style-position'} &&
+                    $properties[-1]->{'list-style-position'} ne 'inside' &&
+                    $properties[-1]->{'list-style-position'} ne 'outside') {
+                    $properties[-1]->{'list-style-position'} = _size2pt($properties[-1]->{'list-style-position'}, $fs,
+                      'parent_size'=>$marker_width + $marker_gap, 'usage'=>'list-style-position');
+                }
+
 		# update current_prop hash -------------------------------------
 		# properties stack already updated 
 		# some current_prop must be updated here, such as stroke
@@ -2062,7 +2121,12 @@ sub _output_text {
 		    # top margin (for that text) and compare to the existing
 		    # bottom margin (in points) saved at the end of the previous
 		    # text.
-		    $topm = $properties[-1]->{'margin-top'};
+                    # if paragraph and is marked as a continuation (i.e., spanned two columns),
+                    # suppress indent (below) and suppress top margin by setting topCol flag
+	            my $pcont = ($tag eq 'p' && defined $mytext[$el]->{'cont'} && $mytext[$el]->{'cont'})? 1: 0;
+                    $topCol = 1 if $pcont;
+                    $vmargin[0] = min($vmargin[0], $properties[-1]->{'margin-top'});
+                    $vmargin[1] = max($vmargin[1], $properties[-1]->{'margin-top'});
 		    # now that need_line etc. has been set due to block display,
 		    # change stack top into 'inline'
 		    $properties[-1]->{'display'} = 'inline';
@@ -2074,22 +2138,10 @@ sub _output_text {
 		# in many cases, all that was needed was to set properties,
 		#   and normal text output takes care of the rest
 		#
-		# current font size (pt) before properties applied
-		my $fs = $current_prop->{'font-size'};
 	        if      ($tag eq 'p') {
-                    # topCol=1 we're at top of column (no extra margin)
-		    # per $topCol (or default), drop down a line?, indent?
-		    # if CSS changed to display=inline for some reason, what to do?
-		    # no y change if at top of column, but still indent
+                    # indent for start of paragraph
 		    $add_x = $properties[-1]->{'text-indent'}; # indent by para indent amount
-		    if ($topCol) {
-		        # at top of column, so suppress extra space
-		        $add_y = 0; # no extra top margin if at column top
-		        $topCol = 0; # for rest of column, extra top margin
-		   #} else {
-		   #   	# extra top margin
-		   #    $add_y = _size2pt($properties[-1]->{'margin-top'}, $fs);
-		    }
+                    $add_y = 0;
 	            # p with cont=>1 is continuation of paragraph in new column 
 	            # no indent and no top margin... just start a new line
 	            if (defined $mytext[$el]->{'cont'} && $mytext[$el]->{'cont'}) {
@@ -2141,9 +2193,7 @@ sub _output_text {
 	       #} elsif ($tag eq 'pre') { 
 	            # white-space etc. no consolidating whitespace
                     # TBD for 3.029 currently ignored
-	       #} elsif ($tag eq 'code') { # font-family sans-serif + 
-	            # constant width 75% font-size
-		    # TBD for 3.029 currently ignored
+	        } elsif ($tag eq 'code') { # font-family sans-serif + constant width 75% font-size
 	        } elsif ($tag eq 'blockquote') {
 		} elsif ($tag eq 'li') {
 		    # where to start <li> text
@@ -2155,18 +2205,8 @@ sub _output_text {
 			# li's copy of _left, should be reset at /li
 			$properties[-1]->{'_left'} += $marker_width+$marker_gap;
 	            } else {
-			# extension to CSS
-			# value in pts, 0 == inside, 100% == outside
-			# <0 or >100% legal, but may be unpredictable effect
-                        my $val = $properties[-1]->{'list-style-position'};
-			my $value = _size2pt($val, $fs);
-			if ($val =~ /%$/) {
-			    # % is percentage of marker width+gap, rather
-			    # than font size
-			    $value *= ($marker_width+$marker_gap)/$fs;
-			}
-			# li's copy of _left, should be reset at /li
-			$properties[-1]->{'_left'} += $value;
+			# extension to CSS (should already be in pts)
+                        $properties[-1]->{'_left'} += $properties[-1]->{'list-style-position'};
 		    }
                 } elsif ($tag eq 'h1') { # TBD align
                     # treat headings as paragraphs
@@ -2176,35 +2216,60 @@ sub _output_text {
 	        } elsif ($tag eq 'h5') {
 	        } elsif ($tag eq 'h6') {
 	        } elsif ($tag eq 'hr') { 
-		    # actually draw a horizontal line
+		    # actually draw a horizontal line  INK HERE
 		    $start_y = $next_y;
+            
+                    # drop down page by any pending vertical margin spacing
+                    if ($vmargin[0] != 0 || $vmargin[1] != 0) {
+                        if (!$topCol) {
+                            $start_y -= ($vmargin[0]+$vmargin[1]);
+                        }
+                        @vmargin = (0, 0); # reset counters
+                    }
+                    $topCol = 0; # for rest of column do not suppress vertical margin
+
 		    my $oldcolor = $grfx->strokecolor();
 		    $grfx->strokecolor($properties[-1]->{'color'});
 		    my $oldlinewidth = $grfx->linewidth();
-		    my $thickness = $properties[-1]->{'height'} || 1;
+		    my $thickness = $properties[-1]->{'height'} || 1; # HTML size attribute
 		    $grfx->linewidth($thickness);
-		    my $y = $start_y - 
-		        _size2pt($properties[-1]->{'margin-top'}, $fs) -
-		       $thickness/2;
+		    my $y = $start_y - $thickness/2;
                     ($start_x,$y, $width) = _get_baseline($y, @outline);
 		    $x = $start_x + $properties[-1]->{'_left'};
-		    $width -= $properties[-1]->{'_left'} + $properties[-1]->{'_right'};
+		    $width -= $properties[-1]->{'_left'} + $properties[-1]->{'_right'}; # default full width
+                    my $available = $width;  # full width amount
 		    # if there is a requested width, use the smaller of the two
 		    # TBD future, width as % of possible baseline, 
 		    #     center or right aligned, explicit units (pt default)
-		    if ($properties[-1]->{'width'} > 0 &&
+		    if ($properties[-1]->{'width'} > 0 &&  # default to use full width is -1
 			$properties[-1]->{'width'} < $width) {
-			$width = $properties[-1]->{'width'};
+			$width = $properties[-1]->{'width'}; # reduced width amount
 		    }
+                    my $align = 'center';
+                    if (defined $mytext[$el]->{'align'}) {
+                        $align = lc($mytext[$el]->{'align'});
+                    }
+                    if ($align eq 'left') {
+                        # no change to x
+                    } elsif ($align eq 'right') {
+                        $x += ($available-$width);
+                    } else {
+                        if ($align ne 'center') {
+                            carp "<hr> align not 'left', 'center', or 'right'. Ignored.";
+                            $align = 'center';
+                        }
+                        $x += ($available-$width)/2;
+                    }
                     $endx = $x + $width;
 
 		    $grfx->move($x, $y);
 		    $grfx->hline($endx);
 		    $grfx->stroke();
-		    $y -= $thickness/2 + 
-		        _size2pt($properties[-1]->{'margin-bottom'}, $fs);
+		    $y -= $thickness/2;
 		    $next_y = $y;
-
+            # empty (self closing) tag, so won't go through a /hr to set bottom margin.
+            # is in empty tag list, so will get proper treatment
+            
 		    # restore changed values
 		    $grfx->linewidth($oldlinewidth);
 		    $grfx->strokecolor($oldcolor);
@@ -2320,7 +2385,7 @@ sub _output_text {
 			# size, etc. changes because no ink laid down
                     } else {
 			# issue property changes when necessary
-                        $fs = $properties[-1]->{'font-size'};
+                        my $fs = $properties[-1]->{'font-size'};
 		        # override any other property with corresponding _marker-*
 		        # properties-to-PDF-calls have NOT yet been done
 		        if (defined $properties[-1]->{'_marker-color'} &&
@@ -2380,7 +2445,7 @@ sub _output_text {
                                    #$x_adj = -(0.3 * $fs + 2);
 		                    # figure y_adj for ul marker (raise, since smaller)
 				    # TBD: new CSS to set adjustments
-			            $y_adj = -0.33*_fs2pt($properties[-1]->{'font-size'}, $fs)/$fs + 0.33;
+			            $y_adj = -0.33*_size2pt($properties[-1]->{'font-size'}, $fs, 'usage'=>'list marker raise')/$fs + 0.33;
 			            $y_adj *= $fs;
 			        } else {
 				    # empty text
@@ -2784,7 +2849,12 @@ sub _output_text {
 	        if (defined $mytext[$el]->{'empty_element'}) {
 	            # empty/void tag, no end tag, pop property stack
 		    # as this tag's actions have already been taken
+            # update bottom margin. display already reset to 'inline'
+            $vmargin[0] = min($vmargin[0], $properties[-1]->{'margin-bottom'});
+            $vmargin[1] = max($vmargin[1], $properties[-1]->{'margin-bottom'});
+
 		    pop @properties;
+                    # should revert any changed font-size
 		    splice(@mytext, $el, 1);
 		    $el--; # end of loop will advance $el
 		    # no text as child of this tag, whatever it does, it has
@@ -2823,7 +2893,6 @@ sub _output_text {
 	        }
 
 		# ready to pick larger of top and bottom margins (block display)
-		$botm = $current_prop->{'margin-bottom'};
 		# block display element end (including paragraphs)
 	        # start next material on new line
 	        if ($current_prop->{'display'} eq 'block') {
@@ -2832,6 +2901,8 @@ sub _output_text {
 		    $add_x = $add_y = 0;
 		    # now that need_line, etc. are set, make inline
 		    $current_prop->{'display'} = 'inline';
+                    $vmargin[0] = min($vmargin[0], $properties[-1]->{'margin-bottom'});
+                    $vmargin[1] = max($vmargin[1], $properties[-1]->{'margin-bottom'});
 	        }
 
 		# pop properties stack and remove element ----------------------
@@ -2847,6 +2918,7 @@ sub _output_text {
 			splice(@mytext, $first, $len);
 			$el -= $len; # end of loop will advance $el
 			pop @properties;
+                        # restore current font size
 			last;
 		    }
                 }
@@ -2869,10 +2941,19 @@ sub _output_text {
             if ($mytext[$el]->{'text'} eq "\n") { next; } # EOL too
 	    if ($mytext[$el]->{'text'} eq '') { next; }
 
-	    # we should be at a new text entry ("phrase")
+	    # we should be at a new text entry ("phrase")  INK HERE
 	    # we have text to output on the page, using properties at the
 	    # properties stack top. compare against current properties to
 	    # see if need to make any calls (font, color, etc.) to make.
+
+            # drop down page by any pending vertical margin spacing
+            if ($vmargin[0] != 0 || $vmargin[1] != 0) {
+                if (!$topCol) {
+                    $start_y -= ($vmargin[0]+$vmargin[1]);
+                }
+                @vmargin = (0, 0); # reset counters
+            }
+            $topCol = 0; # for rest of column do not suppress vertical margin
 
 	    # after tags processed, and property list (properties[-1]) updated,
 	    # typically at start of a text string (phrase) we will call PDF
@@ -2880,6 +2961,7 @@ sub _output_text {
 	    # update current_prop to match.
 
 	    # what properties have changed and need PDF calls to update?
+	    # TBD future: separate slant and italic, optical size
 	    $call_get_font = 0;
 	    if ($properties[-1]->{'font-family'} ne $current_prop->{'font-family'}) {
 		 $call_get_font = 1;
@@ -2888,12 +2970,12 @@ sub _output_text {
             }
 	    if ($properties[-1]->{'font-style'} ne $current_prop->{'font-style'}) {
 		 $call_get_font = 1;
-		 # normal or italic
+		 # normal or italic (TBD separate slant)
 		 $current_prop->{'font-style'} = $properties[-1]->{'font-style'};
             }
 	    if ($properties[-1]->{'font-weight'} ne $current_prop->{'font-weight'}) {
 		 $call_get_font = 1;
-		 # normal or bold
+		 # normal or bold (TBD multiple steps, numeric and named)
 		 $current_prop->{'font-weight'} = $properties[-1]->{'font-weight'};
             }
 	    # font size
@@ -2902,9 +2984,8 @@ sub _output_text {
 	    # properties (latest request) is a relative size (e.g., %),
 	    # what it is relative to is NOT the last font size used
 	    # (current_prop), but carried-along current font size.
-	    my $newval = _fs2pt($properties[-1]->{'font-size'}, 
-	                        $properties[-1]->{'_fs'});
-	    $properties[-1]->{'_fs'} = $newval;  # remember it!
+	    my $newval = _size2pt($properties[-1]->{'font-size'}, 
+	                        $properties[-1]->{'_parent-fs'}, 'usage'=>'font-size');
 	    # newval is the latest requested size (in points), while
 	    # current_prop is last one used for output (in points)
 	    if ($newval != $current_prop->{'font-size'}) {
@@ -2912,17 +2993,20 @@ sub _output_text {
 		$current_prop->{'font-size'} = $newval;
 	    }
 	    # any size as a percentage of font-size will use the current fs
-	    my $fs = $current_prop->{'font-size'};
+            # should be in points by now, might not equal current_prop{font-size}
+	    my $fs = $properties[-1]->{'font-size'};
 
 	    # uncommon to only change font size without also changing something
 	    # else, so make font selection call at the same time, besides,
 	    # there is very little involved in just returning current font.
 	    if ($call_get_font) {
+		# TBD future additional options, expanded weight
                 $text->font($pdf->get_font(
 		    'face' => $current_prop->{'font-family'}, 
 		    'italic' => ($current_prop->{'font-style'} eq 'normal')? 0: 1, 
 		    'bold' => ($current_prop->{'font-weight'} eq 'normal')? 0: 1, 
-		                          ), $fs); 
+		                          ), $fs);
+                $current_prop->{'font-size'} = $fs; 
 	    }
 	    # font-size should be set in current_prop for use by margins, etc.
 
@@ -2943,41 +3027,27 @@ sub _output_text {
 	    # call a Builder routine to set them in PDF, so we can always use
 	    # current_prop instead of switching between the two. current_prop
 	    # property lengths should always be in pts (no labeled dimensions).
-	    $current_prop->{'text-indent'} = _size2pt($properties[-1]->{'text-indent'}, $fs);
+	    $current_prop->{'text-indent'} = $properties[-1]->{'text-indent'}; # should already be pts
 	    $current_prop->{'text-decoration'} = $properties[-1]->{'text-decoration'};
 	    $current_prop->{'text-align'} = $properties[-1]->{'text-align'};
-	    $current_prop->{'margin-top'} = _size2pt($properties[-1]->{'margin-top'}, $fs);
+	    $current_prop->{'margin-top'} = _size2pt($properties[-1]->{'margin-top'}, $fs, 'usage'=>'margin-top');
 	    # the incremental right margin, and the running total
-	    $current_prop->{'margin-right'} = _size2pt($properties[-1]->{'margin-right'}, $fs);
+	    $current_prop->{'margin-right'} = _size2pt($properties[-1]->{'margin-right'}, $fs, 'usage'=>'margin-right');
 	    $properties[-1]->{'_right'} += $current_prop->{'margin-right'};
-	    $current_prop->{'margin-bottom'} = _size2pt($properties[-1]->{'margin-bottom'}, $fs);
+	    $current_prop->{'margin-bottom'} = _size2pt($properties[-1]->{'margin-bottom'}, $fs, 'usage'=>'margin-bottom');
 	    # the incremental left margin, and the running total
-	    $current_prop->{'margin-left'} = _size2pt($properties[-1]->{'margin-left'}, $fs);
+	    $current_prop->{'margin-left'} = _size2pt($properties[-1]->{'margin-left'}, $fs, 'usage'=>'margin-left');
 	    $properties[-1]->{'_left'} += $current_prop->{'margin-left'};
 	    # line-height is expected to be a multiplier to font-size, so
 	    # % or pts value would have to be converted back to ratio TBD
-	    $current_prop->{'line-height'} = $properties[-1]->{'line-height'};
+	    $current_prop->{'line-height'} = $properties[-1]->{'line-height'}; # numeric ratio
 	    $current_prop->{'display'} = $properties[-1]->{'display'};
 	    $current_prop->{'list-style-type'} = $properties[-1]->{'list-style-type'};
-	    $current_prop->{'list-style-position'} = $properties[-1]->{'list-style-position'};
+	    $current_prop->{'list-style-position'} = $properties[-1]->{'list-style-position'}
+                if defined $properties[-1]->{'list-style-position'};
 	    $current_prop->{'_href'} = $properties[-1]->{'_href'};
 	    # current_prop should now be up to date with properties[-1], and
 	    # any Builder calls have been made
-
-	    # calculate this block's top margin, in points.
-	    # if botm (bottom margin of previous block) != 0pt, get larger
-	    # of the two and move start of block down by that amount.
-	    $topm = $current_prop->{'margin-top'};
-            my $vmargin = $botm;
-	    if ($botm < $topm) { $vmargin = $topm; }
-            if (!$topCol && $vmargin > 0) { 
-		# not at the top of the column, handle any requested vmargin
-		# TBD: consider checking that display=block before doing a
-		#      vertical margin?
-	        $start_y -= $vmargin; # could be too low for a new line!
-	    }
-	    $topCol = 0; # for rest of column honor vert margin requests
-	    # will set botm to new margin-bottom after this block is done
 
 	    # we're ready to roll, and output the actual text itself
 	    #
@@ -3490,9 +3560,8 @@ sub _output_text {
 	    # properties (latest request) is a relative size (e.g., %),
 	    # what it is relative to is NOT the last font size used
 	    # (current_prop), but carried-along current font size.
-	    my $newval = _fs2pt($properties[-1]->{'font-size'}, 
-	                        $properties[-1]->{'_fs'});
-	    $properties[-1]->{'_fs'} = $newval;  # remember it!
+	    my $newval = _size2pt($properties[-1]->{'font-size'}, 
+	                        $properties[-1]->{'_parent-fs'}, 'usage'=>'font-size');
 	    # newval is the latest requested size (in points), while
 	    # current_prop is last one used for output (in points)
 	    if ($newval != $current_prop->{'font-size'}) {
@@ -3526,10 +3595,10 @@ sub _output_text {
 	    # do nothing, leave the font state/colors as-is
 	} else { # 2
 	    # restore to entry with @entry_state
-	    return (2, $next_y-$botm, []);
+            return (2, $next_y - ($vmargin[0]+$vmargin[1]), []);
 	}
 
-	return (0, $next_y-$botm, []);
+        return (0, $next_y - ($vmargin[0]+$vmargin[1]), []);
     } else {
 	# we ran out of vertical space in the column. return -1 and 
 	# remainder of mytext list (next_y would be inapplicable)
@@ -3577,6 +3646,7 @@ sub _init_current_prop {
     $cur_prop->{'text-decoration'} = 'none';
    #$cur_prop->{'text-decoration-skip-ink'}; for underline etc.
     $cur_prop->{'display'} = 'block'; # inline, TBD inline-block, none
+    $cur_prop->{'height'} = '0';  # currently <hr> only, NOT inherited
     $cur_prop->{'width'} = '0';  # currently <hr> only, NOT inherited
     $cur_prop->{'list-style-type'} = '.u';
     $cur_prop->{'list-style-position'} = 'outside';
@@ -3584,7 +3654,7 @@ sub _init_current_prop {
     $cur_prop->{'_marker-after'} = '.'; 
     $cur_prop->{'_marker-color'} = ''; 
     $cur_prop->{'_marker-font'} = ''; 
-    $cur_prop->{'_marker-size'} = ''; 
+    $cur_prop->{'_marker-size'} = '0'; 
     $cur_prop->{'_marker-style'} = ''; 
     $cur_prop->{'_marker-text'} = ''; 
     $cur_prop->{'_marker-weight'} = ''; 
@@ -3724,7 +3794,11 @@ sub _get_column_outline {
 	$outline[$i][1] = $outline[$i][1]*$scale_y + $off_y;
     }
 
-    # requested to draw outline (color other than 'none')?
+    # TBD body level background-color fill in outline  INK HERE
+    # if $has_grfx can proceed
+    # use _change_properties _fcolor background-color
+
+    # requested to draw outline (color other than 'none')?   INK HERE
     if ($draw_outline ne 'none' && defined $grfx && ref($grfx) =~ m/^PDF::Builder::Content/) {
 	$grfx->strokecolor($draw_outline);
 	$grfx->linewidth(0.5);
@@ -3918,6 +3992,9 @@ sub _none_hash {
 } # end of _none_hash()
 
 # convert md1 string to html, returning array of hashes
+# TBD `content` wraps in <code> (OK), but fenced ``` wraps in <p><code> ?!
+#     may need to preprocess ``` to wrap in <pre> or postprocess add <pre>
+#     <p><code> -> <p><pre><code>
 sub _md1_hash {
     my ($text, %opts) = @_;
     my $page_numbers = 0;
@@ -4157,7 +4234,7 @@ sub _html_hash {
     # merge into any consolidated <style> tags for user styling in [1]
     if (defined $opts{'style'}) {
 	# $style could be empty hash ptr at this point
-        $style = _process_style_string($style, $opts{'style'});
+        $style = _process_style_tag($style, $opts{'style'});
     }
 
     # always first element tag=style containing the hash, even if it's empty
@@ -4635,62 +4712,39 @@ sub _walkTree {
    return @array;
 } # end of _walkTree()
 
-# convert a font-size (length) into points
+# convert a size (length) or font size into points
 # TBD another parm to indicate how to treat 'no unit' case?
-sub _fs2pt {
-    my ($font_size, $cur_fs) = @_;
-    # requested font size (may be % relative to current font size)
-    # current font size (pts)
-
-    my $number = 0;
-    my $unit = '';
-    # split into number and unit
-    if      ($font_size =~ m/^(\d+\.?\d*)(.*)$/) {
-	$number = $1; # nnn.nn, nnn., or nnn format
-	$unit = $2;   # may be empty
-    } elsif ($font_size =~ m/^(\.\d+)(.*)$/) {
-	$number = $1; # .nnn format
-	$unit = $2;   # may be empty
-    } else {
-	carp "Unable to find number in '$font_size', _fs2pt returning 0";
-	return 0;
-    }
-
-    if ($unit eq '') {
-        # if is already a pure number, just return it
-	return $number;
-    } elsif ($unit eq 'pt') {
-        # if the unit is 'pt', strip off the unit and return the number
-        return $number;
-    } elsif ($unit eq '%') {
-        # if the unit is '%', strip off, /100, multiply by current font-size
-	return $number/100 * $cur_fs;
-   #} elsif ($unit eq    ) {
-        # TBD more units in the future; for now, return an error
-    } else {
-	carp "Unknown unit '$unit' in '$font_size', _fs2pt assumes 'pt'";
-	return $number;
-    }
-
-    return 0; # should not get to here
-} # end of _fs2pt()
-
-# convert a size (length) into points
-# TBD another parm to indicate how to treat 'no unit' case?
+#     currently assume points (CSS considers only bare 0 to be valid)
+# length = string (or pure number) of length in CSS units
+#          if number, is returned as points
+# font_size = current font size (points) for use with em, en, ex, % units
+# option parent_size = parent dimension (points) to use for % instead of font size
+# option usage = label for what is being converted to points
 sub _size2pt {
-    my ($length, $font_size) = @_;
-    # length is requested size, possibly with a unit
+    my ($length, $font_size, %opts) = @_;
+    # length is requested size (or font size), possibly with a unit
+    #    if undefined, use '0'
+    $length = '0' if !defined $length;
+    $length = ''.$length; # ensure is a string (may be unitless number of points)
     # font_size is current_prop font-size (pts), 
-    #    in case relative to font size (such as %)
+    #    in case relative to font size (such as %). must be number > 0
+    my $parent_size = $font_size;
+    if (defined $opts{'parent_size'}) {
+        # must be a number (points). this way, font size still available
+        # for em, en, ex, but parent container size used for other things
+        $parent_size = $opts{'parent_size'};
+    }
+    my $usage = 'unknown';
+    $usage = $opts{'usage'} if defined $opts{'usage'};
 
     my $number = 0;
     my $unit = '';
     # split into number and unit
-    if      ($length =~ m/^(\d+\.?\d*)(.*)$/) {
-	$number = $1; # nnn.nn, nnn., or nnn format
+    if      ($length =~ m/^(-?\d+\.?\d*)(.*)$/) {
+	$number = $1; # [-] nnn.nn, nnn., or nnn format
 	$unit = $2;   # may be empty
-    } elsif ($length =~ m/^(\.\d+)(.*)$/) {
-	$number = $1; # .nnn format
+    } elsif ($length =~ m/^(-?\.\d+)(.*)$/) {
+	$number = $1; # [-] .nnn format
 	$unit = $2;   # may be empty
     } else {
 	carp "Unable to find number in '$length', _size2pt returning 0";
@@ -4700,17 +4754,35 @@ sub _size2pt {
     # font_size should be in points (bare number)
     if ($unit eq '') {
         # if is already a pure number, just return it
+	# except for 0, that's not legal CSS, is an extension
 	return $number;
     } elsif ($unit eq 'pt') {
         # if the unit is 'pt', strip off the unit and return the number
         return $number;
     } elsif ($unit eq '%') {
-        # if the unit is '%', strip off, /100, multiply by current font-size
-	return $number/100 * $font_size;
-   #} elsif ($unit eq    ) {
-        # TBD more units in the future; for now, return an error
+        # if the unit is '%', strip off, /100, multiply by current parent/font size
+	return $number/100 * $parent_size;
+    } elsif ($unit eq 'em') {
+	# 1 em = 100% font size
+	return $font_size;
+    } elsif ($unit eq 'en' || $unit eq 'ex') {
+	# 1 en = 1 ex = 50% font size
+	# TBD get true ex size from font information
+	return $font_size/2;
+    } elsif ($unit eq 'in') {
+	# 1 inch = 72pt
+	return 72*$number;
+    } elsif ($unit eq 'cm') {
+	# 1 cm = 28.35pt
+	return 28.35*$number;
+    } elsif ($unit eq 'mm') {
+	# 1 cm = 2.835pt
+	return 2.835*$number;
+    } elsif ($unit eq 'px') {
+	# assume 78px to the inch TBD actual value available anywhere?
+	return 72/78*$number;
     } else {
-	carp "Unknown unit '$unit' in '$length', _size2pt assumes 'pt'";
+	carp "Unknown unit '$unit' in '$length', _size2pt() assumes 'pt'";
 	return $number;
     }
 

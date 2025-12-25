@@ -358,9 +358,17 @@ Georgia, Verdana, Trebuchet, Wingdings, Webdings>),
 as well as class names
 I<current, default, serif, sans-serif, constant, script, symbol, -external->
 are B<reserved> and should not be used for user-added faces.
+They I<may> be redefined at your discretion.
 The MS Windows core extension I<BankGothic> is currently B<not> added to the
 core fonts automatically. I<-external-> may or may not be defined, and should
 not be used by user code.
+
+B<Note> that use of Windows extension "core" fonts (Georgia, Verdana, Trebuchet,
+Wingdings, and Webdings) expect those fonts to be installed on platforms if
+they are used, and a (hopefully) close substitution will be attempted if not.
+These fonts are normally available on Windows platforms, but may not be 
+available on non-Windows platforms. Use (create PDFs specifying them) at your 
+own risk.
 
 =item type => 'type string'
 

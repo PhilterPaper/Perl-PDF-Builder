@@ -21,6 +21,7 @@ $name =~ s/\.pl/.pdf/; # write in examples directory
 my $max_passes = 5;  # rec min 2, to ensure no visible changes in text
 my $magenta = '#ff00ff';
 my $fs = 15;
+my $paras = [ 0, 7 ]; # paragraph indentation and top margin defaults: pts
 my $debug = 0; # box around link text, red | at link target, blue | at
                # named destination point. 0/default = off, 1 = on
 my ($rc, $next_y, $unused);
@@ -97,7 +98,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
-		  'para'=>[ 0, 5 ], 'start_y'=>$next_y,
+		  'para'=>$paras, 'start_y'=>$next_y,
 	          'state'=>\%state, 'debug'=>$debug,
 		  'page'=> [ $pass_count, $max_passes, $ppn, 'zz', $fpn, 'R', 0 ] );
 if ($rc) {
@@ -122,7 +123,7 @@ recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut
 reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus 
 asperiores repellat.
 
-<_reft id="Lorem" title="Lorem ipsum place" />Lorem ipsum dolor sit amet, 
+Lorem <_reft id="Lorem" title="Lorem ipsum place" /> ipsum dolor sit amet, 
 consectetur adipiscing elit. Proin id ante 
 turpis. In aliquam id enim sed pharetra. Aenean cursus at nisi consectetur 
 semper. Ut risus libero, finibus a aliquet ac, venenatis sit amet ligula. 
@@ -153,11 +154,46 @@ And here is one using the target's natural text: [](someother).
 #"
 }
 
+## test strike-out ~~ WORKS (with fix to Text)
+#$content .= "\nThis line ~~should be struck~~ out.";
+## test 3 forms of horizontal rule WORKS (=== with fix to Text)
+#$content .= "\nhorizontal rule using hyphens\n\n---\n";
+#$content .= "\nhorizontal rule using equals\n\n===\n";
+#$content .= "\nhorizontal rule using underscores\n\n___\n";
+## test underline WORKS
+#$content .= "\nThis is <u>underlined</u> text, and this is <ins>inserted</ins> text.\n";
+## test sub- and super-scripts does NOT work
+#$content .= "\nH~2~O is water, x^2^ is x squared\n";
+## test block quote WORKS, Text needs some work
+#$content .= "\n> This is block quoted.\n";
+## test nested block quote WORKS
+#$content .= ">> This is double block quoted.\n";
+## test paragraph within block WORKS
+#$content .= "\n> A block quote\n\n> A new paragraph in BQ\n";
+## test ordered list WORKS
+#$content .= "\n1. item 1\n1. item 2\n";
+#$content .= "    + item 1\n    + item 2\n";
+#$content .= "1. item 3\n";
+## test inline code and code blocks does NOT work
+#$content .= "\nThis is `a code block` which s/b formatted fixed pitch.\n";
+#$content .= "```\nThis is a fenced\n  code block.\n```\n";
+## test <url> link WORKS 
+#$content .= "\nThis is an <https://www.catskilltech.com> inline link right here.\n";
+## test <email address> mailto link. note that @ must be escaped if within "
+##   <a href="mailto:someone@somewhere.com">someone@somewhere.com</a>
+##   WORKS, but is obfuscated
+#$content .= "\nThis is an <someone\@somewhere.com> email address.\n";
+## test url link does not WORK 
+#$content .= "\nThis is an https://www.catskilltech.com inline link right here.\n";
+## test <email address> mailto link. note that @ must be escaped if within "
+##   does not WORK
+#$content .= "\nThis is an someone\@somewhere.com email address.\n";
+
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
-		  'para'=>[ 0, 5 ], 'start_y'=>$next_y,
+		  'para'=>$paras, 'start_y'=>$next_y,
 	          'state'=>\%state, 'debug'=>$debug,
 		  'page'=> [ $pass_count, $max_passes, $ppn, 'zz', $fpn, 'R', 0 ] );
 if ($rc) {
@@ -206,7 +242,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
-		  'para'=>[ 0, 5 ],
+		  'para'=>$paras,
 	          'state'=>\%state, 'debug'=>$debug,
 		  'page'=> [ $pass_count, $max_passes, $ppn, 'zz', $fpn, 'R', 0 ] );
 if ($rc) {
@@ -274,7 +310,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
-		  'para'=>[ 0, 5 ], 'start_y'=>$next_y,
+		  'para'=>$paras, 'start_y'=>$next_y,
 	          'state'=>\%state, 'debug'=>$debug,
 		  'page'=> [ $pass_count, $max_passes, $ppn, 'zz', $fpn, 'R', 0 ] );
 if ($rc) {

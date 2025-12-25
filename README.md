@@ -25,14 +25,16 @@ each other and one will not interfere with the other if both are installed.
 However, you should _not_ try mixing the two libraries within one running
 program, as they still share many routine names!
 
-[Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full), including Documentation and Examples.
+The
+[Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full)
+includes Documentation and Examples.
 
 [![Open Issues](https://img.shields.io/github/issues/PhilterPaper/Perl-PDF-Builder)](https://github.com/PhilterPaper/Perl-PDF-Builder/issues)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/PhilterPaper/Perl-PDF-Builder/graphs/commit-activity)
 
 This archive contains the distribution PDF::Builder.
-See **Changes** file for the version and list of changes from the previous 
+See **Changes** file for the version and list of changes from the previous
 release.
 
 ## Obtaining and Installing the Package
@@ -41,7 +43,7 @@ The installable Perl package may be obtained from
 "https://metacpan.org/pod/PDF::Builder", or via a CPAN installer package. If
 you install this product, only the run-time modules will be installed. Download
 the full `.tar.gz` file and unpack it (uncompress, then extract directory --
-hint: on Windows, **7-Zip File Manager** is an excellent tool) to get 
+hint: on Windows, **7-Zip File Manager** is an excellent tool) to get
 utilities, test buckets, example usage, etc.
 
 Alternatively, you can obtain the full source files from
@@ -143,7 +145,7 @@ functionality.
 * Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc.pl utility to create HTML documentation)
 * SVGPDF (0.087 or higher, needed if using SVG image functions)
 
-If an optional package is needed for cetain extended functionality, but not
+If an optional package is needed for certain extended functionality, but not
 installed, sometimes PDF::Builder
 will be able to fall back to built-in partial functionality (TIFF and PNG
 images), but other times will fail. After installing the missing package, you

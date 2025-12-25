@@ -21,6 +21,7 @@ $name =~ s/\.pl/.pdf/; # write in examples directory
 my $max_passes = 5;  # rec min 2, to ensure no visible changes in text
 my $magenta = '#ff00ff';
 my $fs = 15;
+my $paras = [ 0, 7 ]; # paragraph indentation and top margin defaults: pts
 my $debug = 0; # box around link text, red | at link target, blue | at
                # named destination point. 0/default = off, 1 = on
 my ($rc, $next_y, $unused);
@@ -96,7 +97,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
-		  'para'=>[ 0, 5 ], 'start_y'=>$next_y,
+		  'para'=>$paras, 'start_y'=>$next_y,
 	          'state'=>\%state, 'debug'=>$debug,
 		  'page'=> [ $pass_count, $max_passes, $ppn, 'zz', $fpn, 'R', 0 ] );
 if ($rc) {
@@ -118,8 +119,8 @@ necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non
 recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut 
 reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus 
 asperiores repellat.</p>
-
-<p><_reft id="Lorem" title="Lorem ipsum place">Lorem ipsum dolor sit amet, 
+<!-- TBI <_reft> first item in <p> causes no top margin! -->
+<p>Lorem <_reft id="Lorem" title="Lorem ipsum place"> ipsum dolor sit amet, 
 consectetur adipiscing elit. Proin id ante 
 turpis. In aliquam id enim sed pharetra. Aenean cursus at nisi consectetur 
 semper. Ut risus libero, finibus a aliquet ac, venenatis sit amet ligula. 
@@ -155,7 +156,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
-		  'para'=>[ 0, 5 ], 'start_y'=>$next_y,
+		  'para'=>$paras, 'start_y'=>$next_y,
 	          'state'=>\%state, 'debug'=>$debug,
 		  'page'=> [ $pass_count, $max_passes, $ppn, 'zz', $fpn, 'R', 0 ] );
 if ($rc) {
@@ -202,7 +203,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
-		  'para'=>[ 0, 5 ],
+		  'para'=>$paras,
 	          'state'=>\%state, 'debug'=>$debug,
 		  'page'=> [ $pass_count, $max_passes, $ppn, 'zz', $fpn, 'R', 0 ] );
 if ($rc) {
@@ -268,7 +269,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
-		  'para'=>[ 0, 5 ], 'start_y'=>$next_y,
+		  'para'=>$paras, 'start_y'=>$next_y,
 	          'state'=>\%state, 'debug'=>$debug,
 		  'page'=> [ $pass_count, $max_passes, $ppn, 'zz', $fpn, 'R', 0 ] );
 if ($rc) {

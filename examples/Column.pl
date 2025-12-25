@@ -222,7 +222,7 @@ $text->column($page, $text, undef, 'html',
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'none', \@ALoremIpsum, 
-	    'rect'=>[50,700, 500,250], 'outline'=>$magenta );
+	    'rect'=>[50,700, 500,275], 'outline'=>$magenta );
 if ($rc) { 
     print STDERR "Lorem Ipsum array overflowed the column!\n";
 }
@@ -234,7 +234,7 @@ $text->column($page, $text, undef, 'html',
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'none', $SLoremIpsum, 
-	          'rect'=>[50,350, 500,300], 'outline'=>$magenta, 
+	          'rect'=>[50,350, 500,275], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ] );
 if ($rc) { 
     print STDERR "Lorem Ipsum string overflowed the column!\n";
@@ -291,6 +291,9 @@ END_OF_CONTENT
 #This is an external named dest [Link Text ND ext](ext2.pdf#NDe) there.
 #This is a browser URL [Link text URL](file.html) there.
 #This is a browser URL with anchor [Link text URL w/ anchor](file2.htm#blah) there.
+
+# TBD in above text, <u><s>nested</s></u> <del><ins>tags</ins></del> lost the
+# space between the words in Treebuilder? needs investigating
 
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
@@ -464,14 +467,14 @@ if ($use_Table) {
 # more pages with more extensive MD
 print "======================================================= pg 5-9\n";
 print "---- A README.md file for PDF::Builder\n";
-print "   You should see warnings about invalid or unknown tags <img>\n";
-print "   and <code>. These tags are not yet implemented and are ignored.\n";
+print "   You should see warnings about invalid or unknown tag <img>.\n";
+print "   This tag is not yet implemented and is ignored.\n";
 $page = $pdf->page();
 $grfx = $page->gfx();
 $text = $page->text();
 footer(++$page_num, $pdf, $text);
 #  might need three or four pages
-#  three <img> calls (GitHub buttons), several `code` 
+#  three <img> calls (GitHub buttons)
 #  escape $ and \ in several lines, unescape \* 
 #  example block in Paper Sizes note needs manual reformat (revisit
 #    when <pre> supported)
@@ -503,7 +506,9 @@ each other and one will not interfere with the other if both are installed.
 However, you should _not_ try mixing the two libraries within one running 
 program, as they still share many routine names!
 
-[Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full), including Documentation and Examples.
+The
+[Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full)
+includes Documentation and Examples.
 
 [![Open Issues](https://img.shields.io/github/issues/PhilterPaper/Perl-PDF-Builder)](https://github.com/PhilterPaper/Perl-PDF-Builder/issues)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
@@ -717,6 +722,7 @@ a pointer to _your_ work. The more cross-pollination, the better!
 * LICENSE file for more on the license term
 * INFO/RoadMap file for the PDF::Builder road map
 * INFO/ACKNOWLEDGE.md for "thank yous" to those who contributed to this product
+* INFO/SPONSORS for "thank yous" to those who financially sponsored this product
 * INFO/CONVERSION file for how to convert from PDF::API2 to PDF::Builder
 * INFO/Changes\* files for older change logs
 * INFO/PATENTS file for information on patents
@@ -784,12 +790,12 @@ addition to Letter paper being .25" wider and .7" shorter than A4, that 1/8"
 END_OF_CONTENT
 
 restore_props($text,$grfx);
-# page 5
+# page 5. tune length to avoid orphaning a couple of headings
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
+	          'rect'=>[50,750, 500,640], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ] );
-# pages 6-8
+# pages 6-8. tune length a bit
 while ($rc) { 
     # new page. uses fixed column template, no headers/footers/page numbers
     $page = $pdf->page();
@@ -800,7 +806,7 @@ while ($rc) {
 #print Dumper($unused) if $page_num == 7;
     ($rc, $next_y, $unused) =
         $text->column($page, $text, $grfx, 'pre', $unused, 
-		  'rect'=>[50,750, 500,700], 'outline'=>$magenta, 
+		  'rect'=>[50,750, 500,640], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ] );
 }
 
@@ -850,7 +856,7 @@ restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[50,750, 500,300], 'outline'=>$magenta, 
-		  'para'=>[ 0, 0 ] );
+		  'para'=>[ 0, 5 ] );
 if ($rc) { 
     print STDERR "Block quotes example overflowed column!\n";
 }
@@ -900,7 +906,7 @@ END_OF_CONTENT
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'md1', $content, 
-	          'rect'=>[50,750, 500,125], 'outline'=>$magenta, 
+	          'rect'=>[50,750, 500,170], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
 if ($rc) { 
@@ -909,22 +915,25 @@ if ($rc) {
 
 # note some tags capitalized, and some attributes capitalized
 print "---- horizontal rules HTML\n";
+# note that current alignment is 'left', while the default HTML alignment 
+#   appears to be 'center' (not currently supported)
+# TBD add align= attribute, support for margin-* auto for center, right align
 $content = <<"END_OF_CONTENT";
 <p>HTML horizontal rules, with CSS</p>
-<hR>
+<hR> <!-- will be folded to lowercase -->
 <p>Between two rules, above is default settings</p>
 <hr style="height: 5; color: blue">
 <p>Between two rules, above is very thick and blue</p>
-<hr style="width: 200" />
-<P>Above rule is only 200pt long</p>
+<hr style="width: 200" align="left" />
+<P>Above rule is only 200pt long, and explicitly left aligned</p>
 <HR size="17" Color="orange" WIDTH="300">
-<p>Above rule is <em>very</em> thick orange and 300pt long</p>
+<p>Above rule is <em>very</em> thick orange and 300pt long, centered by default</p>
 END_OF_CONTENT
 
 restore_props($text, $grfx);
 ($rc, $next_y, $unused) =
     $text->column($page, $text, $grfx, 'html', $content, 
-	          'rect'=>[50,585, 500,185], 'outline'=>$magenta, 
+	          'rect'=>[50,550, 500,235], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
 	         );
 if ($rc) { 
@@ -959,13 +968,14 @@ print "---- Bogus HTML tags and CSS property names\n";
 print "   You should see warnings about an invalid HTML tag <glotz> and invalid \n";
 print "   CSS properties 'snork' and 'snuck'. Don't worry about these messages,\n";
 print "   they're intentional tests.\n";
+# note that global properties must go under the 'body' selector
 $content = <<"END_OF_CONTENT";
 <p> <!-- expect one message -->
 <glotz>This is within a 'glotz' tag</glotz>. 
 This is <glotz>within another.</glotz>
 </p>
 
-<p style="snork: 1em;">This paragraph has CSS 'snork' property.</p>
+<p style="snork: 1em;">This paragraph has CSS 'snork' property and is green.</p>
 END_OF_CONTENT
 
 restore_props($text, $grfx);
@@ -973,7 +983,7 @@ restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,260, 500,60], 'outline'=>$magenta, 
 		  'para'=>[ 0, 10 ],
-                  'style'=>'color: green; snuck: shlump;',
+                  'style'=>'body {color: green; snuck: shlump;}',
 	         );
 if ($rc) { 
     print STDERR "Invalid tags and CSS example overflowed column!\n";
@@ -993,6 +1003,7 @@ restore_props($text, $grfx);
     $text->column($page, $text, $grfx, 'html', $content, 
 	          'rect'=>[100,187, 400,13], 'outline'=>$magenta, 
 		  'para'=>[ 0, 0 ],
+		  'style'=>'body {color: black;}',  # reset color
 	         );
 if ($rc) { 
     print STDERR "1. <_move> and text-align example overflowed column!\n";
@@ -1066,7 +1077,7 @@ if ($rc) {
 }
  
 if (0) { ####################################### future MultiMarkdown
-##### needs <br>, <code>, <pre> support
+##### needs <br>, <pre> support
 print "======================================================= pg 12-13\n";
 print "---- MultiMarkdown web page\n";
 $page = $pdf->page();

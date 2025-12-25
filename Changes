@@ -1,9 +1,21 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-12-02  UNRELEASED
+3.028     2025-12-24  UNRELEASED
 * = work in progress
 
   ==== New features
+
+    lib/PDF/Builder/Content/Text.pm, examples/Column.pl
+      The 'align' attribute has been added to the <hr> tag to 'left', 'center' 
+      (default), or 'right' align a rule which is less than the full width of
+      the column. This brings <hr> (and equivalent Markdown) in column() into
+      compliance with standard HTML behavior. You may of course add CSS to left
+      align <hr>s if you desire.
+
+    lib/PDF/Builder/Content/Text.pm, examples/Column.pl
+     <code> HTML tag now supported, using Courier (fixed pitch font) at 85%
+      of font-size. This will reduce the number of warnings in the Column* 
+      examples.
 
     lib/PDF/Builder/Content/Text.pm, examples/Column.pl
      Add checks for valid (supported) CSS property names. Clarify that the 
@@ -15,8 +27,10 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
      Additional length units for CSS values in column(). In addition to pt and
       % of current font size; em (= font size), en (= 1/2 font size), ex (= 1/2
       font size), in (inches), cm, mm, and px (assume 78dpi display) are added.
-      Future plans are for ex to use the actual font x-height, if available,
-      and for some way to specify the screen resolution (dpi) for px.
+      Negative values are now allowed, although negative margins are NOT yet
+      fully supported. Future plans are for 'ex' to use the actual font 
+      x-height, if available, and for some way to specify the screen resolution 
+      (dpi) for px.
 
     lib/PDF/Builder/Content/Text.pm
      For Markdown (md1), if extra blank lines between list items, Text::Markdown
@@ -110,7 +124,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       lib/PDF/Builder/Content/Text.pm, 
       lib/PDF/Builder/Content/Column_docs.pm (new), MANIFEST
      Move POD cocerning the use of column() and related routines to one place, 
-      for easier reference, and update it.
+      for easier reference and updating it.
 
     lib/PDF/Builder/Resource/CIDFont.pm, 
       lib/PDF/Builder/Resource/CIDFont/TrueType-CJKFont.pm
@@ -213,7 +227,8 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 
     Makefile.PL, INFO/DEPRECATED
      Add installation-time reminder to check DEPRECATED for anything scheduled
-      to be removed, including dashed option names.
+      to be removed, including dashed option names (to be unsupported starting
+      with release 3.030 or later).
 
     lib/PDF/Builder/Content/Text-Column_docs.pm
      Since the introduction, the CSS property 'text-height' has been used for
@@ -227,8 +242,8 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
 
     t/svg.t
      Remove section of comparison that included 'gray' color as RGB. The old
-      SVGPDF library used 3 x x7F, while the new one uses a different color
-      library which defines gray as 3 x x80. This change allows testing with
+      SVGPDF library used 3 x 0x7F, while the new one uses a different color
+      library which defines gray as 3 x 0x80. This change allows testing with
       either the old or the new version of SVGPDF. Re #237.
 
     lib/PDF/Builder/Content/Text.pm
@@ -239,7 +254,8 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
      Ref #231, explain that an externally produced PDF (from "Canva") was 
       leaving the fill state as "transparent", and so any graphics fill or
       text was disappearing. The solution is to use egstate() to reset fill
-      state to "opaque" (transparency to 0, see examples/060_transparency).
+      state to "opaque" (transparency to 0, see examples/060_transparency
+      and ticket #231).
 
     lib/PDF/Builder/Content/Text.pm
      When revising the baseline due to taller text, there was a miscalculation

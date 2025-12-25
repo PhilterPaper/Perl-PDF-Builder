@@ -1,4 +1,4 @@
-package PDF::Builder::Docs;
+package PDF::Builder::Content::Column_docs;
 
 use strict;
 use warnings;
@@ -194,7 +194,8 @@ an C<x> position to start at.
 =item 'font_size' => $font_size
 
 This is the starting font size (in points) to be used. Over the course of
-the text, it may be modified by markup. Initially 12pt.
+the text, it may be modified by markup. The default is 12pt. It is in turn
+overridden by any CSS or HTML font size-settings.
 
 The starting font size may be set in a number of ways. It may be inherited from
 a previous C<$text-E<gt>font(..., font-size)> statement; it may be set via the
@@ -238,11 +239,14 @@ normally supplied with Windows (but not always with other operating systems).
 This is the width of the gutter to the left of a list item, where (for the
 first line of the item) the marker lives. The marker contains the symbol (for
 bulleted/unordered lists) or formatted number and "before" and "after" text
-(for numbered/ordered lists). Both have a single space before the item text
-starts. The number is a length, in points.
+(for numbered/ordered lists). Both have a single space (marker_gap = 1em)
+before the item text starts. The number is a length, in points.
 
-The default is 2 em (2 times the font_size passed to C<column()>), and is not 
-adjusted for any changes of font_size in the markup. An explicit value passed 
+The default is 1 em (1 times the font_size passed to C<column()>), and is not 
+adjusted for any changes of font_size in the markup, so that lists are indented
+I<consistently>. This is usually fine for unordered (bulleted) lists and single
+digit ordered (numbered) lists, although you may need to make it wider for 
+two or three digit numbered lists. An explicit value passed 
 in is also not changed -- the gutter width for the marker will be the same in 
 all lists (keeping them aligned). If you plan to have exceptionally long 
 markers, such as an ordered list of years in Roman numerals, e.g., 
@@ -297,6 +301,11 @@ CSS defaults. These will be applied for the entire C<column()> call. You can
 use this, or C<style> tags in 'html', but for 'none' or 'md1', you will need to
 use this method to set styling. See also the C<font_info=E<gt>> option to set
 initial font settings.
+
+Note that, unlike the C<style=> I<attribute> in HTML tags, the C<style=E<gt>>
+option is formatted like a E<lt>style> I<tag> -- that is, with B<selector {>
+I<property>: I<value>;... B<}>. If you want to set I<global> values, use the
+B<body> selector.
 
 =item 'substitute' => [ [ 'char or string', 'before', 'replace', 'after'],... ]
 
@@ -705,11 +714,11 @@ HTML::TreeBuilder.
 
 =item *
 
-` (backticks) enclose a "code" format phrase, B<NOT> currently supported
+` (backticks) enclose a "code" format phrase
 
 =item *
 
-``` (backticks) enclose a "code" format block, B<NOT> currently supported
+``` (backticks) enclose a "code" format I<block>, B<NOT> currently supported
 
 =item *
 
@@ -824,13 +833,26 @@ produce underlined text
 
 =item *
 
+B<E<lt>codeE<gt>>
+produce 'code'-style fixed-pitch text
+
+=item *
+
 B<E<lt>h1E<gt> through E<lt>h6E<gt>>
 produce level 1 through 6 headings and subheadings
 
 =item *
 
 B<E<lt>hrE<gt>>
-produces a horizontal rule. The C<width="length"> attribute gives a length (width, in pixels) less than the full column width, and C<size="height"> attribute gives the height (thickness) of the rule. CSS properties C<width> and C<height> are the equivalent, permitting other units of measure. Currently there is no CSS B<align> property (left alignment only). Default is C<width> = full column, and C<size> = 0.5pt.
+
+produces a horizontal rule. The C<width="length"> attribute gives a length (width, in pixels) less than the full column width, and C<size="height"> attribute gives the height (thickness) of the rule. CSS properties C<width> and C<height> are the equivalent, permitting other units of measure. 
+
+The default C<width> is the full column, and C<size> (thickness) of the line is 0.5pt.
+
+Note that most browsers default to I<center> alignment if the width is less than the full column, which is the default here. 
+The B<align> attribute is available here to specify I<left> alignment of the rule, I<center> alignment (default), or I<right>
+alignment. Note that this attribute is deprecated in the HTML standard, however, PDF::Builder does not yet support the suggested
+CSS methods (properties) for doing this.
 
 =item *
 
@@ -923,7 +945,15 @@ B<In plan, but not yet implemented>
 
 =item *
 
-'pre', 'code' (preformatted and code blocks),
+'pre' (preformatted blocks),
+
+=item *
+
+'cite', 'q', 'samp', 'var', 'kbd' (various highlights),
+
+=item *
+
+'big', 'bigger', 'small', 'smaller' (various font sizes),
 
 =item *
 
@@ -935,23 +965,35 @@ B<In plan, but not yet implemented>
 
 =item *
 
-'sup', 'sub' (superscript and subscript)
+'sup', 'sub' (superscript and subscript),
 
 =item *
 
-'dl', 'dt', 'dd' (definition lists)
+'dl', 'dt', 'dd' (definition lists),
 
 =item *
 
-'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td' (tables)
+'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td' (tables),
 
 =item *
 
-'mark' (highlighting... requires ability to set background color)
+'mark' (highlighting... requires ability to set background color),
 
 =item *
 
-'div' (handle div's in some manner)
+'div' (handle div's in some manner),
+
+=item *
+
+'center',
+
+=item *
+
+'caption', 'figure', 'figcap' (optional sub- and super-sections)
+
+=item *
+
+'nav', 'header', 'footer', 'address', 'article', 'aside', 'canvas', 'section', 'summary' (possibly some sectioning)
 
 =back
     
@@ -1074,12 +1116,17 @@ C<p.abstract> or C<ol, ul>), hierarchies (e.g., C<ol E<gt> li>), specified
 number of appearance, pseudotags, or other such complications as found in a 
 browser's CSS. Sorry!
 
-Property values which are lengths (including font-size) may have units of pt 
-(points, 72 to the inch), px (pixels, currently 78 to the inch), in (inch),
-cm, mm, em (equal to font-size), en (0.5em), and ex (currently 0.5em, but in
-the future may be able to query the font's actual x-height). % (percentage) of
-the current font-size is allowed, although in the future something may be done
-with the enclosing object size.
+=head4 Length Measures
+
+Property values which are lengths (including C<font-size>) may have units of B<pt> 
+(points, 72 to the inch), B<px> (pixels, currently fixed at 78 to the inch), 
+B<in> (inches), B<cm>, B<mm>, B<em> (equal to font-size), B<en> (0.5em), and B<ex> (currently 
+0.5em, but in the future may be able to query the font's actual x-height). 
+% (percentage) of the current font-size (in most cases, unless otherwise noted) is allowed, although
+some properties may in the future support % of the enclosing object size. For property 
+I<list-style-position>, % is relative to the marker width+gap, not font-size (and pt values may
+be given, where "inside" = 0% and "outside" = 100% of marker width+gap). 
+Sizes may be negative numbers (useful only for margins).
 
 B<Note> that eventually we may support C<li::marker>, which is now standard CSS,
 but there does not appear to be a way to support changes via C<style=>, because
@@ -1109,7 +1156,16 @@ B<font-family> (name as defined to FontManager, e.g. Times)
 
 =item *
 
-B<font-size> (pt, bare number = pt, % of current size)
+B<font-size> (length measure)
+
+Note that B<body> C<font-size> is the starting point, and so if given,
+must be a bare number (greater than 0) or number + 'pt'. C<font-size>s for
+other tags may be given as % of inherited font-size or em (100% of font-size),
+en (50%), or ex (currently fixed at 50%).
+
+Unless otherwise prohibited, any tag's CSS may first change the font-size,
+and then properties such as margins defined as % of font-size will be
+calculated using the new font-size, rather than the inherited one.
 
 =item *
 
@@ -1121,7 +1177,9 @@ B<font-weight> (I<normal> or I<bold>)
 
 =item *
 
-B<height> (pt, bare number) thickness (height) of B<horizontal rule>
+B<height> (pt, bare number) 
+
+Thickness (height) of B<horizontal rule>. The HTML attribute is C<size>.
 
 =item *
 
@@ -1133,20 +1191,46 @@ B<list-style-type> (marker description, see also _marker-text/before/after)
 
 =item *
 
-B<margin-top/right/bottom/left> (pt, bare number = pt, % of font-size). 
+B<margin-top/right/bottom/left> (length measure)
+
 Note that adjacent bottom and top margins will be collapsed to use the 
-I<larger> amount of the two.
+I<larger> amount of the two. Negative margin values ("pulling" objects towards
+each other) are allowed, and positive margin values "push" objects away from
+each other.
 
 =item *
 
-B<text-decoration> (none, underline, line-through, overline, may use more
-than one (except 'none') separated by spaces)
+B<text-decoration> (none, underline, line-through, overline)
+
+May use more than one value (except 'none') separated by spaces. 
+
+B<Note 1:> various HTML tags (such as I<u>, I<ins>, I<del>, I<s>) make use of 
+this CSS property, and may of course be changed in the styling.
+
+B<Note 2:> both I<underline> and I<overline> are solid lines, which will collide with
+glyph descenders and ascenders respectively. We are investigating means of
+implementing something like the CSS I<text-decoration-skip-ink: auto> property. 
+PDF does not appear to currently define a way of doing this (to be handled by
+the Reader). I<line-through> is 
+also a solid line that collides with glyph strokes, but the usual intent I<is> 
+to obscure the text, so there are no plans to change this default behavior.
+
+B<Note 3:> these decorations are made as escapes within the text object, rather
+than within the graphics object. We reserve the right to (in the future) change 
+this to require a graphics object to draw them. Some lead time will be given so
+that you have a chance to update your code.
+
+B<Note 4:> I<line-through> uses a fixed % of ascender height, rather than of I<ex>
+height. In some fonts, this may result in a I<line-through> "floating" above the
+bulk of the characters (intersecting only ascenders), i.e., it is above the x-height.
+It's on the "to do" list to address this.
 
 =item *
 
-B<line-height> (leading, as ratio of baseline-spacing to font-size). Currently,
-percentage of font-size and absolute units (e.g., pt) are B<not> supported. The
-default value is 1.125 (18pt line-to-line for font-size 16).
+B<line-height> (leading, as ratio of baseline-spacing to font-size). 
+
+Currently, percentage of font-size and absolute units (e.g., pt) are B<not> supported. 
+The default value is 1.125 (18pt line-to-line for font-size 16).
 
 B<Note:> B<text-height>, the former I<incorrect> name for this property, is 
 still supported (as an alias for B<line-height>) through release 3.029, but may 
@@ -1154,7 +1238,9 @@ be withdrawn as soon as release 3.030. Update your code if you use it!
 
 =item *
 
-B<text-indent> (pt, bare number = pt, % of current font-size)
+B<text-indent> (length measure)
+
+For paragraph indentation.
 
 =item *
 
@@ -1167,12 +1253,23 @@ not properly wrap to a new line.
 
 =item *
 
-B<width> (pt, bare number) width (length) of B<horizontal rule>
+B<width> (length measure) width (length) of B<horizontal rule>
+
+Currently only used for E<lt>hr>. In the future it may be expanded to other
+object types. E<lt>hr> may be permitted in the future to be a percentage
+of the enclosing parent's width.
+
+B<height> (length measure) height (thickness) of B<horizontal rule>
+
+Currently only used for E<lt>hr>. In the future it may be expanded to other
+object types. E<lt>hr> may be permitted in the future to be a percentage
+of the enclosing parent's height.
+
+The equivalent HTML attribute is C<size>.
 
 =back
 
-Sizes may be '%' (of font-size), or 'pt' (the default unit). 
-More support may be added over time. 
+See the L</Length Measures> section to see what measurements are allowed.
 
 B<CAUTION:> comments /* and */ are NOT
 currently supported in CSS -- perhaps in the future.
@@ -1235,15 +1332,23 @@ B<In plan, but not yet implemented>
 
 =item *
 
+white-space (treatment of line-ends and various spaces),
+
+=item *
+
 /* and */ comments in CSS
 
 =item *
 
-border-* (border properties)
+border and border-* (border properties),
 
 =item *
 
-list-style-image (use an image as a list bullet)
+padding and padding-* (padding properties),
+
+=item *
+
+list-style-image (use an image as a list bullet),
 
 =item *
 
@@ -1251,19 +1356,23 @@ margin (update the four C<margin-*> properties in one setting, add 'auto' value)
 
 =item *
 
-background-color (for <mark> tag)
+background-color (also for <mark> tag),
 
 =back
 
 =back
 
-There are additional non-standard CSS "properties" that you would normally B<not> set in CSS. They are internal state trackers:
+There are additional non-standard CSS "properties" that you would normally 
+B<not> set in CSS. They are internal state trackers:
 
 =over
 
 =item *
 
-B<_fs> (current running font size, in points, on the properties stack)
+B<_parent-fs> (current running font size, in points)
+
+This is actually the parent of this tag's font-size, which the current tag inherits
+and may set to a new value if desired (with C<font-size> property).
 
 =item *
 

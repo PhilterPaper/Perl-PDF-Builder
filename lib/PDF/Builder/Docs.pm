@@ -617,6 +617,8 @@ settings.
  # write a huge amount of stuff to $grfx1
  # write a huge amount of stuff to $grfx2, picking up where $grfx1 left off
 
+=head3 Rendering with a shared (mixed) object
+
 In any case, now that you understand the rendering order and how the order
 of object declarations affects it, how text and graphics are drawn can now be
 completely controlled as desired. There is really no need to add another "both"
@@ -634,10 +636,22 @@ temporarily exiting (ET) to graphics mode to draw the lines, and then returning
 be easily made. Since "BT" resets some text settings, this needs to be done
 with care!
 
-There was a recent problem reported (ticket 231) which suggested that the 
+A number of PDF-producing products out there mix their text and graphics into a
+single object. So long as PDF::Builder is I<not> expecting to pick apart a 
+"text" or "graphics" stream from an existing PDF file, in order to look inside
+it, this should not be expected to cause any problems. However, if you add a
+new text-only or graphics-only object to an existing PDF via PDF::Builder, you
+need to be aware of the rendering order. Presumably the new object(s) will be
+I<after> the original one, but you should be aware of what's going on. A text,
+graphics, or mixed object is all the same to a PDF reader, which cares only 
+for who has the lower object number (to be rendered first).
+
+=head3 Graphics state left by existing PDFs
+
+There was a problem recently reported (ticket 231) which suggested that the 
 expected rendering order of output wasn't being respected. What it turned out
-to be was that a utility ("Canva") used to generate a template PDF was writing 
-graphics commands to a stream (a mixed graphics and text stream, rather than 
+to be was that a utility ("Canva") used to generate a template PDF, was writing 
+graphics commands to a single stream (a mixed graphics and text stream, rather than 
 separate streams, but that's not important here). Apparently it was leaving 
 the PDF it created with a graphics state of B<transparent> "fill" mode. Further
 text (as well as filled graphics draws) added by the user in PDF::Builder (open
@@ -645,7 +659,7 @@ PDF, open_page, add graphics and text in new streams) was still being drawn,
 but was made invisible when rendered! Remember that text is by default (render
 mode 0) drawn only with fill, not outlined. The solution was to first use the 
 C<egstate()> call to set transparency back to 0 (off), making "fill" opaque 
-again. See C<examples/060_transparency> for a code sample.
+again. See C<examples/060_transparency> for a code sample, or ticket 231.
 
 =head2 Notes on Reader support of features
 
