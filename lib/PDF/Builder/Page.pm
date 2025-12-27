@@ -731,6 +731,8 @@ given that the remainder are ignored.
 
 =back
 
+=cut
+
 sub boundaries {
     my $self = shift();
 
