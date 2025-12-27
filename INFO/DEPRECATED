@@ -15,6 +15,34 @@ NOTE for maintainer: update t/deprecations.t with tests for both old
 
 In order of scheduled removal date:
 
+*******************************************************************************
+PDF::Builder currently accepts undashed option names in all cases, e.g.,
+->new('compress' => 'none'), but still accepts dashed legacy names, e.g., 
+->new('-compress' => 'none') or ->new(-compress => 'none'). This is to maintain
+compatibility with PDF::API2, which still has a few dashed options here and 
+there. 
+
+All cases of "dashed" option names (e.g., ->new('-compress' => 'none')) are
+silently converted to "undashed" form internally (->new('compress' => 'none')).
+Only the undashed forms are documented, as we encourage the use of this form.
+We strongly suggest that you go through your code and change dashed option
+names to undashed. PDF::API2 appears to do the same thing (except for the 
+"Lite" subsystem), and has also deprecated dashed (hyphened) names. At this
+point, we have no plans to disallow (or ignore) dashed names.
+
+There are a number of option names that are different between PDF::API2 and
+PDF::Builder (whether dashed or undashed), and we will attempt to honor the
+PDF::API2 names as alternate names.
+
+There are also a number of legacy method names that are still available for
+back (and cross) compatibility, but we recommend that you use the listed 
+(recommended) names for new code.
+*******************************************************************************
+The "Lite" subsystem is not maintained as is kept only for compatibility with
+old code (believe it or not, some organizations may still use it!). It has had 
+dashed option names changed to undashed in PDF::Builder, but not PDF::API.
+*******************************************************************************
+
 default()       method in Builder.pm
    May be renamed in the future, as is flagged by Perl::Critic as reserved.
    Use with caution.
@@ -25,25 +53,18 @@ width(w),height(h)  methods in Resource/XObject/Image.pm
    someone IS using it in some manner, it has not been immediately removed.
  THIS ONE IS BEING REVIEWED, AS THE <img> TAG IN column() WILL REQUIRE 
  IMPLEMENTATION OF WIDTH AND HEIGHT SETTING. NEVERTHELESS, THE CURRENT IMAGE
- SUPPORT DOES NOT WORK.
+ SUPPORT TO *SET* WIDTH AND HEIGHT DOES *NOT* WORK.
 
-All cases of "dashed" option names (e.g., ->new('-compress' => 'none') will
-eventually be removed, leaving only "undashed" (->new('compress' => 'none')
-supported. This is your warning as of release 3.028 to go through your code 
-and change dashed option names to undashed. The next release after the one
-year anniversary of 3.028's release will introduce a warning message for any
-use of a dashed option name (although that option will still work with either
-dashed or undashed name). The next release one year after that will withdraw
-support for dashed option names -- they will simply be silently ignored.
+===== NOT scheduled to be removed, but take notice ===========================
 
 PDFStr()        method in Basic/PDF/Utils.pm
-   NOT scheduled to be removed, but use PDFString() instead. 
+   use PDFString() instead. 
 
 PDFUtf()        method in Basic/PDF/Utils.pm
-   NOT scheduled to be removed, but use PDFString() instead. 
+   use PDFString() instead. 
 
 openpage()      method in Builder.pm
-   NOT scheduled to be removed, but use open_page() instead. 
+   use open_page() instead. 
 
 *** If I have missed any deprecated interfaces, please let me know! ***
 
