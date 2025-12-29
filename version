@@ -7,10 +7,10 @@ VERSION 3.028
 #   of Perl" (NOT "Latest releases in each branch of Perl"!) and subtract 
 #   6 years to get date of oldest release, and then go one release before that. 
 #   Would be nice to read cpan First Release and figure out min Perl version.
-#PERL_V_DOT   5.30.0  # dist.ini, .travis.yml
+#PERL_V_DOT   5.28.0  # dist.ini, .travis.yml
 #    two decimals seems to upset Perl when treating as a number, not string
 # update Makefile.PL, META.*
-PERL_V       5.030000
+PERL_V       5.028000
 
 # minimum ExeUtils::Makemaker needed for configuration
 # update Makefile.PL, META.*

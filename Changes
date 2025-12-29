@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-12-24  UNRELEASED
+3.028     2025-12-29  UNRELEASED
 * = work in progress
 
   ==== New features
@@ -49,7 +49,7 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
       find a different balance more pleasing to you.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm, Version, Makefile.PL
-     Prepare for 3.028 release, new minimum Perl version is 5.30.
+     Prepare for 3.028 release. Minimum Perl version remains at 5.28.
 
 *   lib/PDF/Builder.pm, lib/PDF/Builder/Content/Text.pm, 
       lib/PDF/Builder/Docs.pm, MANIFEST, examples/Column_xrefs.pl (new), 
@@ -63,8 +63,8 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
               "#pgno"            new int link in doc, default fit
               "ePDF#pgno"        new ext link to another PDF
               "url"              existing link to browser URL (start with p://)
-              "id"               new (int or ext) link to doc by id
-                                 may have optional leading # unless the id
+              "id" or "#id"      new (int or ext) link to doc by id
+                                 may have optional leading # *unless* the id
                                    is all digits (numeric)
               "##nameddest"      new int link to a ND
               "ePDF##nameddest"  new ext link to ND in another doc

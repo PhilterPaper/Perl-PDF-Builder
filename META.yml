@@ -70,7 +70,7 @@ provides:
 requires:
   Compress::Zlib: '1.0'
   Font::TTF: '1.04'
-  perl: '5.030000'
+  perl: '5.028000'
 resources:
   bugtracker: https://github.com/PhilterPaper/Perl-PDF-Builder/issues
   homepage: https://metacpan.org/pod/PDF::Builder
