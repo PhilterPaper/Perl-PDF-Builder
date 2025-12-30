@@ -41,11 +41,11 @@ top level in the C<$pdf> object. There are often limitations on the length of
 a Named Destination string (name), including the length of whatever means is 
 used to invoke it (e.g., C<#nameddest=foo> takes up 11 characters before you 
 even get to the name 'foo' itself, so if the limit is 32, you're left with
-perhaps 21 charactes for the name itself). Be aware of this, and keep the names 
-as short as reasonably possible. Spaces within a name are not permitted, and 
-allowable punctuation is limited. Consult the PDF documentation for specifics,
-but A-Z, a-z, 0-9, and '_' (underscore) are generally permitted. Usually names
-are case-sensitive ('foo' is a different destination than 'Foo').
+perhaps 21 characters for the name itself). Be aware of this, and keep the 
+names as short as reasonably possible. Spaces within a name are not permitted, 
+and allowable punctuation is limited. Consult the PDF documentation for 
+specifics, but A-Z, a-z, 0-9, and '_' (underscore) are generally permitted. 
+Usually names are case-sensitive ('foo' is a different destination than 'Foo').
 
     # create a Named Destination 'foo' in this PDF file on page $page
     my $dest = PDF::Builder::NamedDestination->new($pdf);

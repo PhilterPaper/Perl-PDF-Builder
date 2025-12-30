@@ -43,6 +43,11 @@ old code (believe it or not, some organizations may still use it!). It has had
 dashed option names changed to undashed in PDF::Builder, but not PDF::API.
 *******************************************************************************
 
+The 'text-height' CSS property was incorrectly named, and was renamed to the
+correct 'line-height'. 'text-height' will be accepted as an alias to 
+'line-height' through at least the 3.030 release, or one year after the 3.028 
+release, whichever is later.
+
 default()       method in Builder.pm
    May be renamed in the future, as is flagged by Perl::Critic as reserved.
    Use with caution.

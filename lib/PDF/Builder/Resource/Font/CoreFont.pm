@@ -135,7 +135,7 @@ Changes the encoding of the font from its default. Notice that the encoding
 256 glyphs associated with this encoding (I<and> that are available in this 
 font). 
 
-See I<perl's Encode> for the supported values. B<Warning:> only single byte 
+See I<Perl's Encode> for the supported values. B<Warning:> only single byte 
 encodings are permitted. Multibyte encodings such as 'utf8' are forbidden.
 
 =item dokern
@@ -156,7 +156,7 @@ retrieved via $pdfname=$font->name().
 If given, it is expected to be an anonymous hash of font file data. This is
 to be used instead of looking up the I<$fontname>.pm file for width and other
 data. You may need to use this option if your installed font happens to be
-out of synch with the PDF::Builder built-in core font metrics file (e.g.,
+out of sync with the PDF::Builder built-in core font metrics file (e.g.,
 I<helveticabold.pm>).
 
 =back

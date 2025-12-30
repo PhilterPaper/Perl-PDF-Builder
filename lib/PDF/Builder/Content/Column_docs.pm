@@ -26,7 +26,12 @@ could not be fit within the column confines is returned in an internal array
 format, and may be passed to the next C<column()> call to finish the
 formatting.
 
-Future plans call for non-rectangular columns to be definable, as well as flow from one column to another on a page, and column balancing.  Other possible enhancements call for support of non-Western writing systems (e.g., bidirectional text, using the HarfBuzz libary), proper word-splitting and paragraph shaping (possibly using the Knuth-Plass algorithm), and additional markup languages.
+Future plans call for non-rectangular columns to be definable, as well as
+flow from one column to another on a page, and column balancing. Other 
+possible enhancements call for support of non-Western writing systems 
+(e.g., bidirectional text, using the HarfBuzz library), proper 
+word-splitting and paragraph shaping (possibly using the Knuth-Plass 
+algorithm), and additional markup languages.
 
 =head2 column
 
@@ -225,7 +230,7 @@ defaults to 'normal' (unbolded weight), or 'normal' or '0' may be given. For
 bold (heavy) text, use 'bold' or '1'. Finally, a color may be given.
 
 Finally, the C<style> option for C<column()> may be given to override any of 
-the above settigs, e.g., B<'style'=E<gt>{ body { font-family:... }> and set
+the above settings, e.g., B<'style'=E<gt>{ body { font-family:... }> and set
 the initial current font. Remember that, as with anything font-related that
 C<column()> does, the 'face' (family) used must already be known to FontManager
 (explicitly loaded with C<add_font()> if not one of the 28 core fonts). 
@@ -706,11 +711,11 @@ HTML::TreeBuilder.
 
 =item *
 
-[label][n] reference-style links do NOT work
+[label][n] reference-style links B<NOT> currently supported
 
 =item *
 
-[label][^n] footnote-style links do NOT work
+[label][^n] footnote-style links B<NOT> currently supported
 
 =item *
 
@@ -772,7 +777,7 @@ for global settings), via the C<style=E<gt>> C<column()> option. You may also
 prepend a C<E<lt>styleE<gt>> HTML tag, with CSS markup, to your Markdown source.
 
 Standard Markdown permits an 'id' to be defined in a heading, by suffixing the
-text with C<{#id_name}>. This is eqivalent to C<id="id_name"> in HTML markup.
+text with C<{#id_name}>. This is equivalent to C<id="id_name"> in HTML markup.
 Although Text::Markdown does not currently support it, C<column()> implements
 this way of defining a target's id, and in fact extends it to permit an id to 
 be defined for any tag with child text.
@@ -843,9 +848,10 @@ produce level 1 through 6 headings and subheadings
 
 =item *
 
-B<E<lt>hrE<gt>>
+B<E<lt>hrE<gt>> 
+produce a horizontal rule
 
-produces a horizontal rule. The C<width="length"> attribute gives a length (width, in pixels) less than the full column width, and C<size="height"> attribute gives the height (thickness) of the rule. CSS properties C<width> and C<height> are the equivalent, permitting other units of measure. 
+The C<width="length"> attribute gives a length (width, in pixels) less than the full column width, and C<size="height"> attribute gives the height (thickness) of the rule. CSS properties C<width> and C<height> are the equivalent, permitting other units of measure. 
 
 The default C<width> is the full column, and C<size> (thickness) of the line is 0.5pt.
 
@@ -1066,7 +1072,7 @@ B<In plan, but not yet implemented>
 
 =item *
 
-'_swash' (specify a particular alternate glyph to use here)
+'_swash' and '_altg' (specify a particular alternate glyph to use here)
 
 =item *
 
@@ -1123,10 +1129,25 @@ Property values which are lengths (including C<font-size>) may have units of B<p
 B<in> (inches), B<cm>, B<mm>, B<em> (equal to font-size), B<en> (0.5em), and B<ex> (currently 
 0.5em, but in the future may be able to query the font's actual x-height). 
 % (percentage) of the current font-size (in most cases, unless otherwise noted) is allowed, although
-some properties may in the future support % of the enclosing object size. For property 
-I<list-style-position>, % is relative to the marker width+gap, not font-size (and pt values may
-be given, where "inside" = 0% and "outside" = 100% of marker width+gap). 
+some properties may in the future support % of the enclosing object size. 
 Sizes may be negative numbers (useful only for margins).
+
+=over
+
+=item * 
+
+For property 
+I<list-style-position>, % is relative to the marker width+gap, not font-size (and pt values may
+be given, where "inside" = 0% and "outside" = 100% of marker width+gap). The standard 'outside'
+(default) and 'inside' values may also be given.
+
+=item *
+
+For the I<E<lt>hr>> tag, the "width" and "size" attributes are in points. For the CSS "width" 
+property, absolute units may be given, or % of available column width. For the CSS "height"
+property, absolute units may be given.
+
+=back
 
 B<Note> that eventually we may support C<li::marker>, which is now standard CSS,
 but there does not appear to be a way to support changes via C<style=>, because
@@ -1259,6 +1280,8 @@ Currently only used for E<lt>hr>. In the future it may be expanded to other
 object types. E<lt>hr> may be permitted in the future to be a percentage
 of the enclosing parent's width.
 
+=item *
+
 B<height> (length measure) height (thickness) of B<horizontal rule>
 
 Currently only used for E<lt>hr>. In the future it may be expanded to other
@@ -1266,6 +1289,42 @@ object types. E<lt>hr> may be permitted in the future to be a percentage
 of the enclosing parent's height.
 
 The equivalent HTML attribute is C<size>.
+
+=item *
+
+B<In plan, but not yet implemented>
+
+=over
+
+=item *
+
+white-space (treatment of line-ends and various spaces),
+
+=item *
+
+/* and */ comments in CSS
+
+=item *
+
+border and border-* (border properties),
+
+=item *
+
+padding and padding-* (padding properties),
+
+=item *
+
+list-style-image (use an image as a list bullet),
+
+=item *
+
+margin (update the four C<margin-*> properties in one setting, add 'auto' value)
+
+=item *
+
+background-color (also for <mark> tag),
+
+=back
 
 =back
 
@@ -1322,43 +1381,7 @@ B<_marker-align> (left/center/right justify within marker_width gutter)
 
 =item *
 
-B<list-style-position> standard (inside or outside) or numeric (points or percentage of marker_width gutter)
-
-=item *
-
-B<In plan, but not yet implemented>
-
-=over
-
-=item *
-
-white-space (treatment of line-ends and various spaces),
-
-=item *
-
-/* and */ comments in CSS
-
-=item *
-
-border and border-* (border properties),
-
-=item *
-
-padding and padding-* (padding properties),
-
-=item *
-
-list-style-image (use an image as a list bullet),
-
-=item *
-
-margin (update the four C<margin-*> properties in one setting, add 'auto' value)
-
-=item *
-
-background-color (also for <mark> tag),
-
-=back
+B<list-style-position> standard (inside or outside) or numeric (points or percentage of marker_width gutter + marker_gap)
 
 =back
 
@@ -1646,7 +1669,7 @@ B<Fields in %state structure:>
         x,y  = x and y coordinates on page  
 
 Note that the link text ('title') and any page information ('on page X') need
-to be output at each pass, to detemine where everything is, while other
+to be output at each pass, to determine where everything is, while other
 information is stored until the last pass, to actually generate the annotation
 links. The "last pass" will be either when it is found that all link information
 has "settled down", or the C<max_passes> limit is reached.

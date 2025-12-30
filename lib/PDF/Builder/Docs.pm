@@ -230,11 +230,23 @@ B<Note> that these are I<not> hard and fast dates. In particular, we develop
 on Strawberry Perl, which sometimes falls a little behind the official Perl
 release!
 
+Also, due to user requests to allow I<new> releases of PDF::Builder to run on 
+earlier versions of Perl, we will try to stretch the lifetime of earlier Perl 
+versions. Eventually, some older Perl versions will have to be dropped if and 
+when we start making use of newer Perl operators and constructs. Nevertheless,
+it is still I<not> a good idea to continue to use very old Perl versions that 
+are beyond their support cutoff dates -- they become vulnerable to security 
+attacks, and bugs do not get fixed.
+
 =over
 
 =item * 
 
-5.30 current minimum supported version, until next PDF::Builder release after 20 June, 2026
+5.28 current minimum supported version. Out of support, so use at your own risk.
+
+=item * 
+
+5.30 future minimum supported version, until next PDF::Builder release after 20 June, 2026.
 
 =item * 
 
@@ -246,8 +258,7 @@ release!
 
 =item * 
 
-5.36 future minimum supported version, until next PDF::Builder release after 28 May, 2028. This is currently our primary development
-version.
+5.36 future minimum supported version, until next PDF::Builder release after 28 May, 2028. This is currently our primary development version.
 
 =item * 
 
@@ -358,6 +369,7 @@ hopefully illustrate the issue:
  my $page = $pdf->page();
  # adjust path for your operating system
  my $fontTR = $pdf->ttfont('C:\\Windows\\Fonts\\timesbd.ttf');
+    # or 'C:/Windows/Fonts/timesbd.ttf' will also work on Windows
 
 For the first group, you might expect the "under" line to be output, then the
 filled circle (disc) partly covering it, then the "over" line covering the
@@ -783,10 +795,11 @@ Drop me a line if I've overlooked your contribution!
 
 B<Note:> older versions of this package named various (hash element) options
 with leading dashes (hyphens) in the name, e.g., '-encode'. The use of a dash
-is now optional, and options are documented with names I<not> using dashes. At
-some point in the future, it is possible that support for dashed names will be
-deprecated (and eventually withdrawn), so it would be good practice to start
-using undashed names in new and revised code.
+is now optional, and options are documented with names I<not> using dashes. 
+While the use of dashed option names is deprecated and discouraged, they will
+remain legal for some time to come. At some point in the future, it is possible 
+that support for dashed names will be withdrawn, so it would be good practice 
+to start using undashed names in new and revised code.
 
 =head2 After saving a file...
 

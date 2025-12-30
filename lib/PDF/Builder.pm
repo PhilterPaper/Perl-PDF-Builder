@@ -5,7 +5,7 @@ use warnings;
 
 # $VERSION defined here so developers can run PDF::Builder from git.
 # it should be automatically updated as part of the CPAN build.
-our $VERSION = '3.027'; # VERSION
+our $VERSION = '3.028'; # VERSION
 our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
 
 # updated during CPAN build
@@ -155,7 +155,7 @@ including expected cutoff dates for Perl versions.
 
 =head2 KNOWN ISSUES
 
-This module does not work with perl's -l command-line switch.
+This module does not work with Perl's -l command-line switch.
 
 There is a file INFO/KNOWN_INCOMP which lists known incompatibilities with 
 PDF::API2, in case you're thinking of porting over something from that world, 
