@@ -5,7 +5,11 @@
 # -s flag to run short lists for 020_corefonts, 021_synfonts, 023_cjkfonts
 # author: Phil M Perry
 
-# NOTE TO MAINTAINER;
+# examples for Column_md_xrefs not active (commented out). It produces identical
+# results to Column_xrefs, so no point in running both (just different source:
+# HTML and Markdown).
+
+# NOTE TO MAINTAINER:
 #  keep in sync with examples/README, examples/examples.output, and
 #   INFO/old/examples.bat [ ] remove old/* files
 #  don't forget to update MANIFEST, run tools/3_examples.pl -s and upload sample
@@ -16,7 +20,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
 
 # dependent on optional packages:
 my $HS_installed = 1; # HarfBuzz::Shaper IS installed and you want to use it.
@@ -77,10 +81,10 @@ my (@example_list, @example_results);
 # push @example_results, "create examples/027_winfont.pdf. It has been removed (put in Windows directory for now)";
 
   push @example_list, "030_colorspecs";
-  push @example_results, "create examples/030_colorspecs.pdf, showing many color models with\n a large sample of colors each, including named colors.\n";
+  push @example_results, "create examples/030_colorspecs.pdf, showing many color models with\n a large sample of colors each, including named colors.\n 16 pages RGB, 'G' value increasing for brighter samples.\n 16 pages RGB at a specific Gamma, 'G' value increasing for brighter samples.\n 16 pages CMYK, 'M' value increasing for darker samples.\n 16 pages L*a*B, 'L' value increasing for brighter samples.\n  3 pages of named colors in alphabetical order.\n";
 
   push @example_list, "031_color_hsv";
-  push @example_results, "create examples/031_color_hsv.pdf, showing the HSV color model\n a large sample of colors.\n";
+  push @example_results, "create examples/031_color_hsv.pdf, showing the HSV color model\n with a large sample of colors. As pages increase,\n the third value (V) decreases, making a darker sample\n";
 
   push @example_list, "032_separation";
   push @example_results, "create examples/032_separation.pdf, showing the CMYK color separations\n (on one page) for printer use.\n";
@@ -89,7 +93,7 @@ my (@example_list, @example_results);
   push @example_results, "create examples/040_annotation.pdf, showing some text annotations.\n If you interact with the page, you will be asked if you want to save it\n when leaving (no need to do so).\n";
 
   push @example_list, "041_annot_fileattach";
-  push @example_results, "create examples/041_annot_fileattach.pdf, showing some attached file\n annotations. Depending on your OS, Reader, and permission settings,\n you may not be allowed to open some files, or have to select a reader.\n";
+  push @example_results, "create examples/041_annot_fileattach.pdf, showing some attached file\n annotations. Depending on your OS, Reader, and permission settings,\n you may not be allowed to open some files, or have to select a reader.\n Double click icon (one invisible) to open and display file; also can add annotation text.\n";
 
   push @example_list, "042_links";
   push @example_results, "create examples/042_links.pdf, showing some examples of linking from \na PDF to other pages, other PDFs, and even other things such as browser pages.\n";
@@ -98,7 +102,7 @@ my (@example_list, @example_results);
   push @example_results, "create examples/050_pagelabels.pdf, showing a number of pages, each with its\n own page label in different formats. You will see them when you drag the\n vertical scroll thumb and you see a thumbnail of each page,\n each with its own label.\n";
 
   push @example_list, "055_outlines";
-  push @example_results, "create examples/055_outlines.sample_55.pdf, showing a 12 page document.\n Click on the \"bookmark\" or \"outline\" icon to see three pages in the\n outline, where you\n can click to jump to any of them.\n";
+  push @example_results, "create examples/055_outlines.sample_55.pdf, showing a 12 page document.\n Click on the \"bookmark\" or \"outline\" icon to see three pages in the\n outline, where you can click to jump to any of them.\n";
 
   push @example_list, "060_transparency";
   push @example_results, "create examples/060_transparency.pdf, showing 2 pages with red opaque text\n partly covered by 40% transparent black text.\n";
@@ -168,7 +172,7 @@ my %args;
 #
 # 021_psfonts needs T1 glyph and metrics files (not included)
 # assuming metrics file (.afm or .pfm) is in same directory
-  $args{'021_psfonts'} = "/Users/Phil/fonts/T1fonts/URWPalladioL-Roma.pfb";
+  $args{'021_psfonts'} = "/Users/philp/fonts/T1fonts/URWPalladioL-Roma.pfb";
 # 022_truefonts needs a TTF or OTF font to do its thing
   $args{'022_truefonts'} = "/WINDOWS/fonts/times.ttf";
 # 022_truefonts_diacrits_utf8 needs a TTF or OTF font that includes a
@@ -176,7 +180,7 @@ my %args;
   $args{'022_truefonts_diacrits_utf8'} = "/WINDOWS/fonts/tahoma.ttf";
 # 024_bdffonts needs a sample BDF (bitmapped font), which is not
 # included with the distribution
-  $args{'024_bdffonts'} = "/Users/Phil/fonts/BDFfonts/codec/codec.bdf";
+  $args{'024_bdffonts'} = "/Users/philp/fonts/BDFfonts/codec/codec.bdf";
 # ShowFont.pl needs a corefont (by default) font name
   $args{'ShowFont.pl'} = "Helvetica";
 

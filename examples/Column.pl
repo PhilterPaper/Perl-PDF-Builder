@@ -559,7 +559,7 @@ By default, **none** are installed.
 
 ### Perl
 
-**Perl 5.30** or higher. It will likely run on somewhat earlier versions, but
+**Perl 5.28** or higher. It will likely run on somewhat earlier versions, but
 the CPAN installer may refuse to install it. The reason this version was
 chosen was so that LTS (Long Term Support) versions of Perl going back about
 6 years are officially supported (by PDF::Builder), and older versions are not
@@ -573,16 +573,22 @@ new Perl levels, usually on an annual basis, we intend to bump up our required
 minimum Perl level (even-numbered production releases), to keep support for the 
 last 6 calendar years of Perl releases, dropping older ones.
 
+Note that we have
+been informed that enough users want to run PDF::Builder at older levels that
+**for the time being** we will stay at **5.28**. If we make use of newer Perl
+constructs and operators in the code, however, and PDF::Builder no longer works
+with 5.28, we will have to raise the minimum level.
+
 #### Older Perls
 
-If you MUST install on an older (pre 5.30) Perl, you can try the following for
+If you MUST install on an older (pre 5.28) Perl, you can try the following for
 Strawberry Perl (Windows). NO PROMISES! Something similar MAY work for other
 OS's and Perl installations:
 
 1. Unpack installation file (`.tar.gz`, via a utility such as 7-Zip) into a directory, and cd to that directory
-1. Edit META.json and change 5.030000 to 5.016000 or whatever level desired
-1. Edit META.yml and change 5.030000 to 5.016000 or whatever level desired
-1. Edit Makefile.PL and change `use 5.030000;` to `use 5.016000;`, change `\$PERL_version` from `5.030000` to `5.016000`
+1. Edit META.json and change 5.028000 to 5.016000 or whatever level desired
+1. Edit META.yml and change 5.028000 to 5.016000 or whatever level desired
+1. Edit Makefile.PL and change `use 5.028000;` to `use 5.016000;`, change `\$PERL_version` from `5.028000` to `5.016000`
 1. `cpan .`
 
 Note that some Perl installers MAY have a means to override or suppress the

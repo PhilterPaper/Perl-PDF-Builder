@@ -94,7 +94,7 @@ if      (scalar @ARGV == 0) {
 
 foreach my $file (@test_list) {
     if ($file eq 'tiff') {
-	print "\nNote: t/tiff.t takes quite a bit longer than the others to run. Don't Panic!\n";
+	print "\nNote: t/tiff.t make take quite a bit longer than the others to run. Don't Panic!\n";
     }
 
     my @results = `perl t/$file.t`;
