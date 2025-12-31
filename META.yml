@@ -22,7 +22,7 @@ no_index:
 provides:
   PDF::Builder:
     file: lib/PDF/Builder.pm
-    version: v3.027
+    version: v3.028
   PDF::Builder::Annotation:
     file: lib/PDF/Builder/Annotation.pm
   PDF::Builder::Content:
@@ -75,5 +75,5 @@ resources:
   bugtracker: https://github.com/PhilterPaper/Perl-PDF-Builder/issues
   homepage: https://metacpan.org/pod/PDF::Builder
   repository: git://github.com/PhilterPaper/Perl-PDF-Builder.git
-version: '3.027'
+version: '3.028'
 x_serialization_backend: 'CPAN::Meta::YAML version 0.018'

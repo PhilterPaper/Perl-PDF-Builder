@@ -41,7 +41,7 @@ PDF::API2 if you have a package or library intended to run on both!
      subsystem). PDF::Builder has changed all option names to undashed
      (unhyphened) forms, but silently accepts legacy dashed versions.
 
-3.027     2025-04-28
+3.027     2025-04-18
 
    A while back, PDF::API2's Content.pm was modified to return the color just
      set for strokecolor/stroke_color and fillcolor/fill_color (as an RGB list).

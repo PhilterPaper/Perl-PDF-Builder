@@ -77,7 +77,7 @@ to_continue();
 
 # -------------------------------------- configuration
 my $make = 'gmake';  # dmake no longer available
-my $desktop = "C:\\Users\\Phil\\Desktop\\";
+my $desktop = "C:\\Users\\philp\\OneDrive\\Desktop\\";
 my $temp = $desktop."temp";
 
 # location of 7-Zip

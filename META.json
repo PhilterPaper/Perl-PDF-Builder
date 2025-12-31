@@ -47,7 +47,7 @@
    "provides" : {
      "PDF::Builder" : {
        "file" : "lib/PDF/Builder.pm",
-       "version" : "v3.027"
+       "version" : "v3.028"
      },
      "PDF::Builder::Annotation" : {
        "file" : "lib/PDF/Builder/Annotation.pm"
@@ -116,6 +116,6 @@
          "web" : "https://github.com/PhilterPaper/Perl-PDF-Builder"
       }
    },
-   "version" : "3.027",
+   "version" : "3.028",
    "x_serialization_backend" : "JSON::PP version 4.06"
 }

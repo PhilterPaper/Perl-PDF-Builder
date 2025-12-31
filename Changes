@@ -1,6 +1,6 @@
 See also INFO/Changes_2023 for earlier version 3 release logs.
 
-3.028     2025-12-29  UNRELEASED
+3.028     2025-12-31 
 * = work in progress
 
   ==== New features
@@ -51,6 +51,14 @@ See also INFO/Changes_2023 for earlier version 3 release logs.
     lib/PDF/Builder.pm, lib/PDF/Builder/Docs.pm, Version, Makefile.PL
      Prepare for 3.028 release. Minimum Perl version remains at 5.28.
 
++------------------------------------------------------------------------------+
+| C A U T I O N -- Cross reference work is not 100% complete. It does not      |
+|   handle multiple-pass (for forward references) yet. We hope to have that    |
+|   feature out to GitHub soon, and definitely in the following release        |
+|   (3.029). Meanwhile, backwards references and fully-defined target texts are|
+|   properly  handled (in a single pass). You should set the maximum number of |
+|   passes to 1 to prevent problems due to multiple passes in the current code.|
++------------------------------------------------------------------------------+
 *   lib/PDF/Builder.pm, lib/PDF/Builder/Content/Text.pm, 
       lib/PDF/Builder/Docs.pm, MANIFEST, examples/Column_xrefs.pl (new), 
       examples/Column_md_xrefs.pl (new), examples/README, 
