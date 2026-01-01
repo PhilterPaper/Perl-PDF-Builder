@@ -151,6 +151,12 @@ functionality.
 * Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc.pl utility to create HTML documentation)
 * SVGPDF (0.087 or higher, needed if using SVG image functions)
 
+The following external applications (programs) are needed for fully testing some TIFF-related
+PDF::Builder functionality. Install _before_ installing PDF::Builder or Graphics::TIFF.
+
+* ImageMagick (module 'magick' or 'convert')
+* Ghostscript (module 'gs', 'gswin64c', or 'gswin32c')
+
 If an optional package is needed for certain extended functionality, but not
 installed, sometimes PDF::Builder
 will be able to fall back to built-in partial functionality (TIFF and PNG

@@ -14,8 +14,13 @@ our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
 
 # README.md is used below on page 5. Be sure to insert a fresh copy at build 
 #  time, and check if goes more pages. \ -> \\, $PERL_version -> \$PERL_version
-my $use_Table = 1; # if 1, use PDF::Table for table example
-# TBD automatically check if PDF::Table available, and if so, use it
+# automatically check if PDF::Table available, and if so, use it
+my $use_Table; # if 1, use PDF::Table for table example
+$use_Table = eval {
+    require PDF::Table;
+    1;
+};
+if (!defined $use_Table) { $use_Table = 0; } # else is 1
 
 #my $pdf = PDF::Builder->new();
 my $pdf = PDF::Builder->new('compress'=>'none');
@@ -313,7 +318,7 @@ if ($use_Table) {
     # you need to be careful to end a cell with font, etc. restored
     #   this only works if PDF::Table installed!
 
-    use PDF::Table;
+    # PDF::Table already required
     my $table = PDF::Table->new();
     my $table_data = [
         # row 1, solid color lines
@@ -376,7 +381,7 @@ if ($use_Table) {
     # "table" 2 columns width 500, padding 5, font size 12, draw borders 
     # and rules
     # we will show a number of different techniques
-    # do 6 cells as 6 small columns in 3x2 grid
+    # do 8 cells as 8 small columns in 4x2 grid
     my $table_rows = 4;
     my $table_cols = 2;
     my $cell_height = 20;
@@ -458,7 +463,7 @@ if ($use_Table) {
     }
     # vertical divider between columns
     $grfx->move(300,$next_y);
-    $grfx->vline($next_y-60);
+    $grfx->vline($next_y - $table_rows*$cell_height);
     # draw it all
     $grfx->strokecolor('black');
     $grfx->stroke();
@@ -631,6 +636,12 @@ functionality.
 * HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup)
 * Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc.pl utility to create HTML documentation)
 * SVGPDF (0.087 or higher, needed if using SVG image functions)
+
+The following external applications (programs) are needed for fully testing some TIFF-related
+PDF::Builder functionality. Install _before_ installing PDF::Builder or Graphics::TIFF.
+
+* ImageMagick (module 'magick' or 'convert') 
+* Ghostscript (module 'gs', 'gswin64c', or 'gswin32c')
 
 If an optional package is needed for certain extended functionality, but not
 installed, sometimes PDF::Builder

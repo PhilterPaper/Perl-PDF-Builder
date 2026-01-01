@@ -26,7 +26,7 @@ print "\nR E M I N D E R for users: ============================================
 print "\nBe sure to read INFO/DEPRECATED for information on withdrawn facilities";
 print "\nand facilities scheduled to be withdrawn, so that you may update your own";
 print "\ncode in a timely manner.\n";
-print "===========================================================================\n\n";
+print   "=========================================================================\n\n";
 
 my %WriteMakefileArgs =
 (

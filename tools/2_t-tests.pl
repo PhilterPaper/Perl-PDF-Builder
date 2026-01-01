@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
 
 # command line flags, mutually exclusive:
 # -raw   show full output of each t-test run
@@ -94,7 +94,7 @@ if      (scalar @ARGV == 0) {
 
 foreach my $file (@test_list) {
     if ($file eq 'tiff') {
-	print "\nNote: t/tiff.t make take quite a bit longer than the others to run. Don't Panic!\n";
+	print "\nNote: t/tiff.t may take quite a bit longer than the others to run. Don't Panic!\n";
     }
 
     my @results = `perl t/$file.t`;
