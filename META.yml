@@ -1,4 +1,4 @@
----
+--- #YAML:1.4
 abstract: 'Facilitates the creation and modification of PDF files'
 author:
   - 'Phil Perry'
@@ -10,7 +10,7 @@ configure_requires:
   ExtUtils::MakeMaker: '6.66'
 dynamic_config: 1
 generated_by: 'ExtUtils::MakeMaker version 7.62, CPAN::Meta::Converter version 2.150010'
-license: lgpl_2_1
+license: lgpl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: '1.4'
@@ -31,8 +31,10 @@ provides:
     file: lib/PDF/Builder/Content/Hyphenate_basic.pm
   PDF::Builder::Content::Text:
     file: lib/PDF/Builder/Content/Text.pm
+  PDF::Builder::Content::Column_docs:
+    file: lib/PDF/Builder/Content/Column_docs.pm
   PDF::Builder::Docs:
-    file: lib/PDF/Builder/Content/Docs.pm
+    file: lib/PDF/Builder/Docs.pm
   PDF::Builder::FontManager:
     file: lib/PDF/Builder/FontManager.pm
   PDF::Builder::NamedDestination:

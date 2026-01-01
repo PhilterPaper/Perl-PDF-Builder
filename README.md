@@ -150,6 +150,7 @@ functionality.
 * HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup)
 * Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc.pl utility to create HTML documentation)
 * SVGPDF (0.087 or higher, needed if using SVG image functions)
+* Test::Kwalitee (1.28 or higher, needed if running xt/kwalitee.t)
 
 The following external applications (programs) are needed for fully testing some TIFF-related
 PDF::Builder functionality. Install _before_ installing PDF::Builder or Graphics::TIFF.

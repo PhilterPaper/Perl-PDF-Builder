@@ -281,3 +281,4 @@ t/version.t
 t/viewer-preferences.t
 xt/author-critic.t
 xt/author-pod-syntax.t
+xt/kwalitee.t
