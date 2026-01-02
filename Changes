@@ -20,7 +20,8 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
      Fix problem with loss of vertical margin between bottom of a list
       and top of a paragraph.
 
-    META.json, META.yml, xt/kwalitee.t (new), README.md, examples/Column.pl
+    META.json, META.yml, xt/kwalitee.t (new), MANIFEST, README.md, 
+      examples/Column.pl
      Add kwalitee for CPAN tests, update META files for minor errors. I can't
       find a good spec for META.yml, so it is possibly ignoring the 'provides'
       section. No matter, as META.json is supposedly preferred by CPAN. Note 

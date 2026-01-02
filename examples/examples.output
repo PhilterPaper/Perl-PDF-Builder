@@ -16,6 +16,7 @@ to see when the resulting PDFs are displayed.
       giving i ii iii 1 9 2 3 4 5 6 7 8
 
 020_corefonts  (020_corefonts.NAME.latin1.pdf)
+-s flag to produce a subset of three (Courier Bold, Symbol, Times Italic)
  Helvetica -- latin1 
   020_corefonts.Helvetica.latin1.pdf
    2 pages 16x16 char grid
@@ -95,6 +96,7 @@ to see when the resulting PDFs are displayed.
   one or more pages of up to 256 characters displayed
 
 021_synfonts  
+-s flag to produce a subset of one (Courier Oblique base)
   021_synfonts.NAME.pdf "1 font" = one page with 16x16 char grid
   4 pages of variants per "font" (slant, oblique, bold, small caps) 
   and a sample page with combined variants.
@@ -149,6 +151,7 @@ to see when the resulting PDFs are displayed.
    1 page with sample diacritic spanning 3 letters (UTF-8 input)
 
 023_cjkfonts   (requires installation of CJK font package by Adobe Reader)
+-s flag to produce a subset of two (KozGo and Ming Bold)
  Note that in some cases the Latin text example uses fixed pitch Latin
    characters, while in others it uses proportional fonts.
  Ming  Ming-Bold Ming-Italic Ming-BoldItalic

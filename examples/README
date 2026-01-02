@@ -1,7 +1,7 @@
 These "examples" were only used for testing by a former maintainer, and thus 
-were removed from the official distribution (2.026). However, I feel that 
-they can provide some interesting examples of code, and thus should 
-continue to be provided.
+were removed from the official distribution of PDF::API2 (at release 2.026). 
+However, I feel that they can provide some interesting examples of code, and 
+thus should continue to be provided.
 
 SOME OF THESE EXAMPLES MAY NOT WORK (SEE NOTES). USE AT YOUR OWN RISK. THEY
 ARE NOT INTENDED TO BE OFFICIAL TEST CASES, NOR ARE THEY WELL DOCUMENTED OR
@@ -15,10 +15,10 @@ Fixing these examples is a low priority task, but I will try to get to it over
 time. Meanwhile, fixes, suggestions, and even new (working!) examples from the 
 community are welcome.
 
-As of 2.025 (last version tested against)...
+As of PDF::API2 2.025 (last version tested against)...
 (see bug 108987)
-tested against 3.003 April 2017
-tested against 3.004 July 2017
+tested against PDF::Builder 3.003 April 2017
+tested against PDF::Builder 3.004 July 2017
 tested with each release thereafter
 
 =========== known to be broken:
