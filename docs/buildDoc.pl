@@ -11,6 +11,11 @@
 #
 # -h or --help or (nothing) for help
 # --all if you have no other command line parameters
+#
+# examples:
+#   --all  to build PDF::Builder docs
+#   --libtop /Strawberry/perl/site/lib --leading GD --rootname Barcode to
+#       build GD::Barcode docs
 
 use strict;
 use warnings;

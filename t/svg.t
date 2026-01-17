@@ -12,7 +12,7 @@ use PDF::Builder;
 my $diag = '';
 my $failed;
 
-my $pdf = PDF::Builder->new('-compress' => 'none'); # common $pdf all tests
+my $pdf = PDF::Builder->new('compress' => 'none'); # common $pdf all tests
 my $has_SVG = 0; # global flag for all tests that need to know if SVGPDF
 my ($page, $img, $example, $expected);
 $has_SVG = $pdf->LA_SVG();

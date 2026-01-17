@@ -1,6 +1,6 @@
 See also INFO/Changes_2025 for earlier version 3 release logs.
 
-3.029     2026-01-01    UNRELEASED 
+3.029     2026-01-17    UNRELEASED 
 * = work in progress
 
   ==== New features
@@ -19,6 +19,12 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
 *   lib/PDF/Builder/Content/Column.pm
      Fix problem with loss of vertical margin between bottom of a list
       and top of a paragraph.
+
+    INFO/Prereq_fixes.md
+     Document how to install or upgrade HarfBuzz::Shaper optional prereq 
+      on Strawberry Perl (Windows) 5.28, if the latest (0.032 or higher) 
+      will not install or upgrade due to failure to build latest harfbuzz
+      library.
 
     META.json, META.yml, xt/kwalitee.t (new), MANIFEST, README.md, 
       examples/Column.pl

@@ -637,6 +637,7 @@ functionality.
 * Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc.pl utility to create HTML documentation)
 * SVGPDF (0.087 or higher, needed if using SVG image functions)
 * Test::Kwalitee (1.28 or higher, needed if running xt/kwalitee.t)
+* Image::Magick (7.1 or higher, needed to fully test Graphics::TIFF installation)
 
 The following external applications (programs) are needed for fully testing some TIFF-related
 PDF::Builder functionality. Install _before_ installing PDF::Builder or Graphics::TIFF.
