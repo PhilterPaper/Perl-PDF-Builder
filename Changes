@@ -1,6 +1,6 @@
 See also INFO/Changes_2025 for earlier version 3 release logs.
 
-3.029     2026-01-17    UNRELEASED 
+3.029     2026-01-21    UNRELEASED 
 * = work in progress
 
   ==== New features
@@ -13,6 +13,10 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
 *   lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Content/Column.pm (new)
      Split out column() and related routines into their own file. Refactor
       column() code to improve maintainability.
+
+    Makefile.PL
+     Remind user to check INFO/Prereq_fixes.md for information on problems
+      with various prerequisite packages, and workarounds or fixes.
 
   ==== Bug fixes
 

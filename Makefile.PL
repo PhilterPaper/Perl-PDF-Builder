@@ -22,11 +22,14 @@ my $version = '3.028';          # PDFbuild.pl updates from 'version' file
 #my $version = MM->parse_version($master);
 
 # ================================== messages ===========================
-print "\nR E M I N D E R for users: ==============================================\n";
+print "\nR E M I N D E R S for users: ============================================\n";
 print "\nBe sure to read INFO/DEPRECATED for information on withdrawn facilities";
 print "\nand facilities scheduled to be withdrawn, so that you may update your own";
 print "\ncode in a timely manner.\n";
-print   "=========================================================================\n\n";
+print "\nIf you have difficulties installing any prerequisites, be sure to review";
+print "\nINFO/Prereq_fixes.md for some known problems and some workarounds.";
+print "\n";
+print "\n=========================================================================\n\n";
 
 my %WriteMakefileArgs =
 (
