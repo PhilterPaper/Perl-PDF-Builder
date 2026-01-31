@@ -111,8 +111,8 @@ whether or not SVGPDF _can_ install on non-Strawberry Perl (5.34) or on Linux
 and Mac.
 
 It is _possible_ that this could be worked around by manually copying over
-files from an Image::Info installation at another Perl level, but we have
-not confirmed this. It would be better in this case to simply move to a
+files from an Image::Info installation at another Perl level; and we have 
+done so successfully. It would be better in this case to simply move to a
 higher Perl level (5.36+) anyway. If you're stuck at 5.34 (Windows and
 Strawberry Perl, at the least), you will not be able to use SVG image
 files (also, the upcoming equation formatting and bar codes, which will 
