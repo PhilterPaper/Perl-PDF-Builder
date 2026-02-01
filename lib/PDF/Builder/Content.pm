@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.029'; # manually update whenever code is changed
 
 use Carp;
 use Compress::Zlib qw();
@@ -18,6 +18,7 @@ use PDF::Builder::Matrix;
 use PDF::Builder::Basic::PDF::Utils;
 use PDF::Builder::Util;
 use PDF::Builder::Content::Text;
+use PDF::Builder::Content::Column;
 
 # unless otherwise noted, routines beginning with _ are internal helper 
 # functions and should not be used by others

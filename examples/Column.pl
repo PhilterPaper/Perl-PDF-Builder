@@ -815,7 +815,7 @@ restore_props($text,$grfx);
     $text->column($page, $text, $grfx, 'md1', $content, 
 	          'rect'=>[50,750, 500,640], 'outline'=>$magenta, 
 		  'para'=>[ 0, 5 ] );
-# pages 6-8. tune length a bit
+# pages 6-9. tune length a bit
 while ($rc) { 
     # new page. uses fixed column template, no headers/footers/page numbers
     $page = $pdf->page();
