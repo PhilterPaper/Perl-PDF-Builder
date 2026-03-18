@@ -1,7 +1,7 @@
-Sometimes fixes or patches are needed for **required** or **optional** 
+_Sometimes fixes or patches are needed for **required** or **optional** 
 prerequisites. At the time of release of PDF::Builder 3.029, the following 
 fixes or patches are known to be needed. As the libraries are updated, this 
-list will be modified as necessary:
+list will be modified as necessary:_
 
 -----------------------
 
@@ -17,7 +17,7 @@ Tagset.pm will vary on other Perls and OS's):
     3. Add a new line below that:   ins del
 
 This adds `<ins>` and `<del>` to the list of inline ("phrase") tags. It is quite
-possible that other HTML tags may misbehave, and further updates are needed.
+possible that other HTML tags may misbehave, and further updates will be needed.
 If you experience such problems, please open a ticket against PDF::Builder to
 report it.
 
@@ -102,18 +102,20 @@ harfbuzz library.
 
 * **SVGPDF install or upgrade on Strawberry Perl 5.34:** See SVGPDF ticket 12 
 on GitHub. SVGPDF requires package Image::Info to be installed, and only on
-Perl 5.34 does it fail to install. I have reported this to the maintainers of
-both packages. This means that if you run on Perl 5.34 (possibly only on
-Windows with Strawberry Perl -- other OS's and Perls [such as ActiveState] 
-have not been checked), you will not be able to install SVGPDF, and thus not 
-be able to use SVG functions in PDF::Builder. We would appreciate reports of
-whether or not SVGPDF _can_ install on non-Strawberry Perl (5.34) or on Linux
-and Mac.
+Perl 5.34 does it (Image::Info) fail to install, resulting in a failure to
+install SVGPDF. If you do not have Image::Info 1.46 or higher available to
+install, you may not be able to install it, and thus cannot install SVGPDF. 
+Image::Info 1.46 appears to fix the problem.
 
 It is _possible_ that this could be worked around by manually copying over
 files from an Image::Info installation at another Perl level; and we have 
 done so successfully. It would be better in this case to simply move to a
-higher Perl level (5.36+) anyway. If you're stuck at 5.34 (Windows and
-Strawberry Perl, at the least), you will not be able to use SVG image
-files (also, the upcoming equation formatting and bar codes, which will 
-use SVG).
+higher Perl level (5.36+) anyway, as 5.34 is getting a bit long of tooth. 
+You may also be able to manually install Image::Info from the Github source, 
+without running the installation test t/tiff_segfault.t (the one failing 
+test).
+
+If you're stuck at 5.34 (Windows and Strawberry Perl, at the least), and 
+cannot install Image::Info 1.46 or later for some reason, you will not be 
+able to install SVGPDF and use SVG image files (also, the upcoming equation 
+formatting and bar codes, which will use SVG).

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.029'; # manually update whenever code is changed
 
 # originally mostly part of Content/Text.pm, it was split out due to its length
 #
@@ -357,7 +357,7 @@ If 'state' is not given, it will (in most cases) be impossible to define various
 kinds of links (including cross references). A URL link to a browser does not
 need C<'state'>, but all other kinds of links to this or other PDF files do.
 
-=item 'page' => [ $ppn, $extfile, $fpn, $LR, $bind ]
+=item 'page' => [ $pass_count, $max_passes, $ppn, $extfile, $fpn, $LR, $bind ]
 
 This array of values gives C<column()> information needed for generating links
 (both I<goto> and I<pdf> annotations), and (TBD) left- and right-hand page
@@ -365,6 +365,24 @@ processing, including how much to shift C<column()> definitions to the outside
 of the page for binding purposes (TBD). The link information is as follows:
 
 =over
+
+=item $pass_count
+
+This is the number pass we're on at this call. For situations where you are making
+only a single pass through the source (no links with forward references), it will 
+have a value of 1. Values must be be between 1 and C<$max_passes>, inclusive, and
+normally will start at 1. For text source with links and possible forward references 
+(or other multiple pass requirements), C<$pass_count> could be more than 1, but no 
+greater than C<$max_passes>.
+
+=item $max_passes
+
+This is the I<maximum> number of passes (for resolving references) before declaring
+that there is a problem of some sort, and the text has failed to converge (stabilize)
+on constant content. If not using links, or if using links with predeclared labels 
+or only backward references, this value can be as low as 1. In many cases with
+forward references, everything can be resolved within as few as 2 passes. It is
+unusual to require more than 5 or so passes, in very pathological cases.
 
 =item $ppn
 

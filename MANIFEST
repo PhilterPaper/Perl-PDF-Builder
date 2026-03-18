@@ -120,9 +120,10 @@ lib/PDF/Builder/Basic/PDF/Pages.pm
 lib/PDF/Builder/Basic/PDF/String.pm
 lib/PDF/Builder/Basic/PDF/Utils.pm
 # lib/PDF/Builder/Content/Barcode/DataMatrix.pm
+lib/PDF/Builder/Content/Column.pm
+lib/PDF/Builder/Content/Column_docs.pm
 lib/PDF/Builder/Content/Hyphenate_basic.pm
 lib/PDF/Builder/Content/Text.pm
-lib/PDF/Builder/Content/Column_docs.pm
 lib/PDF/Builder/Resource/CIDFont/CJKFont/adobemingstdlightacro.data
 lib/PDF/Builder/Resource/CIDFont/CJKFont/adobemyungjostdmediumacro.data
 lib/PDF/Builder/Resource/CIDFont/CJKFont/adobesongstdlightacro.data

@@ -1,6 +1,6 @@
 See also INFO/Changes_2025 for earlier version 3 release logs.
 
-3.029     2026-01-31    UNRELEASED 
+3.029     2026-03-18    UNRELEASED 
 * = work in progress
 
   ==== New features
@@ -11,7 +11,8 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
       the source.
 
 *   lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Content/Column.pm (new),
-      lib/PDF/Builder/Content.pm, examples/Column.pl
+      lib/PDF/Builder/Content.pm, examples/Column.pl, MANIFEST, META.json,
+      META.yml
      Split out column() and related routines into their own file. Refactor
       column() code to improve maintainability.
 
@@ -24,6 +25,9 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
 *   lib/PDF/Builder/Content/Column.pm
      Fix problem with loss of vertical margin between bottom of a list
       and top of a paragraph.
+
+    INFO/Prereq_fixes.md
+     Document Image::Info minimum version for SVGPDF usage.
 
     INFO/Prereq_fixes.md
      Document how to install or upgrade HarfBuzz::Shaper optional prereq 

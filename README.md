@@ -183,9 +183,7 @@ Sometimes fixes or patches are needed for optional prerequisites. See the file
 t/tiff.t (install testing for TIFF support) makes use of GhostScript and 
 ImageMagick (convert utility). You may need to install these in order to get
 full testing (tests that need them will be skipped if they are not installed).
-Note that it has been reported that some versions of Mac Perl systems have
-a 'convert' utility that is missing the default Arial font, and thus will fail
-(see ticket 223).
+Be sure to read **INFO/Prereq\_fixes.md** for possible problems on Macs.
 
 ## Manually building
 

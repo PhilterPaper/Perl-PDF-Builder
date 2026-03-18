@@ -61,6 +61,9 @@
      "PDF::Builder::Content::Text" : {
        "file" : "lib/PDF/Builder/Content/Text.pm"
      },
+     "PDF::Builder::Content::Column" : {
+       "file" : "lib/PDF/Builder/Content/Column.pm"
+     },
      "PDF::Builder::Content::Column_docs" : {
        "file" : "lib/PDF/Builder/Content/Column_docs.pm"
      },
