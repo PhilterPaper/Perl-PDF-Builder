@@ -20,12 +20,15 @@ PDF::Builder::Content::Text - Additional specialized text-related formatting met
 
 Inherits from L<PDF::Builder::Content>
 
+=head1 METHODS
+
 B<Note:> If you have used some of these methods in PDF::Builder with a 
 I<graphics> 
 type object (e.g., $page->gfx()->method()), you may have to change to a I<text> 
 type object (e.g., $page->text()->method()).
 
-=head1 METHODS
+Methods which can be in either context (text or graphics) should be found here
+in Content.pm. Text-only methods can be in Content::Text.
 
 =cut
 
@@ -1012,167 +1015,6 @@ sub section {
     return $overflow;
 }
 
-=head3 textlabel
-
-    $width = $txt->textlabel($x,$y, $font, $size, $text, %opts)
-
-=over
-
-Place a line of text at an arbitrary C<[$x,$y]> on the page, with various text 
-settings (treatments) specified in the call.
-
-=over
-
-=item $font
-
-A previously created font.
-
-=item $size
-
-The font size (points).
-
-=item $text
-
-The text to be printed (a single line).
-
-=back
-
-B<Options:>
-
-=over
-
-=item 'rotate' => $deg
-
-Rotate C<$deg> degrees counterclockwise from due East.
-
-=item 'color' => $cspec
-
-A color name or permitted spec, such as C<#CCE840>, for the character I<fill>.
-
-=item 'strokecolor' => $cspec
-
-A color name or permitted spec, such as C<#CCE840>, for the character I<outline>.
-
-=item 'charspace' => $cdist
-
-Additional distance between characters.
-
-=item 'wordspace' => $wdist
-
-Additional distance between words.
-
-=item 'hscale' => $hfactor
-
-Horizontal scaling mode (percentage of normal, default is 100).
-
-=item 'render' => $mode
-
-Character rendering mode (outline only, fill only, etc.). See C<render> call.
-
-=item 'left' => 1
-
-Left align on the given point. This is the default.
-
-=item 'center' => 1
-
-Center the text on the given point.
-
-=item 'right' => 1
-
-Right align on the given point.
-
-=item 'align' => $placement
-
-Alternate to left, center, and right. C<$placement> is 'left' (default),
-'center', or 'right'.
-
-=back
-
-Other options available to C<text>, such as underlining, can be used here.
-
-The width used (in points) is B<returned>.
-
-=back
-
-B<Please note> that C<textlabel()> was not designed to interoperate with other
-text operations. It is a standalone operation, and does I<not> leave a "next 
-write" position (or any other setting) for another C<text> mode operation. A 
-following write will likely be at C<(0,0)>, and not at the expected location.
-
-C<textlabel()> is intended as an "all in one" convenience function for single 
-lines of text, such as a label on some
-graphics, and not as part of putting down multiple pieces of text. It I<is>
-possible to figure out the position of a following write (either C<textlabel>
-or C<text>) by adding the returned width to the original position's I<x> value
-(assuming left-justified positioning).
-
-=cut
-
-sub textlabel {
-    my ($self, $x,$y, $font, $size, $text, %opts) = @_;
-    # copy dashed option names to preferred undashed names
-    if (defined $opts{'-rotate'} && !defined $opts{'rotate'}) { $opts{'rotate'} = delete($opts{'-rotate'}); }
-    if (defined $opts{'-color'} && !defined $opts{'color'}) { $opts{'color'} = delete($opts{'-color'}); }
-    if (defined $opts{'-strokecolor'} && !defined $opts{'strokecolor'}) { $opts{'strokecolor'} = delete($opts{'-strokecolor'}); }
-    if (defined $opts{'-charspace'} && !defined $opts{'charspace'}) { $opts{'charspace'} = delete($opts{'-charspace'}); }
-    if (defined $opts{'-hscale'} && !defined $opts{'hscale'}) { $opts{'hscale'} = delete($opts{'-hscale'}); }
-    if (defined $opts{'-wordspace'} && !defined $opts{'wordspace'}) { $opts{'wordspace'} = delete($opts{'-wordspace'}); }
-    if (defined $opts{'-render'} && !defined $opts{'render'}) { $opts{'render'} = delete($opts{'-render'}); }
-    if (defined $opts{'-right'} && !defined $opts{'right'}) { $opts{'right'} = delete($opts{'-right'}); }
-    if (defined $opts{'-center'} && !defined $opts{'center'}) { $opts{'center'} = delete($opts{'-center'}); }
-    if (defined $opts{'-left'} && !defined $opts{'left'}) { $opts{'left'} = delete($opts{'-left'}); }
-    if (defined $opts{'-align'} && !defined $opts{'align'}) { $opts{'align'} = delete($opts{'-align'}); }
-    my $wht;
-
-    my %trans_opts = ( 'translate' => [$x,$y] );
-    my %text_state = ();
-    $trans_opts{'rotate'} = $opts{'rotate'} if defined($opts{'rotate'});
-
-    my $wastext = $self->_in_text_object();
-    if ($wastext) {
-        %text_state = $self->textstate();
-        $self->textend();
-    }
-    $self->save();
-    $self->textstart();
-
-    $self->transform(%trans_opts);
-
-    $self->fillcolor(ref($opts{'color'}) ? @{$opts{'color'}} : $opts{'color'}) if defined($opts{'color'});
-    $self->strokecolor(ref($opts{'strokecolor'}) ? @{$opts{'strokecolor'}} : $opts{'strokecolor'}) if defined($opts{'strokecolor'});
-
-    $self->font($font, $size);
-
-    $self->charspace($opts{'charspace'}) if defined($opts{'charspace'});
-    $self->hscale($opts{'hscale'})       if defined($opts{'hscale'});
-    $self->wordspace($opts{'wordspace'}) if defined($opts{'wordspace'});
-    $self->render($opts{'render'})       if defined($opts{'render'});
-
-    if      (defined($opts{'right'}) && $opts{'right'} ||
-	     defined($opts{'align'}) && $opts{'align'} =~ /^r/i) {
-        $wht = $self->text_right($text, %opts);
-    } elsif (defined($opts{'center'}) && $opts{'center'} ||
-	     defined($opts{'align'}) && $opts{'align'} =~ /^c/i) {
-        $wht = $self->text_center($text, %opts);
-    } elsif (defined($opts{'left'}) && $opts{'left'} ||
-	     defined($opts{'align'}) && $opts{'align'} =~ /^l/i) {
-        # override any stray 'align' that got through to here
-        $wht = $self->text($text, %opts, 'align'=>'l');  # explicitly left aligned
-    } else {
-        # override any stray 'align' that got through to here
-        $wht = $self->text($text, %opts, 'align'=>'l');  # left aligned by default
-    }
-
-    $self->textend();
-    $self->restore();
-
-    if ($wastext) {
-        $self->textstart();
-        $self->textstate(%text_state);
-    }
-    return $wht;
-}
- 
 # ====================================================================
 # handlers for column()-related calls
 sub column {
@@ -1192,6 +1034,7 @@ sub unstable_state {
     my @results = PDF::Builder::Content::Column::unstable_state(@_);
     return @results;
 }
+
 # ====================================================================
 
 1;

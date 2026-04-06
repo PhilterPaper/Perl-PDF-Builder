@@ -1,6 +1,6 @@
 See also INFO/Changes_2025 for earlier version 3 release logs.
 
-3.029     2026-03-18    UNRELEASED 
+3.029     2026-04-06    UNRELEASED 
 * = work in progress
 
   ==== New features
@@ -25,6 +25,15 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
 *   lib/PDF/Builder/Content/Column.pm
      Fix problem with loss of vertical margin between bottom of a list
       and top of a paragraph.
+
+    lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Content.pm,
+      examples/020_textunderline, examples/ContentText.pl
+     Per #217, restore capability of textlabel() method to be called from
+      either text or graphics context. The original API2 implementation 
+      was in graphics context, which never made a lot of sense (this is
+      text handling), and so long ago Builder moved it to the text context.
+      However, some users wish to maintain API2 compatibility and to be
+      able to call it from the graphics context.
 
     INFO/Prereq_fixes.md
      Document Image::Info minimum version for SVGPDF usage.

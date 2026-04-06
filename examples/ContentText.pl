@@ -7,7 +7,7 @@ use warnings;
 use strict;
 
 # VERSION
-our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.029'; # manually update whenever code is changed
 
 use Math::Trig;
 use List::Util qw(min max);
@@ -1091,6 +1091,15 @@ $text->textlabel(300,240, $f2, 20, 'Render mode 1',
     'color'=>'#0000CC',
     'render'=>1,
 );
+
+$grfx->textlabel(350,170, $f2, 20, 'In GRAPHICS context',
+    'rotate'=>20,
+    'color'=>'green');
+
+$grfx->textlabel(50,120, $f2, 20, 'In GRAPHICS context, underlined',
+    'underline'=>[4,[2,'red']],
+);
+
 
 # caption
 drawCaption(['textlabel() samples'], 'LC');
