@@ -2484,13 +2484,13 @@ sub _sweep {
 
 =head4 bogen
 
-    $content->bogen($x1,$y1, $x2,$y2, $radius, $move, $larger, $reverse)
+    $content->bogen($x1,$y1, $x2,$y2, $radius, $move, $larger, $reverse, %opts)
 
-    $content->bogen($x1,$y1, $x2,$y2, $radius, $move, $larger)
+    $content->bogen($x1,$y1, $x2,$y2, $radius, $move, $larger, %opts)
 
-    $content->bogen($x1,$y1, $x2,$y2, $radius, $move)
+    $content->bogen($x1,$y1, $x2,$y2, $radius, $move, %opts)
 
-    $content->bogen($x1,$y1, $x2,$y2, $radius)
+    $content->bogen($x1,$y1, $x2,$y2, $radius, %opts)
 
 =over
 
@@ -2543,11 +2543,29 @@ right (primary) circle.
 
 =back
 
+=head5 options
+
+    'move' => boolean
+
+    'larger' => boolean (alias: larc)
+
+    'reverse' => boolean (alias: dir)
+
+=over
+
+These may be used instead of the positional parameters C<move>, C<larc>, and C<dir>.
+They are boolean values false (0) or true (1), and the default is false (0) for each.
+
+If you mix positional parameters and options, the positional parameters (if given)
+will be used first, and then overridden by the option values. The C<larc> option is 
+an alias for C<larger>, and the C<dir> option is an alias for C<reverse>.
+
+=back
+
 =cut
 
 sub bogen {
-    my ($self, $x1,$y1, $x2,$y2, $r, $move, $larc, $dir) = @_;
-    # in POD description, dir is "reverse" flag
+    my ($self, $x1,$y1, $x2,$y2, $r, @opts) = @_;
 
     my ($p0_x,$p0_y, $p1_x,$p1_y, $p2_x,$p2_y, $p3_x,$p3_y);
     my ($dx,$dy, $x,$y, $alpha,$beta, $alpha_rad, $d,$z, @points);
@@ -2559,10 +2577,43 @@ sub bogen {
     if ($r <= 0.0) {
         die "bogen requires a positive radius";
 	# SVG def of (arc) merely takes absolute value
+        # check later if radius is sufficiently large to bridge points
     }
-    $move = 0 if !defined $move;
-    $larc = 0 if !defined $larc;
-    $dir  = 0 if !defined $dir;
+
+    # options are pairs of names and boolean values, while positional
+    # parameters are single booleans (assume only 0 or 1)
+    my ($move, $larc, $dir);
+    $move = $larc = $dir = 0;  # set defaults
+
+    if (defined $opts[0]) {
+        if ($opts[0] eq '0' || $opts[0] eq '1') {
+            $move = shift @opts;
+        }
+        if (defined $opts[0] && ($opts[0] eq '0' || $opts[0] eq '1')) {
+            $larc = shift @opts;
+        }
+        if (defined $opts[0] && ($opts[0] eq '0' || $opts[0] eq '1')) {
+            $dir = shift @opts;
+        }
+        # if anything remains, it must be name/value pairs
+        if (@opts % 2) {
+            die "bogen has incorrect set of options given";
+        } elsif (@opts) {
+            my %options = @opts; 
+            foreach (keys %options) {
+                if      ($_ eq 'move') {
+                    $move = $options{$_};
+                    $move = 0 if ($move ne '0' && $move ne '1');
+                } elsif ($_ eq 'larc' || $_ eq 'larger') {
+                    $larc = $options{$_};
+                    $larc = 0 if ($larc ne '0' && $larc ne '1');
+                } elsif ($_ eq 'dir'  || $_ eq 'reverse') {
+                    $dir  = $options{$_};
+                    $dir  = 0 if ($dir  ne '0' && $dir  ne '1');
+                } # else ignore option not of interest here
+            }
+        }
+    } # else all default values used
 
     $self->_Gpending();
     $dx = $x2 - $x1;
@@ -2591,7 +2642,13 @@ sub bogen {
 
     # always draw CW (dir=1)
     # note that start and end could be well out of +/-360 degree range
-    @points = _arctocurve($r,$r, 90+$alpha+$beta/2,90+$alpha-$beta/2, 1);
+    my $sweep1 = 90 + $alpha + $beta/2;
+    my $sweep2 = 90 + $alpha - $beta/2;
+    if (abs($sweep1*$r) < 0.001) {
+        # tiny angle force to 0
+        $sweep1 = 0;
+    }
+    @points = _arctocurve($r,$r, $sweep1,$sweep2, 1);
 
     if ($dir) {  # flip order of points for reverse arc
         my @pts = @points;

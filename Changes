@@ -1,6 +1,6 @@
 See also INFO/Changes_2025 for earlier version 3 release logs.
 
-3.029     2026-04-06    UNRELEASED 
+3.029     2026-04-17    UNRELEASED 
 * = work in progress
 
   ==== New features
@@ -16,6 +16,12 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
      Split out column() and related routines into their own file. Refactor
       column() code to improve maintainability.
 
+    lib/PDF/Builder/Content.pm
+     In addition to the existing positional parameter flags move, larc (larger),
+      and dir (reverse), bogen() now permits option-style 'move'=>flag, 
+      'larc'=>flag (or 'larger'=>flag), and 'dir'=>flag (or 'reverse'=>flag)
+      in addition to, or instead of, the positional flags.
+
     Makefile.PL
      Remind user to check INFO/Prereq_fixes.md for information on problems
       with various prerequisite packages, and workarounds or fixes.
@@ -26,6 +32,12 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
      Fix problem with loss of vertical margin between bottom of a list
       and top of a paragraph.
 
+    lib/PDF/Builder/Content.pm
+     Per #208, squeeze out very tiny segments in bogen() calls, caused by 
+      numeric "noise" (very close to 0, usually within 10^-14 degree) primary 
+      angles. This does not affect arc(), pie(), or curve() calls, nor anyone 
+      calling them.
+
     lib/PDF/Builder/Content/Text.pm, lib/PDF/Builder/Content.pm,
       examples/020_textunderline, examples/ContentText.pl
      Per #217, restore capability of textlabel() method to be called from
@@ -33,7 +45,8 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
       was in graphics context, which never made a lot of sense (this is
       text handling), and so long ago Builder moved it to the text context.
       However, some users wish to maintain API2 compatibility and to be
-      able to call it from the graphics context.
+      able to call it from the graphics context. In examples, add a
+      couple of graphics context calls.
 
     INFO/Prereq_fixes.md
      Document Image::Info minimum version for SVGPDF usage.
