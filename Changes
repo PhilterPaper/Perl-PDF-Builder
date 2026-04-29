@@ -1,6 +1,6 @@
 See also INFO/Changes_2025 for earlier version 3 release logs.
 
-3.029     2026-04-17    UNRELEASED 
+3.029     2026-04-29    UNRELEASED 
 * = work in progress
 
   ==== New features
@@ -31,6 +31,11 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
 *   lib/PDF/Builder/Content/Column.pm
      Fix problem with loss of vertical margin between bottom of a list
       and top of a paragraph.
+
+    lib/PDF/Builder.pm
+     Per #228 Clarify in Builder.pm POD that ttffont()'s "file" input can be
+      either a file path/name, or an existing Font::TTF::Font object. See
+      also PDF::API2 PR 92.
 
     lib/PDF/Builder/Content.pm
      Per #208, squeeze out very tiny segments in bogen() calls, caused by 

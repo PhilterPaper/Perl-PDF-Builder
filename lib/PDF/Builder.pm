@@ -3593,6 +3593,13 @@ see L<PDF::Builder::Resource::CIDFont::TrueType>.
 See also L<PDF::Builder::Docs/TrueType Fonts> for additional information,
 including Notes and Limitations.
 
+C<$ttf_file> may be a font file path, name, and extension (TTF and OTF
+supported, as well as TTC and OTC collections), or an already-created 
+Font::TTF::Font object (typically, being reused). This is useful in cases where
+you aready have such an object, e.g., manually created, unpacked from another
+source such as an SVG file, or derived from other sources such as a TTC font 
+collection.
+
 =back
 
 =cut
