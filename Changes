@@ -1,6 +1,6 @@
 See also INFO/Changes_2025 for earlier version 3 release logs.
 
-3.029     2026-04-29    UNRELEASED 
+3.029     2026-07-12    UNRELEASED 
 * = work in progress
 
   ==== New features
@@ -31,6 +31,21 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
 *   lib/PDF/Builder/Content/Column.pm
      Fix problem with loss of vertical margin between bottom of a list
       and top of a paragraph.
+
+    lib/PDF/Builder.pm, lib/PDF/Builder/Outline.pm, 
+      examples/055_outlines_serial (new),
+      examples/055_outlines_multilevel (new), MANIFEST, examples/README, 
+      examples/examples.output, tools/3_examples.pl
+     Per #207, implement Vadim Repin's fix to permit adding additional outline
+      entries to a document with existing outlines (was broken). Add a new 
+      example (outlines_serial) to demonstrate, and add a new example 
+      (outlines_multilevel) to show implementation of (already existing)
+      two-level page outlines.
+
+    INFO/RoadMap.md, INFO/Prereq_fixes.md
+     Adjust formatting so that lists are not ended by paragraphs within list 
+      items. Redo Road Map to list all the "to do" items from various sources, 
+      all in one place.
 
     lib/PDF/Builder.pm
      Per #228 Clarify in Builder.pm POD that ttffont()'s "file" input can be

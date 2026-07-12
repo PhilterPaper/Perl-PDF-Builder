@@ -1,0 +1,39 @@
+# take a PDF of at least 11 pages, and add outlines (bookmarks) for pages
+# 1 ("i"), 4 ("1"), and 11 ("7") physical pages. after adding 1's bookmark,
+# output interim file, and use that as input for adding 4's and 11's
+# bookmarks for the output file.
+
+use strict;
+use warnings;
+use PDF::Builder;
+
+my $infile  = 'examples/resources/sample_55.pdf';
+my $interim = 'examples/055_outlines_serial_1.sample_55.pdf';
+my $outfile = 'examples/055_outlines_serial_2.sample_55.pdf';
+
+my $doc = PDF::Builder-> open($infile);
+print "Use 'outline' or 'bookmark' feature on your PDF Reader to move around\n";
+
+$doc-> outlines
+    -> outline
+        -> dest( $doc-> openpage( 1 ))
+        -> title( '1st page (i)' );
+
+$doc->saveas($interim);
+
+# now use the interim file (a PDF that already has an outline) as input for 
+# adding two more outlines
+
+$doc = PDF::Builder-> open($interim);
+
+$doc-> outlines
+    -> outline
+        -> dest( $doc-> openpage( 4 ))
+        -> title( '4th page (1)' );
+
+$doc-> outlines
+    -> outline
+        -> dest( $doc-> openpage( 11 ))
+        -> title( '11th page (7)' );
+
+$doc->saveas($outfile);

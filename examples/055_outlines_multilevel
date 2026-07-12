@@ -1,0 +1,62 @@
+# take a PDF of at least 11 pages, and add outlines (bookmarks) for pages
+# 1 ("i"), 4 ("1"), and 11 ("7") physical pages. then add bookmarks under
+# the first two (9, 3, 2 under pg 1 (open), and ii and ii under pg i (closed)).
+
+use strict;
+use warnings;
+use PDF::Builder;
+
+my $infile  = 'examples/resources/sample_55.pdf';
+my $outfile = 'examples/055_outlines_multilevel.sample_55.pdf';
+
+my $doc = PDF::Builder-> open($infile);
+print "Use 'outline' or 'bookmark' feature on your PDF Reader to move around\n";
+
+my $root = $doc-> outlines();
+
+my $top0 =  # Outline object at top level. 2 children so count s/b 2;
+            #                              First, Last, Next
+$root -> outline($root)
+        -> is_open(0)  # when open document, this entry is collapsed
+        -> dest( $doc-> openpage( 1 ))
+        -> title( '1st page (i)' );
+
+my $top1 =  # Outline object at top level. 2 children so count s/b 2;
+            #                              First, Last, Prev, Next
+$root -> outline($root)
+        -> dest( $doc-> openpage( 4 ))
+        -> title( '4th page (1)' );
+
+my $top2 =  # Outline object at top level. no children, so no count; Prev
+$root -> outline($root)
+        -> dest( $doc-> openpage( 11 ))
+        -> title( '11th page (7)' );
+
+# add lower level bookmarks here (initially not visible)
+# second level for page i
+$top0 -> outline($top0)
+          -> dest( $doc-> openpage( 2 ))
+          -> title( '2nd page (ii)' );
+ 
+$top0 -> outline($top0)
+          -> dest( $doc-> openpage( 3 ))
+          -> title( '3rd page (iii)' );
+
+# second level for page 1 (initially visible)
+# pages 9 and 2, then insert 3 after 9
+my $first =
+$top1 -> outline($top1)
+          -> dest( $doc-> openpage( 5 ))
+          -> title( '5th page (9)' );
+ 
+$top1 -> outline($top1)
+          -> dest( $doc-> openpage( 6 ))
+          -> title( '6th page (2)' );
+ 
+$first -> insert_after() 
+          -> dest( $doc-> openpage( 7 ))
+          -> title( '7th page (3)' );
+ 
+# no children under page 7
+
+$doc->saveas($outfile);

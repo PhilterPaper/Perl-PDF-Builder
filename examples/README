@@ -146,6 +146,12 @@ tested with each release thereafter
  055_outlines    take PDF like 012_page's, and add three outlines (bookmarks)
                  to physical pages 1, 4, and 11 (labeled i, 1, 7).
 
+ 055_outlines_serial  like 055_outlines, but add first outline, save, add
+                 the other two outlines.
+
+ 055_outlines_multilevel  like 055_outlines, but in addition, a second level of
+                 pages under the top-level entries.
+
  060_transparency  show writing opaque and translucent text by two methods.
 
 =========== other example material:

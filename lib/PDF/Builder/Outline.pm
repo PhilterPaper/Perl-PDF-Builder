@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.028'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.029'; # manually update whenever code is changed
 
 use Carp qw(croak);
 use PDF::Builder::Basic::PDF::Utils;
@@ -117,6 +117,8 @@ sub count {
 
     if ($count) {
         $self->{'Count'} = PDFNum($self->is_open() ? $count : -$count);
+    } else {
+	delete $self->{'Count'};
     }
 
     return $count;
@@ -134,16 +136,12 @@ sub count {
 sub _load_children {
     my $self = shift();
     my $item = $self->{'First'};
-    return unless $item;
-    $item->realise();
-    bless $item, __PACKAGE__;
-
-    push @{$self->{' children'}}, $item;
-    while ($item->next()) {
-        $item = $item->next();
+    while ($item) {
         $item->realise();
         bless $item, __PACKAGE__;
+	$item->{' api'} = $self->{' api'};
         push @{$self->{' children'}}, $item;
+        $item = $item->next();
     }
     return $self;
 }
@@ -155,6 +153,7 @@ sub _load_children {
 =over
 
 Return the first child of the current outline level, if one exists.
+Otherwise, returns C<undef>.
 
 =back
 
@@ -164,9 +163,10 @@ sub first {
     my $self = shift();
     if (defined $self->{' children'} and defined $self->{' children'}->[0]) {
         $self->{'First'} = $self->{' children'}->[0];
+    } else { 
+	delete $self->{'First'};
     }
-   #weaken $self->{'First'};   # not in API2
-    return $self->{'First'};
+    return $self->{'First'}; # may be undef
 }
 
 =head3 last
@@ -176,6 +176,7 @@ sub first {
 =over
 
 Return the last child of the current outline level, if one exists.
+Otherwise, returns C<undef>.
 
 =back
 
@@ -185,9 +186,10 @@ sub last {
     my $self = shift();
     if (defined $self->{' children'} and defined $self->{' children'}->[-1]) {
         $self->{'Last'} = $self->{' children'}->[-1];
+    } else {
+	delete $self->{'Last'};
     }
-   #weaken $self->{'Last'};   # not in API2
-    return $self->{'Last'};
+    return $self->{'Last'}; # may be undef
 }
 
 =head3 parent
@@ -205,9 +207,7 @@ tree.
 
 sub parent {
     my $self = shift();
-    $self->{'Parent'} = shift() if defined $_[0];
-   #weaken $self->{'Parent'}; # not in API2
-    return $self->{'Parent'};
+    return $self->{'Parent'}; # may be undef
 }
 
 =head3 prev
@@ -226,10 +226,12 @@ Return the previous item of the current level of the outline tree
 =cut
 
 sub prev {
-    my $self = shift();
-    $self->{'Prev'} = shift() if defined $_[0];
-   #weaken $self->{'Prev'};  # not in API2
-    return $self->{'Prev'};
+    my ($self, $other) = @_;
+    if ($other) {
+	$self->{'Prev'} = $other;
+	$self->{' api'}{'pdf'}->out_obj($self);
+    }
+    return $self->{'Prev'}; # may be undef
 }
 
 =head3 next
@@ -248,10 +250,12 @@ Return the next item of the current level of the outline tree
 =cut
 
 sub next {
-    my $self = shift();
-    $self->{'Next'} = shift() if defined $_[0];
-   #weaken $self->{'Next'};   # not in API2
-    return $self->{'Next'};
+    my ($self, $other) = @_;
+    if ($other) {
+	$self->{'Next'} = $other;
+	$self->{' api'}{'pdf'}->out_obj($self);
+    }
+    return $self->{'Next'}; # may be undef
 }
 
 =head2 Modify the Outline Tree
@@ -283,6 +287,7 @@ sub outline {
     $self->{' api'}->{'pdf'}->new_obj($child) 
         unless $child->is_obj($self->{' api'}->{'pdf'});
 
+    $self->{' api'}{'pdf'}->out_obj($self);
     return $child;
 }
 
@@ -351,6 +356,7 @@ sub _reset_children {
         $item = $item->next();
         push @{$self->{' children'}}, $item;
     }
+    $self->{' api'}{'pdf'}->out_obj($self);
     return $self;
 }
 
@@ -373,12 +379,18 @@ sub delete {
 
     my $prev = $self->prev();
     my $next = $self->next();
-    $prev->next($next) if defined $prev;
-    $next->prev($prev) if defined $next;
+    if (defined $prev and defined $next) {
+	$prev->next($next);
+	$next->prev($prev);
+    } else {
+	delete $prev->{'Next'} if defined $prev;
+	delete $next->{'Prev'} if defined $next;
+    }
 
     my $siblings = $self->parent->{' children'};
     @$siblings = grep { $_ ne $self } @$siblings;
     delete $self->parent->{' children'} unless $self->parent->has_children();
+    $self->{' api'}{'pdf'}->out_obj($self->parent());
 
     return;
 }
@@ -487,12 +499,17 @@ sub title {
     # Get
     unless (@_) {
         return unless $self->{'Title'};
-        return $self->{'Title'}->val();
+	my $s = $self->{'Title'}->val();
+	if ($s =~ s/^\x{fe}\x{ff}//) {
+	    $s = Encode::decode('UTF-16BE', $s);
+	}
+	return $s;
     }
 
     # Set
     my $text = shift();
     $self->{'Title'} = PDFString($text, 'o');
+    $self->{' api'}{'pdf'}->out_obj($self);
     return $self;
 }
 
@@ -535,6 +552,7 @@ sub dest {
         $self->{'Dest'} = PDFString($page, 'n');
     }
 
+    $self->{' api'}{'pdf'}->out_obj($self);
     return $self;
 }
 
@@ -608,6 +626,7 @@ sub uri {
     $self->{'A'}->{'S'}   = PDFName('URI');
     $self->{'A'}->{'URI'} = PDFString($url, 'u');
 
+    $self->{' api'}{'pdf'}->out_obj($self);
     return $self;
 }
 
@@ -639,6 +658,7 @@ sub launch {
     $self->{'A'}->{'S'} = PDFName('Launch');
     $self->{'A'}->{'F'} = PDFString($file, 'f');
 
+    $self->{' api'}{'pdf'}->out_obj($self);
     return $self;
 }
 
@@ -675,6 +695,7 @@ sub pdf {
     $self->{'A'}->{'F'} = PDFString($file, 'f');
     $self->{'A'}->{'D'} = $self->_fit(PDFNum($page_number // 0), %position);
     
+    $self->{' api'}{'pdf'}->out_obj($self);
     return $self;
 }
 
@@ -696,22 +717,21 @@ sub fix_outline {
 #}
 
 sub outobjdeep {
-#   my ($self, @param) = @_;
-#
-#   $self->fix_outline();
-#   foreach my $k (qw/ api apipdf apipage /) {
-#       $self->{" $k"} = undef;
-#       delete($self->{" $k"});
-#   }
-#   my @ret = $self->SUPER::outobjdeep(@param);
-#   foreach my $k (qw/ First Parent Next Last Prev /) {
-#       $self->{$k} = undef;
-#       delete($self->{$k});
-#   }
-#   return @ret;
     my $self = shift();
     $self->fix_outline();
     return $self->SUPER::outobjdeep(@_);
+}
+
+# Per #207 fix outlines problem
+sub _fix_on_open {
+    my $self = shift();
+
+    if ($self->has_children()) {
+	$self->_load_children() unless exists $self->{' children'};
+	foreach my $child (@{$self->{' children'}}) {
+	   $child->_fix_on_open();
+	}
+    }
 }
 
 1;

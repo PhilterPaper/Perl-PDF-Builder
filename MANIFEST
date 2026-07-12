@@ -75,6 +75,8 @@ examples/041_annot_fileattach
 examples/042_links
 examples/050_pagelabels
 examples/055_outlines
+examples/055_outlines_serial
+examples/055_outlines_multilevel
 examples/060_transparency
 examples/BarCode.pl
 examples/Boxes.pl

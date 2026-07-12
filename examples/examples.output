@@ -237,6 +237,23 @@ to see when the resulting PDFs are displayed.
    pages 1 ("i"), 4 ("1"), and 11 ("7"). you may need to click on your reader's
    bookmark icon to display the list of bookmarks available.
 
+055_outlines_serial
+  055_outlines_serial_1.sample_55.pdf
+   12 pages (like 012_pages output) with one bookmark (outline) to logical page
+   1 ("i"). you may need to click on your reader's bookmark icon to display the
+   list of bookmarks available.
+  055_outlines_serial_2.sample_55.pdf
+   as above, with two more bookmarks (outlines) added to logical pages 4 ("1")
+   and 11 ("7"). you may need to click on your reader's bookmark icon to display
+   the list of bookmarks available.
+  
+055_outlines_multilevel
+  055_outlines_multilevel.sample_55.pdf
+   12 pages (like 012_pages output) with three top level bookmarks (outlines)
+   to logical pages 1 ("i"), 4 ("1", and 11 ("7"), and a second level of 
+   bookmarks to logical pages 2 ("ii") and 3 ("iii") under page "i", and to
+   logical pages 5 ("9"), 7 ("3"), and 6 ("2").
+
 060_transparency
   060_transparency.pdf
    2 pages, each one method of transparency/opacity,

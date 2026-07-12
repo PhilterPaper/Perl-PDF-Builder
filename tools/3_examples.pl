@@ -104,6 +104,12 @@ my (@example_list, @example_results);
   push @example_list, "055_outlines";
   push @example_results, "create examples/055_outlines.sample_55.pdf, showing a 12 page document.\n Click on the \"bookmark\" or \"outline\" icon to see three pages in the\n outline, where you can click to jump to any of them.\n";
 
+  push @example_list, "055_outlines_serial";
+  push @example_results, "create examples/055_outlines_serial_1.sample_55.pdf and serial_2, showing a 12 page document.\n Click on the \"bookmark\" or \"outline\" icon to see three pages in the\n outline, where you can click to jump to any of them.\n";
+
+  push @example_list, "055_outlines_multilevel";
+  push @example_results, "create examples/055_outlines_multilevel.sample_55.pdf, showing a 12 page document.\n Click on the \"bookmark\" or \"outline\" icon to see three pages in the\n outline, where you can click to jump to any of them on two levels.\n";
+
   push @example_list, "060_transparency";
   push @example_results, "create examples/060_transparency.pdf, showing 2 pages with red opaque text\n partly covered by 40% transparent black text.\n";
 

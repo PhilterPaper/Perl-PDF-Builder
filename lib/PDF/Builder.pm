@@ -1899,6 +1899,7 @@ sub outline {
         bless $obj, 'PDF::Builder::Outlines';
         $obj->{' api'} = $self;
         weaken $obj->{' api'};
+        $obj->_fix_on_open();
     } else {
 	$obj = PDF::Builder::Outlines->new($self);
 
