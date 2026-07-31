@@ -20,6 +20,7 @@ tools/3_examples.pl
 tools/4_contrib.pl
 #tools/optional_update.pl
 tools/TTFdump.pl
+tools/md2html.pl
 INFO/ACKNOWLEDGE.md
 INFO/Changes_2017
 INFO/Changes_2018
@@ -33,7 +34,7 @@ INFO/DEPRECATED
 INFO/KNOWN_INCOMP
 INFO/PATENTS
 INFO/Prereq_fixes.md
-INFO/RoadMap
+INFO/RoadMap.md
 INFO/SPONSORS
 INFO/SUPPORT
 contrib/combine_pdfs.pl

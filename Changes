@@ -1,6 +1,6 @@
 See also INFO/Changes_2025 for earlier version 3 release logs.
 
-3.029     2026-07-12    UNRELEASED 
+3.029     2026-07-31    UNRELEASED 
 * = work in progress
 
   ==== New features
@@ -15,6 +15,12 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
       META.yml
      Split out column() and related routines into their own file. Refactor
       column() code to improve maintainability.
+
+    tools/md2html.pl (new)
+     A utility to convert .md (Markdown) files into .html (browser) files, which
+      may be a more convenient way to view .md files than in an editor. Note 
+      that Text::MultiMarkdown is required to be installed. Text::Markdown can
+      be used in a pinch, but will not handle tables correctly.
 
     lib/PDF/Builder/Content.pm
      In addition to the existing positional parameter flags move, larc (larger),
@@ -32,6 +38,11 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
      Fix problem with loss of vertical margin between bottom of a list
       and top of a paragraph.
 
+    README.md, INFO/RoadMap.md (renamed), INFO/Prereq_fixes.md
+     Adjust formatting so that lists are not ended by paragraphs within list 
+      items. Redo Road Map to list all the "to do" enhancements from various
+      sources, all in one place, and change from plain text to Markdown.
+
     lib/PDF/Builder.pm, lib/PDF/Builder/Outline.pm, 
       examples/055_outlines_serial (new),
       examples/055_outlines_multilevel (new), MANIFEST, examples/README, 
@@ -41,11 +52,6 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
       example (outlines_serial) to demonstrate, and add a new example 
       (outlines_multilevel) to show implementation of (already existing)
       two-level page outlines.
-
-    INFO/RoadMap.md, INFO/Prereq_fixes.md
-     Adjust formatting so that lists are not ended by paragraphs within list 
-      items. Redo Road Map to list all the "to do" items from various sources, 
-      all in one place.
 
     lib/PDF/Builder.pm
      Per #228 Clarify in Builder.pm POD that ttffont()'s "file" input can be

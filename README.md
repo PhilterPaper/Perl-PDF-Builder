@@ -1,4 +1,4 @@
-# PDF::Builder release 3.028
+# PDF::Builder release 3.029
 
 A Perl library to create and modify PDF (Portable Document Format) files
 
@@ -27,7 +27,8 @@ program, as they still share many routine names!
 
 The
 [Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full)
-includes Documentation and Examples.
+includes Documentation and Examples output, for your convenience. Of course, the examples
+and the documentation (POD) are included with PDF::Builder, but you would need to build them.
 
 [![Open Issues](https://img.shields.io/github/issues/PhilterPaper/Perl-PDF-Builder)](https://github.com/PhilterPaper/Perl-PDF-Builder/issues)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
@@ -142,22 +143,23 @@ matters, especially if an optional package fails to install. You can always
 manually install them later, if you desire to make use of their added
 functionality.
 
-* Perl::Critic (1.150 or higher, need if running tools/1\_pc.pl)
+* SVGPDF (0.087 or higher, needed if using SVG image functions)
 * Graphics::TIFF (19 or higher, recommended if using TIFF image functions)
+* Image::Magick (7.1 or higher, needed to fully test Graphics::TIFF installation)
 * Image::PNG::Libpng (0.57 or higher, recommended for enhanced PNG image function processing)
 * HarfBuzz::Shaper (0.024 or higher, needed for Latin script ligatures and kerning, as well as for any complex script such as Arabic, Indic scripts, or Khmer)
 * Text::Markdown (1.000031 or higher, needed if using 'md1' markup)
 * HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup)
-* Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc.pl utility to create HTML documentation)
-* SVGPDF (0.087 or higher, needed if using SVG image functions)
+
+* Perl::Critic (1.150 or higher, need if running tools/1\_pc.pl)
 * Test::Kwalitee (1.28 or higher, needed if running xt/kwalitee.t)
-* Image::Magick (7.1 or higher, needed to fully test Graphics::TIFF installation)
+* Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc.pl utility to create HTML documentation)
 
 The following external applications (programs) are needed for fully testing some TIFF-related
 PDF::Builder functionality. Install _before_ installing PDF::Builder or Graphics::TIFF.
 
-* ImageMagick (module 'magick' or 'convert')
 * Ghostscript (module 'gs', 'gswin64c', or 'gswin32c')
+* ImageMagick (module 'magick' or 'convert')
 
 If an optional package is needed for certain extended functionality, but not
 installed, sometimes PDF::Builder
@@ -207,7 +209,7 @@ and runs the "t" tests to confirm the proper installation.
 
 ## Copyright
 
-This software is Copyright (c) 2017-2025 by Phil M. Perry.
+This software is Copyright (c) 2017-2026 by Phil M. Perry.
 
 Previous copyrights are held by others (Steve Simms, Alfred Reibenschuh, 
 et al.). See The HISTORY section of the documentation for more information.
@@ -251,14 +253,12 @@ a pointer to _your_ work. The more cross-pollination, the better!
 * INFO/Prereq\_fixes.md possible patches for prerequisites
 * CONTRIBUTING file for how to contribute to the project
 * LICENSE file for more on the license term
-* INFO/RoadMap file for the PDF::Builder road map
+* INFO/RoadMap.md file for the PDF::Builder road map
 * INFO/ACKNOWLEDGE.md for "thank yous" to those who contributed to this product
 * INFO/SPONSORS for "thank yous" to those who financially sponsored this product
 * INFO/CONVERSION file for how to convert from PDF::API2 to PDF::Builder
 * INFO/Changes\* files for older change logs
 * INFO/PATENTS file for information on patents
-
-`INFO/old/` also has some build and test tool files that are not currently used.
 
 ## Documentation
 
