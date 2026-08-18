@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # take a PDF of at least 11 pages, and add outlines (bookmarks) for pages
 # 1 ("i"), 4 ("1"), and 11 ("7") physical pages. then add bookmarks under
 # the first two (9, 3, 2 under pg 1 (open), and ii and ii under pg i (closed)).

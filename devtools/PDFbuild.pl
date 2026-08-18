@@ -193,7 +193,7 @@ system("xcopy /s .\\examples\\*.* $temp\\examples\\");
 
 # all other .pm and .pl files should just have an empty '# VERSION' line
 print "calling PDFversion.pl\n";
-system("devtools\\PDFversion.pl . $VERSION");
+system("perl devtools\\PDFversion.pl . $VERSION");
 
 system('for /R %G in (*.pl) do dos2unix "%G"');
 system('for /R %G in (*.pm) do dos2unix "%G"');
@@ -219,9 +219,9 @@ if_OK();
 
 print "**** build $script\n";
 #system("attrib +R $builder");  # didn't seem to help
-system("$builder");
+system("perl $builder");
 ##print "**** edit $script to insert VERSION update (and erase $script~)\n";
-##print "(tab)devtools\\PDFversion.pl \$(DISTVNAME) \$(VERSION)\n";
+##print "(tab)perl devtools\\PDFversion.pl \$(DISTVNAME) \$(VERSION)\n";
 # gzip -> devtools/gzip
 update2_Makefile();
 print "**** Check $script.\n";

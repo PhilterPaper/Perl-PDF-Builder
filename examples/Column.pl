@@ -485,7 +485,7 @@ footer(++$page_num, $pdf, $text);
 #  example block in Paper Sizes note needs manual reformat (revisit
 #    when <pre> supported)
 $content = <<"END_OF_CONTENT";
-# PDF::Builder release 3.028
+# PDF::Builder release 3.029
 
 A Perl library to create and modify PDF (Portable Document Format) files
 
@@ -514,7 +514,8 @@ program, as they still share many routine names!
 
 The
 [Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full)
-includes Documentation and Examples.
+includes Documentation and Examples output, for your convenience. Of course, the examples
+and the documentation (POD) are included with PDF::Builder, but you would need to build them.
 
 [![Open Issues](https://img.shields.io/github/issues/PhilterPaper/Perl-PDF-Builder)](https://github.com/PhilterPaper/Perl-PDF-Builder/issues)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
@@ -526,9 +527,13 @@ release.
 
 ## Obtaining and Installing the Package
 
+Presumably, you have a Perl interpreter installed, of at least version 5.28.
+PDF::Builder may work on slightly older versions, but it is not tested on
+anything earlier than 5.28.
+
 The installable Perl package may be obtained from
 "https://metacpan.org/pod/PDF::Builder", or via a CPAN installer package. If
-you install this product, only the run-time modules will be installed. Download
+you _install_ this product, only the run-time modules will be installed. Download
 the full `.tar.gz` file and unpack it (uncompress, then extract directory --
 hint: on Windows, **7-Zip File Manager** is an excellent tool) to get
 utilities, test buckets, example usage, etc.
@@ -543,7 +548,8 @@ Other than an installer for standard CPAN packages (such as 'cpan' on
 Strawberry Perl for Windows), no other tools or manually-installed prereqs are
 needed (worst case, you can unpack the `.tar.gz` file and copy files into
 place yourself!). Currently there are no compiles and links (Perl extensions)
-done during the install process, only copying of .pm Perl module files. 
+done during the install process, only copying of .pm Perl module files, and
+running of a test suite. 
 
 A package installer such as "cpan" (included with Strawberry Perl and some
 other systems) can retrieve the package, unpack and copy files, and run 
@@ -560,6 +566,30 @@ Note that there are several "optional" libraries (Perl modules) used to extend
 and improve PDF::Builder. Read about the list of optional libraries in
 PDF::Builder::Docs, and decide whether or not you want to install any of them.
 By default, **none** are installed.
+
+### Notes on running Perl programs
+
+Most Perl programs (scripts) are named with a `.pl` file extension, e.g.,
+_program_.pl, although some (especially some t-tests) lack an extension. 
+Different operating systems treat such files in different ways. Linux and
+similar systems usually ignore the file extension, and look for a "hashbang"
+entry such as `#!/usr/bin/perl` or perhaps `#!/usr/local/bin/perl`. Perl is
+normally installed on such systems, but the path to the interpreter may vary.
+
+Windows systems normally do not come with Perl pre-installed, and once installed,
+do not know what to do with a `.pl` file. It _is_ possible to configure Windows
+to recognize a `.pl` file extension as needing `perl` to run, and even to look
+for `.pl` extension files once the normal _command_`.com`, `.exe`, and `.bat`
+extensions have not been found. Thus, _program.pl_ and even just _program_ can
+be made to run from the command line or File Explorer.
+
+Whenever instructions are given to run a Perl program, it should always be safe
+to run it as `perl` _filename_. In a few specific cases (some t-tests), a `-T`
+flag needs to be used (you will get an error if it isn't given). We will usually
+(but not guaranteed) include a hashbang line in any Perl script provided, and in
+any scripts invoking other Perl scripts we will try to use the `perl` form so
+that it should run properly on any platform. Please feel free to report anything
+that we've overlooked.
 
 ## Requirements
 
@@ -629,22 +659,23 @@ matters, especially if an optional package fails to install. You can always
 manually install them later, if you desire to make use of their added
 functionality.
 
-* Perl::Critic (1.150 or higher, need if running tools/1\_pc.pl)
+* SVGPDF (0.087 or higher, needed if using SVG image functions)
 * Graphics::TIFF (19 or higher, recommended if using TIFF image functions)
+* Image::Magick (7.1 or higher, needed to fully test Graphics::TIFF installation)
 * Image::PNG::Libpng (0.57 or higher, recommended for enhanced PNG image function processing)
 * HarfBuzz::Shaper (0.024 or higher, needed for Latin script ligatures and kerning, as well as for any complex script such as Arabic, Indic scripts, or Khmer)
 * Text::Markdown (1.000031 or higher, needed if using 'md1' markup)
 * HTML::TreeBuilder (5.07 or higher, needed if using 'html' or 'md1' markup)
-* Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc.pl utility to create HTML documentation)
-* SVGPDF (0.087 or higher, needed if using SVG image functions)
+
+* Perl::Critic (1.150 or higher, need if running tools/1\_pc.pl)
 * Test::Kwalitee (1.28 or higher, needed if running xt/kwalitee.t)
-* Image::Magick (7.1 or higher, needed to fully test Graphics::TIFF installation)
+* Pod::Simple::XHTML (3.45 or higher, needed if using buildDoc.pl utility to create HTML documentation)
 
 The following external applications (programs) are needed for fully testing some TIFF-related
 PDF::Builder functionality. Install _before_ installing PDF::Builder or Graphics::TIFF.
 
-* ImageMagick (module 'magick' or 'convert') 
 * Ghostscript (module 'gs', 'gswin64c', or 'gswin32c')
+* ImageMagick (module 'magick' or 'convert') 
 
 If an optional package is needed for certain extended functionality, but not
 installed, sometimes PDF::Builder
@@ -670,9 +701,7 @@ Sometimes fixes or patches are needed for optional prerequisites. See the file
 t/tiff.t (install testing for TIFF support) makes use of GhostScript and 
 ImageMagick (convert utility). You may need to install these in order to get
 full testing (tests that need them will be skipped if they are not installed).
-Note that it has been reported that some versions of Mac Perl systems have
-a 'convert' utility that is missing the default Arial font, and thus will fail
-(see ticket 223).
+Be sure to read **INFO/Prereq\_fixes.md** for possible problems on Macs.
 
 ## Manually building
 
@@ -746,8 +775,6 @@ a pointer to _your_ work. The more cross-pollination, the better!
 * INFO/CONVERSION file for how to convert from PDF::API2 to PDF::Builder
 * INFO/Changes\* files for older change logs
 * INFO/PATENTS file for information on patents
-
-`INFO/old/` also has some build and test tool files that are not currently used.
 
 ## Documentation
 

@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # take a PDF of at least 11 pages, and add outlines (bookmarks) for pages
 # 1 ("i"), 4 ("1"), and 11 ("7") physical pages. after adding 1's bookmark,
 # output interim file, and use that as input for adding 4's and 11's

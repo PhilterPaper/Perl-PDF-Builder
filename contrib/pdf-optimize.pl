@@ -1,10 +1,10 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
 use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.029'; # manually update whenever code is changed
 
 use PDF::Builder::Basic::PDF::File;
 use PDF::Builder::Basic::PDF::Utils;

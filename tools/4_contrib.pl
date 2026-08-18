@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 # VERSION
-our $LAST_UPDATE = '3.027'; # manually update whenever code is changed
+our $LAST_UPDATE = '3.029'; # manually update whenever code is changed
 
 # command line:
 # 
@@ -49,7 +49,7 @@ if ($noRun) {
 if ($noRun) { exit(1); }
 
 print "===== run contrib/combine_pdfs.pl\n";
-system("contrib".$dirSep."combine_pdfs.pl examples/011_open_update.BASE.pdf examples/012_pages.pdf examples/011_open_update.UPDATED.pdf combined.pdf");
+system("perl contrib".$dirSep."combine_pdfs.pl examples/011_open_update.BASE.pdf examples/012_pages.pdf examples/011_open_update.UPDATED.pdf combined.pdf");
 print "combined.pdf should be 15 pages: \n";
 print "  Hello World\n";
 print "  page sequence i ii iii 1 9 2..8\n";
@@ -61,19 +61,19 @@ $pause = <>;
 print "===== run contrib/pdf-debug.pl\n";
 print " contrib/pdf-debug.pl combined.pdf\n";
 print "  lists version, some other information:\n";
-system("contrib".$dirSep."pdf-debug.pl combined.pdf");
+system("perl contrib".$dirSep."pdf-debug.pl combined.pdf");
 print "Press Enter to continue\n";
 $pause = <>;
 
 print " contrib/pdf-debug.pl combined.pdf obj 2\n";
 print "  describes a Pages type object:\n";
-system("contrib".$dirSep."pdf-debug.pl combined.pdf obj 2");
+system("perl contrib".$dirSep."pdf-debug.pl combined.pdf obj 2");
 print "Press Enter to continue\n";
 $pause = <>;
 
 print " contrib/pdf-debug.pl combined.pdf xref\n";
 print "  lists the cross reference:\n";
-system("contrib".$dirSep."pdf-debug.pl combined.pdf xref");
+system("perl contrib".$dirSep."pdf-debug.pl combined.pdf xref");
 print "Press Enter to continue\n";
 $pause = <>;
 
@@ -81,7 +81,7 @@ print "===== run contrib/pdf-deoptimize.pl\n";
 print " contrib/pdf-deoptimize.pl combined.pdf combined.deopt.pdf\n";
 print "  outputs combined.deopt.pdf, smaller than the original\n";
 print "  other than it's a working PDF, no idea what \"de-optimize\" does\n";
-system("contrib".$dirSep."pdf-deoptimize.pl combined.pdf combined.deopt.pdf");
+system("perl contrib".$dirSep."pdf-deoptimize.pl combined.pdf combined.deopt.pdf");
 print "Press Enter to continue\n";
 $pause = <>;
 
@@ -89,13 +89,13 @@ print "===== run contrib/pdf-optimize.pl\n";
 print " contrib/pdf-optimize.pl combined.pdf combined.opt.pdf\n";
 print "  outputs combined.opt.pdf, same size as the original\n";
 print "  other than it's a working PDF, no idea what \"optimize\" does\n";
-system("contrib".$dirSep."pdf-optimize.pl combined.pdf combined.opt.pdf");
+system("perl contrib".$dirSep."pdf-optimize.pl combined.pdf combined.opt.pdf");
 print "Press Enter to continue\n";
 $pause = <>;
 
 print "===== run contrib/text2pdf.pl\n";
 print "  output to text2pdf.pl.pdf a paginated listing of itself\n";
-system("contrib".$dirSep."text2pdf.pl contrib/text2pdf.pl");
+system("perl contrib".$dirSep."text2pdf.pl contrib/text2pdf.pl");
 print "Press Enter to continue\n";
 $pause = <>;
 

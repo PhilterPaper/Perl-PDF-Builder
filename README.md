@@ -40,9 +40,13 @@ release.
 
 ## Obtaining and Installing the Package
 
+Presumably, you have a Perl interpreter installed, of at least version 5.28.
+PDF::Builder may work on slightly older versions, but it is not tested on
+anything earlier than 5.28.
+
 The installable Perl package may be obtained from
 "https://metacpan.org/pod/PDF::Builder", or via a CPAN installer package. If
-you install this product, only the run-time modules will be installed. Download
+you _install_ this product, only the run-time modules will be installed. Download
 the full `.tar.gz` file and unpack it (uncompress, then extract directory --
 hint: on Windows, **7-Zip File Manager** is an excellent tool) to get
 utilities, test buckets, example usage, etc.
@@ -57,7 +61,8 @@ Other than an installer for standard CPAN packages (such as 'cpan' on
 Strawberry Perl for Windows), no other tools or manually-installed prereqs are
 needed (worst case, you can unpack the `.tar.gz` file and copy files into
 place yourself!). Currently there are no compiles and links (Perl extensions)
-done during the install process, only copying of .pm Perl module files. 
+done during the install process, only copying of .pm Perl module files, and
+running of a test suite. 
 
 A package installer such as "cpan" (included with Strawberry Perl and some
 other systems) can retrieve the package, unpack and copy files, and run 
@@ -74,6 +79,30 @@ Note that there are several "optional" libraries (Perl modules) used to extend
 and improve PDF::Builder. Read about the list of optional libraries in
 PDF::Builder::Docs, and decide whether or not you want to install any of them.
 By default, **none** are installed.
+
+### Notes on running Perl programs
+
+Most Perl programs (scripts) are named with a `.pl` file extension, e.g.,
+_program_.pl, although some (especially some t-tests) lack an extension. 
+Different operating systems treat such files in different ways. Linux and
+similar systems usually ignore the file extension, and look for a "hashbang"
+entry such as `#!/usr/bin/perl` or perhaps `#!/usr/local/bin/perl`. Perl is
+normally installed on such systems, but the path to the interpreter may vary.
+
+Windows systems normally do not come with Perl pre-installed, and once installed,
+do not know what to do with a `.pl` file. It _is_ possible to configure Windows
+to recognize a `.pl` file extension as needing `perl` to run, and even to look
+for `.pl` extension files once the normal _command_`.com`, `.exe`, and `.bat`
+extensions have not been found. Thus, _program.pl_ and even just _program_ can
+be made to run from the command line or File Explorer.
+
+Whenever instructions are given to run a Perl program, it should always be safe
+to run it as `perl` _filename_. In a few specific cases (some t-tests), a `-T`
+flag needs to be used (you will get an error if it isn't given). We will usually
+(but not guaranteed) include a hashbang line in any Perl script provided, and in
+any scripts invoking other Perl scripts we will try to use the `perl` form so
+that it should run properly on any platform. Please feel free to report anything
+that we've overlooked.
 
 ## Requirements
 
@@ -268,7 +297,7 @@ tree of documentation. There's a lot of additional information in the
 PDF::Builder::Docs module (it's all documentation).
 
 You may find it more convenient to point your browser to our
-[Home Page](https://www.catskilltech.com/FreeSW/product/PDF-Builder/title/PDF%3A%3ABuilder/freeSW_full)
+[Documentation and Examples Pages](https://PhilterPaper.github.io/index.html)
 to see the full documentation build (as well as most of the example outputs).
 
 We admit that the documentation is a bit light on "how to" task orientation.

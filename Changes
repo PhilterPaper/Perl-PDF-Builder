@@ -1,6 +1,6 @@
 See also INFO/Changes_2025 for earlier version 3 release logs.
 
-3.029     2026-07-31    UNRELEASED 
+3.029     2026-08-18    UNRELEASED 
 * = work in progress
 
   ==== New features
@@ -16,7 +16,7 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
      Split out column() and related routines into their own file. Refactor
       column() code to improve maintainability.
 
-    tools/md2html.pl (new)
+    tools/md2html.pl (new), MANIFEST
      A utility to convert .md (Markdown) files into .html (browser) files, which
       may be a more convenient way to view .md files than in an editor. Note 
       that Text::MultiMarkdown is required to be installed. Text::Markdown can
@@ -38,10 +38,19 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
      Fix problem with loss of vertical margin between bottom of a list
       and top of a paragraph.
 
+    README.md, examples/Column.pl-042_links-055_outlines-055_outlines_multilevel-
+      055_outlines_serial, contrib/pdf-optimize.pl, xt/kwalitee.t, Makefile.PL,
+      devtools/PDFbuild.pl, tools/4_contrib.pl
+     Describe how to run Perl programs on Linux and similar systems, as well
+      as Windows systems. Add #!/usr/bin/perl hashbang line to scripts missing it
+      (or change from #!/usr/local/bin/perl or #!perl). Add "perl" in front of
+      ".pl" files run via system() within other Perl programs.
+
     README.md, INFO/RoadMap.md (renamed), INFO/Prereq_fixes.md
      Adjust formatting so that lists are not ended by paragraphs within list 
       items. Redo Road Map to list all the "to do" enhancements from various
-      sources, all in one place, and change from plain text to Markdown.
+      sources, all in one place, and change from plain text to Markdown. Add
+      "perl" to system() commands when running .pl programs.
 
     lib/PDF/Builder.pm, lib/PDF/Builder/Outline.pm, 
       examples/055_outlines_serial (new),

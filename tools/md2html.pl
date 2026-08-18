@@ -1,6 +1,7 @@
+#!/usr/bin/perl
 use strict;
 use warnings;
-use Slurp;
+use File::Slurp;
 
 # new paragraph WITHIN a list item... indent 4 spaces
 
@@ -18,11 +19,11 @@ my $output = "$basename.html";
 print "Input: $input, Output: $output\n";
 
 my $in_txt = '';
-my $out_txt   = "<html>\n<head>\n<title>$basename Markdown</title>\n<style>\n";
+my $out_txt  = "<html>\n<head>\n<title>$basename Markdown</title>\n<style>\n";
    $out_txt .= "body { font-size: 12pt; }\nli { margin-top: 6pt; }\n";
    $out_txt .= "</style>\n</head>\n<body>\n";
 
-$in_txt = slurp($input);
+   $in_txt = read_file($input);
 #$out_txt .= _md1_hash($in_txt);
 $out_txt .= _md2_hash($in_txt);
 $out_txt .= "</body>\n</html>\n";
