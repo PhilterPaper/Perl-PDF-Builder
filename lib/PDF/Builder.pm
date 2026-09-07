@@ -2448,8 +2448,7 @@ B<Example:>
 
 B<Alternate name:> C<openpage>
 
-This is the older name; it is kept for compatibility until after June 2023
-(deprecated, as previously announced).
+This is the older name; it is kept for compatibility.
 
 =back
 

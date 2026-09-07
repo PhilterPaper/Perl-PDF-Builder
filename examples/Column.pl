@@ -509,11 +509,10 @@ more powerful and versatile.
 \\*Note that PDF::Builder is **not** built on PDF::API2, and does **not**
 require that it be installed. The two libraries are completely independent of
 each other and one will not interfere with the other if both are installed.
-However, you should _not_ try mixing the two libraries within one running 
+However, you should _not_ try mixing the two libraries within one running
 program, as they still share many routine names!
 
-The
-[Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full)
+The [Home Page](https://PhilterPaper.github.io/pdfbuilder/index.html)
 includes Documentation and Examples output, for your convenience. Of course, the examples
 and the documentation (POD) are included with PDF::Builder, but you would need to build them.
 
@@ -524,6 +523,27 @@ and the documentation (POD) are included with PDF::Builder, but you would need t
 This archive contains the distribution PDF::Builder.
 See **Changes** file for the version and list of changes from the previous
 release.
+
+## A CAUTION on PDF versions
+
+PDF::Builder (like its predecessor) is written to produce, _and process_,
+**PDF 1.4** level documents. A few PDF 1.5 features are _tolerated_, but be
+aware that many 1.5 and up features are likely to be mishandled. If you must
+read in and process a PDF that contains features of version 1.5 or higher,
+it is possible that PDF::Builder may fail in some manner. Many bugs reported
+against PDF::Builder turn out to be an attempt to read in a PDF of version 1.5
+or higher! Do note that many PDF writers will label their output as 1.7 (or
+even 2.0), while not necessarily incorporating features beyond 1.4, but you
+cannot count on this. If you can adjust this setting, consider asking your
+PDF writer to produce only 1.4 level PDF files.
+
+Although PDF::Builder _does_ support most PDF features up to level 1.4, it is
+**not** guaranteed to properly read in and handle _every_ legal 1.4 feature
+defined. It was written to primarily _produce_ 1.4 level documents that
+basically any PDF reader out there can handle. A few 1.5 level features can be
+read in and properly handled, or even produced from calls (see the documentation).
+The only thing guaranteed is that PDF::Builder _should_ be able to read in any
+document that it has produced.
 
 ## Obtaining and Installing the Package
 
@@ -675,7 +695,7 @@ The following external applications (programs) are needed for fully testing some
 PDF::Builder functionality. Install _before_ installing PDF::Builder or Graphics::TIFF.
 
 * Ghostscript (module 'gs', 'gswin64c', or 'gswin32c')
-* ImageMagick (module 'magick' or 'convert') 
+* ImageMagick (module 'magick' or 'convert')
 
 If an optional package is needed for certain extended functionality, but not
 installed, sometimes PDF::Builder
@@ -725,7 +745,7 @@ and runs the "t" tests to confirm the proper installation.
 
 ## Copyright
 
-This software is Copyright (c) 2017-2025 by Phil M. Perry.
+This software is Copyright (c) 2017-2026 by Phil M. Perry.
 
 Previous copyrights are held by others (Steve Simms, Alfred Reibenschuh, 
 et al.). See The HISTORY section of the documentation for more information.
@@ -769,7 +789,7 @@ a pointer to _your_ work. The more cross-pollination, the better!
 * INFO/Prereq\_fixes.md possible patches for prerequisites
 * CONTRIBUTING file for how to contribute to the project
 * LICENSE file for more on the license term
-* INFO/RoadMap file for the PDF::Builder road map
+* INFO/RoadMap.md file for the PDF::Builder road map
 * INFO/ACKNOWLEDGE.md for "thank yous" to those who contributed to this product
 * INFO/SPONSORS for "thank yous" to those who financially sponsored this product
 * INFO/CONVERSION file for how to convert from PDF::API2 to PDF::Builder
@@ -784,7 +804,7 @@ tree of documentation. There's a lot of additional information in the
 PDF::Builder::Docs module (it's all documentation).
 
 You may find it more convenient to point your browser to our
-[Home Page](https://www.catskilltech.com/FreeSW/product/PDF-Builder/title/PDF%3A%3ABuilder/freeSW_full)
+[Home Page](https://PhilterPaper.github.io/pdfbuilder/index.html)
 to see the full documentation build (as well as most of the example outputs).
 
 We admit that the documentation is a bit light on "how to" task orientation.

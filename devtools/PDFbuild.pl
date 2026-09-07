@@ -77,7 +77,7 @@ to_continue();
 
 # -------------------------------------- configuration
 my $make = 'gmake';  # dmake no longer available
-my $desktop = "C:\\Users\\philp\\OneDrive\\Desktop\\";
+my $desktop = "C:\\Users\\philp\\Desktop\\";
 my $temp = $desktop."temp";
 
 # location of 7-Zip
@@ -132,7 +132,11 @@ print "**** Have you remembered to update LAST_UPDATE everywhere changed?\n";
 if_OK();
 print "**** Have you 1) compared $GHname/ to /Strawberry, 2) run 1_pc,
      3) run 2_t-tests, 4) run 3_examples, 5) run 4_contrib to thoroughly
-     test? Have you 6) built all docs (.html) to check PODs?\n";
+     test? Have you 6) built all docs (.html) and spell-checked to check PODs?\n";
+to_continue();
+print "**** Have you moved docs to proj-docs/pdfbuilder and run updates?\n";
+to_continue();
+print "**** Have you moved examples to proj-docs/pdfbuilder?\n";
 to_continue();
 
 system("attrib -R $builder");
@@ -249,6 +253,7 @@ print "**** erase Desktop/temp/ if everything is clean in build\n";
 print "**** erase $script, etc. new stuff (EXCEPT .tar.gz)\n";
 print "**** log on to PAUSE and upload .tar.gz file\n";
 print "**** consider removing an old release from CPAN\n";
+print "**** proj-docs/pdfbuilder/ check, and promote to final\n";
 print "**** update motd.php on website\n";
 print "**** copy .tar.gz to releases/ and git rm oldest\n";
 print "**** version update\n";

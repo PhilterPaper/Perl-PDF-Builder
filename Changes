@@ -38,13 +38,13 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
      Fix problem with loss of vertical margin between bottom of a list
       and top of a paragraph.
 
-    README.md, examples/Column.pl-042_links-055_outlines-055_outlines_multilevel-
-      055_outlines_serial, contrib/pdf-optimize.pl, xt/kwalitee.t, Makefile.PL,
-      devtools/PDFbuild.pl, tools/4_contrib.pl
+    README.md, Makefile.PL, examples/Column.pl-042_links-055_outlines-
+      055_outlines_multilevel-055_outlines_serial, contrib/pdf-optimize.pl,
+      xt/kwalitee.t, devtools/PDFbuild.pl, tools/4_contrib.pl
      Describe how to run Perl programs on Linux and similar systems, as well
-      as Windows systems. Add #!/usr/bin/perl hashbang line to scripts missing it
-      (or change from #!/usr/local/bin/perl or #!perl). Add "perl" in front of
-      ".pl" files run via system() within other Perl programs.
+      as Windows systems. Add #!/usr/bin/perl hashbang line to scripts missing
+      it (or change from #!/usr/local/bin/perl or #!perl). Add "perl" in front
+      of ".pl" files run via system() within other Perl programs.
 
     README.md, INFO/RoadMap.md (renamed), INFO/Prereq_fixes.md
      Adjust formatting so that lists are not ended by paragraphs within list 

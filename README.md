@@ -25,8 +25,7 @@ each other and one will not interfere with the other if both are installed.
 However, you should _not_ try mixing the two libraries within one running
 program, as they still share many routine names!
 
-The
-[Home Page](https://www.catskilltech.com/FreeSW/product/PDF%2DBuilder/title/PDF%3A%3ABuilder/freeSW_full)
+The [Home Page](https://PhilterPaper.github.io/pdfbuilder/index.html)
 includes Documentation and Examples output, for your convenience. Of course, the examples
 and the documentation (POD) are included with PDF::Builder, but you would need to build them.
 
@@ -37,6 +36,27 @@ and the documentation (POD) are included with PDF::Builder, but you would need t
 This archive contains the distribution PDF::Builder.
 See **Changes** file for the version and list of changes from the previous
 release.
+
+## A CAUTION on PDF versions
+
+PDF::Builder (like its predecessor) is written to produce, _and process_,
+**PDF 1.4** level documents. A few PDF 1.5 features are _tolerated_, but be
+aware that many 1.5 and up features are likely to be mishandled. If you must
+read in and process a PDF that contains features of version 1.5 or higher,
+it is possible that PDF::Builder may fail in some manner. Many bugs reported
+against PDF::Builder turn out to be an attempt to read in a PDF of version 1.5
+or higher! Do note that many PDF writers will label their output as 1.7 (or
+even 2.0), while not necessarily incorporating features beyond 1.4, but you
+cannot count on this. If you can adjust this setting, consider asking your
+PDF writer to produce only 1.4 level PDF files.
+
+Although PDF::Builder _does_ support most PDF features up to level 1.4, it is
+**not** guaranteed to properly read in and handle _every_ legal 1.4 feature
+defined. It was written to primarily _produce_ 1.4 level documents that
+basically any PDF reader out there can handle. A few 1.5 level features can be
+read in and properly handled, or even produced from calls (see the documentation).
+The only thing guaranteed is that PDF::Builder _should_ be able to read in any
+document that it has produced.
 
 ## Obtaining and Installing the Package
 
@@ -83,7 +103,7 @@ By default, **none** are installed.
 ### Notes on running Perl programs
 
 Most Perl programs (scripts) are named with a `.pl` file extension, e.g.,
-_program_.pl, although some (especially some t-tests) lack an extension. 
+_program_.pl, although some (especially some t-tests) lack an extension.
 Different operating systems treat such files in different ways. Linux and
 similar systems usually ignore the file extension, and look for a "hashbang"
 entry such as `#!/usr/bin/perl` or perhaps `#!/usr/local/bin/perl`. Perl is
@@ -120,7 +140,7 @@ Usually about once a year the minimum level is bumped up, but this depends on
 whether Strawberry releases the newest Perl level. As Strawberry Perl releases 
 new Perl levels, usually on an annual basis, we intend to bump up our required 
 minimum Perl level (even-numbered production releases), to keep support for the 
-last 6 calendar years of Perl releases, dropping older ones. 
+last 6 calendar years of Perl releases, dropping older ones.
 
 Note that we have
 been informed that enough users want to run PDF::Builder at older levels that
@@ -297,7 +317,7 @@ tree of documentation. There's a lot of additional information in the
 PDF::Builder::Docs module (it's all documentation).
 
 You may find it more convenient to point your browser to our
-[Documentation and Examples Pages](https://PhilterPaper.github.io/index.html)
+[Home Page](https://PhilterPaper.github.io/pdfbuilder/index.html)
 to see the full documentation build (as well as most of the example outputs).
 
 We admit that the documentation is a bit light on "how to" task orientation.

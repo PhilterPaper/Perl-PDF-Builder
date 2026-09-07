@@ -2,8 +2,8 @@
 use strict;
 use warnings;
 
-my $base_src = "C:/Users/philp/OneDrive/Desktop/PDF-Builder/docs";
-my $base_dst = "C:/Users/philp/OneDrive/Desktop/PDF-Builder/docs/PHP";
+my $base_src = "C:/Users/philp/Desktop/PDF-Builder/docs";
+my $base_dst = "C:/Users/philp/Desktop/PDF-Builder/docs/PHP";
 
 # A "flat" structure is simpler, even at the cost of redundant path info
 # 'keys' entry = ADDITIONAL keywords (comma-separated) after 'documentation'

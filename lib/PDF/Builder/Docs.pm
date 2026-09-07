@@ -45,7 +45,7 @@ C<README> file for the list of optional packages.
 You want to write a Perl program that uses PDF::Builder functions. In 
 addition to installing PDF::Builder from CPAN, you will want documentation on
 it. Obtain a copy of the product from GitHub 
-(https://github.com/PhilterPaper/Perl-PDF-Builder) or as a gzipped tar file from CPAN. 
+(https://github.com/PhilterPaper/Perl-PDF-Builder) or as a gzipped tar file from CPAN.
 This includes a utility to 
 build (from POD) a library of HTML documents, as well as examples (examples/ 
 directory) and contributed sample programs (contrib/ directory).
@@ -153,7 +153,7 @@ Pod::Simple::XHTML
 This library is used if you wish to generate the HTML documentation from the
 POD and PM source, using C<docs/buildDoc.pl>. Note that the full set of
 documentation can also be found online at 
-https://www.catskilltech.com/FreeSW/product/PDF-Builder/title/PDF%3A%3ABuilder/freeSW_full 
+https://PhilterPaper.github.io/pdfbuilder/index.html
 under the "Documentation" link. This online documentation is updated at 
 every CPAN release, but not necessarily when the GitHub repository is updated.
 
