@@ -2301,7 +2301,11 @@ sub _output_text {
 				}
 			    }
 			    $phrase = $wordLeft; 
-			    $remainder = "$wordRight $remainder";
+			    if ($remainder ne '') {
+			        $remainder = "$wordRight $remainder";
+			    } else {
+			        $remainder = $wordRight;
+			    }
                             next; # re-try shortened phrase
 	                }
     

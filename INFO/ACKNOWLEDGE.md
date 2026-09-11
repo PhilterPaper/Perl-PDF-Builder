@@ -31,6 +31,7 @@ that may prove useful in future code and may show up later.
 - **Vadim Repin** contributed a number of fixes and minor enhancements.
 - **Davide Cervone** contributed support for allowing _PDF::Builder_ to 
 interface with _MathJax_ (NodeJS) for equation support `(upcoming feature)`.
+- **M Somerville** "dracos" contributed a fix for failure to hyphenate (#241).
 
 And of course, many thanks to those who reported bugs and requested needed
 enhancements, sometimes even contributing some code and test cases. These

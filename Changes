@@ -1,6 +1,6 @@
 See also INFO/Changes_2025 for earlier version 3 release logs.
 
-3.029     2026-08-18    UNRELEASED 
+3.029     2026-09-10    UNRELEASED 
 * = work in progress
 
   ==== New features
@@ -37,6 +37,10 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
 *   lib/PDF/Builder/Content/Column.pm
      Fix problem with loss of vertical margin between bottom of a list
       and top of a paragraph.
+
+    lib/PDF/Builder/Content/Column.pm
+     Fix for #241, courtesy of "dracos" (M Somerville). Extra long words were
+      not being split (basic hyphenation) after the first line of a paragraph.
 
     README.md, Makefile.PL, examples/Column.pl-042_links-055_outlines-
       055_outlines_multilevel-055_outlines_serial, contrib/pdf-optimize.pl,
