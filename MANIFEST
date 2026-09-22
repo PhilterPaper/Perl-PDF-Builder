@@ -224,6 +224,7 @@ lib/PDF/Builder/Outline.pm
 lib/PDF/Builder/Outlines.pm
 lib/PDF/Builder/Page.pm
 lib/PDF/Builder/Resource.pm
+lib/PDF/Builder/Security/Standard.pm
 lib/PDF/Builder/UniWrap.pm
 lib/PDF/Builder/Util.pm
 lib/PDF/Builder/ViewerPreferences.pm
@@ -236,6 +237,8 @@ t/resources/1x1-lzw.tif
 t/resources/sample.pdf
 t/resources/sample-xrefstm.pdf
 t/resources/sample-xrefstm-index.pdf
+t/resources/sample-encrypted-R2.pdf
+t/resources/sample-encrypted-R3.pdf
 t/resources/test-rgba.png
 t/00-all-usable.t
 t/01-basic.t
@@ -250,6 +253,7 @@ t/content.t
 t/content-deprecated.t
 t/cs-webcolor.t
 t/deprecations.t
+t/encryption.t
 t/extgstate.t
 t/filter-ascii85decode.t
 t/filter-asciihexdecode.t

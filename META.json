@@ -33,6 +33,8 @@
       "runtime" : {
          "requires" : {
             "Compress::Zlib" : "1.0",
+            "Crypt::RC4" : "0",
+            "Digest::MD5" : "0",
             "Font::TTF" : "1.04",
             "perl" : "5.028000"
          }
@@ -105,6 +107,9 @@
      },
      "PDF::Builder::Resource::XObject::Image" : {
        "file" : "lib/PDF/Builder/Resource/XObject/Image.pm"
+     },
+     "PDF::Builder::Security::Standard" : {
+       "file" : "lib/PDF/Builder/Security/Standard.pm"
      },
      "PDF::Builder::ViewerPreferences" : {
        "file" : "lib/PDF/Builder/ViewerPreferences.pm"

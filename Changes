@@ -5,6 +5,12 @@ See also INFO/Changes_2025 for earlier version 3 release logs.
 
   ==== New features
 
+*   PDF encryption
+     Add detection of encrypted PDF documents and explicit rejection of
+     unsupported security handler revisions.
+     Add a sample PDF file with R3 encryption for rejection testing.
+     Add decryption of PDF R2.
+
 *   lib/PDF/Builder/Content/Column.pm
      Finish cross references for column() to support multiple passes, for
       forward references when the link text needs to be picked up later in
