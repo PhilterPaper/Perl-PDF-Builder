@@ -325,9 +325,60 @@ sub open {
     foreach my $key (keys %$tdict) {
         $self->{$key} = $tdict->{$key};
     }
+    $self->init_security(%options);
 
     return $self;
 } # end of open()
+
+=head2 $p->init_security(%options)
+
+Initializes or validates the security handler after the xref/trailer chain has
+been read and before the document catalog is dereferenced.
+
+At present this supports decryption of Standard security handler revision 2.
+Other encrypted files are rejected here with a descriptive error instead of
+being allowed to fail later while parsing an encrypted object.
+
+=cut
+
+sub init_security {
+    my ($self, %options) = @_;
+
+    return $self unless defined $self->{'Encrypt'};
+
+    my $encrypt = $self->{'Encrypt'}->realise();
+
+    my $filter = defined $encrypt->{'Filter'}
+        ? $encrypt->{'Filter'}->val()
+        : 'Standard';
+
+    my $revision = defined $encrypt->{'R'}
+        ? $encrypt->{'R'}->val()
+        : undef;
+
+    my $version = defined $encrypt->{'V'}
+        ? $encrypt->{'V'}->val()
+        : undef;
+
+    my $cfm;
+    if (defined $encrypt->{'CF'}) {
+        my $crypt_filters = $encrypt->{'CF'}->realise();
+        if (defined $crypt_filters->{'StdCF'}) {
+            my $stdcf = $crypt_filters->{'StdCF'}->realise();
+            $cfm = $stdcf->{'CFM'}->val() if defined $stdcf->{'CFM'};
+        }
+    }
+
+    my $description = sprintf(
+        'Filter=%s R=%s V=%s CFM=%s',
+        defined $filter ? $filter : '?',
+        defined $revision ? $revision : '?',
+        defined $version ? $version : '?',
+        defined $cfm ? $cfm : '?',
+    );
+
+    croak "PDF encryption is not implemented yet: $description";
+}
 
 =head2 version
 
@@ -824,7 +875,6 @@ sub readval {
             my $length = $result->{'Length'}->val() + 0; # ensure seen as decimal
             $result->{' streamsrc'} = $fh;
             $result->{' streamloc'} = $fh->tell() - length($str);
-
             unless ($opts{'nostreams'}) {
                 if ($length > length($str)) {
                     $value = $str;

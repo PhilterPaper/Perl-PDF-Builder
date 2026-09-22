@@ -260,6 +260,11 @@ The 'compress' option can be
 given to specify stream compression: default is 'flate', 'none' (or 0) is no
 compression. No other compression methods are currently supported.
 
+=item password
+
+Password used to open an encrypted PDF. Encrypted PDF support is currently
+limited to Standard security handler revision 2 (RC4).
+
 =item outver
 
 The 'outver' option defaults to 1.4 as the output PDF version and the highest 
