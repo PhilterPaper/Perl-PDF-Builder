@@ -377,6 +377,20 @@ sub init_security {
         defined $cfm ? $cfm : '?',
     );
 
+    if (defined $revision && defined $version && $revision == 2 && $version == 1) {
+        require PDF::Builder::Security::Standard;
+
+        $self->{'security'} = PDF::Builder::Security::Standard->new(
+            file       => $self,
+            encrypt    => $encrypt,
+            identifier => $self->{'ID'},
+            password   => $options{'password'},
+        );
+        $self->{'security'}->authenticate();
+
+        return $self;
+    }
+
     croak "PDF encryption is not implemented yet: $description";
 }
 
@@ -875,6 +889,13 @@ sub readval {
             my $length = $result->{'Length'}->val() + 0; # ensure seen as decimal
             $result->{' streamsrc'} = $fh;
             $result->{' streamloc'} = $fh->tell() - length($str);
+            $result->{' streamobjnum'} = $opts{'objnum'}
+                if defined $opts{'objnum'};
+            $result->{' streamobjgen'} = $opts{'objgen'} // 0
+                if defined $opts{'objnum'};
+            $result->{' streamencrypted'} = $opts{'encrypted'} ? 1 : 0;
+            $result->{' streamsecurity'} = $self->{'security'}
+                if $result->{' streamencrypted'};
             unless ($opts{'nostreams'}) {
                 if ($length > length($str)) {
                     $value = $str;
@@ -988,6 +1009,7 @@ sub readval {
         } # end while(TRUE) loop
 
         $result = PDF::Builder::Basic::PDF::String->from_pdf($value);
+        $self->_decrypt_string($result, %opts);
         # end Literal String check
 
     } elsif ($str =~ m/^</) {
@@ -996,6 +1018,7 @@ sub readval {
         $fh->read($str, 255, length($str)) while (0 > index($str, '>'));
         ($value, $str) = ($str =~ /^(.*?)>(.*)/s);
         $result = PDF::Builder::Basic::PDF::String->from_pdf('<' . $value . '>');
+        $self->_decrypt_string($result, %opts);
 
     } elsif ($str =~ m/^\[/) {
         # Array
@@ -1145,17 +1168,48 @@ sub read_objnum {
             close $fh;
         }
 
+        # The object stream itself is decrypted as one stream. Objects inside
+        # it must not be decrypted a second time.
         ($object) = $self->readval($stream, %opts, update => 0);
         return $object;
     }
 
     my $current_location = $self->{' INFILE'}->tell();
     $self->{' INFILE'}->seek($object_location, 0);
-    ($object) = $self->readval('', %opts);
+    my $encrypted = 1;
+    if (defined $self->{'Encrypt'}
+        && $self->{'Encrypt'}->{' objnum'} == $num
+        && $self->{'Encrypt'}->{' objgen'} == $gen) {
+        $encrypted = 0;
+    }
+
+    ($object) = $self->readval(
+        '',
+        %opts,
+        encrypted => $encrypted,
+        objnum => $num,
+        objgen => $gen,
+    );
     $self->{' INFILE'}->seek($current_location, 0);
 
     return $object;
 } # end of read_objnum()
+
+sub _decrypt_string {
+    my ($self, $string, %opts) = @_;
+
+    return $string unless $opts{'encrypted'}
+        && $self->{'security'}
+        && defined $opts{'objnum'};
+
+    $string->{'val'} = $self->{'security'}->decrypt_string(
+        $opts{'objnum'},
+        $opts{'objgen'} // 0,
+        $string->val(),
+    );
+
+    return $string;
+}
 
 =head2 new_obj
 

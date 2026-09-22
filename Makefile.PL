@@ -59,6 +59,8 @@ my %WriteMakefileArgs =
 
   PREREQ_PM => {
     "Compress::Zlib" => 1.0,
+    "Crypt::RC4" => 0,
+    "Digest::MD5" => 0,
     "Font::TTF" => 1.04,
  #  "Readonly" => 0,      use when TIFF changes go in
 

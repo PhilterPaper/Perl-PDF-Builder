@@ -224,6 +224,7 @@ lib/PDF/Builder/Outline.pm
 lib/PDF/Builder/Outlines.pm
 lib/PDF/Builder/Page.pm
 lib/PDF/Builder/Resource.pm
+lib/PDF/Builder/Security/Standard.pm
 lib/PDF/Builder/UniWrap.pm
 lib/PDF/Builder/Util.pm
 lib/PDF/Builder/ViewerPreferences.pm
