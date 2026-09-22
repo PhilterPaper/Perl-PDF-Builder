@@ -237,6 +237,7 @@ t/resources/sample.pdf
 t/resources/sample-xrefstm.pdf
 t/resources/sample-xrefstm-index.pdf
 t/resources/sample-encrypted-R2.pdf
+t/resources/sample-encrypted-R3.pdf
 t/resources/test-rgba.png
 t/00-all-usable.t
 t/01-basic.t
